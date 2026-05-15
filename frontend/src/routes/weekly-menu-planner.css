@@ -1,0 +1,597 @@
+/* ---------------------------------------------------------------
+   Weekly Menu Planner — Component Styles
+   --------------------------------------------------------------- */
+
+/* --- Planner Shell --- */
+.planner-page {
+  min-height: calc(100vh - 128px);
+  padding: 1rem;
+  background:
+    linear-gradient(135deg, rgba(123, 148, 96, 0.1), transparent 34%),
+    linear-gradient(225deg, rgba(181, 113, 58, 0.1), transparent 38%), #fcf7f0;
+}
+
+.planner-shell {
+  width: min(1120px, 100%);
+  margin: 0 auto;
+  padding: 28px;
+  border: 1px solid rgba(138, 112, 96, 0.18);
+  border-radius: 8px;
+  background: rgba(255, 252, 247, 0.88);
+  box-shadow: 0 24px 80px rgba(62, 48, 35, 0.12);
+}
+
+.planner-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 28px;
+  align-items: start;
+}
+
+.planner-copy {
+  max-width: 720px;
+}
+
+.planner-kicker,
+.planner-section-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #7b9460;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.planner-hero h1 {
+  margin-top: 12px;
+  color: #1a1a2e;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(2.6rem, 5vw, 5.2rem);
+  line-height: 0.94;
+  letter-spacing: 0;
+}
+
+.planner-intro {
+  max-width: 660px;
+  margin-top: 18px;
+  color: #5d594f;
+  font-size: 1.02rem;
+  line-height: 1.75;
+}
+
+.planner-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.planner-primary-btn,
+.planner-secondary-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  gap: 10px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 10px 16px;
+  font-weight: 800;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.planner-primary-btn {
+  background: #1f3025;
+  color: #fffdf8;
+}
+
+.planner-primary-btn:hover:not(:disabled),
+.planner-secondary-btn:hover {
+  transform: translateY(-1px);
+}
+
+.planner-primary-btn:disabled {
+  cursor: wait;
+  opacity: 0.78;
+}
+
+.planner-secondary-btn {
+  position: relative;
+  background: #fff;
+  border-color: rgba(138, 112, 96, 0.24);
+  color: #1f3025;
+}
+
+.planner-btn-badge {
+  display: inline-flex;
+  min-width: 20px;
+  height: 20px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #b5713a;
+  color: #fff;
+  font-size: 0.7rem;
+}
+
+.planner-divider {
+  height: 1px;
+  margin: 28px 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(138, 112, 96, 0.28),
+    transparent
+  );
+}
+
+.planner-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.planner-state-note {
+  color: #7a746b;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.planner-empty-state {
+  display: grid;
+  min-height: 330px;
+  place-items: center;
+  align-content: center;
+  gap: 14px;
+  padding: 36px 24px;
+  border: 1px dashed rgba(138, 112, 96, 0.28);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.54);
+  color: #5d594f;
+  text-align: center;
+  animation: fadeSlideUp 0.35s ease-out both;
+}
+
+.planner-empty-state > svg {
+  width: 34px;
+  height: 34px;
+  color: #b5713a;
+}
+
+.planner-empty-state h2,
+.planner-section-heading h2,
+.planner-shopping-tab h2 {
+  color: #1a1a2e;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 1.6rem;
+  line-height: 1.15;
+  letter-spacing: 0;
+}
+
+.planner-empty-state p {
+  max-width: 520px;
+  line-height: 1.7;
+}
+
+.planner-menu-tab {
+  animation: fadeSlideUp 0.35s ease-out both;
+}
+
+.planner-section-heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 380px);
+  gap: 24px;
+  align-items: end;
+  margin-bottom: 20px;
+}
+
+.planner-section-heading p:last-child {
+  color: #6f695f;
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+.planner-day-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.planner-reasoning {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 18px;
+  margin-top: 24px;
+  padding: 22px;
+  border: 1px solid rgba(123, 148, 96, 0.2);
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(123, 148, 96, 0.1), transparent 48%), #fffdf8;
+  animation: fadeSlideUp 0.45s ease-out both;
+}
+
+.planner-reasoning-icon {
+  display: inline-grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border-radius: 8px;
+  background: rgba(123, 148, 96, 0.12);
+  color: #50683f;
+}
+
+.planner-reasoning h2 {
+  margin-top: 6px;
+  color: #1a1a2e;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 1.45rem;
+  letter-spacing: 0;
+  line-height: 1.15;
+}
+
+.planner-reasoning ul {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+  padding-left: 20px;
+  color: #625d54;
+  line-height: 1.65;
+}
+
+.planner-shopping-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  animation: fadeSlideUp 0.35s ease-out both;
+}
+
+.planner-shopping-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 20px;
+  align-items: start;
+}
+
+.planner-shopping-helper {
+  color: #6f695f;
+  line-height: 1.65;
+}
+
+.planner-shopping-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.planner-progress-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 18px;
+  border: 1px solid rgba(193, 168, 120, 0.22);
+  border-radius: 999px;
+  background: linear-gradient(135deg, #fefcf8, #faf5ea);
+  color: #7b6248;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.planner-progress-track {
+  width: 84px;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(193, 168, 120, 0.25);
+}
+
+.planner-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(to right, #7b9460, #a3b87a);
+  transition: width 0.35s ease;
+}
+
+.planner-reset-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(193, 168, 120, 0.35);
+  border-radius: 999px;
+  padding: 8px 14px;
+  background: transparent;
+  color: #9a7c5a;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.planner-reset-btn:hover {
+  border-color: #b5713a;
+  color: #b5713a;
+  transform: translateY(-1px);
+}
+
+.planner-reset-btn:focus-visible,
+.planner-ingredient-row:focus-visible {
+  outline: 2px solid rgba(181, 113, 58, 0.85);
+  outline-offset: 2px;
+}
+
+.planner-summary-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  border-radius: 12px;
+  animation: popIn 0.3s ease both;
+}
+
+.planner-summary-banner p {
+  margin: 0;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.05rem;
+}
+
+.planner-summary-banner.shopping {
+  border: 1px solid rgba(181, 113, 58, 0.18);
+  background: linear-gradient(
+    135deg,
+    rgba(181, 113, 58, 0.07),
+    rgba(181, 113, 58, 0.03)
+  );
+  color: #7b5030;
+}
+
+.planner-summary-banner.stocked {
+  border: 1px solid rgba(123, 148, 96, 0.22);
+  background: linear-gradient(
+    135deg,
+    rgba(123, 148, 96, 0.1),
+    rgba(123, 148, 96, 0.04)
+  );
+  color: #4a6830;
+}
+
+.planner-ingredient-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.planner-ingredient-group {
+  overflow: hidden;
+  border: 1px solid var(--category-border);
+  border-radius: 18px;
+  background: linear-gradient(135deg, #fefcf8, #faf5ea);
+  box-shadow: 0 16px 38px rgba(95, 73, 40, 0.06);
+}
+
+.planner-ingredient-group-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--category-border);
+  background: var(--category-bg);
+}
+
+.planner-ingredient-group-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.planner-ingredient-group-accent {
+  width: 4px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--category-accent);
+}
+
+.planner-ingredient-group-title h3 {
+  margin: 0;
+  color: var(--category-accent);
+  font-size: 0.88rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.planner-ingredient-group-progress {
+  color: var(--category-accent);
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.planner-ingredient-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.planner-ingredient-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 12px 20px;
+  border: 0;
+  border-bottom: 1px solid rgba(193, 168, 120, 0.12);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.18s ease;
+}
+
+.planner-ingredient-row:last-child {
+  border-bottom: 0;
+}
+
+.planner-ingredient-row:hover {
+  background: rgba(193, 168, 120, 0.08);
+}
+
+.planner-ingredient-row.stocked {
+  background: rgba(123, 148, 96, 0.05);
+}
+
+.planner-ingredient-row.stocked:hover {
+  background: rgba(123, 148, 96, 0.09);
+}
+
+.planner-ingredient-checkbox {
+  display: inline-flex;
+  width: 22px;
+  height: 22px;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  border: 1.5px solid rgba(193, 168, 120, 0.5);
+  border-radius: 6px;
+  color: #fff;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.planner-ingredient-checkbox svg {
+  width: 12px;
+  height: 12px;
+}
+
+.planner-ingredient-checkbox.checked {
+  border-color: var(--category-accent);
+  background: var(--category-accent);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+}
+
+.planner-ingredient-copy {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.planner-ingredient-label {
+  color: #4a3520;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.03rem;
+  letter-spacing: 0.01em;
+}
+
+.planner-ingredient-row.stocked .planner-ingredient-label {
+  color: #a09080;
+  text-decoration: line-through;
+  text-decoration-color: rgba(160, 144, 128, 0.6);
+}
+
+.planner-ingredient-qty {
+  color: #8f7458;
+  font-size: 0.83rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.planner-in-fridge-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  color: var(--category-accent);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.planner-in-fridge-tag svg {
+  width: 14px;
+  height: 14px;
+}
+
+@media (max-width: 900px) {
+  .planner-shell {
+    padding: 22px;
+  }
+
+  .planner-hero,
+  .planner-section-heading,
+  .planner-shopping-header {
+    grid-template-columns: 1fr;
+  }
+
+  .planner-actions {
+    justify-content: flex-start;
+  }
+
+  .planner-shopping-actions {
+    align-items: flex-start;
+  }
+
+  .planner-day-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 620px) {
+  .planner-page {
+    padding: 28px 12px 48px;
+  }
+
+  .planner-shell {
+    padding: 16px;
+  }
+
+  .planner-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .planner-actions,
+  .planner-primary-btn,
+  .planner-secondary-btn {
+    width: 100%;
+  }
+
+  .planner-day-grid,
+  .planner-reasoning {
+    grid-template-columns: 1fr;
+  }
+
+  .planner-progress-pill {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .planner-ingredient-row {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .planner-in-fridge-tag {
+    width: 100%;
+    padding-left: 36px;
+  }
+}

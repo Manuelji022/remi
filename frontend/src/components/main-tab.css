@@ -1,0 +1,60 @@
+/* --- Main Tab --- */
+.main-tab {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  background-color: #f0ebe4;
+  border-radius: 12px;
+  width: fit-content;
+}
+
+.tab-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 18px;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  color: #666;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tab-btn:hover {
+  color: #333;
+}
+
+.tab-btn:disabled {
+  color: #b8a997;
+  cursor: not-allowed;
+  opacity: 0.72;
+}
+
+.tab-btn.active {
+  background-color: #fff;
+  color: #1a1a2e;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.tab-btn:focus-visible {
+  outline: 2px solid rgba(181, 113, 58, 0.85);
+  outline-offset: 2px;
+}
+
+.tab-btn .badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 9999px;
+  background-color: #e65100;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+}

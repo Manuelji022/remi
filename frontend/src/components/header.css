@@ -1,0 +1,43 @@
+header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  border: 3px solid #111;
+  background-color: #f0ece2;
+  position: relative;
+  max-width: 300px;
+}
+
+/* Sombra brutalista verde */
+/* .header-wrapper::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 3px solid #111;
+  background-color: #3ddc68;
+  transform: translate(8px, 8px);
+  z-index: -1;
+} */
+
+h1 {
+  padding: 0;
+  font-size: 4rem;
+  font-weight: 900;
+  color: #111;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  position: relative;
+  display: inline-block;
+
+  /* Sombra de texto verde apilada brutalista */
+  /* text-shadow:
+      3px 3px 0 #3ddc68,
+      6px 6px 0 #111;
+
+    transition:
+      text-shadow 0.1s ease,
+      transform 0.1s ease;
+    cursor: default;
+    user-select: none; */
+}
