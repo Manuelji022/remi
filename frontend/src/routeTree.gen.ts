@@ -10,12 +10,21 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WeeklyMenuPlannerRouteImport } from './routes/weekly-menu-planner'
+import { Route as EsRouteImport } from './routes/es'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as EsIndexRouteImport } from './routes/es.index'
+import { Route as EsWeeklyMenuPlannerRouteImport } from './routes/es.weekly-menu-planner'
+import { Route as EsAboutRouteImport } from './routes/es.about'
 
 const WeeklyMenuPlannerRoute = WeeklyMenuPlannerRouteImport.update({
   id: '/weekly-menu-planner',
   path: '/weekly-menu-planner',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EsRoute = EsRouteImport.update({
+  id: '/es',
+  path: '/es',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AboutRoute = AboutRouteImport.update({
@@ -28,34 +37,82 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EsIndexRoute = EsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => EsRoute,
+} as any)
+const EsWeeklyMenuPlannerRoute = EsWeeklyMenuPlannerRouteImport.update({
+  id: '/weekly-menu-planner',
+  path: '/weekly-menu-planner',
+  getParentRoute: () => EsRoute,
+} as any)
+const EsAboutRoute = EsAboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => EsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/es': typeof EsRouteWithChildren
   '/weekly-menu-planner': typeof WeeklyMenuPlannerRoute
+  '/es/about': typeof EsAboutRoute
+  '/es/weekly-menu-planner': typeof EsWeeklyMenuPlannerRoute
+  '/es/': typeof EsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/weekly-menu-planner': typeof WeeklyMenuPlannerRoute
+  '/es/about': typeof EsAboutRoute
+  '/es/weekly-menu-planner': typeof EsWeeklyMenuPlannerRoute
+  '/es': typeof EsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/es': typeof EsRouteWithChildren
   '/weekly-menu-planner': typeof WeeklyMenuPlannerRoute
+  '/es/about': typeof EsAboutRoute
+  '/es/weekly-menu-planner': typeof EsWeeklyMenuPlannerRoute
+  '/es/': typeof EsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/weekly-menu-planner'
+  fullPaths:
+    | '/'
+    | '/about'
+    | '/es'
+    | '/weekly-menu-planner'
+    | '/es/about'
+    | '/es/weekly-menu-planner'
+    | '/es/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/weekly-menu-planner'
-  id: '__root__' | '/' | '/about' | '/weekly-menu-planner'
+  to:
+    | '/'
+    | '/about'
+    | '/weekly-menu-planner'
+    | '/es/about'
+    | '/es/weekly-menu-planner'
+    | '/es'
+  id:
+    | '__root__'
+    | '/'
+    | '/about'
+    | '/es'
+    | '/weekly-menu-planner'
+    | '/es/about'
+    | '/es/weekly-menu-planner'
+    | '/es/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  EsRoute: typeof EsRouteWithChildren
   WeeklyMenuPlannerRoute: typeof WeeklyMenuPlannerRoute
 }
 
@@ -66,6 +123,13 @@ declare module '@tanstack/react-router' {
       path: '/weekly-menu-planner'
       fullPath: '/weekly-menu-planner'
       preLoaderRoute: typeof WeeklyMenuPlannerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/es': {
+      id: '/es'
+      path: '/es'
+      fullPath: '/es'
+      preLoaderRoute: typeof EsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/about': {
@@ -82,12 +146,48 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/es/': {
+      id: '/es/'
+      path: '/'
+      fullPath: '/es/'
+      preLoaderRoute: typeof EsIndexRouteImport
+      parentRoute: typeof EsRoute
+    }
+    '/es/weekly-menu-planner': {
+      id: '/es/weekly-menu-planner'
+      path: '/weekly-menu-planner'
+      fullPath: '/es/weekly-menu-planner'
+      preLoaderRoute: typeof EsWeeklyMenuPlannerRouteImport
+      parentRoute: typeof EsRoute
+    }
+    '/es/about': {
+      id: '/es/about'
+      path: '/about'
+      fullPath: '/es/about'
+      preLoaderRoute: typeof EsAboutRouteImport
+      parentRoute: typeof EsRoute
+    }
   }
 }
+
+interface EsRouteChildren {
+  EsAboutRoute: typeof EsAboutRoute
+  EsWeeklyMenuPlannerRoute: typeof EsWeeklyMenuPlannerRoute
+  EsIndexRoute: typeof EsIndexRoute
+}
+
+const EsRouteChildren: EsRouteChildren = {
+  EsAboutRoute: EsAboutRoute,
+  EsWeeklyMenuPlannerRoute: EsWeeklyMenuPlannerRoute,
+  EsIndexRoute: EsIndexRoute,
+}
+
+const EsRouteWithChildren = EsRoute._addFileChildren(EsRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  EsRoute: EsRouteWithChildren,
   WeeklyMenuPlannerRoute: WeeklyMenuPlannerRoute,
 }
 export const routeTree = rootRouteImport

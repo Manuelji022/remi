@@ -6,7 +6,15 @@ header {
   border: 3px solid #111;
   background-color: #f0ece2;
   position: relative;
-  max-width: 300px;
+  width: fit-content;
+  max-width: min(100%, 460px);
+  margin: 0 auto;
+}
+
+.header-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
 /* Sombra brutalista verde */
@@ -40,4 +48,43 @@ h1 {
       transform 0.1s ease;
     cursor: default;
     user-select: none; */
+}
+
+.language-switcher {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 36px;
+  padding: 0.35rem 0.65rem;
+  border: 2px solid #111;
+  border-radius: 999px;
+  background: #fffdf8;
+  color: #111;
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.language-switcher:hover {
+  background: #dfe8c8;
+  transform: translateY(-1px);
+}
+
+.language-switcher svg {
+  width: 16px;
+  height: 16px;
+}
+
+@media (max-width: 520px) {
+  h1 {
+    font-size: 2.7rem;
+  }
+
+  .header-wrapper {
+    gap: 0.7rem;
+  }
 }

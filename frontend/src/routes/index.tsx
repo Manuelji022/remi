@@ -1,11 +1,14 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { useI18n } from '#/i18n'
 
-export const Route = createFileRoute('/')({ component: App })
+export const Route = createFileRoute('/')({ component: IndexPage })
 
-function App() {
+export function IndexPage() {
+  const { t } = useI18n()
+
   return (
     <main>
-      <p>Probando</p>
+      <p>{t('home.copy')}</p>
     </main>
   )
 }
