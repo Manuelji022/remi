@@ -18,7 +18,13 @@ export type WeeklyMenu = Record<Day, DayMeals>
 
 export interface CustomRecipe {
   name: string
-  description: string
+  ingredients: RecipeIngredient[]
+  planningScope: PlanningScope
+}
+
+export interface RecipeIngredient {
+  name: string
+  quantity: string
 }
 
 export interface Preferences {

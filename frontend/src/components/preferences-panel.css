@@ -247,7 +247,8 @@
 .panel-scope-pill,
 .panel-primary-btn,
 .panel-secondary-btn,
-.panel-add-btn {
+.panel-add-btn,
+.panel-inline-add-btn {
   border-radius: 999px;
   transition:
     transform 0.2s ease,
@@ -317,8 +318,7 @@
   font-weight: 700;
 }
 
-.panel-field input,
-.panel-field textarea {
+.panel-field input {
   width: 100%;
   border: 1px solid rgba(193, 168, 120, 0.3);
   border-radius: 14px;
@@ -329,11 +329,6 @@
   transition:
     border-color 0.2s ease,
     box-shadow 0.2s ease;
-}
-
-.panel-field textarea {
-  min-height: 92px;
-  resize: vertical;
 }
 
 .panel-add-btn {
@@ -350,6 +345,46 @@
   font-weight: 700;
   cursor: pointer;
   box-shadow: 0 10px 24px rgba(138, 78, 32, 0.22);
+}
+
+.panel-inline-add-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+  border: 1px solid rgba(181, 113, 58, 0.3);
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.52);
+  color: #8a4e20;
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.panel-ingredient-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.panel-ingredient-row {
+  display: grid;
+  grid-template-columns: minmax(92px, 0.7fr) minmax(0, 1.3fr) auto;
+  align-items: end;
+  gap: 10px;
+}
+
+.panel-ingredient-row .panel-field + .panel-field {
+  margin-top: 0;
+}
+
+.panel-quantity-field {
+  min-width: 0;
+}
+
+.panel-ingredient-delete {
+  margin-bottom: 1px;
 }
 
 .panel-add-btn:disabled {
@@ -376,6 +411,35 @@
 
 .panel-recipe-copy {
   min-width: 0;
+}
+
+.panel-recipe-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.panel-recipe-scope {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  border-radius: 999px;
+  padding: 0 9px;
+  background: rgba(123, 148, 96, 0.12);
+  color: #506538;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.panel-recipe-ingredients {
+  margin: 10px 0 0;
+  padding-left: 18px;
+  color: #8f7458;
+  font-size: 0.92rem;
+  line-height: 1.6;
 }
 
 .panel-footer {
@@ -422,6 +486,7 @@
 .panel-primary-btn:hover:not(:disabled),
 .panel-secondary-btn:hover,
 .panel-add-btn:hover:not(:disabled),
+.panel-inline-add-btn:hover,
 .panel-context-pill:hover,
 .panel-scope-pill:hover:not(:disabled) {
   transform: translateY(-1px);
@@ -440,15 +505,14 @@
 .panel-primary-btn:focus-visible,
 .panel-secondary-btn:focus-visible,
 .panel-add-btn:focus-visible,
+.panel-inline-add-btn:focus-visible,
 .panel-field input:focus-visible,
-.panel-field textarea:focus-visible,
 .panel-overlay:focus-visible {
   outline: 2px solid rgba(181, 113, 58, 0.85);
   outline-offset: 2px;
 }
 
-.panel-field input:focus-visible,
-.panel-field textarea:focus-visible {
+.panel-field input:focus-visible {
   border-color: rgba(181, 113, 58, 0.55);
   box-shadow: 0 0 0 4px rgba(181, 113, 58, 0.1);
 }
@@ -468,5 +532,13 @@
 
   .panel-footer-actions {
     flex-direction: column;
+  }
+
+  .panel-ingredient-row {
+    grid-template-columns: 1fr;
+  }
+
+  .panel-ingredient-delete {
+    justify-self: end;
   }
 }

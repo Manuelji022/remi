@@ -8,6 +8,7 @@ import type {
   DayContext,
   PlanningScope,
   Preferences,
+  RecipeIngredient,
 } from '#/data/types'
 import {
   CalendarIcon,
@@ -35,6 +36,17 @@ const PLANNING_SCOPE_LABELS: Record<PlanningScope, string> = {
   both: 'Both',
 }
 
+const RECIPE_USAGE_LABELS: Record<PlanningScope, string> = {
+  lunch: 'Lunch',
+  dinner: 'Dinner',
+  both: 'Lunch and dinner',
+}
+
+const EMPTY_RECIPE_INGREDIENT: RecipeIngredient = {
+  name: '',
+  quantity: '',
+}
+
 function getBlockedPlanningScopes(
   dayContext: DayContext | null,
 ): ReadonlyArray<PlanningScope> {
@@ -59,20 +71,26 @@ export function PreferencesPanel({
   savedPrefs,
   onSave,
 }: PreferencesPanelProps) {
-  const [draftPrefs, setDraftPrefs] = useState<Preferences>(savedPrefs)
+  const [draftPrefs, setDraftPrefs] = useState<Preferences>(() =>
+    normalizePreferences(savedPrefs),
+  )
   const [activeTab, setActiveTab] = useState<PreferencesPanelTab>('schedule')
   const [recipeName, setRecipeName] = useState('')
-  const [recipeDescription, setRecipeDescription] = useState('')
+  const [recipePlanningScope, setRecipePlanningScope] =
+    useState<PlanningScope>('both')
+  const [recipeIngredients, setRecipeIngredients] = useState<
+    RecipeIngredient[]
+  >([{ ...EMPTY_RECIPE_INGREDIENT }])
   const recipeNameId = useId()
-  const recipeDescriptionId = useId()
 
   useEffect(() => {
     if (!isOpen) return
 
-    setDraftPrefs(savedPrefs)
+    setDraftPrefs(normalizePreferences(savedPrefs))
     setActiveTab('schedule')
     setRecipeName('')
-    setRecipeDescription('')
+    setRecipePlanningScope('both')
+    setRecipeIngredients([{ ...EMPTY_RECIPE_INGREDIENT }])
   }, [isOpen, savedPrefs])
 
   const hasUnsavedChanges = useMemo(
@@ -120,13 +138,19 @@ export function PreferencesPanel({
 
   function handleAddRecipe() {
     const name = recipeName.trim()
-    const description = recipeDescription.trim()
+    const ingredients = recipeIngredients
+      .map((ingredient) => ({
+        name: ingredient.name.trim(),
+        quantity: ingredient.quantity.trim(),
+      }))
+      .filter((ingredient) => ingredient.name)
 
-    if (!name) return
+    if (!name || ingredients.length === 0) return
 
     const nextRecipe: CustomRecipe = {
       name,
-      description,
+      ingredients,
+      planningScope: recipePlanningScope,
     }
 
     setDraftPrefs({
@@ -135,7 +159,38 @@ export function PreferencesPanel({
     })
 
     setRecipeName('')
-    setRecipeDescription('')
+    setRecipePlanningScope('both')
+    setRecipeIngredients([{ ...EMPTY_RECIPE_INGREDIENT }])
+  }
+
+  function updateRecipeIngredient(
+    ingredientIndex: number,
+    field: keyof RecipeIngredient,
+    value: string,
+  ) {
+    setRecipeIngredients((currentIngredients) =>
+      currentIngredients.map((ingredient, index) =>
+        index === ingredientIndex
+          ? { ...ingredient, [field]: value }
+          : ingredient,
+      ),
+    )
+  }
+
+  function addRecipeIngredient() {
+    setRecipeIngredients((currentIngredients) => [
+      ...currentIngredients,
+      { ...EMPTY_RECIPE_INGREDIENT },
+    ])
+  }
+
+  function deleteRecipeIngredient(ingredientIndex: number) {
+    setRecipeIngredients((currentIngredients) => {
+      if (currentIngredients.length === 1)
+        return [{ ...EMPTY_RECIPE_INGREDIENT }]
+
+      return currentIngredients.filter((_, index) => index !== ingredientIndex)
+    })
   }
 
   function handleDeleteRecipe(recipeIndex: number) {
@@ -306,8 +361,7 @@ export function PreferencesPanel({
                   Save recipes to reuse later
                 </h3>
                 <p>
-                  Add favorite meals or dietary notes that should influence
-                  future menu generation.
+                  Add favorite meals with ingredients and when they work best.
                 </p>
               </div>
 
@@ -324,24 +378,93 @@ export function PreferencesPanel({
                   />
                 </label>
 
-                <label className="panel-field">
-                  <span>Description or notes</span>
-                  <textarea
-                    id={recipeDescriptionId}
-                    name="recipeDescription"
-                    onChange={(event) =>
-                      setRecipeDescription(event.target.value)
-                    }
-                    placeholder="Optional notes, ingredients, or dietary preferences"
-                    rows={3}
-                    value={recipeDescription}
-                  />
-                </label>
+                <div className="panel-control-group">
+                  <span className="panel-control-label">Use for</span>
+                  <div className="panel-pill-row">
+                    {PLANNING_SCOPE_OPTIONS.map((scope) => (
+                      <PlanningScopePill
+                        isDisabled={false}
+                        isSelected={recipePlanningScope === scope}
+                        key={scope}
+                        label={PLANNING_SCOPE_LABELS[scope]}
+                        onClick={() => setRecipePlanningScope(scope)}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                <div className="panel-control-group">
+                  <span className="panel-control-label">Ingredients</span>
+                  <div className="panel-ingredient-editor">
+                    {recipeIngredients.map((ingredient, ingredientIndex) => (
+                      <div
+                        className="panel-ingredient-row"
+                        key={ingredientIndex}
+                      >
+                        <label className="panel-field panel-quantity-field">
+                          <span>Quantity</span>
+                          <input
+                            name={`recipeIngredientQuantity-${ingredientIndex}`}
+                            onChange={(event) =>
+                              updateRecipeIngredient(
+                                ingredientIndex,
+                                'quantity',
+                                event.target.value,
+                              )
+                            }
+                            placeholder="Optional"
+                            type="text"
+                            value={ingredient.quantity}
+                          />
+                        </label>
+                        <label className="panel-field">
+                          <span>Ingredient</span>
+                          <input
+                            name={`recipeIngredientName-${ingredientIndex}`}
+                            onChange={(event) =>
+                              updateRecipeIngredient(
+                                ingredientIndex,
+                                'name',
+                                event.target.value,
+                              )
+                            }
+                            placeholder="Ex. lentils"
+                            type="text"
+                            value={ingredient.name}
+                          />
+                        </label>
+                        <button
+                          className="panel-icon-btn panel-ingredient-delete"
+                          type="button"
+                          aria-label="Delete ingredient"
+                          onClick={() =>
+                            deleteRecipeIngredient(ingredientIndex)
+                          }
+                        >
+                          <TrashIcon aria-hidden="true" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  <button
+                    className="panel-inline-add-btn"
+                    type="button"
+                    onClick={addRecipeIngredient}
+                  >
+                    <PlusIcon aria-hidden="true" />
+                    Add ingredient
+                  </button>
+                </div>
 
                 <button
                   className="panel-add-btn"
                   type="button"
-                  disabled={!recipeName.trim()}
+                  disabled={
+                    !recipeName.trim() ||
+                    !recipeIngredients.some((ingredient) =>
+                      ingredient.name.trim(),
+                    )
+                  }
                   onClick={handleAddRecipe}
                 >
                   <PlusIcon aria-hidden="true" />
@@ -361,8 +484,21 @@ export function PreferencesPanel({
                       key={`${recipe.name}-${recipeIndex}`}
                     >
                       <div className="panel-recipe-copy">
-                        <h4>{recipe.name}</h4>
-                        <p>{recipe.description || 'No extra notes yet.'}</p>
+                        <div className="panel-recipe-title-row">
+                          <h4>{recipe.name}</h4>
+                          <span className="panel-recipe-scope">
+                            {RECIPE_USAGE_LABELS[recipe.planningScope]}
+                          </span>
+                        </div>
+                        <ul className="panel-recipe-ingredients">
+                          {recipe.ingredients.map((ingredient, index) => (
+                            <li key={`${ingredient.name}-${index}`}>
+                              {[ingredient.quantity, ingredient.name]
+                                .filter(Boolean)
+                                .join(' ')}
+                            </li>
+                          ))}
+                        </ul>
                       </div>
 
                       <button
@@ -408,6 +544,28 @@ export function PreferencesPanel({
       </aside>
     </div>
   )
+}
+
+function normalizePreferences(preferences: Preferences): Preferences {
+  const customRecipes = preferences.customRecipes as Array<
+    Partial<CustomRecipe>
+  >
+
+  return {
+    ...preferences,
+    customRecipes: customRecipes.map((recipe) => ({
+      name: recipe.name ?? '',
+      ingredients: Array.isArray(recipe.ingredients)
+        ? (recipe.ingredients as Array<Partial<RecipeIngredient>>).map(
+            (ingredient) => ({
+              name: ingredient.name ?? '',
+              quantity: ingredient.quantity ?? '',
+            }),
+          )
+        : [],
+      planningScope: recipe.planningScope ?? 'both',
+    })),
+  }
 }
 
 interface PanelTabButtonProps {
