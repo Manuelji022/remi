@@ -25,6 +25,24 @@ This project uses [Vitest](https://vitest.dev/) for testing. You can run the tes
 pnpm test
 ```
 
+## Backend API
+
+This frontend does not connect directly to the database. FastAPI is the backend owner for PostgreSQL, migrations, authentication, and business logic.
+
+Create a local `.env` from `.env.example` and point the frontend at the FastAPI server:
+
+```bash
+cp .env.example .env
+```
+
+Default local API URL:
+
+```text
+VITE_API_URL=http://localhost:8000
+```
+
+Architecture details live in `../docs/fastapi-backend-architecture.md`.
+
 ## Styling
 
 This project uses vanilla CSS
