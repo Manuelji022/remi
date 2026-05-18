@@ -5,15 +5,10 @@
 /* --- Planner Shell --- */
 .planner-page {
   min-height: calc(100vh - 128px);
-  padding: 1rem;
-  background:
-    linear-gradient(135deg, rgba(123, 148, 96, 0.1), transparent 34%),
-    linear-gradient(225deg, rgba(181, 113, 58, 0.1), transparent 38%), #fcf7f0;
+  margin-block: 1rem;
 }
 
 .planner-shell {
-  width: min(1120px, 100%);
-  margin: 0 auto;
   padding: 28px;
   border: 1px solid rgba(138, 112, 96, 0.18);
   border-radius: 8px;
