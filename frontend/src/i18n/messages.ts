@@ -33,9 +33,6 @@ export const messages = {
     'dayContext.eatingOut': 'Eating out',
     'dayContext.none': 'No day context selected',
     'planner.weekKicker': 'Week {week} · {start} to {end}',
-    'planner.title': 'Weekly Menu Planner',
-    'planner.intro':
-      'Generate a mock Weekly Menu for the current Calendar Week, tune preferences, and prepare the shopping checklist from the same screen.',
     'planner.actionsLabel': 'Planner actions',
     'planner.preferences': 'Preferences',
     'planner.generating': 'Generating',
@@ -81,15 +78,15 @@ export const messages = {
     'preferences.recipesKicker': 'My recipes',
     'preferences.recipesTitle': 'Save recipes to reuse later',
     'preferences.recipesBody':
-      'Add favorite meals or dietary notes that should influence future menu generation.',
+      'Add favorite meals and their ingredients so they can influence future menu generation.',
     'preferences.recipeName': 'Recipe name',
     'preferences.recipeNamePlaceholder': 'Ex. Lemon chickpea pasta',
-    'preferences.recipeDescription': 'Description or notes',
-    'preferences.recipeDescriptionPlaceholder':
-      'Optional notes, ingredients, or dietary preferences',
+    'preferences.recipeIngredients': 'Ingredients',
+    'preferences.recipeIngredientsPlaceholder':
+      'One ingredient per line\nEx. chickpeas\nlemon\nfresh parsley',
     'preferences.addRecipe': 'Add recipe',
     'preferences.emptyRecipes': 'No custom recipes saved yet.',
-    'preferences.noRecipeNotes': 'No extra notes yet.',
+    'preferences.noRecipeIngredients': 'No ingredients added yet.',
     'preferences.deleteRecipe': 'Delete {name}',
     'preferences.unsaved': 'You have unsaved preference changes.',
     'preferences.ready': 'Changes are ready to save when you are.',
@@ -112,7 +109,8 @@ export const messages = {
       'You still need to buy {count} {itemWord} for this weekly menu.',
     'shopping.itemSingular': 'item',
     'shopping.itemPlural': 'items',
-    'shopping.stocked': 'Your fridge is stocked. Nothing left to buy this week.',
+    'shopping.stocked':
+      'Your fridge is stocked. Nothing left to buy this week.',
     'shopping.inFridge': 'In fridge',
     'categories.produceAndFreshHerbs': 'Produce & Fresh Herbs',
     'categories.meatAndFish': 'Meat & Fish',
@@ -125,7 +123,8 @@ export const messages = {
     'header.languageLabel': 'Idioma',
     'header.languageEn': 'Inglés',
     'header.languageEs': 'Español',
-    'footer.rights': 'Desarrollado por Manuelji. Todos los derechos reservados.',
+    'footer.rights':
+      'Desarrollado por Manuelji. Todos los derechos reservados.',
     'home.copy': 'Probando',
     'about.kicker': 'Acerca de',
     'about.title': 'Un pequeño punto de partida con espacio para crecer.',
@@ -150,10 +149,6 @@ export const messages = {
     'dayContext.eatingOut': 'Comida fuera',
     'dayContext.none': 'Sin contexto seleccionado',
     'planner.weekKicker': 'Semana {week} · {start} al {end}',
-    'planner.title': 'Planificador de Menú Semanal',
-    'planner.intro':
-      'Genera un Menú Semanal de ejemplo para la Semana Calendario actual, ajusta preferencias y prepara la lista de la compra desde la misma pantalla.',
-    'planner.actionsLabel': 'Acciones del planificador',
     'planner.preferences': 'Preferencias',
     'planner.generating': 'Generando',
     'planner.generateMenu': 'Generar menú',
@@ -198,15 +193,15 @@ export const messages = {
     'preferences.recipesKicker': 'Mis recetas',
     'preferences.recipesTitle': 'Guarda recetas para reutilizarlas',
     'preferences.recipesBody':
-      'Añade comidas favoritas o notas dietéticas que deberían influir en futuros menús.',
+      'Añade comidas favoritas y sus ingredientes para que influyan en futuros menús.',
     'preferences.recipeName': 'Nombre de la receta',
     'preferences.recipeNamePlaceholder': 'Ej. pasta de garbanzos al limón',
-    'preferences.recipeDescription': 'Descripción o notas',
-    'preferences.recipeDescriptionPlaceholder':
-      'Notas opcionales, ingredientes o preferencias dietéticas',
+    'preferences.recipeIngredients': 'Ingredientes',
+    'preferences.recipeIngredientsPlaceholder':
+      'Un ingrediente por línea\nEj. garbanzos\nlimón\nperejil fresco',
     'preferences.addRecipe': 'Añadir receta',
     'preferences.emptyRecipes': 'Todavía no hay recetas personalizadas.',
-    'preferences.noRecipeNotes': 'Todavía no hay notas adicionales.',
+    'preferences.noRecipeIngredients': 'Todavía no hay ingredientes añadidos.',
     'preferences.deleteRecipe': 'Eliminar {name}',
     'preferences.unsaved': 'Tienes cambios de preferencias sin guardar.',
     'preferences.ready': 'Los cambios están listos para guardar.',
@@ -241,4 +236,3 @@ export const messages = {
 } as const
 
 export type MessageKey = keyof (typeof messages)['en']
-

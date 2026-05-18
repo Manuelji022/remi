@@ -44,23 +44,6 @@
   text-transform: uppercase;
 }
 
-.planner-hero h1 {
-  margin-top: 12px;
-  color: #1a1a2e;
-  font-family: Georgia, 'Times New Roman', serif;
-  font-size: clamp(2.6rem, 5vw, 5.2rem);
-  line-height: 0.94;
-  letter-spacing: 0;
-}
-
-.planner-intro {
-  max-width: 660px;
-  margin-top: 18px;
-  color: #5d594f;
-  font-size: 1.02rem;
-  line-height: 1.75;
-}
-
 .planner-actions {
   display: flex;
   flex-wrap: wrap;

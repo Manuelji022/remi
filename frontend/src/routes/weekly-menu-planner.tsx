@@ -111,8 +111,6 @@ export function WeeklyMenuPlanner() {
                 end: weekRange.end,
               })}
             </p>
-            <h1 id="planner-title">{t('planner.title')}</h1>
-            <p className="planner-intro">{t('planner.intro')}</p>
           </div>
 
           <div className="planner-actions" aria-label={t('planner.actionsLabel')}>
