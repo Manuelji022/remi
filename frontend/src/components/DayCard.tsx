@@ -72,18 +72,15 @@ function MealSlotDisplay({
       {isHomePlanned && meal ? (
         <>
           <span className="meal-name">{meal.name}</span>
-          <span className="meal-description">{meal.description}</span>
         </>
       ) : (
         <>
           <span className="meal-name">{t('meal.unplannedName')}</span>
-          <span className="meal-description">
             {dayContextLabel
               ? t('meal.coveredByContext', {
                   context: dayContextLabel.toLowerCase(),
                 })
               : t('meal.outsideScope')}
-          </span>
         </>
       )}
     </div>
