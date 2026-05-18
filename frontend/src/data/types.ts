@@ -34,6 +34,7 @@ export interface CustomRecipeIngredient {
 
 export interface CustomRecipe {
   name: string
+  slot: MealSlot
   ingredients: CustomRecipeIngredient[]
 }
 
