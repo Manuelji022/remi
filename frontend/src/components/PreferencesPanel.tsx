@@ -18,6 +18,7 @@ import {
   TrashIcon,
   UtensilsIcon,
 } from '#/components/icons'
+import { useI18n } from '#/i18n'
 
 type PreferencesPanelTab = 'schedule' | 'recipes'
 
@@ -29,12 +30,6 @@ interface PreferencesPanelProps {
 }
 
 const PLANNING_SCOPE_OPTIONS: PlanningScope[] = ['lunch', 'dinner', 'both']
-const PLANNING_SCOPE_LABELS: Record<PlanningScope, string> = {
-  lunch: 'Lunch',
-  dinner: 'Dinner',
-  both: 'Both',
-}
-
 function getBlockedPlanningScopes(
   dayContext: DayContext | null,
 ): ReadonlyArray<PlanningScope> {
@@ -59,6 +54,7 @@ export function PreferencesPanel({
   savedPrefs,
   onSave,
 }: PreferencesPanelProps) {
+  const { t } = useI18n()
   const [draftPrefs, setDraftPrefs] = useState<Preferences>(savedPrefs)
   const [activeTab, setActiveTab] = useState<PreferencesPanelTab>('schedule')
   const [recipeName, setRecipeName] = useState('')
@@ -152,7 +148,7 @@ export function PreferencesPanel({
       <button
         className="panel-overlay"
         type="button"
-        aria-label="Close preferences panel"
+        aria-label={t('preferences.close')}
         onClick={onClose}
       />
 
@@ -166,17 +162,17 @@ export function PreferencesPanel({
           <div>
             <p className="panel-kicker">
               <SettingsIcon aria-hidden="true" />
-              Meal planning
+              {t('preferences.kicker')}
             </p>
-            <h2 id="preferences-panel-title">Preferences</h2>
+            <h2 id="preferences-panel-title">{t('preferences.title')}</h2>
             <p className="panel-subtitle">
-              Tailor the weekly menu to your week
+              {t('preferences.subtitle')}
             </p>
           </div>
           <button
             className="panel-close-btn"
             type="button"
-            aria-label="Close preferences panel"
+            aria-label={t('preferences.close')}
             onClick={onClose}
           >
             <CloseIcon aria-hidden="true" />
@@ -186,18 +182,18 @@ export function PreferencesPanel({
         <div
           className="panel-tablist"
           role="tablist"
-          aria-label="Preferences sections"
+          aria-label={t('preferences.sections')}
         >
           <PanelTabButton
             id="schedule"
             isActive={activeTab === 'schedule'}
-            label="Weekly Schedule"
+            label={t('preferences.weeklySchedule')}
             onClick={() => setActiveTab('schedule')}
           />
           <PanelTabButton
             id="recipes"
             isActive={activeTab === 'recipes'}
-            label="My Recipes"
+            label={t('preferences.myRecipes')}
             onClick={() => setActiveTab('recipes')}
           />
         </div>
@@ -213,13 +209,12 @@ export function PreferencesPanel({
               <div className="panel-section-copy">
                 <p className="panel-section-kicker">
                   <CalendarIcon aria-hidden="true" />
-                  Weekly schedule
+                  {t('preferences.scheduleKicker')}
                 </p>
-                <h3 id="preferences-schedule-title">Plan around each day</h3>
-                <p>
-                  Mark office or eat-out days, then choose whether lunch,
-                  dinner, or both still need planning at home.
-                </p>
+                <h3 id="preferences-schedule-title">
+                  {t('preferences.scheduleTitle')}
+                </h3>
+                <p>{t('preferences.scheduleBody')}</p>
               </div>
 
               <div className="panel-day-list">
@@ -235,22 +230,26 @@ export function PreferencesPanel({
                     >
                       <div className="panel-day-header">
                         <div>
-                          <h4>{day}</h4>
+                          <h4>{t(`days.${day}`)}</h4>
                           <p>
                             {dayContext
                               ? dayContext === 'office'
-                                ? 'Office day'
-                                : 'Eating out'
-                              : 'No day context selected'}
+                                ? t('dayContext.officeDay')
+                                : t('dayContext.eatingOut')
+                              : t('dayContext.none')}
                           </p>
                         </div>
                         {isWeekend(day) && (
-                          <span className="panel-day-badge">Weekend</span>
+                          <span className="panel-day-badge">
+                            {t('common.weekend')}
+                          </span>
                         )}
                       </div>
 
                       <div className="panel-control-group">
-                        <span className="panel-control-label">Context</span>
+                        <span className="panel-control-label">
+                          {t('preferences.context')}
+                        </span>
                         <div className="panel-pill-row">
                           <DayContextPill
                             context="office"
@@ -267,7 +266,7 @@ export function PreferencesPanel({
 
                       <div className="panel-control-group">
                         <span className="panel-control-label">
-                          Plan at home
+                          {t('preferences.planAtHome')}
                         </span>
                         <div className="panel-pill-row">
                           {PLANNING_SCOPE_OPTIONS.map((scope) => {
@@ -278,7 +277,11 @@ export function PreferencesPanel({
                                 isDisabled={isBlocked}
                                 isSelected={planningScope === scope}
                                 key={scope}
-                                label={PLANNING_SCOPE_LABELS[scope]}
+                                label={
+                                  scope === 'both'
+                                    ? t('scopes.both')
+                                    : t(`slots.${scope}`)
+                                }
                                 onClick={() => updatePlanningScope(day, scope)}
                               />
                             )
@@ -300,39 +303,36 @@ export function PreferencesPanel({
               <div className="panel-section-copy">
                 <p className="panel-section-kicker">
                   <PlusIcon aria-hidden="true" />
-                  My recipes
+                  {t('preferences.recipesKicker')}
                 </p>
                 <h3 id="preferences-recipes-title">
-                  Save recipes to reuse later
+                  {t('preferences.recipesTitle')}
                 </h3>
-                <p>
-                  Add favorite meals or dietary notes that should influence
-                  future menu generation.
-                </p>
+                <p>{t('preferences.recipesBody')}</p>
               </div>
 
               <div className="panel-recipe-form">
                 <label className="panel-field">
-                  <span>Recipe name</span>
+                  <span>{t('preferences.recipeName')}</span>
                   <input
                     id={recipeNameId}
                     name="recipeName"
                     onChange={(event) => setRecipeName(event.target.value)}
-                    placeholder="Ex. Lemon chickpea pasta"
+                    placeholder={t('preferences.recipeNamePlaceholder')}
                     type="text"
                     value={recipeName}
                   />
                 </label>
 
                 <label className="panel-field">
-                  <span>Description or notes</span>
+                  <span>{t('preferences.recipeDescription')}</span>
                   <textarea
                     id={recipeDescriptionId}
                     name="recipeDescription"
                     onChange={(event) =>
                       setRecipeDescription(event.target.value)
                     }
-                    placeholder="Optional notes, ingredients, or dietary preferences"
+                    placeholder={t('preferences.recipeDescriptionPlaceholder')}
                     rows={3}
                     value={recipeDescription}
                   />
@@ -345,13 +345,13 @@ export function PreferencesPanel({
                   onClick={handleAddRecipe}
                 >
                   <PlusIcon aria-hidden="true" />
-                  Add recipe
+                  {t('preferences.addRecipe')}
                 </button>
               </div>
 
               {draftPrefs.customRecipes.length === 0 ? (
                 <div className="panel-empty-recipes">
-                  <p>No custom recipes saved yet.</p>
+                  <p>{t('preferences.emptyRecipes')}</p>
                 </div>
               ) : (
                 <div className="panel-recipe-list">
@@ -362,13 +362,17 @@ export function PreferencesPanel({
                     >
                       <div className="panel-recipe-copy">
                         <h4>{recipe.name}</h4>
-                        <p>{recipe.description || 'No extra notes yet.'}</p>
+                        <p>
+                          {recipe.description || t('preferences.noRecipeNotes')}
+                        </p>
                       </div>
 
                       <button
                         className="panel-icon-btn"
                         type="button"
-                        aria-label={`Delete ${recipe.name}`}
+                        aria-label={t('preferences.deleteRecipe', {
+                          name: recipe.name,
+                        })}
                         onClick={() => handleDeleteRecipe(recipeIndex)}
                       >
                         <TrashIcon aria-hidden="true" />
@@ -384,8 +388,8 @@ export function PreferencesPanel({
         <div className="panel-footer">
           <p className="panel-footer-note">
             {hasUnsavedChanges
-              ? 'You have unsaved preference changes.'
-              : 'Changes are ready to save when you are.'}
+              ? t('preferences.unsaved')
+              : t('preferences.ready')}
           </p>
           <div className="panel-footer-actions">
             <button
@@ -393,7 +397,7 @@ export function PreferencesPanel({
               type="button"
               onClick={onClose}
             >
-              Cancel
+              {t('common.cancel')}
             </button>
             <button
               className="panel-primary-btn"
@@ -401,7 +405,7 @@ export function PreferencesPanel({
               onClick={() => onSave(draftPrefs)}
             >
               <CheckIcon aria-hidden="true" />
-              Save preferences
+              {t('preferences.save')}
             </button>
           </div>
         </div>
@@ -440,7 +444,8 @@ interface DayContextPillProps {
 }
 
 function DayContextPill({ context, isSelected, onClick }: DayContextPillProps) {
-  const label = context === 'office' ? 'Office' : 'Eat out'
+  const { t } = useI18n()
+  const label = t(`contexts.${context}`)
   const Icon = context === 'office' ? CalendarIcon : UtensilsIcon
 
   return (

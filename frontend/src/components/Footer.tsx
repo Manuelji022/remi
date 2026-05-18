@@ -1,11 +1,16 @@
 import './footer.css'
 
+import { useI18n } from '#/i18n'
+
 export default function Footer() {
   const year = new Date().getFullYear()
+  const { t } = useI18n()
 
   return (
     <footer>
-      <p>&copy; {year} Developed by Manuelji. All rights reserved.</p>
+      <p>
+        &copy; {year} {t('footer.rights')}
+      </p>
     </footer>
   )
 }
