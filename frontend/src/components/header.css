@@ -1,102 +1,46 @@
 .site-header {
-  width: min(100%, 1120px);
-  margin: 0 auto;
   padding: 0.75rem clamp(0.75rem, 2vw, 1.25rem);
 }
 
 .header-wrapper {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  gap: clamp(0.75rem, 2vw, 1.5rem);
+  width: fit-content;
+  margin: auto;
   min-height: 68px;
-  padding: 0.65rem clamp(0.8rem, 2vw, 1.25rem);
+  padding: 0.4rem;
   border: 3px solid var(--text-color);
-  border-radius: 1rem;
+  border-radius: 8px;
   background-color: #fff8e6;
-  box-shadow: 4px 4px 0 var(--highlight-color);
+  box-shadow: 4px 4px 0 var(--highlight-color-2);
+  cursor: pointer;
+}
+
+.header-wrapper:hover {
+  transform: scale(1.05);
+  transition: 0.5s;
 }
 
 .header-logo {
-  justify-self: start;
   padding: 0;
   color: #111;
-  font-size: clamp(2rem, 5vw, 3.3rem);
-  font-weight: 900;
-  letter-spacing: 0.08em;
+  font-size: clamp(3rem, 6vw, 6rem);
+  letter-spacing: -4px;
   line-height: 0.9;
   text-decoration: none;
   text-transform: uppercase;
-  text-shadow: 3px 3px 0 var(--highlight-color);
+  /* text-shadow: 2px 2px 0 var(--highlight-color-2); */
 }
 
-.header-week {
-  justify-self: center;
-  margin: 0;
-  padding: 0.55rem 0.85rem;
-  border: 2px solid #111;
-  border-radius: 1rem;
-  background: #fffdf8;
-  color: var(--text-color);
-  font-size: clamp(0.78rem, 1.8vw, 0.95rem);
-  font-weight: 900;
-  letter-spacing: 0.04em;
-  line-height: 1.2;
-  text-align: center;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-.language-switcher {
-  justify-self: end;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  min-height: 36px;
-  padding: 0.35rem 0.65rem;
-  border: 2px solid #111;
-  border-radius: 999px;
-  background: #fffdf8;
-  color: #111;
-  font-size: 0.78rem;
-  font-weight: 900;
-  letter-spacing: 0.08em;
-  text-decoration: none;
-  transition:
-    background-color 0.2s ease,
-    transform 0.2s ease;
-}
-
-.language-switcher:hover {
-  transform: translateY(-1px);
-}
-
-.language-switcher svg {
-  width: 16px;
-  height: 16px;
+.header-logo-span {
+  color: var(--highlight-color-3);
 }
 
 @media (max-width: 520px) {
   .header-wrapper {
-    grid-template-columns: auto auto;
     min-height: auto;
     box-shadow: 5px 5px 0 #111;
   }
 
   .header-logo {
     font-size: 2.45rem;
-  }
-
-  .header-week {
-    grid-column: 1 / -1;
-    grid-row: 2;
-    justify-self: stretch;
-    order: 3;
-    white-space: normal;
-  }
-
-  .language-switcher {
-    min-height: 34px;
-    padding: 0.3rem 0.55rem;
   }
 }
