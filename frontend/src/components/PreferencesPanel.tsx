@@ -8,6 +8,7 @@ import type {
   CustomRecipeIngredient,
   DayContext,
   IngredientUnit,
+  MealSlot,
   PlanningScope,
   Preferences,
 } from '#/data/types'
@@ -37,6 +38,7 @@ interface PreferencesPanelProps {
 }
 
 const PLANNING_SCOPE_OPTIONS: PlanningScope[] = ['lunch', 'dinner', 'both']
+const RECIPE_SLOT_OPTIONS: MealSlot[] = ['lunch', 'dinner']
 const INGREDIENT_UNITS: IngredientUnit[] = [
   'unit',
   'g',
@@ -130,6 +132,7 @@ export function PreferencesPanel({
   const [draftPrefs, setDraftPrefs] = useState<Preferences>(savedPrefs)
   const [activeTab, setActiveTab] = useState<PreferencesPanelTab>('schedule')
   const [recipeName, setRecipeName] = useState('')
+  const [recipeSlot, setRecipeSlot] = useState<MealSlot>('dinner')
   const [recipeIngredients, setRecipeIngredients] = useState<
     RecipeIngredientDraft[]
   >([getEmptyRecipeIngredient()])
@@ -144,6 +147,7 @@ export function PreferencesPanel({
     setDraftPrefs(savedPrefs)
     setActiveTab('schedule')
     setRecipeName('')
+    setRecipeSlot('dinner')
     setRecipeIngredients([getEmptyRecipeIngredient()])
   }, [isOpen, savedPrefs])
 
@@ -197,6 +201,7 @@ export function PreferencesPanel({
 
     const nextRecipe: CustomRecipe = {
       name,
+      slot: recipeSlot,
       ingredients: buildRecipeIngredients(recipeIngredients),
     }
 
@@ -206,6 +211,7 @@ export function PreferencesPanel({
     })
 
     setRecipeName('')
+    setRecipeSlot('dinner')
     setRecipeIngredients([getEmptyRecipeIngredient()])
   }
 
@@ -269,7 +275,6 @@ export function PreferencesPanel({
               {t('preferences.kicker')}
             </p>
             <h2 id="preferences-panel-title">{t('preferences.title')}</h2>
-            <p className="panel-subtitle">{t('preferences.subtitle')}</p>
           </div>
           <button
             className="panel-close-btn"
@@ -427,6 +432,26 @@ export function PreferencesPanel({
                 </label>
 
                 <div className="panel-field">
+                  <span>{t('preferences.recipeSlot')}</span>
+                  <div
+                    className="panel-pill-row"
+                    aria-label={t('preferences.recipeSlotHelp')}
+                    role="group"
+                  >
+                    {RECIPE_SLOT_OPTIONS.map((slot) => (
+                      <button
+                        className={`panel-scope-pill ${recipeSlot === slot ? 'selected' : ''}`}
+                        key={slot}
+                        type="button"
+                        onClick={() => setRecipeSlot(slot)}
+                      >
+                        {t(`slots.${slot}`)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="panel-field">
                   <span>{t('preferences.recipeIngredients')}</span>
                   <div className="panel-ingredient-rows">
                     {recipeIngredients.map((ingredient, ingredientIndex) => {
@@ -565,6 +590,9 @@ export function PreferencesPanel({
                       >
                         <div className="panel-recipe-copy">
                           <h4>{recipe.name}</h4>
+                          <p className="panel-recipe-slot">
+                            {t(`slots.${recipe.slot}`)}
+                          </p>
                           {ingredients.length > 0 ? (
                             <ul className="panel-ingredient-list">
                               {ingredients.map((ingredient) => (
