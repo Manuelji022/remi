@@ -8,6 +8,14 @@
   margin: 0;
 }
 
+:root {
+  --background-color: #fdcb40;
+  --highlight-color: #00a071;
+  --highlight-color-2: #4072fd;
+  --card-color: #ffffff;
+  --text-color: #1a1a2e;
+}
+
 body {
   font-family:
     'Lato',
@@ -16,8 +24,8 @@ body {
     sans-serif;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
-  background-color: #fcf7f0;
-  color: #1a1a2e;
+  background-color: var(--background-color);
+  color: var(--text-color);
 }
 
 input,

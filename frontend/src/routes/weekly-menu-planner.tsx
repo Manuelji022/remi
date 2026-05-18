@@ -102,16 +102,6 @@ export function WeeklyMenuPlanner() {
     <main className="planner-page">
       <section className="planner-shell" aria-labelledby="planner-title">
         <div className="planner-hero">
-          <div className="planner-copy">
-            <p className="planner-kicker">
-              <CalendarIcon aria-hidden="true" />
-              {t('planner.weekKicker', {
-                week: getWeekNumber(),
-                start: weekRange.start,
-                end: weekRange.end,
-              })}
-            </p>
-          </div>
 
           <div className="planner-actions" aria-label={t('planner.actionsLabel')}>
             <button
