@@ -5,7 +5,9 @@ import { DAYS, isWeekend } from '#/data/constants'
 import type { Day } from '#/data/constants'
 import type {
   CustomRecipe,
+  CustomRecipeIngredient,
   DayContext,
+  IngredientUnit,
   PlanningScope,
   Preferences,
 } from '#/data/types'
@@ -21,6 +23,11 @@ import {
 import { useI18n } from '#/i18n'
 
 type PreferencesPanelTab = 'schedule' | 'recipes'
+type RecipeIngredientDraft = {
+  name: string
+  quantity: string
+  unit: IngredientUnit | ''
+}
 
 interface PreferencesPanelProps {
   isOpen: boolean
@@ -30,6 +37,71 @@ interface PreferencesPanelProps {
 }
 
 const PLANNING_SCOPE_OPTIONS: PlanningScope[] = ['lunch', 'dinner', 'both']
+const INGREDIENT_UNITS: IngredientUnit[] = [
+  'unit',
+  'g',
+  'kg',
+  'ml',
+  'l',
+  'tbsp',
+  'tsp',
+  'can',
+  'pack',
+]
+const EMPTY_RECIPE_INGREDIENT: RecipeIngredientDraft = {
+  name: '',
+  quantity: '',
+  unit: '',
+}
+
+function getEmptyRecipeIngredient(): RecipeIngredientDraft {
+  return { ...EMPTY_RECIPE_INGREDIENT }
+}
+
+function buildRecipeIngredients(
+  recipeIngredients: RecipeIngredientDraft[],
+): CustomRecipeIngredient[] {
+  return recipeIngredients
+    .map((ingredient) => {
+      const name = ingredient.name.trim()
+      const quantity = ingredient.quantity.trim()
+
+      if (!name) return null
+
+      return {
+        name,
+        ...(quantity ? { quantity: Number(quantity) } : {}),
+        ...(ingredient.unit ? { unit: ingredient.unit } : {}),
+      }
+    })
+    .filter((ingredient): ingredient is CustomRecipeIngredient =>
+      Boolean(ingredient),
+    )
+}
+
+function hasInvalidRecipeIngredientQuantity(
+  recipeIngredients: RecipeIngredientDraft[],
+): boolean {
+  return recipeIngredients.some((ingredient) => {
+    const quantity = ingredient.quantity.trim()
+
+    return (
+      quantity !== '' &&
+      (!Number.isFinite(Number(quantity)) || Number(quantity) < 0)
+    )
+  })
+}
+
+function formatRecipeIngredient(
+  ingredient: CustomRecipeIngredient,
+  getUnitLabel: (unit: IngredientUnit) => string,
+): string {
+  const quantity = ingredient.quantity == null ? '' : `${ingredient.quantity} `
+  const unit = ingredient.unit ? `${getUnitLabel(ingredient.unit)} ` : ''
+
+  return `${quantity}${unit}${ingredient.name}`
+}
+
 function getBlockedPlanningScopes(
   dayContext: DayContext | null,
 ): ReadonlyArray<PlanningScope> {
@@ -58,9 +130,13 @@ export function PreferencesPanel({
   const [draftPrefs, setDraftPrefs] = useState<Preferences>(savedPrefs)
   const [activeTab, setActiveTab] = useState<PreferencesPanelTab>('schedule')
   const [recipeName, setRecipeName] = useState('')
-  const [recipeDescription, setRecipeDescription] = useState('')
+  const [recipeIngredients, setRecipeIngredients] = useState<
+    RecipeIngredientDraft[]
+  >([getEmptyRecipeIngredient()])
   const recipeNameId = useId()
-  const recipeDescriptionId = useId()
+  const recipeIngredientsId = useId()
+  const hasInvalidIngredientQuantity =
+    hasInvalidRecipeIngredientQuantity(recipeIngredients)
 
   useEffect(() => {
     if (!isOpen) return
@@ -68,7 +144,7 @@ export function PreferencesPanel({
     setDraftPrefs(savedPrefs)
     setActiveTab('schedule')
     setRecipeName('')
-    setRecipeDescription('')
+    setRecipeIngredients([getEmptyRecipeIngredient()])
   }, [isOpen, savedPrefs])
 
   const hasUnsavedChanges = useMemo(
@@ -116,13 +192,12 @@ export function PreferencesPanel({
 
   function handleAddRecipe() {
     const name = recipeName.trim()
-    const description = recipeDescription.trim()
 
-    if (!name) return
+    if (!name || hasInvalidIngredientQuantity) return
 
     const nextRecipe: CustomRecipe = {
       name,
-      description,
+      ingredients: buildRecipeIngredients(recipeIngredients),
     }
 
     setDraftPrefs({
@@ -131,7 +206,36 @@ export function PreferencesPanel({
     })
 
     setRecipeName('')
-    setRecipeDescription('')
+    setRecipeIngredients([getEmptyRecipeIngredient()])
+  }
+
+  function updateRecipeIngredient(
+    ingredientIndex: number,
+    field: keyof RecipeIngredientDraft,
+    value: string,
+  ) {
+    setRecipeIngredients(
+      recipeIngredients.map((ingredient, index) =>
+        index === ingredientIndex
+          ? { ...ingredient, [field]: value }
+          : ingredient,
+      ),
+    )
+  }
+
+  function addRecipeIngredientRow() {
+    setRecipeIngredients([...recipeIngredients, getEmptyRecipeIngredient()])
+  }
+
+  function deleteRecipeIngredientRow(ingredientIndex: number) {
+    if (recipeIngredients.length === 1) {
+      setRecipeIngredients([getEmptyRecipeIngredient()])
+      return
+    }
+
+    setRecipeIngredients(
+      recipeIngredients.filter((_, index) => index !== ingredientIndex),
+    )
   }
 
   function handleDeleteRecipe(recipeIndex: number) {
@@ -165,9 +269,7 @@ export function PreferencesPanel({
               {t('preferences.kicker')}
             </p>
             <h2 id="preferences-panel-title">{t('preferences.title')}</h2>
-            <p className="panel-subtitle">
-              {t('preferences.subtitle')}
-            </p>
+            <p className="panel-subtitle">{t('preferences.subtitle')}</p>
           </div>
           <button
             className="panel-close-btn"
@@ -324,24 +426,122 @@ export function PreferencesPanel({
                   />
                 </label>
 
-                <label className="panel-field">
-                  <span>{t('preferences.recipeDescription')}</span>
-                  <textarea
-                    id={recipeDescriptionId}
-                    name="recipeDescription"
-                    onChange={(event) =>
-                      setRecipeDescription(event.target.value)
-                    }
-                    placeholder={t('preferences.recipeDescriptionPlaceholder')}
-                    rows={3}
-                    value={recipeDescription}
-                  />
-                </label>
+                <div className="panel-field">
+                  <span>{t('preferences.recipeIngredients')}</span>
+                  <div className="panel-ingredient-rows">
+                    {recipeIngredients.map((ingredient, ingredientIndex) => {
+                      const ingredientNameId = `${recipeIngredientsId}-name-${ingredientIndex}`
+                      const ingredientQuantityId = `${recipeIngredientsId}-quantity-${ingredientIndex}`
+                      const ingredientUnitId = `${recipeIngredientsId}-unit-${ingredientIndex}`
+                      const quantity = ingredient.quantity.trim()
+                      const hasInvalidQuantity =
+                        quantity !== '' &&
+                        (!Number.isFinite(Number(quantity)) ||
+                          Number(quantity) < 0)
+
+                      return (
+                        <div
+                          className="panel-ingredient-row"
+                          key={ingredientIndex}
+                        >
+                          <label className="panel-ingredient-name-field">
+                            <span>{t('preferences.ingredientName')}</span>
+                            <input
+                              id={ingredientNameId}
+                              name={ingredientNameId}
+                              onChange={(event) =>
+                                updateRecipeIngredient(
+                                  ingredientIndex,
+                                  'name',
+                                  event.target.value,
+                                )
+                              }
+                              placeholder={t(
+                                'preferences.ingredientNamePlaceholder',
+                              )}
+                              type="text"
+                              value={ingredient.name}
+                            />
+                          </label>
+
+                          <label className="panel-ingredient-quantity-field">
+                            <span>{t('preferences.ingredientQuantity')}</span>
+                            <input
+                              aria-invalid={hasInvalidQuantity}
+                              id={ingredientQuantityId}
+                              min="0"
+                              name={ingredientQuantityId}
+                              onChange={(event) =>
+                                updateRecipeIngredient(
+                                  ingredientIndex,
+                                  'quantity',
+                                  event.target.value,
+                                )
+                              }
+                              placeholder="1"
+                              type="number"
+                              value={ingredient.quantity}
+                            />
+                          </label>
+
+                          <label className="panel-ingredient-unit-field">
+                            <span>{t('preferences.ingredientUnit')}</span>
+                            <select
+                              id={ingredientUnitId}
+                              name={ingredientUnitId}
+                              onChange={(event) =>
+                                updateRecipeIngredient(
+                                  ingredientIndex,
+                                  'unit',
+                                  event.target.value,
+                                )
+                              }
+                              value={ingredient.unit}
+                            >
+                              <option value="">
+                                {t('preferences.ingredientNoUnit')}
+                              </option>
+                              {INGREDIENT_UNITS.map((unit) => (
+                                <option key={unit} value={unit}>
+                                  {t(`units.${unit}`)}
+                                </option>
+                              ))}
+                            </select>
+                          </label>
+
+                          <button
+                            className="panel-icon-btn panel-ingredient-delete-btn"
+                            type="button"
+                            aria-label={t('preferences.deleteIngredient')}
+                            onClick={() =>
+                              deleteRecipeIngredientRow(ingredientIndex)
+                            }
+                          >
+                            <TrashIcon aria-hidden="true" />
+                          </button>
+                        </div>
+                      )
+                    })}
+                  </div>
+                  {hasInvalidIngredientQuantity && (
+                    <p className="panel-field-error">
+                      {t('preferences.invalidIngredientQuantity')}
+                    </p>
+                  )}
+                  <button
+                    className="panel-add-ingredient-btn"
+                    type="button"
+                    onClick={addRecipeIngredientRow}
+                  >
+                    <PlusIcon aria-hidden="true" />
+                    {t('preferences.addIngredient')}
+                  </button>
+                </div>
 
                 <button
                   className="panel-add-btn"
                   type="button"
-                  disabled={!recipeName.trim()}
+                  disabled={!recipeName.trim() || hasInvalidIngredientQuantity}
                   onClick={handleAddRecipe}
                 >
                   <PlusIcon aria-hidden="true" />
@@ -355,30 +555,47 @@ export function PreferencesPanel({
                 </div>
               ) : (
                 <div className="panel-recipe-list">
-                  {draftPrefs.customRecipes.map((recipe, recipeIndex) => (
-                    <article
-                      className="panel-recipe-card"
-                      key={`${recipe.name}-${recipeIndex}`}
-                    >
-                      <div className="panel-recipe-copy">
-                        <h4>{recipe.name}</h4>
-                        <p>
-                          {recipe.description || t('preferences.noRecipeNotes')}
-                        </p>
-                      </div>
+                  {draftPrefs.customRecipes.map((recipe, recipeIndex) => {
+                    const { ingredients } = recipe
 
-                      <button
-                        className="panel-icon-btn"
-                        type="button"
-                        aria-label={t('preferences.deleteRecipe', {
-                          name: recipe.name,
-                        })}
-                        onClick={() => handleDeleteRecipe(recipeIndex)}
+                    return (
+                      <article
+                        className="panel-recipe-card"
+                        key={`${recipe.name}-${recipeIndex}`}
                       >
-                        <TrashIcon aria-hidden="true" />
-                      </button>
-                    </article>
-                  ))}
+                        <div className="panel-recipe-copy">
+                          <h4>{recipe.name}</h4>
+                          {ingredients.length > 0 ? (
+                            <ul className="panel-ingredient-list">
+                              {ingredients.map((ingredient) => (
+                                <li
+                                  className="panel-ingredient-chip"
+                                  key={`${ingredient.name}-${ingredient.quantity ?? ''}-${ingredient.unit ?? ''}`}
+                                >
+                                  {formatRecipeIngredient(ingredient, (unit) =>
+                                    t(`units.${unit}`),
+                                  )}
+                                </li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <p>{t('preferences.noRecipeIngredients')}</p>
+                          )}
+                        </div>
+
+                        <button
+                          className="panel-icon-btn"
+                          type="button"
+                          aria-label={t('preferences.deleteRecipe', {
+                            name: recipe.name,
+                          })}
+                          onClick={() => handleDeleteRecipe(recipeIndex)}
+                        >
+                          <TrashIcon aria-hidden="true" />
+                        </button>
+                      </article>
+                    )
+                  })}
                 </div>
               )}
             </section>

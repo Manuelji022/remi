@@ -318,7 +318,8 @@
 }
 
 .panel-field input,
-.panel-field textarea {
+.panel-field textarea,
+.panel-field select {
   width: 100%;
   border: 1px solid rgba(193, 168, 120, 0.3);
   border-radius: 14px;
@@ -334,6 +335,78 @@
 .panel-field textarea {
   min-height: 92px;
   resize: vertical;
+}
+
+.panel-ingredient-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.panel-ingredient-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 86px 118px 40px;
+  align-items: end;
+  gap: 8px;
+}
+
+.panel-ingredient-row label {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.panel-ingredient-row label span {
+  color: #9a7c5a;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.panel-ingredient-row input,
+.panel-ingredient-row select {
+  min-height: 40px;
+  padding: 9px 10px;
+  border-radius: 12px;
+}
+
+.panel-ingredient-row input[aria-invalid='true'] {
+  border-color: rgba(170, 64, 54, 0.65);
+}
+
+.panel-ingredient-delete-btn {
+  width: 40px;
+  height: 40px;
+}
+
+.panel-add-ingredient-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: fit-content;
+  margin-top: 12px;
+  border: 1px solid rgba(123, 148, 96, 0.28);
+  border-radius: 999px;
+  padding: 9px 13px;
+  background: rgba(123, 148, 96, 0.1);
+  color: #506538;
+  font-size: 0.82rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.panel-add-ingredient-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+.panel-field-error {
+  margin: 8px 0 0;
+  color: #aa4036;
+  font-size: 0.8rem;
+  font-weight: 700;
 }
 
 .panel-add-btn {
@@ -376,6 +449,25 @@
 
 .panel-recipe-copy {
   min-width: 0;
+}
+
+.panel-ingredient-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.panel-ingredient-chip {
+  border: 1px solid rgba(123, 148, 96, 0.22);
+  border-radius: 999px;
+  padding: 5px 10px;
+  background: rgba(123, 148, 96, 0.1);
+  color: #506538;
+  font-size: 0.78rem;
+  font-weight: 700;
 }
 
 .panel-footer {
@@ -422,6 +514,7 @@
 .panel-primary-btn:hover:not(:disabled),
 .panel-secondary-btn:hover,
 .panel-add-btn:hover:not(:disabled),
+.panel-add-ingredient-btn:hover,
 .panel-context-pill:hover,
 .panel-scope-pill:hover:not(:disabled) {
   transform: translateY(-1px);
@@ -440,15 +533,18 @@
 .panel-primary-btn:focus-visible,
 .panel-secondary-btn:focus-visible,
 .panel-add-btn:focus-visible,
+.panel-add-ingredient-btn:focus-visible,
 .panel-field input:focus-visible,
 .panel-field textarea:focus-visible,
+.panel-field select:focus-visible,
 .panel-overlay:focus-visible {
   outline: 2px solid rgba(181, 113, 58, 0.85);
   outline-offset: 2px;
 }
 
 .panel-field input:focus-visible,
-.panel-field textarea:focus-visible {
+.panel-field textarea:focus-visible,
+.panel-field select:focus-visible {
   border-color: rgba(181, 113, 58, 0.55);
   box-shadow: 0 0 0 4px rgba(181, 113, 58, 0.1);
 }
@@ -468,5 +564,13 @@
 
   .panel-footer-actions {
     flex-direction: column;
+  }
+
+  .panel-ingredient-row {
+    grid-template-columns: minmax(0, 1fr) 84px 40px;
+  }
+
+  .panel-ingredient-unit-field {
+    grid-column: 1 / -1;
   }
 }
