@@ -1,4 +1,5 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link, useLocation } from '@tanstack/react-router'
+import { Globe2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import type { CSSProperties } from 'react'
 import './weekly-menu-planner.css'
@@ -34,7 +35,7 @@ import {
   getPlanningScopeForDay,
 } from '#/data/types'
 import type { ChecklistState, Preferences, WeeklyMenu } from '#/data/types'
-import { useI18n } from '#/i18n'
+import { getLocalizedPath, useI18n } from '#/i18n'
 
 type MainTabId = 'menu' | 'ingredients'
 
@@ -44,6 +45,7 @@ export const Route = createFileRoute('/weekly-menu-planner')({
 
 export function WeeklyMenuPlanner() {
   const { locale, t, formatWeekRange } = useI18n()
+  const location = useLocation()
   const [isGenerating, setIsGenerating] = useState(false)
   const [currentMenuIndex, setCurrentMenuIndex] = useState(-1)
   const [animationKey, setAnimationKey] = useState(0)
@@ -62,6 +64,7 @@ export function WeeklyMenuPlanner() {
   const generatedMenu =
     currentMenuIndex >= 0 ? menuSets[currentMenuIndex] : null
   const weekRange = formatWeekRange()
+  const alternateLocale = locale === 'en' ? 'es' : 'en'
   const activePreferenceCount = getActivePreferencesBadgeCount(savedPreferences)
   const neededItems = getNeededItemsCount(shoppingChecklist)
 
@@ -102,6 +105,27 @@ export function WeeklyMenuPlanner() {
     <main className="planner-page">
       <section className="planner-shell" aria-labelledby="planner-title">
         <div className="planner-hero">
+          <div className="planner-card-meta">
+            <p className="planner-week-pill">
+              {t('planner.weekKicker', {
+                week: getWeekNumber(),
+                start: weekRange.start,
+                end: weekRange.end,
+              })}
+            </p>
+            <Link
+              aria-label={`${t('header.languageLabel')}: ${
+                alternateLocale === 'en'
+                  ? t('header.languageEn')
+                  : t('header.languageEs')
+              }`}
+              className="planner-language-switcher"
+              to={getLocalizedPath(location.pathname, alternateLocale)}
+            >
+              <Globe2 aria-hidden="true" />
+              <span>{locale === 'en' ? 'ES' : 'EN'}</span>
+            </Link>
+          </div>
 
           <div className="planner-actions" aria-label={t('planner.actionsLabel')}>
             <button
@@ -263,9 +287,6 @@ function MenuTab({
   return (
     <div className="planner-menu-tab" key={animationKey}>
       <div className="planner-section-heading">
-        <div>
-          <p className="planner-section-kicker">{t('planner.currentWeek')}</p>
-        </div>
       </div>
 
       <div className="planner-day-grid">
