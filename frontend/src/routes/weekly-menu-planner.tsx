@@ -265,9 +265,7 @@ function MenuTab({
       <div className="planner-section-heading">
         <div>
           <p className="planner-section-kicker">{t('planner.currentWeek')}</p>
-          <h2>{t('planner.glanceTitle')}</h2>
         </div>
-        <p>{t('planner.glanceBody')}</p>
       </div>
 
       <div className="planner-day-grid">

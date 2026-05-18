@@ -13,7 +13,7 @@
   padding: 0.65rem clamp(0.8rem, 2vw, 1.25rem);
   border: 3px solid var(--text-color);
   border-radius: 1rem;
-  background-color: #f4efe0;
+  background-color: #fff8e6;
   box-shadow: 4px 4px 0 var(--highlight-color);
 }
 

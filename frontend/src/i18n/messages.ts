@@ -46,7 +46,6 @@ export const messages = {
     'planner.emptyBody':
       'Start with a generated mock menu. The next phases will make this view richer, but the page state is already wired end to end.',
     'planner.currentWeek': 'Current Calendar Week',
-    'planner.glanceTitle': 'Lunch and dinner at a glance',
     'planner.glanceBody':
       'Both Meal Slots stay visible so later phases can distinguish home-planned and unplanned slots cleanly.',
     'planner.reasoningKicker': 'Mock AI reasoning',
@@ -177,7 +176,6 @@ export const messages = {
     'planner.emptyBody':
       'Empieza con un menú mock generado. Las siguientes fases enriquecerán esta vista, pero el estado de la página ya está conectado de principio a fin.',
     'planner.currentWeek': 'Semana Calendario actual',
-    'planner.glanceTitle': 'Comida y cena de un vistazo',
     'planner.glanceBody':
       'Ambos Espacios de Comida permanecen visibles para que fases posteriores distingan claramente comidas planificadas en casa y espacios sin planificar.',
     'planner.reasoningKicker': 'Razonamiento mock de IA',

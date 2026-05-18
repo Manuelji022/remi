@@ -12,7 +12,7 @@
   padding: 28px;
   border: 1px solid rgba(138, 112, 96, 0.18);
   border-radius: 8px;
-  background: var(--card-color);
+  background: #fff8e6;
   box-shadow: 0 24px 80px rgba(62, 48, 35, 0.12);
 }
 
@@ -43,7 +43,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
-  justify-content: flex-end;
+  justify-content: center;
 }
 
 .planner-primary-btn,
@@ -66,8 +66,8 @@
 }
 
 .planner-primary-btn {
-  background: #1f3025;
-  color: #fffdf8;
+  background: var(--highlight-color);
+  color: var(--text-color);
 }
 
 .planner-primary-btn:hover:not(:disabled),
