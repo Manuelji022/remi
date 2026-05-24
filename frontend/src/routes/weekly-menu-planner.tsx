@@ -1,5 +1,6 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { useState } from 'react'
+import { createFileRoute, Link, useLocation } from '@tanstack/react-router'
+import { Globe2 } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import type { CSSProperties } from 'react'
 import './weekly-menu-planner.css'
 import { DayCard, LoadingDots, MainTab, PreferencesPanel } from '#/components'
@@ -15,19 +16,18 @@ import {
 } from '#/components/icons'
 import {
   DAYS,
-  getWeekDateRange,
   getWeekNumber,
   isWeekend,
 } from '#/data/constants'
 import {
   CATEGORY_META,
-  INGREDIENT_SETS,
   createChecklistState,
+  getIngredientSets,
   getIngredientChecklistKey,
   getNeededItemsCount,
 } from '#/data/ingredients'
 import type { IngredientCategory } from '#/data/ingredients'
-import { MENU_SETS } from '#/data/menu'
+import { getMenuSets } from '#/data/menu'
 import {
   getActivePreferencesBadgeCount,
   getDayContextForDay,
@@ -35,6 +35,7 @@ import {
   getPlanningScopeForDay,
 } from '#/data/types'
 import type { ChecklistState, Preferences, WeeklyMenu } from '#/data/types'
+import { getLocalizedPath, useI18n } from '#/i18n'
 
 type MainTabId = 'menu' | 'ingredients'
 
@@ -42,8 +43,9 @@ export const Route = createFileRoute('/weekly-menu-planner')({
   component: WeeklyMenuPlanner,
 })
 
-function WeeklyMenuPlanner() {
-  const [generatedMenu, setGeneratedMenu] = useState<WeeklyMenu | null>(null)
+export function WeeklyMenuPlanner() {
+  const { locale, t, formatWeekRange } = useI18n()
+  const location = useLocation()
   const [isGenerating, setIsGenerating] = useState(false)
   const [currentMenuIndex, setCurrentMenuIndex] = useState(-1)
   const [animationKey, setAnimationKey] = useState(0)
@@ -57,9 +59,20 @@ function WeeklyMenuPlanner() {
   )
   const [shoppingChecklist, setShoppingChecklist] = useState<ChecklistState>({})
 
-  const weekRange = getWeekDateRange()
+  const menuSets = getMenuSets(locale)
+  const ingredientSets = getIngredientSets(locale)
+  const generatedMenu =
+    currentMenuIndex >= 0 ? menuSets[currentMenuIndex] : null
+  const weekRange = formatWeekRange()
+  const alternateLocale = locale === 'en' ? 'es' : 'en'
   const activePreferenceCount = getActivePreferencesBadgeCount(savedPreferences)
   const neededItems = getNeededItemsCount(shoppingChecklist)
+
+  useEffect(() => {
+    if (currentMenuIndex < 0) return
+
+    setShoppingChecklist(createChecklistState(ingredientSets[currentMenuIndex]))
+  }, [currentMenuIndex, ingredientSets, locale])
 
   function handleGenerateMenu() {
     if (isGenerating) return
@@ -68,11 +81,10 @@ function WeeklyMenuPlanner() {
     setActiveTab('menu')
 
     window.setTimeout(() => {
-      const nextMenuIndex = (currentMenuIndex + 1) % MENU_SETS.length
+      const nextMenuIndex = (currentMenuIndex + 1) % menuSets.length
 
-      setGeneratedMenu(MENU_SETS[nextMenuIndex])
       setCurrentMenuIndex(nextMenuIndex)
-      setShoppingChecklist(createChecklistState(INGREDIENT_SETS[nextMenuIndex]))
+      setShoppingChecklist(createChecklistState(ingredientSets[nextMenuIndex]))
       setAnimationKey((key) => key + 1)
       setIsGenerating(false)
     }, 700)
@@ -93,27 +105,36 @@ function WeeklyMenuPlanner() {
     <main className="planner-page">
       <section className="planner-shell" aria-labelledby="planner-title">
         <div className="planner-hero">
-          <div className="planner-copy">
-            <p className="planner-kicker">
-              <CalendarIcon aria-hidden="true" />
-              Week {getWeekNumber()} · {weekRange.start} to {weekRange.end}
+          <div className="planner-card-meta">
+            <p className="planner-week-pill">
+              {t('planner.weekKicker', {
+                week: getWeekNumber(),
+                start: weekRange.start,
+                end: weekRange.end,
+              })}
             </p>
-            <h1 id="planner-title">Weekly Menu Planner</h1>
-            <p className="planner-intro">
-              Generate a mock Weekly Menu for the current Calendar Week, tune
-              preferences, and prepare the shopping checklist from the same
-              screen.
-            </p>
+            <Link
+              aria-label={`${t('header.languageLabel')}: ${
+                alternateLocale === 'en'
+                  ? t('header.languageEn')
+                  : t('header.languageEs')
+              }`}
+              className="planner-language-switcher"
+              to={getLocalizedPath(location.pathname, alternateLocale)}
+            >
+              <Globe2 aria-hidden="true" />
+              <span>{locale === 'en' ? 'ES' : 'EN'}</span>
+            </Link>
           </div>
 
-          <div className="planner-actions" aria-label="Planner actions">
+          <div className="planner-actions" aria-label={t('planner.actionsLabel')}>
             <button
               className="planner-secondary-btn"
               type="button"
               onClick={handleOpenPreferences}
             >
               <SettingsIcon aria-hidden="true" />
-              Preferences
+              {t('planner.preferences')}
               {activePreferenceCount > 0 && (
                 <span className="planner-btn-badge">
                   {activePreferenceCount}
@@ -128,12 +149,14 @@ function WeeklyMenuPlanner() {
             >
               {isGenerating ? (
                 <>
-                  Generating <LoadingDots />
+                  {t('planner.generating')} <LoadingDots />
                 </>
               ) : (
                 <>
                   <SparkleIcon aria-hidden="true" />
-                  {generatedMenu ? 'Regenerate menu' : 'Generate menu'}
+                  {generatedMenu
+                    ? t('planner.regenerateMenu')
+                    : t('planner.generateMenu')}
                 </>
               )}
             </button>
@@ -151,7 +174,10 @@ function WeeklyMenuPlanner() {
           />
           {generatedMenu && (
             <p className="planner-state-note">
-              Mock set {currentMenuIndex + 1} of {MENU_SETS.length}
+              {t('planner.mockSet', {
+                current: currentMenuIndex + 1,
+                total: menuSets.length,
+              })}
             </p>
           )}
         </div>
@@ -169,14 +195,16 @@ function WeeklyMenuPlanner() {
         {activeTab === 'ingredients' && (
           <ShoppingTab
             checklist={shoppingChecklist}
-            currentMenuIndex={currentMenuIndex}
             generatedMenu={generatedMenu}
+            ingredientSet={
+              currentMenuIndex >= 0 ? ingredientSets[currentMenuIndex] : undefined
+            }
             isGenerating={isGenerating}
             neededItems={neededItems}
             onResetChecklist={() => {
               if (currentMenuIndex < 0) return
               setShoppingChecklist(
-                createChecklistState(INGREDIENT_SETS[currentMenuIndex]),
+                createChecklistState(ingredientSets[currentMenuIndex]),
               )
             }}
             onToggleChecklistItem={(ingredientKey) => {
@@ -226,12 +254,14 @@ function MenuTab({
   onGenerateMenu,
   savedPreferences,
 }: MenuTabProps) {
+  const { t } = useI18n()
+
   if (isGenerating) {
     return (
       <div className="planner-empty-state" role="status" aria-live="polite">
         <SparkleIcon aria-hidden="true" />
-        <h2>Building your Weekly Menu</h2>
-        <p>Balancing lunch, dinner, variety, and your saved preferences.</p>
+        <h2>{t('planner.buildingTitle')}</h2>
+        <p>{t('planner.buildingBody')}</p>
       </div>
     )
   }
@@ -240,18 +270,15 @@ function MenuTab({
     return (
       <div className="planner-empty-state">
         <SparkleIcon aria-hidden="true" />
-        <h2>No Weekly Menu yet</h2>
-        <p>
-          Start with a generated mock menu. The next phases will make this view
-          richer, but the page state is already wired end to end.
-        </p>
+        <h2>{t('planner.emptyTitle')}</h2>
+        <p>{t('planner.emptyBody')}</p>
         <button
           className="planner-primary-btn"
           type="button"
           onClick={onGenerateMenu}
         >
           <SparkleIcon aria-hidden="true" />
-          Generate menu
+          {t('planner.generateMenu')}
         </button>
       </div>
     )
@@ -260,14 +287,6 @@ function MenuTab({
   return (
     <div className="planner-menu-tab" key={animationKey}>
       <div className="planner-section-heading">
-        <div>
-          <p className="planner-section-kicker">Current Calendar Week</p>
-          <h2>Lunch and dinner at a glance</h2>
-        </div>
-        <p>
-          Both Meal Slots stay visible so later phases can distinguish
-          home-planned and unplanned slots cleanly.
-        </p>
       </div>
 
       <div className="planner-day-grid">
@@ -295,21 +314,14 @@ function MenuTab({
           <LeafIcon aria-hidden="true" />
         </div>
         <div>
-          <p className="planner-section-kicker">Mock AI reasoning</p>
-          <h2 id="reasoning-title">Why this Weekly Menu works</h2>
+          <p className="planner-section-kicker">
+            {t('planner.reasoningKicker')}
+          </p>
+          <h2 id="reasoning-title">{t('planner.reasoningTitle')}</h2>
           <ul>
-            <li>
-              Alternates lighter lunches with richer dinners so the week feels
-              varied without requiring a different cooking style every night.
-            </li>
-            <li>
-              Keeps both lunch and dinner visible for each day, even when future
-              preferences mark one slot as away from home.
-            </li>
-            <li>
-              Uses the selected mock set to prepare ingredient state for the
-              downstream shopping checklist.
-            </li>
+            <li>{t('planner.reasoningOne')}</li>
+            <li>{t('planner.reasoningTwo')}</li>
+            <li>{t('planner.reasoningThree')}</li>
           </ul>
         </div>
       </section>
@@ -319,8 +331,8 @@ function MenuTab({
 
 interface ShoppingTabProps {
   checklist: ChecklistState
-  currentMenuIndex: number
   generatedMenu: WeeklyMenu | null
+  ingredientSet?: ReturnType<typeof getIngredientSets>[number]
   isGenerating: boolean
   neededItems: number
   onResetChecklist: () => void
@@ -329,27 +341,25 @@ interface ShoppingTabProps {
 
 function ShoppingTab({
   checklist,
-  currentMenuIndex,
   generatedMenu,
+  ingredientSet,
   isGenerating,
   neededItems,
   onResetChecklist,
   onToggleChecklistItem,
 }: ShoppingTabProps) {
+  const { t } = useI18n()
+
   if (!generatedMenu || isGenerating) {
     return (
       <div className="planner-empty-state">
         <ShoppingCartIcon aria-hidden="true" />
-        <h2>Generate a Weekly Menu first</h2>
-        <p>
-          The shopping checklist is tied to the selected mock menu set and will
-          be expanded in the shopping-list phase.
-        </p>
+        <h2>{t('shopping.emptyTitle')}</h2>
+        <p>{t('shopping.emptyBody')}</p>
       </div>
     )
   }
 
-  const ingredientSet = INGREDIENT_SETS.at(currentMenuIndex)
   const totalItems = Object.keys(checklist).length
   const stockedItems = Object.values(checklist).filter(
     (item) => item.checked || item.inFridge,
@@ -361,8 +371,8 @@ function ShoppingTab({
     return (
       <div className="planner-empty-state">
         <ShoppingCartIcon aria-hidden="true" />
-        <h2>Shopping data unavailable</h2>
-        <p>Generate the Weekly Menu again to rebuild the ingredient list.</p>
+        <h2>{t('shopping.unavailableTitle')}</h2>
+        <p>{t('shopping.unavailableBody')}</p>
       </div>
     )
   }
@@ -371,17 +381,17 @@ function ShoppingTab({
     <div className="planner-shopping-tab">
       <div className="planner-shopping-header">
         <div>
-          <p className="planner-section-kicker">Shopping List</p>
-          <h2>Everything you need for this week</h2>
-          <p className="planner-shopping-helper">
-            Tick the items you already have. The rest becomes your shopping list
-            for the week.
-          </p>
+          <p className="planner-section-kicker">{t('shopping.kicker')}</p>
+          <h2>{t('shopping.title')}</h2>
+          <p className="planner-shopping-helper">{t('shopping.helper')}</p>
         </div>
 
         <div className="planner-shopping-actions">
           <div
-            aria-label={`${stockedItems} of ${totalItems} ingredients already in fridge`}
+            aria-label={t('shopping.progressLabel', {
+              stocked: stockedItems,
+              total: totalItems,
+            })}
             className="planner-progress-pill"
           >
             <div aria-hidden="true" className="planner-progress-track">
@@ -391,7 +401,10 @@ function ShoppingTab({
               />
             </div>
             <span>
-              {stockedItems}/{totalItems} in fridge
+              {t('shopping.progress', {
+                stocked: stockedItems,
+                total: totalItems,
+              })}
             </span>
           </div>
 
@@ -401,7 +414,7 @@ function ShoppingTab({
             onClick={onResetChecklist}
           >
             <RefreshIcon aria-hidden="true" />
-            Reset checklist
+            {t('shopping.reset')}
           </button>
         </div>
       </div>
@@ -410,11 +423,13 @@ function ShoppingTab({
         <section className="planner-summary-banner shopping" aria-live="polite">
           <ShoppingCartIcon aria-hidden="true" />
           <p>
-            You still need to buy{' '}
-            <strong>
-              {neededItems} item{neededItems === 1 ? '' : 's'}
-            </strong>{' '}
-            for this weekly menu.
+            {t('shopping.needToBuy', {
+              count: neededItems,
+              itemWord:
+                neededItems === 1
+                  ? t('shopping.itemSingular')
+                  : t('shopping.itemPlural'),
+            })}
           </p>
         </section>
       )}
@@ -422,7 +437,7 @@ function ShoppingTab({
       {neededItems === 0 && totalItems > 0 && (
         <section className="planner-summary-banner stocked" aria-live="polite">
           <CheckIcon aria-hidden="true" />
-          <p>Your fridge is stocked. Nothing left to buy this week.</p>
+          <p>{t('shopping.stocked')}</p>
         </section>
       )}
 
@@ -453,7 +468,7 @@ function ShoppingTab({
                 <div className="planner-ingredient-group-header">
                   <div className="planner-ingredient-group-title">
                     <span className="planner-ingredient-group-accent" />
-                    <h3>{meta.label}</h3>
+                    <h3>{t(`categories.${category}`)}</h3>
                   </div>
                   <span className="planner-ingredient-group-progress">
                     {stockedCount}/{ingredients.length}
@@ -499,7 +514,7 @@ function ShoppingTab({
                         {isStocked && (
                           <span className="planner-in-fridge-tag">
                             <FridgeIcon aria-hidden="true" />
-                            In fridge
+                            {t('shopping.inFridge')}
                           </span>
                         )}
                       </button>

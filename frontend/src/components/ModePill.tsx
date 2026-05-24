@@ -1,5 +1,7 @@
 import './pills.css'
 
+import { useI18n } from '#/i18n'
+
 interface ModePillProps {
   mode: 'office' | 'eatOut'
   selected: boolean
@@ -7,14 +9,15 @@ interface ModePillProps {
 }
 
 export function ModePill({ mode, selected, onClick }: ModePillProps) {
-  const labels = { office: 'Office', eatOut: 'Eat Out' }
+  const { t } = useI18n()
+
   return (
     <button
       className={`mode-pill ${selected ? 'selected' : ''}`}
       type="button"
       onClick={onClick}
     >
-      {labels[mode]}
+      {t(`contexts.${mode}`)}
     </button>
   )
 }

@@ -1,8 +1,14 @@
-import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
-import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
-import { TanStackDevtools } from '@tanstack/react-devtools'
+import {
+  HeadContent,
+  Scripts,
+  createRootRoute,
+  useLocation,
+} from '@tanstack/react-router'
 import Footer from '../components/Footer'
 import Header from '../components/Header'
+import { I18nProvider, getLocaleFromPathname } from '#/i18n'
+import { messages } from '#/i18n/messages'
+import { useEffect } from 'react'
 
 import appCss from '../styles.css?url'
 
@@ -31,15 +37,25 @@ export const Route = createRootRoute({
 })
 
 function RootDocument({ children }: { children: React.ReactNode }) {
+  const location = useLocation()
+  const locale = getLocaleFromPathname(location.pathname)
+
+  useEffect(() => {
+    document.title = messages[locale]['app.title']
+  }, [locale])
+
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
       <head>
         <HeadContent />
+        <title>{messages[locale]['app.title']}</title>
       </head>
       <body>
-        <Header />
-        {children}
-        <Footer />
+        <I18nProvider locale={locale}>
+          <Header />
+          {children}
+          <Footer />
+        </I18nProvider>
         <Scripts />
       </body>
     </html>

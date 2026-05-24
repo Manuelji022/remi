@@ -1,5 +1,7 @@
 import './main-tab.css'
 
+import { useI18n } from '#/i18n'
+
 interface MainTabProps {
   activeTab: 'menu' | 'ingredients'
   onTabChange: (tab: 'menu' | 'ingredients') => void
@@ -13,6 +15,8 @@ export function MainTab({
   neededItems,
   isIngredientsDisabled = false,
 }: MainTabProps) {
+  const { t } = useI18n()
+
   return (
     <div className="main-tab">
       <button
@@ -20,7 +24,7 @@ export function MainTab({
         type="button"
         onClick={() => onTabChange('menu')}
       >
-        Weekly Menu
+        {t('tabs.menu')}
       </button>
       <button
         className={`tab-btn ${activeTab === 'ingredients' ? 'active' : ''}`}
@@ -28,7 +32,7 @@ export function MainTab({
         disabled={isIngredientsDisabled}
         onClick={() => onTabChange('ingredients')}
       >
-        Shopping List
+        {t('tabs.ingredients')}
         {neededItems > 0 && <span className="badge">{neededItems}</span>}
       </button>
     </div>

@@ -3,6 +3,16 @@ import type { Day } from './constants'
 export type MealSlot = 'lunch' | 'dinner'
 export type PlanningScope = MealSlot | 'both'
 export type DayContext = 'office' | 'eatOut'
+export type IngredientUnit =
+  | 'unit'
+  | 'g'
+  | 'kg'
+  | 'ml'
+  | 'l'
+  | 'tbsp'
+  | 'tsp'
+  | 'can'
+  | 'pack'
 
 export interface Meal {
   name: string
@@ -16,15 +26,16 @@ export interface DayMeals {
 
 export type WeeklyMenu = Record<Day, DayMeals>
 
-export interface CustomRecipe {
+export interface CustomRecipeIngredient {
   name: string
-  ingredients: RecipeIngredient[]
-  planningScope: PlanningScope
+  quantity?: number
+  unit?: IngredientUnit
 }
 
-export interface RecipeIngredient {
+export interface CustomRecipe {
   name: string
-  quantity: string
+  slot: MealSlot
+  ingredients: CustomRecipeIngredient[]
 }
 
 export interface Preferences {

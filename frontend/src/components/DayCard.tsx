@@ -2,6 +2,7 @@ import './day-card.css'
 
 import type { Day } from '#/data/constants'
 import type { DayContext, Meal, MealSlot, PlanningScope } from '#/data/types'
+import { useI18n } from '#/i18n'
 
 interface DayCardProps {
   day: Day
@@ -12,16 +13,6 @@ interface DayCardProps {
   planningScope: PlanningScope
 }
 
-const SLOT_LABELS: Record<MealSlot, string> = {
-  lunch: 'Lunch',
-  dinner: 'Dinner',
-}
-
-const CONTEXT_LABELS: Record<DayContext, string> = {
-  office: 'Office',
-  eatOut: 'Eat out',
-}
-
 export function DayCard({
   day,
   isWeekend,
@@ -30,12 +21,13 @@ export function DayCard({
   dayContext,
   planningScope,
 }: DayCardProps) {
-  const dayContextLabel = dayContext ? CONTEXT_LABELS[dayContext] : null
+  const { t } = useI18n()
+  const dayContextLabel = dayContext ? t(`contexts.${dayContext}`) : null
 
   return (
     <article className={`day-card ${isWeekend ? 'weekend' : ''}`}>
       <div className="day-card-header">
-        <div className="day-name">{day}</div>
+        <div className="day-name">{t(`days.${day}`)}</div>
         {dayContextLabel && (
           <span className="day-context-badge">{dayContextLabel}</span>
         )}
@@ -72,23 +64,23 @@ function MealSlotDisplay({
   slot,
 }: MealSlotDisplayProps) {
   const isHomePlanned = planningScope === 'both' || planningScope === slot
+  const { t } = useI18n()
 
   return (
     <div className={`meal-slot ${isHomePlanned ? '' : 'unplanned'}`}>
-      <span className="meal-label">{SLOT_LABELS[slot]}</span>
+      <span className="meal-label">{t(`slots.${slot}`)}</span>
       {isHomePlanned && meal ? (
         <>
           <span className="meal-name">{meal.name}</span>
-          <span className="meal-description">{meal.description}</span>
         </>
       ) : (
         <>
-          <span className="meal-name">No home-planned meal</span>
-          <span className="meal-description">
+          <span className="meal-name">{t('meal.unplannedName')}</span>
             {dayContextLabel
-              ? `Covered by ${dayContextLabel.toLowerCase()} context.`
-              : 'Outside the current planning scope.'}
-          </span>
+              ? t('meal.coveredByContext', {
+                  context: dayContextLabel.toLowerCase(),
+                })
+              : t('meal.outsideScope')}
         </>
       )}
     </div>

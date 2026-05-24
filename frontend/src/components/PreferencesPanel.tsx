@@ -5,10 +5,12 @@ import { DAYS, isWeekend } from '#/data/constants'
 import type { Day } from '#/data/constants'
 import type {
   CustomRecipe,
+  CustomRecipeIngredient,
   DayContext,
+  IngredientUnit,
+  MealSlot,
   PlanningScope,
   Preferences,
-  RecipeIngredient,
 } from '#/data/types'
 import {
   CalendarIcon,
@@ -19,8 +21,14 @@ import {
   TrashIcon,
   UtensilsIcon,
 } from '#/components/icons'
+import { useI18n } from '#/i18n'
 
 type PreferencesPanelTab = 'schedule' | 'recipes'
+type RecipeIngredientDraft = {
+  name: string
+  quantity: string
+  unit: IngredientUnit | ''
+}
 
 interface PreferencesPanelProps {
   isOpen: boolean
@@ -30,21 +38,70 @@ interface PreferencesPanelProps {
 }
 
 const PLANNING_SCOPE_OPTIONS: PlanningScope[] = ['lunch', 'dinner', 'both']
-const PLANNING_SCOPE_LABELS: Record<PlanningScope, string> = {
-  lunch: 'Lunch',
-  dinner: 'Dinner',
-  both: 'Both',
-}
-
-const RECIPE_USAGE_LABELS: Record<PlanningScope, string> = {
-  lunch: 'Lunch',
-  dinner: 'Dinner',
-  both: 'Lunch and dinner',
-}
-
-const EMPTY_RECIPE_INGREDIENT: RecipeIngredient = {
+const RECIPE_SLOT_OPTIONS: MealSlot[] = ['lunch', 'dinner']
+const INGREDIENT_UNITS: IngredientUnit[] = [
+  'unit',
+  'g',
+  'kg',
+  'ml',
+  'l',
+  'tbsp',
+  'tsp',
+  'can',
+  'pack',
+]
+const EMPTY_RECIPE_INGREDIENT: RecipeIngredientDraft = {
   name: '',
   quantity: '',
+  unit: '',
+}
+
+function getEmptyRecipeIngredient(): RecipeIngredientDraft {
+  return { ...EMPTY_RECIPE_INGREDIENT }
+}
+
+function buildRecipeIngredients(
+  recipeIngredients: RecipeIngredientDraft[],
+): CustomRecipeIngredient[] {
+  return recipeIngredients
+    .map((ingredient) => {
+      const name = ingredient.name.trim()
+      const quantity = ingredient.quantity.trim()
+
+      if (!name) return null
+
+      return {
+        name,
+        ...(quantity ? { quantity: Number(quantity) } : {}),
+        ...(ingredient.unit ? { unit: ingredient.unit } : {}),
+      }
+    })
+    .filter((ingredient): ingredient is CustomRecipeIngredient =>
+      Boolean(ingredient),
+    )
+}
+
+function hasInvalidRecipeIngredientQuantity(
+  recipeIngredients: RecipeIngredientDraft[],
+): boolean {
+  return recipeIngredients.some((ingredient) => {
+    const quantity = ingredient.quantity.trim()
+
+    return (
+      quantity !== '' &&
+      (!Number.isFinite(Number(quantity)) || Number(quantity) < 0)
+    )
+  })
+}
+
+function formatRecipeIngredient(
+  ingredient: CustomRecipeIngredient,
+  getUnitLabel: (unit: IngredientUnit) => string,
+): string {
+  const quantity = ingredient.quantity == null ? '' : `${ingredient.quantity} `
+  const unit = ingredient.unit ? `${getUnitLabel(ingredient.unit)} ` : ''
+
+  return `${quantity}${unit}${ingredient.name}`
 }
 
 function getBlockedPlanningScopes(
@@ -71,26 +128,27 @@ export function PreferencesPanel({
   savedPrefs,
   onSave,
 }: PreferencesPanelProps) {
-  const [draftPrefs, setDraftPrefs] = useState<Preferences>(() =>
-    normalizePreferences(savedPrefs),
-  )
+  const { t } = useI18n()
+  const [draftPrefs, setDraftPrefs] = useState<Preferences>(savedPrefs)
   const [activeTab, setActiveTab] = useState<PreferencesPanelTab>('schedule')
   const [recipeName, setRecipeName] = useState('')
-  const [recipePlanningScope, setRecipePlanningScope] =
-    useState<PlanningScope>('both')
+  const [recipeSlot, setRecipeSlot] = useState<MealSlot>('dinner')
   const [recipeIngredients, setRecipeIngredients] = useState<
-    RecipeIngredient[]
-  >([{ ...EMPTY_RECIPE_INGREDIENT }])
+    RecipeIngredientDraft[]
+  >([getEmptyRecipeIngredient()])
   const recipeNameId = useId()
+  const recipeIngredientsId = useId()
+  const hasInvalidIngredientQuantity =
+    hasInvalidRecipeIngredientQuantity(recipeIngredients)
 
   useEffect(() => {
     if (!isOpen) return
 
-    setDraftPrefs(normalizePreferences(savedPrefs))
+    setDraftPrefs(savedPrefs)
     setActiveTab('schedule')
     setRecipeName('')
-    setRecipePlanningScope('both')
-    setRecipeIngredients([{ ...EMPTY_RECIPE_INGREDIENT }])
+    setRecipeSlot('dinner')
+    setRecipeIngredients([getEmptyRecipeIngredient()])
   }, [isOpen, savedPrefs])
 
   const hasUnsavedChanges = useMemo(
@@ -138,19 +196,13 @@ export function PreferencesPanel({
 
   function handleAddRecipe() {
     const name = recipeName.trim()
-    const ingredients = recipeIngredients
-      .map((ingredient) => ({
-        name: ingredient.name.trim(),
-        quantity: ingredient.quantity.trim(),
-      }))
-      .filter((ingredient) => ingredient.name)
 
-    if (!name || ingredients.length === 0) return
+    if (!name || hasInvalidIngredientQuantity) return
 
     const nextRecipe: CustomRecipe = {
       name,
-      ingredients,
-      planningScope: recipePlanningScope,
+      slot: recipeSlot,
+      ingredients: buildRecipeIngredients(recipeIngredients),
     }
 
     setDraftPrefs({
@@ -159,17 +211,17 @@ export function PreferencesPanel({
     })
 
     setRecipeName('')
-    setRecipePlanningScope('both')
-    setRecipeIngredients([{ ...EMPTY_RECIPE_INGREDIENT }])
+    setRecipeSlot('dinner')
+    setRecipeIngredients([getEmptyRecipeIngredient()])
   }
 
   function updateRecipeIngredient(
     ingredientIndex: number,
-    field: keyof RecipeIngredient,
+    field: keyof RecipeIngredientDraft,
     value: string,
   ) {
-    setRecipeIngredients((currentIngredients) =>
-      currentIngredients.map((ingredient, index) =>
+    setRecipeIngredients(
+      recipeIngredients.map((ingredient, index) =>
         index === ingredientIndex
           ? { ...ingredient, [field]: value }
           : ingredient,
@@ -177,20 +229,19 @@ export function PreferencesPanel({
     )
   }
 
-  function addRecipeIngredient() {
-    setRecipeIngredients((currentIngredients) => [
-      ...currentIngredients,
-      { ...EMPTY_RECIPE_INGREDIENT },
-    ])
+  function addRecipeIngredientRow() {
+    setRecipeIngredients([...recipeIngredients, getEmptyRecipeIngredient()])
   }
 
-  function deleteRecipeIngredient(ingredientIndex: number) {
-    setRecipeIngredients((currentIngredients) => {
-      if (currentIngredients.length === 1)
-        return [{ ...EMPTY_RECIPE_INGREDIENT }]
+  function deleteRecipeIngredientRow(ingredientIndex: number) {
+    if (recipeIngredients.length === 1) {
+      setRecipeIngredients([getEmptyRecipeIngredient()])
+      return
+    }
 
-      return currentIngredients.filter((_, index) => index !== ingredientIndex)
-    })
+    setRecipeIngredients(
+      recipeIngredients.filter((_, index) => index !== ingredientIndex),
+    )
   }
 
   function handleDeleteRecipe(recipeIndex: number) {
@@ -207,7 +258,7 @@ export function PreferencesPanel({
       <button
         className="panel-overlay"
         type="button"
-        aria-label="Close preferences panel"
+        aria-label={t('preferences.close')}
         onClick={onClose}
       />
 
@@ -221,17 +272,14 @@ export function PreferencesPanel({
           <div>
             <p className="panel-kicker">
               <SettingsIcon aria-hidden="true" />
-              Meal planning
+              {t('preferences.kicker')}
             </p>
-            <h2 id="preferences-panel-title">Preferences</h2>
-            <p className="panel-subtitle">
-              Tailor the weekly menu to your week
-            </p>
+            <h2 id="preferences-panel-title">{t('preferences.title')}</h2>
           </div>
           <button
             className="panel-close-btn"
             type="button"
-            aria-label="Close preferences panel"
+            aria-label={t('preferences.close')}
             onClick={onClose}
           >
             <CloseIcon aria-hidden="true" />
@@ -241,18 +289,18 @@ export function PreferencesPanel({
         <div
           className="panel-tablist"
           role="tablist"
-          aria-label="Preferences sections"
+          aria-label={t('preferences.sections')}
         >
           <PanelTabButton
             id="schedule"
             isActive={activeTab === 'schedule'}
-            label="Weekly Schedule"
+            label={t('preferences.weeklySchedule')}
             onClick={() => setActiveTab('schedule')}
           />
           <PanelTabButton
             id="recipes"
             isActive={activeTab === 'recipes'}
-            label="My Recipes"
+            label={t('preferences.myRecipes')}
             onClick={() => setActiveTab('recipes')}
           />
         </div>
@@ -268,13 +316,12 @@ export function PreferencesPanel({
               <div className="panel-section-copy">
                 <p className="panel-section-kicker">
                   <CalendarIcon aria-hidden="true" />
-                  Weekly schedule
+                  {t('preferences.scheduleKicker')}
                 </p>
-                <h3 id="preferences-schedule-title">Plan around each day</h3>
-                <p>
-                  Mark office or eat-out days, then choose whether lunch,
-                  dinner, or both still need planning at home.
-                </p>
+                <h3 id="preferences-schedule-title">
+                  {t('preferences.scheduleTitle')}
+                </h3>
+                <p>{t('preferences.scheduleBody')}</p>
               </div>
 
               <div className="panel-day-list">
@@ -290,22 +337,26 @@ export function PreferencesPanel({
                     >
                       <div className="panel-day-header">
                         <div>
-                          <h4>{day}</h4>
+                          <h4>{t(`days.${day}`)}</h4>
                           <p>
                             {dayContext
                               ? dayContext === 'office'
-                                ? 'Office day'
-                                : 'Eating out'
-                              : 'No day context selected'}
+                                ? t('dayContext.officeDay')
+                                : t('dayContext.eatingOut')
+                              : t('dayContext.none')}
                           </p>
                         </div>
                         {isWeekend(day) && (
-                          <span className="panel-day-badge">Weekend</span>
+                          <span className="panel-day-badge">
+                            {t('common.weekend')}
+                          </span>
                         )}
                       </div>
 
                       <div className="panel-control-group">
-                        <span className="panel-control-label">Context</span>
+                        <span className="panel-control-label">
+                          {t('preferences.context')}
+                        </span>
                         <div className="panel-pill-row">
                           <DayContextPill
                             context="office"
@@ -322,7 +373,7 @@ export function PreferencesPanel({
 
                       <div className="panel-control-group">
                         <span className="panel-control-label">
-                          Plan at home
+                          {t('preferences.planAtHome')}
                         </span>
                         <div className="panel-pill-row">
                           {PLANNING_SCOPE_OPTIONS.map((scope) => {
@@ -333,7 +384,11 @@ export function PreferencesPanel({
                                 isDisabled={isBlocked}
                                 isSelected={planningScope === scope}
                                 key={scope}
-                                label={PLANNING_SCOPE_LABELS[scope]}
+                                label={
+                                  scope === 'both'
+                                    ? t('scopes.both')
+                                    : t(`slots.${scope}`)
+                                }
                                 onClick={() => updatePlanningScope(day, scope)}
                               />
                             )
@@ -355,162 +410,220 @@ export function PreferencesPanel({
               <div className="panel-section-copy">
                 <p className="panel-section-kicker">
                   <PlusIcon aria-hidden="true" />
-                  My recipes
+                  {t('preferences.recipesKicker')}
                 </p>
                 <h3 id="preferences-recipes-title">
-                  Save recipes to reuse later
+                  {t('preferences.recipesTitle')}
                 </h3>
-                <p>
-                  Add favorite meals with ingredients and when they work best.
-                </p>
+                <p>{t('preferences.recipesBody')}</p>
               </div>
 
               <div className="panel-recipe-form">
                 <label className="panel-field">
-                  <span>Recipe name</span>
+                  <span>{t('preferences.recipeName')}</span>
                   <input
                     id={recipeNameId}
                     name="recipeName"
                     onChange={(event) => setRecipeName(event.target.value)}
-                    placeholder="Ex. Lemon chickpea pasta"
+                    placeholder={t('preferences.recipeNamePlaceholder')}
                     type="text"
                     value={recipeName}
                   />
                 </label>
 
-                <div className="panel-control-group">
-                  <span className="panel-control-label">Use for</span>
-                  <div className="panel-pill-row">
-                    {PLANNING_SCOPE_OPTIONS.map((scope) => (
-                      <PlanningScopePill
-                        isDisabled={false}
-                        isSelected={recipePlanningScope === scope}
-                        key={scope}
-                        label={PLANNING_SCOPE_LABELS[scope]}
-                        onClick={() => setRecipePlanningScope(scope)}
-                      />
+                <div className="panel-field">
+                  <span>{t('preferences.recipeSlot')}</span>
+                  <div
+                    className="panel-pill-row"
+                    aria-label={t('preferences.recipeSlotHelp')}
+                    role="group"
+                  >
+                    {RECIPE_SLOT_OPTIONS.map((slot) => (
+                      <button
+                        className={`panel-scope-pill ${recipeSlot === slot ? 'selected' : ''}`}
+                        key={slot}
+                        type="button"
+                        onClick={() => setRecipeSlot(slot)}
+                      >
+                        {t(`slots.${slot}`)}
+                      </button>
                     ))}
                   </div>
                 </div>
 
-                <div className="panel-control-group">
-                  <span className="panel-control-label">Ingredients</span>
-                  <div className="panel-ingredient-editor">
-                    {recipeIngredients.map((ingredient, ingredientIndex) => (
-                      <div
-                        className="panel-ingredient-row"
-                        key={ingredientIndex}
-                      >
-                        <label className="panel-field panel-quantity-field">
-                          <span>Quantity</span>
-                          <input
-                            name={`recipeIngredientQuantity-${ingredientIndex}`}
-                            onChange={(event) =>
-                              updateRecipeIngredient(
-                                ingredientIndex,
-                                'quantity',
-                                event.target.value,
-                              )
-                            }
-                            placeholder="Optional"
-                            type="text"
-                            value={ingredient.quantity}
-                          />
-                        </label>
-                        <label className="panel-field">
-                          <span>Ingredient</span>
-                          <input
-                            name={`recipeIngredientName-${ingredientIndex}`}
-                            onChange={(event) =>
-                              updateRecipeIngredient(
-                                ingredientIndex,
-                                'name',
-                                event.target.value,
-                              )
-                            }
-                            placeholder="Ex. lentils"
-                            type="text"
-                            value={ingredient.name}
-                          />
-                        </label>
-                        <button
-                          className="panel-icon-btn panel-ingredient-delete"
-                          type="button"
-                          aria-label="Delete ingredient"
-                          onClick={() =>
-                            deleteRecipeIngredient(ingredientIndex)
-                          }
+                <div className="panel-field">
+                  <span>{t('preferences.recipeIngredients')}</span>
+                  <div className="panel-ingredient-rows">
+                    {recipeIngredients.map((ingredient, ingredientIndex) => {
+                      const ingredientNameId = `${recipeIngredientsId}-name-${ingredientIndex}`
+                      const ingredientQuantityId = `${recipeIngredientsId}-quantity-${ingredientIndex}`
+                      const ingredientUnitId = `${recipeIngredientsId}-unit-${ingredientIndex}`
+                      const quantity = ingredient.quantity.trim()
+                      const hasInvalidQuantity =
+                        quantity !== '' &&
+                        (!Number.isFinite(Number(quantity)) ||
+                          Number(quantity) < 0)
+
+                      return (
+                        <div
+                          className="panel-ingredient-row"
+                          key={ingredientIndex}
                         >
-                          <TrashIcon aria-hidden="true" />
-                        </button>
-                      </div>
-                    ))}
+                          <label className="panel-ingredient-name-field">
+                            <span>{t('preferences.ingredientName')}</span>
+                            <input
+                              id={ingredientNameId}
+                              name={ingredientNameId}
+                              onChange={(event) =>
+                                updateRecipeIngredient(
+                                  ingredientIndex,
+                                  'name',
+                                  event.target.value,
+                                )
+                              }
+                              placeholder={t(
+                                'preferences.ingredientNamePlaceholder',
+                              )}
+                              type="text"
+                              value={ingredient.name}
+                            />
+                          </label>
+
+                          <label className="panel-ingredient-quantity-field">
+                            <span>{t('preferences.ingredientQuantity')}</span>
+                            <input
+                              aria-invalid={hasInvalidQuantity}
+                              id={ingredientQuantityId}
+                              min="0"
+                              name={ingredientQuantityId}
+                              onChange={(event) =>
+                                updateRecipeIngredient(
+                                  ingredientIndex,
+                                  'quantity',
+                                  event.target.value,
+                                )
+                              }
+                              placeholder="1"
+                              type="number"
+                              value={ingredient.quantity}
+                            />
+                          </label>
+
+                          <label className="panel-ingredient-unit-field">
+                            <span>{t('preferences.ingredientUnit')}</span>
+                            <select
+                              id={ingredientUnitId}
+                              name={ingredientUnitId}
+                              onChange={(event) =>
+                                updateRecipeIngredient(
+                                  ingredientIndex,
+                                  'unit',
+                                  event.target.value,
+                                )
+                              }
+                              value={ingredient.unit}
+                            >
+                              <option value="">
+                                {t('preferences.ingredientNoUnit')}
+                              </option>
+                              {INGREDIENT_UNITS.map((unit) => (
+                                <option key={unit} value={unit}>
+                                  {t(`units.${unit}`)}
+                                </option>
+                              ))}
+                            </select>
+                          </label>
+
+                          <button
+                            className="panel-icon-btn panel-ingredient-delete-btn"
+                            type="button"
+                            aria-label={t('preferences.deleteIngredient')}
+                            onClick={() =>
+                              deleteRecipeIngredientRow(ingredientIndex)
+                            }
+                          >
+                            <TrashIcon aria-hidden="true" />
+                          </button>
+                        </div>
+                      )
+                    })}
                   </div>
+                  {hasInvalidIngredientQuantity && (
+                    <p className="panel-field-error">
+                      {t('preferences.invalidIngredientQuantity')}
+                    </p>
+                  )}
                   <button
-                    className="panel-inline-add-btn"
+                    className="panel-add-ingredient-btn"
                     type="button"
-                    onClick={addRecipeIngredient}
+                    onClick={addRecipeIngredientRow}
                   >
                     <PlusIcon aria-hidden="true" />
-                    Add ingredient
+                    {t('preferences.addIngredient')}
                   </button>
                 </div>
 
                 <button
                   className="panel-add-btn"
                   type="button"
-                  disabled={
-                    !recipeName.trim() ||
-                    !recipeIngredients.some((ingredient) =>
-                      ingredient.name.trim(),
-                    )
-                  }
+                  disabled={!recipeName.trim() || hasInvalidIngredientQuantity}
                   onClick={handleAddRecipe}
                 >
                   <PlusIcon aria-hidden="true" />
-                  Add recipe
+                  {t('preferences.addRecipe')}
                 </button>
               </div>
 
               {draftPrefs.customRecipes.length === 0 ? (
                 <div className="panel-empty-recipes">
-                  <p>No custom recipes saved yet.</p>
+                  <p>{t('preferences.emptyRecipes')}</p>
                 </div>
               ) : (
                 <div className="panel-recipe-list">
-                  {draftPrefs.customRecipes.map((recipe, recipeIndex) => (
-                    <article
-                      className="panel-recipe-card"
-                      key={`${recipe.name}-${recipeIndex}`}
-                    >
-                      <div className="panel-recipe-copy">
-                        <div className="panel-recipe-title-row">
-                          <h4>{recipe.name}</h4>
-                          <span className="panel-recipe-scope">
-                            {RECIPE_USAGE_LABELS[recipe.planningScope]}
-                          </span>
-                        </div>
-                        <ul className="panel-recipe-ingredients">
-                          {recipe.ingredients.map((ingredient, index) => (
-                            <li key={`${ingredient.name}-${index}`}>
-                              {[ingredient.quantity, ingredient.name]
-                                .filter(Boolean)
-                                .join(' ')}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
+                  {draftPrefs.customRecipes.map((recipe, recipeIndex) => {
+                    const { ingredients } = recipe
 
-                      <button
-                        className="panel-icon-btn"
-                        type="button"
-                        aria-label={`Delete ${recipe.name}`}
-                        onClick={() => handleDeleteRecipe(recipeIndex)}
+                    return (
+                      <article
+                        className="panel-recipe-card"
+                        key={`${recipe.name}-${recipeIndex}`}
                       >
-                        <TrashIcon aria-hidden="true" />
-                      </button>
-                    </article>
-                  ))}
+                        <div className="panel-recipe-copy">
+                          <h4>{recipe.name}</h4>
+                          <p className="panel-recipe-slot">
+                            {t(`slots.${recipe.slot}`)}
+                          </p>
+                          {ingredients.length > 0 ? (
+                            <ul className="panel-ingredient-list">
+                              {ingredients.map((ingredient) => (
+                                <li
+                                  className="panel-ingredient-chip"
+                                  key={`${ingredient.name}-${ingredient.quantity ?? ''}-${ingredient.unit ?? ''}`}
+                                >
+                                  {formatRecipeIngredient(ingredient, (unit) =>
+                                    t(`units.${unit}`),
+                                  )}
+                                </li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <p>{t('preferences.noRecipeIngredients')}</p>
+                          )}
+                        </div>
+
+                        <button
+                          className="panel-icon-btn"
+                          type="button"
+                          aria-label={t('preferences.deleteRecipe', {
+                            name: recipe.name,
+                          })}
+                          onClick={() => handleDeleteRecipe(recipeIndex)}
+                        >
+                          <TrashIcon aria-hidden="true" />
+                        </button>
+                      </article>
+                    )
+                  })}
                 </div>
               )}
             </section>
@@ -520,8 +633,8 @@ export function PreferencesPanel({
         <div className="panel-footer">
           <p className="panel-footer-note">
             {hasUnsavedChanges
-              ? 'You have unsaved preference changes.'
-              : 'Changes are ready to save when you are.'}
+              ? t('preferences.unsaved')
+              : t('preferences.ready')}
           </p>
           <div className="panel-footer-actions">
             <button
@@ -529,7 +642,7 @@ export function PreferencesPanel({
               type="button"
               onClick={onClose}
             >
-              Cancel
+              {t('common.cancel')}
             </button>
             <button
               className="panel-primary-btn"
@@ -537,35 +650,13 @@ export function PreferencesPanel({
               onClick={() => onSave(draftPrefs)}
             >
               <CheckIcon aria-hidden="true" />
-              Save preferences
+              {t('preferences.save')}
             </button>
           </div>
         </div>
       </aside>
     </div>
   )
-}
-
-function normalizePreferences(preferences: Preferences): Preferences {
-  const customRecipes = preferences.customRecipes as Array<
-    Partial<CustomRecipe>
-  >
-
-  return {
-    ...preferences,
-    customRecipes: customRecipes.map((recipe) => ({
-      name: recipe.name ?? '',
-      ingredients: Array.isArray(recipe.ingredients)
-        ? (recipe.ingredients as Array<Partial<RecipeIngredient>>).map(
-            (ingredient) => ({
-              name: ingredient.name ?? '',
-              quantity: ingredient.quantity ?? '',
-            }),
-          )
-        : [],
-      planningScope: recipe.planningScope ?? 'both',
-    })),
-  }
 }
 
 interface PanelTabButtonProps {
@@ -598,7 +689,8 @@ interface DayContextPillProps {
 }
 
 function DayContextPill({ context, isSelected, onClick }: DayContextPillProps) {
-  const label = context === 'office' ? 'Office' : 'Eat out'
+  const { t } = useI18n()
+  const label = t(`contexts.${context}`)
   const Icon = context === 'office' ? CalendarIcon : UtensilsIcon
 
   return (

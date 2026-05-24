@@ -1,5 +1,7 @@
 import './pills.css'
 
+import { useI18n } from '#/i18n'
+
 interface FocusPillProps {
   focus: 'lunch' | 'dinner' | 'both'
   selected: boolean
@@ -7,14 +9,15 @@ interface FocusPillProps {
 }
 
 export function FocusPill({ focus, selected, onClick }: FocusPillProps) {
-  const labels = { lunch: 'Lunch', dinner: 'Dinner', both: 'Both' }
+  const { t } = useI18n()
+
   return (
     <button
       className={`focus-pill ${selected ? 'selected' : ''}`}
       type="button"
       onClick={onClick}
     >
-      {labels[focus]}
+      {focus === 'both' ? t('scopes.both') : t(`slots.${focus}`)}
     </button>
   )
 }

@@ -1,43 +1,46 @@
-header {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.5rem;
-  border: 3px solid #111;
-  background-color: #f0ece2;
-  position: relative;
-  max-width: 300px;
+.site-header {
+  padding: 0.75rem clamp(0.75rem, 2vw, 1.25rem);
 }
 
-/* Sombra brutalista verde */
-/* .header-wrapper::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border: 3px solid #111;
-  background-color: #3ddc68;
-  transform: translate(8px, 8px);
-  z-index: -1;
-} */
+.header-wrapper {
+  width: fit-content;
+  margin: auto;
+  min-height: 68px;
+  padding: 0.4rem;
+  border: 3px solid var(--text-color);
+  border-radius: 8px;
+  background-color: #fff8e6;
+  box-shadow: 4px 4px 0 var(--highlight-color-2);
+  cursor: pointer;
+}
 
-h1 {
+.header-wrapper:hover {
+  transform: scale(1.05);
+  transition: 0.5s;
+}
+
+.header-logo {
   padding: 0;
-  font-size: 4rem;
-  font-weight: 900;
   color: #111;
-  letter-spacing: 0.08em;
+  font-size: clamp(3rem, 6vw, 6rem);
+  letter-spacing: -4px;
+  line-height: 0.9;
+  text-decoration: none;
   text-transform: uppercase;
-  position: relative;
-  display: inline-block;
+  /* text-shadow: 2px 2px 0 var(--highlight-color-2); */
+}
 
-  /* Sombra de texto verde apilada brutalista */
-  /* text-shadow:
-      3px 3px 0 #3ddc68,
-      6px 6px 0 #111;
+.header-logo-span {
+  color: var(--highlight-color-3);
+}
 
-    transition:
-      text-shadow 0.1s ease,
-      transform 0.1s ease;
-    cursor: default;
-    user-select: none; */
+@media (max-width: 520px) {
+  .header-wrapper {
+    min-height: auto;
+    box-shadow: 5px 5px 0 #111;
+  }
+
+  .header-logo {
+    font-size: 2.45rem;
+  }
 }

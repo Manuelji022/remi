@@ -1,3 +1,5 @@
+import type { Locale } from '#/i18n'
+
 export const DAYS = [
   'Monday',
   'Tuesday',
@@ -26,7 +28,15 @@ export function getWeekNumber(date: Date = new Date()): number {
   return Math.ceil(((+d - +yearStart) / 86400000 + 1) / 7)
 }
 
-export function getWeekDateRange(date: Date = new Date()): {
+const DATE_LOCALES: Record<Locale, string> = {
+  en: 'en-GB',
+  es: 'es-ES',
+}
+
+export function getWeekDateRange(
+  locale: Locale = 'en',
+  date: Date = new Date(),
+): {
   start: string
   end: string
 } {
@@ -38,7 +48,10 @@ export function getWeekDateRange(date: Date = new Date()): {
   sunday.setDate(monday.getDate() + 6)
 
   const fmt = (d: Date) =>
-    d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+    d.toLocaleDateString(DATE_LOCALES[locale], {
+      day: 'numeric',
+      month: 'short',
+    })
 
   return { start: fmt(monday), end: fmt(sunday) }
 }
