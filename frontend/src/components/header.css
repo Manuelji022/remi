@@ -16,11 +16,6 @@
   box-shadow: 4px 4px 0 var(--highlight-color-2);
 }
 
-.header-wrapper:hover {
-  transform: scale(1.05);
-  transition: 0.5s;
-}
-
 .header-logo {
   padding: 0;
   color: #111;
