@@ -40,15 +40,14 @@
   align-items: center;
   gap: 8px;
   margin: 0;
-  padding: 10px 14px;
+  padding: 0.45rem 0.75rem;
   border: 1px solid rgba(138, 112, 96, 0.24);
   border-radius: 8px;
-  background: #ffffff;
-  color: var(--text-color)
-  font-size: 0.82rem;
+  background: #fffdf8;
+  color: var(--text-color);
+  font-size: 0.8rem;
   font-weight: 900;
   letter-spacing: 0.06em;
-  line-height: 1.2;
   text-transform: uppercase;
   white-space: nowrap;
 }
@@ -62,12 +61,11 @@
   border: 1px solid rgba(138, 112, 96, 0.24);
   border-radius: 8px;
   background: #fffdf8;
-  color: var(--text-color)
-  font-size: 0.78rem;
+  color: var(--text-color);
+  font-size: 0.8rem;
   font-weight: 900;
   letter-spacing: 0.08em;
   text-decoration: none;
-  transition: transform 0.2s ease;
 }
 
 .planner-language-switcher:hover {
