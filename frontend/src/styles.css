@@ -25,7 +25,10 @@
 }
 
 :root {
-  --background-color: #fdcb40;
+  --background-color: #F0EEE6;
+  --font-body: 'Bricolage Grotesque', system-ui, -apple-system, sans-serif;
+  --font-heading: 'Jersey 25', 'Bricolage Grotesque', system-ui, -apple-system,
+    sans-serif;
   --highlight-color: #00a071;
   --highlight-color-2: #4072fd;
   --highlight-color-3: #fd4400;
@@ -34,11 +37,7 @@
 }
 
 body {
-  font-family:
-    'Bricolage Grotesque',
-    system-ui,
-    -apple-system,
-    sans-serif;
+  font-family: var(--font-body);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   background-color: var(--background-color);
@@ -58,18 +57,10 @@ h3,
 h4,
 h5,
 h6 {
+  font-family: var(--font-heading);
+  font-weight: 400;
   overflow-wrap: break-word;
   text-wrap: balance;
-}
-
-h1 {
-  font-family:
-    'Jersey 25',
-    'Bricolage Grotesque',
-    system-ui,
-    -apple-system,
-    sans-serif;
-  font-weight: 400;
 }
 
 p {
