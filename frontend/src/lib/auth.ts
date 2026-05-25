@@ -3,7 +3,7 @@ import { betterAuth } from 'better-auth'
 import { twoFactor } from 'better-auth/plugins/two-factor'
 import { tanstackStartCookies } from 'better-auth/tanstack-start'
 import { db, schema } from '#/db'
-import { sendOtpEmail } from '#/lib/email'
+import { sendOtpEmail, sendResetPasswordEmail } from '#/lib/email'
 
 const baseURL = process.env.BETTER_AUTH_URL
 const appName = 'Remi'
@@ -24,6 +24,10 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     minPasswordLength: 8,
+    revokeSessionsOnPasswordReset: true,
+    sendResetPassword: async ({ user, url }) => {
+      await sendResetPasswordEmail({ appName, to: user.email, url })
+    },
   },
   databaseHooks: {
     user: {
@@ -40,7 +44,6 @@ export const auth = betterAuth({
     },
   },
   plugins: [
-    tanstackStartCookies(),
     twoFactor({
       otpOptions: {
         async sendOTP({ user, otp }) {
@@ -48,5 +51,6 @@ export const auth = betterAuth({
         },
       },
     }),
+    tanstackStartCookies(),
   ],
 })

@@ -89,6 +89,12 @@ export function LoginPage() {
           </button>
         </form>
 
+        <p className="auth-forgot">
+          <Link to={getLocalizedPath('/forgot-password', locale)}>
+            {t('auth.forgotPasswordLink')}
+          </Link>
+        </p>
+
         <p className="auth-switch">
           {t('auth.noAccount')}{' '}
           <Link to={getLocalizedPath('/signup', locale)}>

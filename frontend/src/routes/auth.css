@@ -92,6 +92,24 @@
   color: var(--text-color);
 }
 
+.auth-success {
+  padding: 0.75rem;
+  border: 2px solid #2ecc71;
+  border-radius: var(--radius-md);
+  background: #e1f9e9;
+  color: var(--text-color);
+}
+
+.auth-forgot {
+  margin-top: 0.5rem;
+  text-align: center;
+}
+
+.auth-forgot a {
+  color: var(--highlight-color-2);
+  font-weight: 900;
+}
+
 .auth-switch {
   margin-top: 1.25rem;
 }
