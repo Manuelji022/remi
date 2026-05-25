@@ -1,5 +1,6 @@
 import { drizzleAdapter } from '@better-auth/drizzle-adapter'
 import { betterAuth } from 'better-auth'
+import { emailOTP } from 'better-auth/plugins'
 import { tanstackStartCookies } from 'better-auth/tanstack-start'
 import { db, schema } from '#/db'
 
@@ -21,5 +22,21 @@ export const auth = betterAuth({
     enabled: true,
     minPasswordLength: 8,
   },
-  plugins: [tanstackStartCookies()],
+  plugins: [
+    tanstackStartCookies(),
+    emailOTP({
+      async sendOTP({
+        email,
+        otp,
+        type,
+      }: {
+        email: string
+        otp: string
+        type: 'sign-in' | 'email-verification' | 'forget-password'
+      }) {
+        // TODO: integrate with an email provider (Resend, SendGrid, etc.)
+        console.log(`[emailOTP] type=${type} email=${email} otp=${otp}`)
+      },
+    }),
+  ],
 })
