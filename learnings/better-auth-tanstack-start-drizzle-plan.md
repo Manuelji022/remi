@@ -159,7 +159,7 @@ Likely new or modified files:
 - The general Better Auth docs may show `better-auth/adapters/drizzle`, while the Drizzle adapter page shows `@better-auth/drizzle-adapter`; use the current dedicated Drizzle adapter documentation as the source of truth.
 - Cookie setting can fail if `tanstackStartCookies()` is missing or not the last plugin.
 - `BETTER_AUTH_URL` must match the app URL in development and production.
-- In development, `BETTER_AUTH_URL` should be `http://localhost:3000`; in production, it must match the deployed canonical origin.
+- In development, `BETTER_AUTH_URL` should be `http://localhost:3001`; in production, it must match the deployed canonical origin.
 - `DATABASE_URL` must be available server-side for both runtime and migration commands.
 - Avoid importing the server-side `auth` module into client components.
 - Ensure generated schema and migrations are committed if the project tracks migrations.
