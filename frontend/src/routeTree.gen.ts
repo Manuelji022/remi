@@ -10,16 +10,29 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WeeklyMenuPlannerRouteImport } from './routes/weekly-menu-planner'
+import { Route as SignupRouteImport } from './routes/signup'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as EsRouteImport } from './routes/es'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as EsIndexRouteImport } from './routes/es.index'
 import { Route as EsWeeklyMenuPlannerRouteImport } from './routes/es.weekly-menu-planner'
 import { Route as EsAboutRouteImport } from './routes/es.about'
+import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
 const WeeklyMenuPlannerRoute = WeeklyMenuPlannerRouteImport.update({
   id: '/weekly-menu-planner',
   path: '/weekly-menu-planner',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EsRoute = EsRouteImport.update({
@@ -52,33 +65,47 @@ const EsAboutRoute = EsAboutRouteImport.update({
   path: '/about',
   getParentRoute: () => EsRoute,
 } as any)
+const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
+  id: '/api/auth/$',
+  path: '/api/auth/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/es': typeof EsRouteWithChildren
+  '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
   '/weekly-menu-planner': typeof WeeklyMenuPlannerRoute
   '/es/about': typeof EsAboutRoute
   '/es/weekly-menu-planner': typeof EsWeeklyMenuPlannerRoute
   '/es/': typeof EsIndexRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
   '/weekly-menu-planner': typeof WeeklyMenuPlannerRoute
   '/es/about': typeof EsAboutRoute
   '/es/weekly-menu-planner': typeof EsWeeklyMenuPlannerRoute
   '/es': typeof EsIndexRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/es': typeof EsRouteWithChildren
+  '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
   '/weekly-menu-planner': typeof WeeklyMenuPlannerRoute
   '/es/about': typeof EsAboutRoute
   '/es/weekly-menu-planner': typeof EsWeeklyMenuPlannerRoute
   '/es/': typeof EsIndexRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -86,34 +113,46 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/es'
+    | '/login'
+    | '/signup'
     | '/weekly-menu-planner'
     | '/es/about'
     | '/es/weekly-menu-planner'
     | '/es/'
+    | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/about'
+    | '/login'
+    | '/signup'
     | '/weekly-menu-planner'
     | '/es/about'
     | '/es/weekly-menu-planner'
     | '/es'
+    | '/api/auth/$'
   id:
     | '__root__'
     | '/'
     | '/about'
     | '/es'
+    | '/login'
+    | '/signup'
     | '/weekly-menu-planner'
     | '/es/about'
     | '/es/weekly-menu-planner'
     | '/es/'
+    | '/api/auth/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   EsRoute: typeof EsRouteWithChildren
+  LoginRoute: typeof LoginRoute
+  SignupRoute: typeof SignupRoute
   WeeklyMenuPlannerRoute: typeof WeeklyMenuPlannerRoute
+  ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -123,6 +162,20 @@ declare module '@tanstack/react-router' {
       path: '/weekly-menu-planner'
       fullPath: '/weekly-menu-planner'
       preLoaderRoute: typeof WeeklyMenuPlannerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/es': {
@@ -167,6 +220,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EsAboutRouteImport
       parentRoute: typeof EsRoute
     }
+    '/api/auth/$': {
+      id: '/api/auth/$'
+      path: '/api/auth/$'
+      fullPath: '/api/auth/$'
+      preLoaderRoute: typeof ApiAuthSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -188,7 +248,10 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   EsRoute: EsRouteWithChildren,
+  LoginRoute: LoginRoute,
+  SignupRoute: SignupRoute,
   WeeklyMenuPlannerRoute: WeeklyMenuPlannerRoute,
+  ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

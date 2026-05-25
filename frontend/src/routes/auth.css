@@ -1,0 +1,85 @@
+.auth-page {
+  display: grid;
+  min-height: calc(100vh - 220px);
+  place-items: center;
+  padding: clamp(1.5rem, 4vw, 4rem);
+}
+
+.auth-card {
+  width: min(100%, 430px);
+  padding: clamp(1.25rem, 4vw, 2rem);
+  border: 3px solid var(--text-color);
+  border-radius: 18px;
+  background: #fff8e6;
+  box-shadow: 8px 8px 0 var(--highlight-color-2);
+}
+
+.auth-card h1 {
+  margin-bottom: 0.5rem;
+  font-size: clamp(2rem, 7vw, 3.5rem);
+  line-height: 0.95;
+  letter-spacing: -0.06em;
+}
+
+.auth-copy {
+  margin-bottom: 1.5rem;
+  color: rgba(26, 26, 46, 0.78);
+}
+
+.auth-form {
+  display: grid;
+  gap: 1rem;
+}
+
+.auth-field {
+  display: grid;
+  gap: 0.35rem;
+  font-weight: 700;
+}
+
+.auth-field input {
+  width: 100%;
+  padding: 0.75rem 0.85rem;
+  border: 2px solid var(--text-color);
+  border-radius: 10px;
+  background: white;
+  color: var(--text-color);
+}
+
+.auth-field input:focus-visible {
+  outline: 3px solid var(--highlight-color-3);
+  outline-offset: 2px;
+}
+
+.auth-button {
+  padding: 0.8rem 1rem;
+  border: 2px solid var(--text-color);
+  border-radius: 999px;
+  background: var(--highlight-color-3);
+  color: white;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 4px 4px 0 var(--text-color);
+}
+
+.auth-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.auth-error {
+  padding: 0.75rem;
+  border: 2px solid var(--highlight-color-3);
+  border-radius: 10px;
+  background: #ffe1d6;
+  color: var(--text-color);
+}
+
+.auth-switch {
+  margin-top: 1.25rem;
+}
+
+.auth-switch a {
+  color: var(--highlight-color-2);
+  font-weight: 900;
+}
