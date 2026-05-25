@@ -7,7 +7,7 @@ export default function Footer() {
   const { t } = useI18n()
 
   return (
-    <footer>
+    <footer className="footer">
       <p>
         &copy; {year} {t('footer.rights')}
       </p>

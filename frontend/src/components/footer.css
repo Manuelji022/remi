@@ -1,3 +1,9 @@
 footer {
   font-size: 1rem;
+  padding: 1rem;
+}
+
+.footer {
+  background-color: black;
+  color:var(--background-color);
 }
