@@ -2,16 +2,16 @@
   display: grid;
   min-height: calc(100vh - 220px);
   place-items: center;
-  padding: clamp(1.5rem, 4vw, 4rem);
+  padding: clamp(var(--space-lg), 4vw, 4rem);
 }
 
 .auth-card {
   width: min(100%, 430px);
   padding: clamp(1.25rem, 4vw, 2rem);
-  border: 3px solid var(--text-color);
-  border-radius: 18px;
+  border: var(--border-brutal);
+  border-radius: var(--radius-lg);
   background: #fff8e6;
-  box-shadow: 8px 8px 0 var(--highlight-color-2);
+  box-shadow: var(--shadow-brutal-blue-lg);
 }
 
 .auth-card h1 {
@@ -28,7 +28,7 @@
 
 .auth-form {
   display: grid;
-  gap: 1rem;
+  gap: var(--space-md);
 }
 
 .auth-field {
@@ -40,26 +40,26 @@
 .auth-field input {
   width: 100%;
   padding: 0.75rem 0.85rem;
-  border: 2px solid var(--text-color);
-  border-radius: 10px;
+  border: var(--border-strong);
+  border-radius: var(--radius-md);
   background: white;
   color: var(--text-color);
 }
 
 .auth-field input:focus-visible {
-  outline: 3px solid var(--highlight-color-3);
-  outline-offset: 2px;
+  outline: var(--focus-ring-strong);
+  outline-offset: var(--focus-offset);
 }
 
 .auth-button {
   padding: 0.8rem 1rem;
-  border: 2px solid var(--text-color);
-  border-radius: 999px;
+  border: var(--border-strong);
+  border-radius: var(--radius-pill);
   background: var(--highlight-color-3);
   color: white;
   font-weight: 900;
   cursor: pointer;
-  box-shadow: 4px 4px 0 var(--text-color);
+  box-shadow: var(--shadow-brutal-text);
 }
 
 .auth-button:disabled {
@@ -70,7 +70,7 @@
 .auth-error {
   padding: 0.75rem;
   border: 2px solid var(--highlight-color-3);
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   background: #ffe1d6;
   color: var(--text-color);
 }

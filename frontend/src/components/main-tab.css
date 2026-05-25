@@ -1,10 +1,10 @@
 /* --- Main Tab --- */
 .main-tab {
   display: flex;
-  gap: 4px;
-  padding: 4px;
+  gap: var(--space-xxs);
+  padding: var(--space-xxs);
   background-color: #f0ebe4;
-  border-radius: 12px;
+  border-radius: var(--radius-control);
   width: fit-content;
 }
 
@@ -13,15 +13,19 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 18px;
-  border-radius: 10px;
+  padding: var(--space-xs) var(--radius-lg);
+  border-radius: var(--radius-md);
   border: none;
   background: transparent;
   color: #666;
   font-size: 0.9rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition:
+    background-color var(--transition-ui),
+    box-shadow var(--transition-ui),
+    color var(--transition-ui),
+    transform var(--transition-ui);
 }
 
 .tab-btn:hover {
@@ -37,12 +41,12 @@
 .tab-btn.active {
   background-color: #fff;
   color: #1a1a2e;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-soft);
 }
 
 .tab-btn:focus-visible {
-  outline: 2px solid rgba(181, 113, 58, 0.85);
-  outline-offset: 2px;
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
 }
 
 .tab-btn .badge {
@@ -52,7 +56,7 @@
   min-width: 20px;
   height: 20px;
   padding: 0 6px;
-  border-radius: 9999px;
+  border-radius: var(--radius-pill);
   background-color: #e65100;
   color: #fff;
   font-size: 0.7rem;

@@ -1,7 +1,7 @@
 /* --- Loading Dots --- */
 .loading-dots {
   display: inline-flex;
-  gap: 4px;
+  gap: var(--space-xxs);
   align-items: center;
 }
 
@@ -9,7 +9,7 @@
   display: inline-block;
   width: 6px;
   height: 6px;
-  border-radius: 50%;
+  border-radius: var(--radius-full);
   background-color: currentColor;
   animation: loadingPulse 1.4s infinite ease-in-out both;
 }

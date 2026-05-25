@@ -1,5 +1,5 @@
 .site-header {
-  padding: 0.75rem clamp(0.75rem, 2vw, 1.25rem);
+  padding: var(--space-sm) clamp(var(--space-sm), 2vw, var(--space-lg));
 }
 
 .header-wrapper {
@@ -10,10 +10,10 @@
   padding: 0.4rem;
   align-items: center;
   gap: clamp(0.75rem, 2vw, 1.25rem);
-  border: 3px solid var(--text-color);
-  border-radius: 8px;
+  border: var(--border-brutal);
+  border-radius: var(--radius-sm);
   background-color: #fff8e6;
-  box-shadow: 4px 4px 0 var(--highlight-color-2);
+  box-shadow: var(--shadow-brutal-blue);
 }
 
 .header-logo {
@@ -36,7 +36,7 @@
 .header-auth {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-xs);
 }
 
 .header-user {
@@ -51,8 +51,8 @@
 .header-auth-link,
 .header-auth-button {
   padding: 0.45rem 0.7rem;
-  border: 2px solid var(--text-color);
-  border-radius: 999px;
+  border: var(--border-strong);
+  border-radius: var(--radius-pill);
   background: white;
   color: var(--text-color);
   font-size: 0.85rem;
@@ -71,7 +71,7 @@
 @media (max-width: 520px) {
   .header-wrapper {
     min-height: auto;
-    box-shadow: 5px 5px 0 #111;
+    box-shadow: var(--shadow-brutal-text);
   }
 
   .header-logo {
