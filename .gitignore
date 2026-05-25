@@ -13,3 +13,5 @@ dist-ssr
 __unconfig*
 todos.json
 infraestructure/postgres/secrets/*
+infraestructure/postgres/data/*
+infraestructure/postgres/backups/*
