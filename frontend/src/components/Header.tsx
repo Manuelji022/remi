@@ -22,7 +22,7 @@ export default function Header() {
         <div className="header-auth">
           {session ? (
             <>
-              <span className="header-user">{session.user.email}</span>
+              <span className="header-user">{session.user.name}</span>
               <button
                 className="header-auth-button"
                 onClick={handleSignOut}
