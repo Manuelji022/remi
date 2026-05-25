@@ -54,7 +54,6 @@
   align-items: center;
   justify-content: center;
   min-width: 20px;
-  height: 20px;
   padding: 0 6px;
   border-radius: var(--radius-pill);
   background-color: #e65100;
