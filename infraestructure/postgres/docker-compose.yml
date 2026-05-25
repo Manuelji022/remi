@@ -1,0 +1,50 @@
+services:
+  postgres:
+    image: postgres:18-bookworm
+    container_name: postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+      POSTGRES_DB: ${POSTGRES_DB}
+
+    secrets:
+      - postgres_password
+
+    volumes:
+      - ${POSTGRES_DATA_DIR}:/var/lib/postgresql
+      - ./init:/docker-entrypoint-initdb.d:ro
+
+    networks:
+      - db_internal
+
+    ports:
+      - "${TAILSCALE_IP}:15432:5432"
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\" -h 127.0.0.1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+    command:
+      - "postgres"
+      - "-c"
+      - "password_encryption=scram-sha-256"
+      - "-c"
+      - "listen_addresses=*"
+      - "-c"
+      - "max_connections=100"
+
+    security_opt:
+      - no-new-privileges:true
+
+
+secrets:
+  postgres_password:
+    file: ./secrets/postgres_password.txt
+
+networks:
+  db_internal:
+    driver: bridge

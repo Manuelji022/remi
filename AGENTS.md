@@ -6,7 +6,7 @@ TanStack Start (React 19) frontend app with file-based routing.
 
 ```bash
 cd frontend
-pnpm dev          # dev server on port 3000
+pnpm dev          # dev server on port 3001
 pnpm build        # production build to dist/
 pnpm test         # Vitest
 pnpm lint

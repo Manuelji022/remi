@@ -12,4 +12,6 @@ dist-ssr
 .vinxi
 __unconfig*
 todos.json
-
+infraestructure/postgres/secrets/*
+infraestructure/postgres/data/*
+infraestructure/postgres/backups/*
