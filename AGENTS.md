@@ -12,6 +12,8 @@ pnpm test         # Vitest
 pnpm lint
 pnpm format       # prettier --write + eslint --fix
 pnpm check        # prettier --check only
+#--react doctor to keep clean react code
+pnpx react-doctor@latest
 ```
 
 ## Key conventions

@@ -68,7 +68,7 @@
   width: 40px;
   height: 40px;
   flex: 0 0 auto;
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-sm);
   border: none;
   background: color-mix(in srgb, var(--card-color) 45%, transparent);
   cursor: pointer;
@@ -187,7 +187,7 @@
 
 .panel-day-badge {
   padding: 5px 10px;
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-sm);
   background: color-mix(in srgb, var(--highlight-color-3) 14%, transparent);
   font-size: 0.68rem;
   font-weight: 800;
@@ -221,7 +221,7 @@
 .panel-primary-btn,
 .panel-secondary-btn,
 .panel-add-btn {
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-sm);
   transition:
     transform var(--transition-ui),
     border-color var(--transition-ui),
@@ -357,7 +357,7 @@
   width: fit-content;
   margin-top: 12px;
   border: 1px solid color-mix(in srgb, var(--highlight-color) 28%, transparent);
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-sm);
   padding: 9px 13px;
   background: color-mix(in srgb, var(--highlight-color) 10%, transparent);
   color: var(--highlight-color);
@@ -432,7 +432,7 @@
 
 .panel-ingredient-chip {
   border: 1px solid color-mix(in srgb, var(--highlight-color) 22%, transparent);
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-sm);
   padding: 5px 10px;
   background: color-mix(in srgb, var(--highlight-color) 10%, transparent);
   color: var(--highlight-color);

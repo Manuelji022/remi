@@ -8,7 +8,10 @@ import { authClient } from '#/lib/auth-client'
 
 export const Route = createFileRoute('/signup')({ component: SignupPage })
 
-type FormSubmitEvent = Parameters<NonNullable<ComponentProps<'form'>['onSubmit']>>[0]
+type FormSubmitEvent = Parameters<
+  NonNullable<ComponentProps<'form'>['onSubmit']>
+>[0]
+type SignInData = { twoFactorRedirect?: boolean } | null
 
 export function SignupPage() {
   const navigate = useNavigate()
@@ -30,14 +33,34 @@ export function SignupPage() {
       password,
     })
 
-    setIsSubmitting(false)
-
     if (result.error) {
+      setIsSubmitting(false)
       setError(result.error.message ?? t('auth.signupError'))
       return
     }
 
-    await navigate({ to: locale === 'es' ? '/es' : '/' })
+    await authClient.signOut()
+
+    const loginResult = await authClient.signIn.email({ email, password })
+
+    if (loginResult.error) {
+      setIsSubmitting(false)
+      setError(loginResult.error.message ?? t('auth.signupOtpStartError'))
+      return
+    }
+
+    const data = loginResult.data as SignInData
+
+    if (data?.twoFactorRedirect) {
+      window.sessionStorage.setItem('remi:signupOtpPending', 'true')
+      setIsSubmitting(false)
+      await navigate({ to: getLocalizedPath('/two-factor', locale) })
+      return
+    }
+
+    await authClient.signOut()
+    setIsSubmitting(false)
+    setError(t('auth.twoFactorRequiredError'))
   }
 
   return (
