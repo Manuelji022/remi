@@ -7,7 +7,7 @@ import { authClient } from '#/lib/auth-client'
 export default function Header() {
   const { locale, t } = useI18n()
   const homePath = locale === 'es' ? '/es' : '/'
-  const { data: session, isPending } = authClient.useSession()
+  const { data: session } = authClient.useSession()
 
   async function handleSignOut() {
     await authClient.signOut()
@@ -31,7 +31,7 @@ export default function Header() {
                 {t('auth.logout')}
               </button>
             </>
-          ) : isPending ? null : (
+          ) : (
             <>
               <Link
                 className="header-auth-link"
