@@ -309,22 +309,6 @@ function MenuTab({
         })}
       </div>
 
-      <section className="planner-reasoning" aria-labelledby="reasoning-title">
-        <div className="planner-reasoning-icon">
-          <LeafIcon aria-hidden="true" />
-        </div>
-        <div>
-          <p className="planner-section-kicker">
-            {t('planner.reasoningKicker')}
-          </p>
-          <h2 id="reasoning-title">{t('planner.reasoningTitle')}</h2>
-          <ul>
-            <li>{t('planner.reasoningOne')}</li>
-            <li>{t('planner.reasoningTwo')}</li>
-            <li>{t('planner.reasoningThree')}</li>
-          </ul>
-        </div>
-      </section>
     </div>
   )
 }
