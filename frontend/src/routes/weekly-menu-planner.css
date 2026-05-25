@@ -52,31 +52,6 @@
   white-space: nowrap;
 }
 
-.planner-language-switcher {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  min-height: 38px;
-  padding: 0.45rem 0.75rem;
-  border: 1px solid rgba(138, 112, 96, 0.24);
-  border-radius: var(--radius-sm);
-  background: #fffdf8;
-  color: var(--text-color);
-  font-size: 0.8rem;
-  font-weight: 900;
-  letter-spacing: 0.08em;
-  text-decoration: none;
-}
-
-.planner-language-switcher:hover {
-  transform: var(--hover-lift);
-}
-
-.planner-language-switcher svg {
-  width: 16px;
-  height: 16px;
-}
-
 .planner-kicker,
 .planner-section-kicker {
   display: inline-flex;
