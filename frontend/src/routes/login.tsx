@@ -8,7 +8,10 @@ import { authClient } from '#/lib/auth-client'
 
 export const Route = createFileRoute('/login')({ component: LoginPage })
 
-type FormSubmitEvent = Parameters<NonNullable<ComponentProps<'form'>['onSubmit']>>[0]
+type FormSubmitEvent = Parameters<
+  NonNullable<ComponentProps<'form'>['onSubmit']>
+>[0]
+type SignInData = { twoFactorRedirect?: boolean } | null
 
 export function LoginPage() {
   const navigate = useNavigate()
@@ -28,14 +31,23 @@ export function LoginPage() {
       password,
     })
 
-    setIsSubmitting(false)
-
     if (result.error) {
+      setIsSubmitting(false)
       setError(result.error.message ?? t('auth.loginError'))
       return
     }
 
-    await navigate({ to: locale === 'es' ? '/es' : '/' })
+    const data = result.data as SignInData
+
+    if (data?.twoFactorRedirect) {
+      setIsSubmitting(false)
+      await navigate({ to: getLocalizedPath('/two-factor', locale) })
+      return
+    }
+
+    await authClient.signOut()
+    setIsSubmitting(false)
+    setError(t('auth.twoFactorRequiredError'))
   }
 
   return (
@@ -79,7 +91,9 @@ export function LoginPage() {
 
         <p className="auth-switch">
           {t('auth.noAccount')}{' '}
-          <Link to={getLocalizedPath('/signup', locale)}>{t('auth.createOne')}</Link>
+          <Link to={getLocalizedPath('/signup', locale)}>
+            {t('auth.createOne')}
+          </Link>
         </p>
       </section>
     </main>

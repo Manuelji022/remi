@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WeeklyMenuPlannerRouteImport } from './routes/weekly-menu-planner'
+import { Route as TwoFactorRouteImport } from './routes/two-factor'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as EsRouteImport } from './routes/es'
@@ -17,6 +18,7 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as EsIndexRouteImport } from './routes/es.index'
 import { Route as EsWeeklyMenuPlannerRouteImport } from './routes/es.weekly-menu-planner'
+import { Route as EsTwoFactorRouteImport } from './routes/es.two-factor'
 import { Route as EsSignupRouteImport } from './routes/es.signup'
 import { Route as EsLoginRouteImport } from './routes/es.login'
 import { Route as EsAboutRouteImport } from './routes/es.about'
@@ -25,6 +27,11 @@ import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 const WeeklyMenuPlannerRoute = WeeklyMenuPlannerRouteImport.update({
   id: '/weekly-menu-planner',
   path: '/weekly-menu-planner',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TwoFactorRoute = TwoFactorRouteImport.update({
+  id: '/two-factor',
+  path: '/two-factor',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SignupRoute = SignupRouteImport.update({
@@ -62,6 +69,11 @@ const EsWeeklyMenuPlannerRoute = EsWeeklyMenuPlannerRouteImport.update({
   path: '/weekly-menu-planner',
   getParentRoute: () => EsRoute,
 } as any)
+const EsTwoFactorRoute = EsTwoFactorRouteImport.update({
+  id: '/two-factor',
+  path: '/two-factor',
+  getParentRoute: () => EsRoute,
+} as any)
 const EsSignupRoute = EsSignupRouteImport.update({
   id: '/signup',
   path: '/signup',
@@ -89,10 +101,12 @@ export interface FileRoutesByFullPath {
   '/es': typeof EsRouteWithChildren
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/two-factor': typeof TwoFactorRoute
   '/weekly-menu-planner': typeof WeeklyMenuPlannerRoute
   '/es/about': typeof EsAboutRoute
   '/es/login': typeof EsLoginRoute
   '/es/signup': typeof EsSignupRoute
+  '/es/two-factor': typeof EsTwoFactorRoute
   '/es/weekly-menu-planner': typeof EsWeeklyMenuPlannerRoute
   '/es/': typeof EsIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -102,10 +116,12 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/two-factor': typeof TwoFactorRoute
   '/weekly-menu-planner': typeof WeeklyMenuPlannerRoute
   '/es/about': typeof EsAboutRoute
   '/es/login': typeof EsLoginRoute
   '/es/signup': typeof EsSignupRoute
+  '/es/two-factor': typeof EsTwoFactorRoute
   '/es/weekly-menu-planner': typeof EsWeeklyMenuPlannerRoute
   '/es': typeof EsIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -117,10 +133,12 @@ export interface FileRoutesById {
   '/es': typeof EsRouteWithChildren
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/two-factor': typeof TwoFactorRoute
   '/weekly-menu-planner': typeof WeeklyMenuPlannerRoute
   '/es/about': typeof EsAboutRoute
   '/es/login': typeof EsLoginRoute
   '/es/signup': typeof EsSignupRoute
+  '/es/two-factor': typeof EsTwoFactorRoute
   '/es/weekly-menu-planner': typeof EsWeeklyMenuPlannerRoute
   '/es/': typeof EsIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -133,10 +151,12 @@ export interface FileRouteTypes {
     | '/es'
     | '/login'
     | '/signup'
+    | '/two-factor'
     | '/weekly-menu-planner'
     | '/es/about'
     | '/es/login'
     | '/es/signup'
+    | '/es/two-factor'
     | '/es/weekly-menu-planner'
     | '/es/'
     | '/api/auth/$'
@@ -146,10 +166,12 @@ export interface FileRouteTypes {
     | '/about'
     | '/login'
     | '/signup'
+    | '/two-factor'
     | '/weekly-menu-planner'
     | '/es/about'
     | '/es/login'
     | '/es/signup'
+    | '/es/two-factor'
     | '/es/weekly-menu-planner'
     | '/es'
     | '/api/auth/$'
@@ -160,10 +182,12 @@ export interface FileRouteTypes {
     | '/es'
     | '/login'
     | '/signup'
+    | '/two-factor'
     | '/weekly-menu-planner'
     | '/es/about'
     | '/es/login'
     | '/es/signup'
+    | '/es/two-factor'
     | '/es/weekly-menu-planner'
     | '/es/'
     | '/api/auth/$'
@@ -175,6 +199,7 @@ export interface RootRouteChildren {
   EsRoute: typeof EsRouteWithChildren
   LoginRoute: typeof LoginRoute
   SignupRoute: typeof SignupRoute
+  TwoFactorRoute: typeof TwoFactorRoute
   WeeklyMenuPlannerRoute: typeof WeeklyMenuPlannerRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
@@ -186,6 +211,13 @@ declare module '@tanstack/react-router' {
       path: '/weekly-menu-planner'
       fullPath: '/weekly-menu-planner'
       preLoaderRoute: typeof WeeklyMenuPlannerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/two-factor': {
+      id: '/two-factor'
+      path: '/two-factor'
+      fullPath: '/two-factor'
+      preLoaderRoute: typeof TwoFactorRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/signup': {
@@ -237,6 +269,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EsWeeklyMenuPlannerRouteImport
       parentRoute: typeof EsRoute
     }
+    '/es/two-factor': {
+      id: '/es/two-factor'
+      path: '/two-factor'
+      fullPath: '/es/two-factor'
+      preLoaderRoute: typeof EsTwoFactorRouteImport
+      parentRoute: typeof EsRoute
+    }
     '/es/signup': {
       id: '/es/signup'
       path: '/signup'
@@ -272,6 +311,7 @@ interface EsRouteChildren {
   EsAboutRoute: typeof EsAboutRoute
   EsLoginRoute: typeof EsLoginRoute
   EsSignupRoute: typeof EsSignupRoute
+  EsTwoFactorRoute: typeof EsTwoFactorRoute
   EsWeeklyMenuPlannerRoute: typeof EsWeeklyMenuPlannerRoute
   EsIndexRoute: typeof EsIndexRoute
 }
@@ -280,6 +320,7 @@ const EsRouteChildren: EsRouteChildren = {
   EsAboutRoute: EsAboutRoute,
   EsLoginRoute: EsLoginRoute,
   EsSignupRoute: EsSignupRoute,
+  EsTwoFactorRoute: EsTwoFactorRoute,
   EsWeeklyMenuPlannerRoute: EsWeeklyMenuPlannerRoute,
   EsIndexRoute: EsIndexRoute,
 }
@@ -292,6 +333,7 @@ const rootRouteChildren: RootRouteChildren = {
   EsRoute: EsRouteWithChildren,
   LoginRoute: LoginRoute,
   SignupRoute: SignupRoute,
+  TwoFactorRoute: TwoFactorRoute,
   WeeklyMenuPlannerRoute: WeeklyMenuPlannerRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
