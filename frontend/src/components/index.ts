@@ -1,6 +1,4 @@
 export { DayCard } from './DayCard'
-export { FocusPill } from './FocusPill'
 export { LoadingDots } from './LoadingDots'
 export { MainTab } from './MainTab'
-export { ModePill } from './ModePill'
 export { PreferencesPanel } from './PreferencesPanel'
