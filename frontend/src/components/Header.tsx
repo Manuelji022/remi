@@ -1,11 +1,11 @@
 import './header.css'
 
 import { Link } from '@tanstack/react-router'
-import { useI18n } from '#/i18n'
+import { getLocalizedPath, useI18n } from '#/i18n'
 import { authClient } from '#/lib/auth-client'
 
 export default function Header() {
-  const { locale } = useI18n()
+  const { locale, t } = useI18n()
   const homePath = locale === 'es' ? '/es' : '/'
   const { data: session, isPending } = authClient.useSession()
 
@@ -28,19 +28,22 @@ export default function Header() {
                 onClick={handleSignOut}
                 type="button"
               >
-                Log out
+                {t('auth.logout')}
               </button>
             </>
           ) : isPending ? null : (
             <>
-              <Link className="header-auth-link" to="/login">
-                Log in
+              <Link
+                className="header-auth-link"
+                to={getLocalizedPath('/login', locale)}
+              >
+                {t('auth.login')}
               </Link>
               <Link
                 className="header-auth-link header-auth-link-strong"
-                to="/signup"
+                to={getLocalizedPath('/signup', locale)}
               >
-                Sign up
+                {t('auth.signup')}
               </Link>
             </>
           )}

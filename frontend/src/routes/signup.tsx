@@ -3,14 +3,16 @@ import './auth.css'
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import type { ComponentProps } from 'react'
 import { useState } from 'react'
+import { getLocalizedPath, useI18n } from '#/i18n'
 import { authClient } from '#/lib/auth-client'
 
 export const Route = createFileRoute('/signup')({ component: SignupPage })
 
 type FormSubmitEvent = Parameters<NonNullable<ComponentProps<'form'>['onSubmit']>>[0]
 
-function SignupPage() {
+export function SignupPage() {
   const navigate = useNavigate()
+  const { locale, t } = useI18n()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -31,24 +33,22 @@ function SignupPage() {
     setIsSubmitting(false)
 
     if (result.error) {
-      setError(result.error.message ?? 'Unable to create your account.')
+      setError(result.error.message ?? t('auth.signupError'))
       return
     }
 
-    await navigate({ to: '/' })
+    await navigate({ to: locale === 'es' ? '/es' : '/' })
   }
 
   return (
     <main className="auth-page">
       <section className="auth-card" aria-labelledby="signup-title">
-        <h1 id="signup-title">Sign up</h1>
-        <p className="auth-copy">
-          Create your Remi account to save your plans.
-        </p>
+        <h1 id="signup-title">{t('auth.signupTitle')}</h1>
+        <p className="auth-copy">{t('auth.signupCopy')}</p>
 
         <form className="auth-form" onSubmit={handleSubmit}>
           <label className="auth-field">
-            Name
+            {t('auth.name')}
             <input
               autoComplete="name"
               name="name"
@@ -60,7 +60,7 @@ function SignupPage() {
           </label>
 
           <label className="auth-field">
-            Email
+            {t('auth.email')}
             <input
               autoComplete="email"
               name="email"
@@ -72,7 +72,7 @@ function SignupPage() {
           </label>
 
           <label className="auth-field">
-            Password
+            {t('auth.password')}
             <input
               autoComplete="new-password"
               minLength={8}
@@ -87,12 +87,13 @@ function SignupPage() {
           {error ? <p className="auth-error">{error}</p> : null}
 
           <button className="auth-button" disabled={isSubmitting} type="submit">
-            {isSubmitting ? 'Creating account...' : 'Create account'}
+            {isSubmitting ? t('auth.creatingAccount') : t('auth.createAccount')}
           </button>
         </form>
 
         <p className="auth-switch">
-          Already have an account? <Link to="/login">Log in</Link>
+          {t('auth.alreadyHaveAccount')}{' '}
+          <Link to={getLocalizedPath('/login', locale)}>{t('auth.login')}</Link>
         </p>
       </section>
     </main>
