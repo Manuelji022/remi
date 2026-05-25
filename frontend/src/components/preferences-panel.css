@@ -64,9 +64,7 @@
 
 .panel-header h2 {
   margin: 0 0 4px;
-  font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 2rem;
-  font-weight: 600;
   color: #3d2f1f;
 }
 
@@ -109,7 +107,6 @@
   border-bottom: 2px solid transparent;
   background: transparent;
   color: #9a7c5a;
-  font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 1.05rem;
   font-weight: 600;
   letter-spacing: 0.04em;
@@ -139,9 +136,7 @@
 
 .panel-section-copy h3 {
   margin: 0 0 8px;
-  font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 1.7rem;
-  font-weight: 600;
   color: #3d2f1f;
 }
 
@@ -187,9 +182,7 @@
 .panel-day-header h4,
 .panel-recipe-copy h4 {
   margin: 0;
-  font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 1.35rem;
-  font-weight: 600;
   color: #3d2f1f;
 }
 
