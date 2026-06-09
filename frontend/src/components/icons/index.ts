@@ -1,5 +1,7 @@
 export { CalendarIcon } from './CalendarIcon'
 export { CheckIcon } from './CheckIcon'
+export { ChevronLeftIcon } from './ChevronLeftIcon'
+export { ChevronRightIcon } from './ChevronRightIcon'
 export { CloseIcon } from './CloseIcon'
 export { FridgeIcon } from './FridgeIcon'
 export { LeafIcon } from './LeafIcon'

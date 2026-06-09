@@ -33,16 +33,62 @@
   gap: 10px;
 }
 
+.planner-week-nav {
+  display: inline-grid;
+  grid-template-columns: 38px minmax(0, auto) 38px;
+  align-items: stretch;
+  width: fit-content;
+  max-width: 100%;
+  border: 1px solid rgba(138, 112, 96, 0.24);
+  border-radius: var(--radius-sm);
+  background: #fffdf8;
+  overflow: hidden;
+}
+
+.planner-week-nav-btn {
+  display: inline-flex;
+  width: 38px;
+  min-height: 38px;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: transparent;
+  color: var(--text-color);
+  cursor: pointer;
+  transition:
+    background-color var(--transition-ui),
+    color var(--transition-ui);
+}
+
+.planner-week-nav-btn:hover,
+.planner-week-nav-btn:focus-visible {
+  background: var(--highlight-color-2);
+  color: #ffffff;
+}
+
+.planner-week-nav-btn:disabled {
+  color: rgba(26, 27, 46, 0.34);
+  cursor: not-allowed;
+}
+
+.planner-week-nav-btn:disabled:hover {
+  background: transparent;
+  color: rgba(26, 27, 46, 0.34);
+}
+
+.planner-week-nav-btn:focus-visible {
+  outline: 2px solid var(--highlight-color-2);
+  outline-offset: -2px;
+}
+
 .planner-week-pill {
   display: inline-flex;
-  width: fit-content;
+  min-height: 38px;
   align-items: center;
   gap: var(--space-xs);
   margin: 0;
   padding: 0.45rem 0.75rem;
-  border: 1px solid rgba(138, 112, 96, 0.24);
-  border-radius: var(--radius-sm);
-  background: #fffdf8;
+  border-inline: 1px solid rgba(138, 112, 96, 0.24);
   color: var(--text-color);
   font-size: 0.8rem;
   font-weight: 900;
@@ -547,6 +593,10 @@
 
   .planner-week-pill {
     white-space: normal;
+  }
+
+  .planner-week-nav {
+    grid-template-columns: 38px minmax(0, 1fr) 38px;
   }
 
   .planner-shopping-actions {

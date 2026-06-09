@@ -6,6 +6,8 @@ import { DayCard, LoadingDots, MainTab, PreferencesPanel } from '#/components'
 import {
   CalendarIcon,
   CheckIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
   FridgeIcon,
   LeafIcon,
   RefreshIcon,
@@ -13,11 +15,7 @@ import {
   ShoppingCartIcon,
   SparkleIcon,
 } from '#/components/icons'
-import {
-  DAYS,
-  getWeekNumber,
-  isWeekend,
-} from '#/data/constants'
+import { DAYS, getWeekNumber, isWeekend } from '#/data/constants'
 import {
   CATEGORY_META,
   createChecklistState,
@@ -49,6 +47,7 @@ export function WeeklyMenuPlanner() {
   const [animationKey, setAnimationKey] = useState(0)
   const [activeTab, setActiveTab] = useState<MainTabId>('menu')
   const [isPreferencesOpen, setIsPreferencesOpen] = useState(false)
+  const [weekOffset, setWeekOffset] = useState(0)
   const [savedPreferences, setSavedPreferences] = useState<Preferences>(() =>
     getDefaultPreferences(),
   )
@@ -61,7 +60,9 @@ export function WeeklyMenuPlanner() {
   const ingredientSets = getIngredientSets(locale)
   const generatedMenu =
     currentMenuIndex >= 0 ? menuSets[currentMenuIndex] : null
-  const weekRange = formatWeekRange()
+  const selectedWeekDate = new Date()
+  selectedWeekDate.setDate(selectedWeekDate.getDate() + weekOffset * 7)
+  const weekRange = formatWeekRange(selectedWeekDate)
   const activePreferenceCount = getActivePreferencesBadgeCount(savedPreferences)
   const neededItems = getNeededItemsCount(shoppingChecklist)
 
@@ -103,16 +104,46 @@ export function WeeklyMenuPlanner() {
       <section className="planner-shell" aria-labelledby="planner-title">
         <div className="planner-hero">
           <div className="planner-card-meta">
-            <p className="planner-week-pill">
-              {t('planner.weekKicker', {
-                week: getWeekNumber(),
-                start: weekRange.start,
-                end: weekRange.end,
-              })}
-            </p>
+            <div
+              className="planner-week-nav"
+              aria-label={t('planner.weekNavigationLabel')}
+            >
+              <button
+                className="planner-week-nav-btn"
+                type="button"
+                aria-label={t('planner.previousWeek')}
+                disabled={weekOffset <= -1}
+                onClick={() =>
+                  setWeekOffset((offset) => Math.max(offset - 1, -1))
+                }
+              >
+                <ChevronLeftIcon aria-hidden="true" />
+              </button>
+              <p className="planner-week-pill" aria-live="polite">
+                {t('planner.weekKicker', {
+                  week: getWeekNumber(selectedWeekDate),
+                  start: weekRange.start,
+                  end: weekRange.end,
+                })}
+              </p>
+              <button
+                className="planner-week-nav-btn"
+                type="button"
+                aria-label={t('planner.nextWeek')}
+                disabled={weekOffset >= 1}
+                onClick={() =>
+                  setWeekOffset((offset) => Math.min(offset + 1, 1))
+                }
+              >
+                <ChevronRightIcon aria-hidden="true" />
+              </button>
+            </div>
           </div>
 
-          <div className="planner-actions" aria-label={t('planner.actionsLabel')}>
+          <div
+            className="planner-actions"
+            aria-label={t('planner.actionsLabel')}
+          >
             <button
               className="planner-secondary-btn"
               type="button"
@@ -182,7 +213,9 @@ export function WeeklyMenuPlanner() {
             checklist={shoppingChecklist}
             generatedMenu={generatedMenu}
             ingredientSet={
-              currentMenuIndex >= 0 ? ingredientSets[currentMenuIndex] : undefined
+              currentMenuIndex >= 0
+                ? ingredientSets[currentMenuIndex]
+                : undefined
             }
             isGenerating={isGenerating}
             neededItems={neededItems}
@@ -271,8 +304,7 @@ function MenuTab({
 
   return (
     <div className="planner-menu-tab" key={animationKey}>
-      <div className="planner-section-heading">
-      </div>
+      <div className="planner-section-heading"></div>
 
       <div className="planner-day-grid">
         {DAYS.map((day, index) => {
@@ -293,7 +325,6 @@ function MenuTab({
           )
         })}
       </div>
-
     </div>
   )
 }
