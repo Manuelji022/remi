@@ -21,7 +21,7 @@
   right: 0;
   width: min(540px, 100%);
   height: 100%;
-  background: var(--background-color);
+  background: #ffffff;
   box-shadow: -16px 0 60px
     color-mix(in srgb, var(--text-color) 20%, transparent);
   display: flex;
@@ -188,10 +188,6 @@
 
 .panel-day-card {
   padding: var(--radius-lg);
-}
-
-.panel-day-card.weekend {
-  border-color: color-mix(in srgb, var(--highlight-color-3) 35%, transparent);
 }
 
 .panel-day-header {

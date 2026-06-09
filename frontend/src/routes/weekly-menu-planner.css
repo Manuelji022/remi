@@ -5,7 +5,6 @@
 /* --- Planner Shell --- */
 .planner-page {
   min-height: calc(100vh - 128px);
-  margin: var(--space-md);
 }
 
 .planner-shell {
