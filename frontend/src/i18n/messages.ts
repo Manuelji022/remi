@@ -43,7 +43,8 @@ export const messages = {
     'auth.backToLogin': 'Back to login',
     'auth.forgotPasswordLink': 'Forgot your password?',
     'auth.forgotPasswordTitle': 'Reset password',
-    'auth.forgotPasswordCopy': 'Enter your email and we will send you a link to reset your password.',
+    'auth.forgotPasswordCopy':
+      'Enter your email and we will send you a link to reset your password.',
     'auth.sendResetLink': 'Send reset link',
     'auth.sending': 'Sending...',
     'auth.resetPasswordSent': 'Check your email for the reset link.',
@@ -53,9 +54,11 @@ export const messages = {
     'auth.newPassword': 'New password',
     'auth.resetPassword': 'Reset password',
     'auth.resettingPassword': 'Resetting...',
-    'auth.resetPasswordInvalidToken': 'The reset link is invalid or has expired.',
+    'auth.resetPasswordInvalidToken':
+      'The reset link is invalid or has expired.',
     'auth.resetPasswordDoneTitle': 'Password updated',
-    'auth.resetPasswordDoneCopy': 'Your password has been reset. You can now log in with your new password.',
+    'auth.resetPasswordDoneCopy':
+      'Your password has been reset. You can now log in with your new password.',
     'auth.alreadyHaveAccount': 'Already have an account?',
     'footer.rights': 'Developed by Manuelji. All rights reserved.',
     'home.copy': 'Probando',
@@ -146,8 +149,6 @@ export const messages = {
     'preferences.emptyRecipes': 'No custom recipes saved yet.',
     'preferences.noRecipeIngredients': 'No ingredients added yet.',
     'preferences.deleteRecipe': 'Delete {name}',
-    'preferences.unsaved': 'You have unsaved preference changes.',
-    'preferences.ready': 'Changes are ready to save when you are.',
     'preferences.save': 'Save preferences',
     'shopping.emptyTitle': 'Generate a Weekly Menu first',
     'shopping.emptyBody':
@@ -225,10 +226,12 @@ export const messages = {
     'auth.backToLogin': 'Volver al inicio de sesión',
     'auth.forgotPasswordLink': '¿Has olvidado tu contraseña?',
     'auth.forgotPasswordTitle': 'Restablecer contraseña',
-    'auth.forgotPasswordCopy': 'Introduce tu email y te enviaremos un enlace para restablecer tu contraseña.',
+    'auth.forgotPasswordCopy':
+      'Introduce tu email y te enviaremos un enlace para restablecer tu contraseña.',
     'auth.sendResetLink': 'Enviar enlace',
     'auth.sending': 'Enviando...',
-    'auth.resetPasswordSent': 'Revisa tu email para el enlace de restablecimiento.',
+    'auth.resetPasswordSent':
+      'Revisa tu email para el enlace de restablecimiento.',
     'auth.resetPasswordError': 'No se pudo enviar el enlace.',
     'auth.resetPasswordTitle': 'Nueva contraseña',
     'auth.resetPasswordCopy': 'Introduce una nueva contraseña para tu cuenta.',
@@ -237,7 +240,8 @@ export const messages = {
     'auth.resettingPassword': 'Restableciendo...',
     'auth.resetPasswordInvalidToken': 'El enlace no es válido o ha caducado.',
     'auth.resetPasswordDoneTitle': 'Contraseña actualizada',
-    'auth.resetPasswordDoneCopy': 'Tu contraseña se ha restablecido. Ya puedes iniciar sesión con tu nueva contraseña.',
+    'auth.resetPasswordDoneCopy':
+      'Tu contraseña se ha restablecido. Ya puedes iniciar sesión con tu nueva contraseña.',
     'auth.alreadyHaveAccount': '¿Ya tienes cuenta?',
     'footer.rights':
       'Desarrollado por Manuelji. Todos los derechos reservados.',
@@ -327,8 +331,6 @@ export const messages = {
     'preferences.emptyRecipes': 'Todavía no hay recetas personalizadas.',
     'preferences.noRecipeIngredients': 'Todavía no hay ingredientes añadidos.',
     'preferences.deleteRecipe': 'Eliminar {name}',
-    'preferences.unsaved': 'Tienes cambios de preferencias sin guardar.',
-    'preferences.ready': 'Los cambios están listos para guardar.',
     'preferences.save': 'Guardar preferencias',
     'shopping.emptyTitle': 'Genera primero un Menú Semanal',
     'shopping.emptyBody':

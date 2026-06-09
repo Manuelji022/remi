@@ -186,11 +186,6 @@ export function PreferencesPanel({
         </div>
 
         <div className="panel-footer">
-          <p className="panel-footer-note">
-            {hasUnsavedChanges
-              ? t('preferences.unsaved')
-              : t('preferences.ready')}
-          </p>
           <div className="panel-footer-actions">
             <button
               className="panel-secondary-btn"
