@@ -31,3 +31,7 @@ pnpx react-doctor@latest
 - Nitro for SSR/production server
 - Vitest for testing
 - ESLint + Prettier (TanStack config)
+
+## Pull requests
+
+Every pull request needs a conventional-commit title (`type: description` or `type(scope): description`) and a filled [`.github/PULL_REQUEST_TEMPLATE.md`](.github/PULL_REQUEST_TEMPLATE.md). PR policy requires non-empty Summary, Why, Scope, Out of scope, How to test, and Risk sections. The template source of truth is https://github.com/Manuelji022/.github/blob/main/PULL_REQUEST_TEMPLATE.md.

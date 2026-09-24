@@ -6,7 +6,9 @@ settings:
 
 importers:
 
-  .:
+  .: {}
+
+  frontend:
     dependencies:
       '@better-auth/drizzle-adapter':
         specifier: 1.6.11

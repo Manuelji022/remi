@@ -28,7 +28,9 @@ export function TwoFactorPage() {
     setError(null)
     setIsSending(true)
 
-    const result = await authClient.twoFactor.sendOtp({ trustDevice: false })
+    const result = await authClient.twoFactor.sendOtp({
+      trustDevice: false,
+    } as Parameters<typeof authClient.twoFactor.sendOtp>[0])
 
     setIsSending(false)
 
