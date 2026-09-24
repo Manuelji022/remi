@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
 import './weekly-menu-planner.css'
 import { DayCard, LoadingDots, MainTab, PreferencesPanel } from '#/components'
@@ -31,6 +31,12 @@ import {
 } from '#/data/types'
 import type { ChecklistState, Preferences, WeeklyMenu } from '#/data/types'
 import { useI18n } from '#/i18n'
+import {
+  getBrowserStorage,
+  mergeChecklistWithMenu,
+  readWeeklyMenuPlannerState,
+  writeWeeklyMenuPlannerState,
+} from '#/lib/weekly-menu-planner-storage'
 
 type MainTabId = 'menu' | 'ingredients'
 
@@ -53,6 +59,9 @@ export function WeeklyMenuPlanner() {
     getDefaultPreferences(),
   )
   const [shoppingChecklist, setShoppingChecklist] = useState<ChecklistState>({})
+  const [isHydrated, setIsHydrated] = useState(false)
+  const hasLoadedRef = useRef(false)
+  const skipChecklistSyncRef = useRef(false)
 
   const menuSets = getMenuSets(locale)
   const ingredientSets = getIngredientSets(locale)
@@ -65,10 +74,62 @@ export function WeeklyMenuPlanner() {
   const neededItems = getNeededItemsCount(shoppingChecklist)
 
   useEffect(() => {
-    if (currentMenuIndex < 0) return
+    if (hasLoadedRef.current) return
+    hasLoadedRef.current = true
+
+    const stored = readWeeklyMenuPlannerState(
+      getBrowserStorage(),
+      menuSets.length,
+    )
+
+    if (stored) {
+      const ingredientSet =
+        stored.currentMenuIndex >= 0
+          ? ingredientSets[stored.currentMenuIndex]
+          : undefined
+
+      setSavedPreferences(stored.savedPreferences)
+      setDraftPreferences(stored.savedPreferences)
+      setCurrentMenuIndex(stored.currentMenuIndex)
+
+      if (ingredientSet) {
+        // Changing the menu index rebuilds a blank checklist. Skip that once
+        // so the restored checklist is not cleared on load.
+        skipChecklistSyncRef.current = true
+        setShoppingChecklist(
+          mergeChecklistWithMenu(
+            createChecklistState(ingredientSet),
+            stored.shoppingChecklist,
+          ),
+        )
+      }
+    }
+
+    setIsHydrated(true)
+  }, [ingredientSets, menuSets.length])
+
+  useEffect(() => {
+    if (!isHydrated) return
+
+    writeWeeklyMenuPlannerState(getBrowserStorage(), {
+      savedPreferences,
+      currentMenuIndex,
+      shoppingChecklist,
+    })
+  }, [currentMenuIndex, isHydrated, savedPreferences, shoppingChecklist])
+
+  useEffect(() => {
+    if (!isHydrated || currentMenuIndex < 0) return
+
+    if (skipChecklistSyncRef.current) {
+      skipChecklistSyncRef.current = false
+      return
+    }
+
+    if (currentMenuIndex >= ingredientSets.length) return
 
     setShoppingChecklist(createChecklistState(ingredientSets[currentMenuIndex]))
-  }, [currentMenuIndex, ingredientSets, locale])
+  }, [currentMenuIndex, ingredientSets, isHydrated, locale])
 
   function handleGenerateMenu() {
     if (isGenerating) return

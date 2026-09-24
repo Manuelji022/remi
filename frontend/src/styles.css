@@ -136,6 +136,38 @@ p {
   text-wrap: pretty;
 }
 
+.home-page {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-md);
+  padding: var(--space-lg);
+}
+
+.planner-entry-link {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.45rem 0.7rem;
+  border: var(--border-strong);
+  border-radius: var(--radius-pill);
+  background: white;
+  color: var(--text-color);
+  font-size: 0.85rem;
+  font-weight: 900;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.planner-entry-link:hover {
+  background: var(--highlight-color);
+  color: white;
+}
+
+.planner-entry-link:focus-visible {
+  outline: var(--focus-ring-strong);
+  outline-offset: 3px;
+}
+
 button:focus-visible {
   outline: var(--focus-ring-strong);
   outline-offset: 3px;

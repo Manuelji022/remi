@@ -62,6 +62,7 @@ export const messages = {
     'auth.alreadyHaveAccount': 'Already have an account?',
     'footer.rights': 'Developed by Manuelji. All rights reserved.',
     'home.copy': 'Probando',
+    'nav.weeklyMenu': 'Weekly menu',
     'about.kicker': 'About',
     'about.title': 'A small starter with room to grow.',
     'about.body':
@@ -249,6 +250,7 @@ export const messages = {
     'footer.rights':
       'Desarrollado por Manuelji. Todos los derechos reservados.',
     'home.copy': 'Probando',
+    'nav.weeklyMenu': 'Menú semanal',
     'about.kicker': 'Acerca de',
     'about.title': 'Un pequeño punto de partida con espacio para crecer.',
     'about.body':

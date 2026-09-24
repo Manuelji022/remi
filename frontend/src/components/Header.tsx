@@ -16,9 +16,17 @@ export default function Header() {
   return (
     <header className="site-header">
       <nav className="header-wrapper" aria-label="Primary">
-        <Link className="header-logo" to={homePath} aria-label="Remi home">
-          REMI<span className="header-logo-span">!</span>
-        </Link>
+        <div className="header-leading">
+          <Link className="header-logo" to={homePath} aria-label="Remi home">
+            REMI<span className="header-logo-span">!</span>
+          </Link>
+          <Link
+            className="planner-entry-link"
+            to={getLocalizedPath('/weekly-menu-planner', locale)}
+          >
+            {t('nav.weeklyMenu')}
+          </Link>
+        </div>
         <div className="header-auth">
           {session ? (
             <>
