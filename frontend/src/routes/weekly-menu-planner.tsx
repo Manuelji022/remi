@@ -4,12 +4,10 @@ import type { CSSProperties } from 'react'
 import './weekly-menu-planner.css'
 import { DayCard, LoadingDots, MainTab, PreferencesPanel } from '#/components'
 import {
-  CalendarIcon,
   CheckIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
   FridgeIcon,
-  LeafIcon,
   RefreshIcon,
   SettingsIcon,
   ShoppingCartIcon,

@@ -2,7 +2,7 @@ import './preferences-panel.css'
 
 import { Link, useLocation } from '@tanstack/react-router'
 import { Globe2 } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { CheckIcon, CloseIcon, SettingsIcon } from '#/components/icons'
 import type { Day } from '#/data/constants'
 import type {
@@ -43,11 +43,6 @@ export function PreferencesPanel({
     setDraftPrefs(savedPrefs)
     setActiveTab('schedule')
   }, [isOpen, savedPrefs])
-
-  const hasUnsavedChanges = useMemo(
-    () => JSON.stringify(draftPrefs) !== JSON.stringify(savedPrefs),
-    [draftPrefs, savedPrefs],
-  )
 
   if (!isOpen) return null
 

@@ -1,0 +1,14 @@
+name: CI
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  node-ci:
+    uses: Manuelji022/github-workflows/.github/workflows/node-ci.yml@main
+    with:
+      node-version: "24"
+      package-manager: pnpm

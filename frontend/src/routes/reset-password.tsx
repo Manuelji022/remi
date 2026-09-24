@@ -17,7 +17,7 @@ type FormSubmitEvent = Parameters<
 export function ResetPasswordPage() {
   const navigate = useNavigate()
   const { locale, t } = useI18n()
-  const search = useSearch({ from: '/reset-password' })
+  const search: { token?: unknown } = useSearch({ from: '/reset-password' })
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
