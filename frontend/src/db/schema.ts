@@ -1,5 +1,13 @@
 import { relations } from 'drizzle-orm'
-import { pgTable, text, timestamp, boolean, index } from 'drizzle-orm/pg-core'
+import {
+  pgTable,
+  text,
+  timestamp,
+  boolean,
+  index,
+  integer,
+  doublePrecision,
+} from 'drizzle-orm/pg-core'
 
 export const user = pgTable('user', {
   id: text('id').primaryKey(),
@@ -91,10 +99,44 @@ export const twoFactor = pgTable(
   ],
 )
 
+export const recipe = pgTable(
+  'recipe',
+  {
+    id: text('id').primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    name: text('name').notNull(),
+    slot: text('slot').notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at')
+      .defaultNow()
+      .$onUpdate(() => /* @__PURE__ */ new Date())
+      .notNull(),
+  },
+  (table) => [index('recipe_userId_idx').on(table.userId)],
+)
+
+export const recipeIngredient = pgTable(
+  'recipe_ingredient',
+  {
+    id: text('id').primaryKey(),
+    recipeId: text('recipe_id')
+      .notNull()
+      .references(() => recipe.id, { onDelete: 'cascade' }),
+    name: text('name').notNull(),
+    quantity: doublePrecision('quantity'),
+    unit: text('unit'),
+    position: integer('position').notNull(),
+  },
+  (table) => [index('recipeIngredient_recipeId_idx').on(table.recipeId)],
+)
+
 export const userRelations = relations(user, ({ many }) => ({
   sessions: many(session),
   accounts: many(account),
   twoFactors: many(twoFactor),
+  recipes: many(recipe),
 }))
 
 export const sessionRelations = relations(session, ({ one }) => ({
@@ -117,3 +159,21 @@ export const twoFactorRelations = relations(twoFactor, ({ one }) => ({
     references: [user.id],
   }),
 }))
+
+export const recipeRelations = relations(recipe, ({ one, many }) => ({
+  user: one(user, {
+    fields: [recipe.userId],
+    references: [user.id],
+  }),
+  ingredients: many(recipeIngredient),
+}))
+
+export const recipeIngredientRelations = relations(
+  recipeIngredient,
+  ({ one }) => ({
+    recipe: one(recipe, {
+      fields: [recipeIngredient.recipeId],
+      references: [recipe.id],
+    }),
+  }),
+)

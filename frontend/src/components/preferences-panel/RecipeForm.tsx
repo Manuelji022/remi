@@ -1,8 +1,9 @@
 import { useId, useState } from 'react'
 import { PlusIcon, TrashIcon } from '#/components/icons'
-import type { CustomRecipe, MealSlot } from '#/data/types'
+import type { MealSlot } from '#/data/types'
 import { useI18n } from '#/i18n'
-import { INGREDIENT_UNITS, RECIPE_SLOT_OPTIONS } from './types'
+import { INGREDIENT_UNITS, MEAL_SLOTS } from '#/recipes/recipe'
+import type { RecipeInput } from '#/recipes/recipe'
 import type { RecipeIngredientDraft } from './types'
 import {
   buildRecipeIngredients,
@@ -11,7 +12,7 @@ import {
 } from './utils'
 
 interface RecipeFormProps {
-  onAddRecipe: (recipe: CustomRecipe) => void
+  onAddRecipe: (recipe: RecipeInput) => Promise<void>
 }
 
 export function RecipeForm({ onAddRecipe }: RecipeFormProps) {
@@ -26,16 +27,20 @@ export function RecipeForm({ onAddRecipe }: RecipeFormProps) {
   const hasInvalidIngredientQuantity =
     hasInvalidRecipeIngredientQuantity(recipeIngredients)
 
-  function handleAddRecipe() {
+  async function handleAddRecipe() {
     const name = recipeName.trim()
 
     if (!name || hasInvalidIngredientQuantity) return
 
-    onAddRecipe({
-      name,
-      slot: recipeSlot,
-      ingredients: buildRecipeIngredients(recipeIngredients),
-    })
+    try {
+      await onAddRecipe({
+        name,
+        slot: recipeSlot,
+        ingredients: buildRecipeIngredients(recipeIngredients),
+      })
+    } catch {
+      return
+    }
 
     setRecipeName('')
     setRecipeSlot('dinner')
@@ -92,7 +97,7 @@ export function RecipeForm({ onAddRecipe }: RecipeFormProps) {
           aria-label={t('preferences.recipeSlotHelp')}
           role="group"
         >
-          {RECIPE_SLOT_OPTIONS.map((slot) => (
+          {MEAL_SLOTS.map((slot) => (
             <button
               className={`panel-scope-pill ${recipeSlot === slot ? 'selected' : ''}`}
               key={slot}
