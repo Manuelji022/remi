@@ -270,7 +270,7 @@
   gap: 7px;
   min-height: 40px;
   padding: 0 var(--space-control);
-  border: 1px solid color-mix(in srgb, var(--card-color) 70%, transparent);
+  border: 2px solid color-mix(in srgb, var(--text-color) 22%, transparent);
   background: color-mix(in srgb, var(--background-color) 74%, white);
   font-size: 0.82rem;
   font-weight: 700;
@@ -282,21 +282,23 @@
   height: 14px;
 }
 
-.panel-context-pill.selected {
-  border-color: color-mix(in srgb, var(--highlight-color-3) 55%, transparent);
-  background: color-mix(in srgb, var(--highlight-color-3) 14%, transparent);
+.panel-context-pill.selected,
+.panel-scope-pill.selected {
+  border-color: var(--text-color);
+  background: var(--background-color);
+  color: var(--text-color);
 }
 
-.panel-scope-pill.selected {
-  border-color: color-mix(in srgb, var(--highlight-color) 45%, transparent);
-  background: color-mix(in srgb, var(--highlight-color) 14%, transparent);
-  color: var(--highlight-color);
+.panel-pill-check {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 auto;
 }
 
 .panel-scope-pill:disabled {
-  border-color: color-mix(in srgb, var(--text-color) 16%, transparent);
-  background: color-mix(in srgb, var(--text-color) 8%, transparent);
-  color: color-mix(in srgb, var(--text-color) 42%, transparent);
+  border-color: var(--text-disabled);
+  background: var(--button-disabled-bg);
+  color: var(--text-disabled);
   cursor: not-allowed;
 }
 
@@ -392,7 +394,7 @@
   border-radius: var(--radius-sm);
   padding: 9px 13px;
   background: color-mix(in srgb, var(--highlight-color) 10%, transparent);
-  color: var(--highlight-color);
+  color: var(--text-color);
   font-size: 0.82rem;
   font-weight: 800;
   cursor: pointer;
@@ -405,7 +407,7 @@
 
 .panel-field-error {
   margin: 8px 0 0;
-  color: var(--highlight-color-3);
+  color: var(--text-color);
   font-size: 0.8rem;
   font-weight: 700;
 }
@@ -416,21 +418,21 @@
   justify-content: center;
   gap: var(--space-xs);
   margin-top: 16px;
-  border: none;
+  border: var(--border-strong);
+  border-radius: var(--button-primary-radius);
   padding: var(--space-sm) var(--radius-lg);
-  background: var(--highlight-color-2);
-  color: var(--background-color);
+  background: var(--button-primary-bg);
+  color: var(--button-primary-fg);
   font-size: 0.95rem;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 10px 24px
-    color-mix(in srgb, var(--highlight-color-2) 22%, transparent);
 }
 
 .panel-add-btn:disabled {
+  border-color: var(--text-disabled);
+  background: var(--button-disabled-bg);
+  color: var(--button-disabled-fg);
   cursor: not-allowed;
-  opacity: 0.5;
-  box-shadow: none;
 }
 
 .panel-empty-recipes {
@@ -467,7 +469,7 @@
   border-radius: var(--radius-sm);
   padding: 5px 10px;
   background: color-mix(in srgb, var(--highlight-color) 10%, transparent);
-  color: var(--highlight-color);
+  color: var(--text-color);
   font-size: 0.78rem;
   font-weight: 700;
 }
@@ -500,16 +502,18 @@
   align-items: center;
   justify-content: center;
   gap: var(--space-xs);
-  border: none;
-  background: var(--highlight-color-2);
-  color: var(--background-color);
+  border: var(--border-strong);
+  border-radius: var(--button-primary-radius);
+  background: var(--button-primary-bg);
+  color: var(--button-primary-fg);
 }
 
 .panel-secondary-btn {
   flex: 1;
-  background: var(--highlight-color-3);
-  border: none;
-  color: var(--background-color);
+  border: var(--border-strong);
+  border-radius: var(--button-secondary-radius);
+  background: var(--button-secondary-bg);
+  color: var(--button-secondary-fg);
 }
 
 .panel-primary-btn:hover:not(:disabled),
@@ -519,12 +523,6 @@
 .panel-context-pill:hover,
 .panel-scope-pill:hover:not(:disabled) {
   transform: var(--hover-lift);
-}
-
-.panel-primary-btn:hover:not(:disabled),
-.panel-add-btn:hover:not(:disabled) {
-  box-shadow: 0 14px 30px
-    color-mix(in srgb, var(--highlight-color-2) 30%, transparent);
 }
 
 .panel-context-pill:focus-visible,

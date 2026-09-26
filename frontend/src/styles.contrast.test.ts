@@ -3,7 +3,10 @@ import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 
-const stylesPath = resolve(dirname(fileURLToPath(import.meta.url)), 'styles.css')
+const stylesPath = resolve(
+  dirname(fileURLToPath(import.meta.url)),
+  'styles.css',
+)
 const styles = readFileSync(stylesPath, 'utf8')
 
 const surfaces = [
@@ -26,7 +29,9 @@ function luminance(hex: string) {
   const red = Number.parseInt(hex.slice(1, 3), 16)
   const green = Number.parseInt(hex.slice(3, 5), 16)
   const blue = Number.parseInt(hex.slice(5, 7), 16)
-  return 0.2126 * channel(red) + 0.7152 * channel(green) + 0.0722 * channel(blue)
+  return (
+    0.2126 * channel(red) + 0.7152 * channel(green) + 0.0722 * channel(blue)
+  )
 }
 
 function contrast(foreground: string, background: string) {
@@ -59,7 +64,9 @@ describe('contrast tokens', () => {
 
   it('keeps disabled UI at 3:1', () => {
     const disabled = token('--text-disabled')
-    expect(contrast(disabled, token('--button-disabled-bg'))).toBeGreaterThanOrEqual(3)
+    expect(
+      contrast(disabled, token('--button-disabled-bg')),
+    ).toBeGreaterThanOrEqual(3)
     expect(contrast(disabled, '#f0ebe4')).toBeGreaterThanOrEqual(3)
     expect(contrast(disabled, '#ffffff')).toBeGreaterThanOrEqual(3)
   })

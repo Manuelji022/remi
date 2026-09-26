@@ -61,7 +61,7 @@ export const messages = {
       'Your password has been reset. You can now log in with your new password.',
     'auth.alreadyHaveAccount': 'Already have an account?',
     'footer.rights': 'Developed by Manuelji. All rights reserved.',
-    'home.copy': 'Probando',
+    'home.copy': 'Plan meals for this week and shop from one list.',
     'nav.weeklyMenu': 'Weekly menu',
     'about.kicker': 'About',
     'about.title': 'A small starter with room to grow.',
@@ -249,7 +249,8 @@ export const messages = {
     'auth.alreadyHaveAccount': '¿Ya tienes cuenta?',
     'footer.rights':
       'Desarrollado por Manuelji. Todos los derechos reservados.',
-    'home.copy': 'Probando',
+    'home.copy':
+      'Planifica las comidas de esta semana y compra con una sola lista.',
     'nav.weeklyMenu': 'Menú semanal',
     'about.kicker': 'Acerca de',
     'about.title': 'Un pequeño punto de partida con espacio para crecer.',

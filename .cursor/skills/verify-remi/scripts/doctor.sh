@@ -50,7 +50,7 @@ home_file=$(mktemp)
 curl -fsS --max-time 10 -o "$home_file" http://localhost:3001/ || fail "GET http://localhost:3001/ failed. 127.0.0.1 is not the bind address."
 # SSR HTML contains null bytes. grep -a still searches them.
 grep -a -q "Remi - Your weekly meal planner" "$home_file" || fail "home response missing English title."
-grep -a -q "Probando" "$home_file" || fail "home response missing home copy."
+grep -a -q "Plan meals for this week and shop from one list." "$home_file" || fail "home response missing home copy."
 grep -a -q "Weekly menu" "$home_file" || fail "home response missing Weekly menu link."
 rm -f "$home_file"
 

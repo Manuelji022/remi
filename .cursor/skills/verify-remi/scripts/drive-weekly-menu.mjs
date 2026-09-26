@@ -335,8 +335,9 @@ async function main() {
     const home = await bodyText(page)
     step(
       'home copy',
-      home.includes('Probando') && home.includes('Weekly menu'),
-      'Probando and Weekly menu visible',
+      home.includes('Plan meals for this week and shop from one list.') &&
+        home.includes('Weekly menu'),
+      'home copy and Weekly menu visible',
     )
     const lang = await page.evaluate('document.documentElement.lang')
     step('home lang', lang === 'en', `lang=${lang}`)
