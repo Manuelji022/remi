@@ -26,22 +26,9 @@ export interface DayMeals {
 
 export type WeeklyMenu = Record<Day, DayMeals>
 
-export interface CustomRecipeIngredient {
-  name: string
-  quantity?: number
-  unit?: IngredientUnit
-}
-
-export interface CustomRecipe {
-  name: string
-  slot: MealSlot
-  ingredients: CustomRecipeIngredient[]
-}
-
 export interface Preferences {
   dayContexts: Partial<Record<Day, DayContext | null>>
   planningScopes: Partial<Record<Day, PlanningScope | null>>
-  customRecipes: CustomRecipe[]
 }
 
 export interface ChecklistItemState {
@@ -55,7 +42,6 @@ export function getDefaultPreferences(): Preferences {
   return {
     dayContexts: {},
     planningScopes: {},
-    customRecipes: [],
   }
 }
 
@@ -83,7 +69,7 @@ export function getActivePreferencesBadgeCount(
     (scope) => scope != null && scope !== 'both',
   ).length
 
-  return dayContextCount + scopedDayCount + preferences.customRecipes.length
+  return dayContextCount + scopedDayCount
 }
 
 export type SavedPrefs = Preferences

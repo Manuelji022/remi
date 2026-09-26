@@ -5,13 +5,11 @@ import { Globe2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { CheckIcon, CloseIcon, SettingsIcon } from '#/components/icons'
 import type { Day } from '#/data/constants'
-import type {
-  CustomRecipe,
-  DayContext,
-  PlanningScope,
-  Preferences,
-} from '#/data/types'
+import type { DayContext, PlanningScope, Preferences } from '#/data/types'
 import { getLocalizedPath, useI18n } from '#/i18n'
+import { authClient } from '#/lib/auth-client'
+import { importLegacyRecipes } from '#/recipes/migrate'
+import type { RecipeInput } from '#/recipes/recipe'
 import { PanelTabButton } from './Pills'
 import { RecipesTab } from './RecipesTab'
 import { ScheduleTab } from './ScheduleTab'
@@ -23,6 +21,8 @@ interface PreferencesPanelProps {
   onClose: () => void
   savedPrefs: Preferences
   onSave: (prefs: Preferences) => void
+  legacyCustomRecipes: RecipeInput[]
+  onLegacyRecipesMigrated: () => void
 }
 
 export function PreferencesPanel({
@@ -30,12 +30,17 @@ export function PreferencesPanel({
   onClose,
   savedPrefs,
   onSave,
+  legacyCustomRecipes,
+  onLegacyRecipesMigrated,
 }: PreferencesPanelProps) {
   const { locale, t } = useI18n()
   const location = useLocation()
+  const { data: session, isPending: isSessionPending } = authClient.useSession()
   const alternateLocale = locale === 'en' ? 'es' : 'en'
   const [draftPrefs, setDraftPrefs] = useState<Preferences>(savedPrefs)
   const [activeTab, setActiveTab] = useState<PreferencesPanelTab>('schedule')
+  const [migrationFailed, setMigrationFailed] = useState(false)
+  const userId = session?.user.id
 
   useEffect(() => {
     if (!isOpen) return
@@ -43,6 +48,40 @@ export function PreferencesPanel({
     setDraftPrefs(savedPrefs)
     setActiveTab('schedule')
   }, [isOpen, savedPrefs])
+
+  useEffect(() => {
+    if (
+      !isOpen ||
+      isSessionPending ||
+      !userId ||
+      legacyCustomRecipes.length === 0
+    ) {
+      return
+    }
+
+    const controller = { cancelled: false }
+
+    void importLegacyRecipes(legacyCustomRecipes, () => controller.cancelled)
+      .then((imported) => {
+        if (!imported || controller.cancelled) return
+        setMigrationFailed(false)
+        onLegacyRecipesMigrated()
+      })
+      .catch(() => {
+        if (controller.cancelled) return
+        setMigrationFailed(true)
+      })
+
+    return () => {
+      controller.cancelled = true
+    }
+  }, [
+    isOpen,
+    isSessionPending,
+    legacyCustomRecipes,
+    onLegacyRecipesMigrated,
+    userId,
+  ])
 
   if (!isOpen) return null
 
@@ -78,22 +117,6 @@ export function PreferencesPanel({
     setDraftPrefs({
       ...draftPrefs,
       planningScopes: { ...draftPrefs.planningScopes, [day]: nextScope },
-    })
-  }
-
-  function handleAddRecipe(recipe: CustomRecipe) {
-    setDraftPrefs({
-      ...draftPrefs,
-      customRecipes: [...draftPrefs.customRecipes, recipe],
-    })
-  }
-
-  function handleDeleteRecipe(recipeIndex: number) {
-    setDraftPrefs({
-      ...draftPrefs,
-      customRecipes: draftPrefs.customRecipes.filter(
-        (_, index) => index !== recipeIndex,
-      ),
     })
   }
 
@@ -173,9 +196,8 @@ export function PreferencesPanel({
             />
           ) : (
             <RecipesTab
-              customRecipes={draftPrefs.customRecipes}
-              onAddRecipe={handleAddRecipe}
-              onDeleteRecipe={handleDeleteRecipe}
+              legacyPending={legacyCustomRecipes.length > 0}
+              migrationFailed={migrationFailed}
             />
           )}
         </div>

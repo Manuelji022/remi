@@ -441,6 +441,11 @@
   background: color-mix(in srgb, var(--background-color) 85%, white);
 }
 
+.panel-text-link {
+  color: var(--highlight-color-2);
+  font-weight: 700;
+}
+
 .panel-recipe-card {
   display: flex;
   align-items: start;

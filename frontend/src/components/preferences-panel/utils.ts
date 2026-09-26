@@ -1,9 +1,5 @@
-import type {
-  CustomRecipeIngredient,
-  DayContext,
-  IngredientUnit,
-  PlanningScope,
-} from '#/data/types'
+import type { DayContext, IngredientUnit, PlanningScope } from '#/data/types'
+import type { RecipeIngredientInput } from '#/recipes/recipe'
 import { EMPTY_RECIPE_INGREDIENT } from './types'
 import type { RecipeIngredientDraft } from './types'
 
@@ -13,23 +9,21 @@ export function getEmptyRecipeIngredient(): RecipeIngredientDraft {
 
 export function buildRecipeIngredients(
   recipeIngredients: RecipeIngredientDraft[],
-): CustomRecipeIngredient[] {
-  return recipeIngredients
-    .map((ingredient) => {
-      const name = ingredient.name.trim()
-      const quantity = ingredient.quantity.trim()
+): RecipeIngredientInput[] {
+  return recipeIngredients.flatMap((ingredient) => {
+    const name = ingredient.name.trim()
+    const quantity = ingredient.quantity.trim()
 
-      if (!name) return null
+    if (!name) return []
 
-      return {
+    return [
+      {
         name,
-        ...(quantity ? { quantity: Number(quantity) } : {}),
-        ...(ingredient.unit ? { unit: ingredient.unit } : {}),
-      }
-    })
-    .filter((ingredient): ingredient is CustomRecipeIngredient =>
-      Boolean(ingredient),
-    )
+        quantity: quantity === '' ? null : Number(quantity),
+        unit: ingredient.unit === '' ? null : ingredient.unit,
+      },
+    ]
+  })
 }
 
 export function hasInvalidRecipeIngredientQuantity(
@@ -46,7 +40,7 @@ export function hasInvalidRecipeIngredientQuantity(
 }
 
 export function formatRecipeIngredient(
-  ingredient: CustomRecipeIngredient,
+  ingredient: RecipeIngredientInput,
   getUnitLabel: (unit: IngredientUnit) => string,
 ): string {
   const quantity = ingredient.quantity == null ? '' : `${ingredient.quantity} `

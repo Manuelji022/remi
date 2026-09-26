@@ -150,7 +150,10 @@ export const messages = {
     'preferences.invalidIngredientQuantity':
       'Ingredient quantities must be zero or greater.',
     'preferences.addRecipe': 'Add recipe',
-    'preferences.emptyRecipes': 'No custom recipes saved yet.',
+    'preferences.emptyRecipes': 'No recipes saved yet.',
+    'preferences.signInToSaveRecipes': 'Sign in to save recipes.',
+    'preferences.recipesLoading': 'Loading recipes...',
+    'preferences.recipesError': 'Could not update your recipes. Try again.',
     'preferences.noRecipeIngredients': 'No ingredients added yet.',
     'preferences.deleteRecipe': 'Delete {name}',
     'preferences.save': 'Save preferences',
@@ -337,7 +340,11 @@ export const messages = {
     'preferences.invalidIngredientQuantity':
       'Las cantidades deben ser cero o mayores.',
     'preferences.addRecipe': 'Añadir receta',
-    'preferences.emptyRecipes': 'Todavía no hay recetas personalizadas.',
+    'preferences.emptyRecipes': 'Todavía no hay recetas.',
+    'preferences.signInToSaveRecipes': 'Inicia sesión para guardar recetas.',
+    'preferences.recipesLoading': 'Cargando recetas...',
+    'preferences.recipesError':
+      'No se pudieron actualizar tus recetas. Inténtalo de nuevo.',
     'preferences.noRecipeIngredients': 'Todavía no hay ingredientes añadidos.',
     'preferences.deleteRecipe': 'Eliminar {name}',
     'preferences.save': 'Guardar preferencias',

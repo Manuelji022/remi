@@ -21,4 +21,4 @@ Shared chrome on every route:
 
 Related routes that are part of auth, not separate features: `/signup`, `/forgot-password`, `/reset-password`, `/two-factor`, and the `/es/...` copies of each. API: `/api/auth/*`.
 
-Out of this map: recipe database schema, Drizzle migrations, and `infraestructure/postgres` bring-up beyond the auth-submit line `doctor.sh` already prints.
+Recipe create, reload, and delete are in [preferences.md](preferences.md). They need the same `auth-submit: ready` line `doctor.sh` prints. Drizzle migrate commands and the `infraestructure/postgres` compose file stay out of this map.
