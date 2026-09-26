@@ -71,7 +71,7 @@ What that script does, in order:
 3. Empty state: `h2` text `No Weekly Menu yet`. The `Shopping List` `button.tab-btn` is disabled. There is no `#planner-title` node; `aria-labelledby="planner-title"` on `.planner-shell` points at nothing.
 4. Click the first `button.planner-primary-btn` (text `Generate menu`). The client handler waits 700ms. Resulting state: `h2` `No Weekly Menu yet` is gone; Monday shows `Roasted Tomato Soup & Sourdough` and `Herb-Crusted Salmon with Lentils`; a primary button reads `Regenerate menu`; `.planner-state-note` reads `Mock set 1 of 3`.
 5. `localStorage['remi:weekly-menu-planner:state']` parses to `currentMenuIndex === 0`.
-6. Click the `button.tab-btn` whose text starts with `Shopping List`. Heading `Everything you need for this week` is visible. Click the first `button.planner-ingredient-row` (`Cherry tomatoes`). `aria-pressed` becomes `true` and the row shows `In fridge`. Storage checklist key `produceAndFreshHerbs::Cherry tomatoes` is `{ checked: true, inFridge: true }`.
+6. Click the `button.tab-btn` whose text starts with `Shopping List`. Heading `Everything you need for this week` is visible. Click the first `button.planner-ingredient-row` (`Cherry tomatoes`). `aria-pressed` becomes `true`. The message catalog string is `In fridge`, and `.planner-in-fridge-tag` uses `text-transform: uppercase`, so `innerText` is `IN FRIDGE`. Storage checklist key `produceAndFreshHerbs::Cherry tomatoes` is `{ checked: true, inFridge: true }`.
 
 Other features: same Chrome rules, selectors in `features/`. Do not add a second dev server to reach them.
 

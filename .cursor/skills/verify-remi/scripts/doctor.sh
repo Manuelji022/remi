@@ -46,10 +46,13 @@ if [[ $ancestor_ok -ne 1 ]]; then
   exit 1
 fi
 
-home=$(curl -fsS --max-time 10 http://localhost:3001/) || fail "GET http://localhost:3001/ failed. 127.0.0.1 is not the bind address."
-echo "$home" | grep -q "Remi - Your weekly meal planner" || fail "home response missing English title."
-echo "$home" | grep -q "Probando" || fail "home response missing home copy."
-echo "$home" | grep -q "Weekly menu" || fail "home response missing Weekly menu link."
+home_file=$(mktemp)
+curl -fsS --max-time 10 -o "$home_file" http://localhost:3001/ || fail "GET http://localhost:3001/ failed. 127.0.0.1 is not the bind address."
+# SSR HTML contains null bytes. grep -a still searches them.
+grep -a -q "Remi - Your weekly meal planner" "$home_file" || fail "home response missing English title."
+grep -a -q "Probando" "$home_file" || fail "home response missing home copy."
+grep -a -q "Weekly menu" "$home_file" || fail "home response missing Weekly menu link."
+rm -f "$home_file"
 
 session_file=$(mktemp)
 session_code=$(curl -sS --max-time 10 -o "$session_file" -w "%{http_code}" http://localhost:3001/api/auth/get-session) || fail "GET /api/auth/get-session failed to connect."

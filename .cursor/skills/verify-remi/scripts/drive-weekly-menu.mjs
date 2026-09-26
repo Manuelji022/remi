@@ -478,7 +478,9 @@ async function main() {
     )
     step(
       'toggle ingredient',
-      pressed === 'true' && rowText.includes('Cherry tomatoes') && rowText.includes('In fridge'),
+      pressed === 'true' &&
+        /cherry tomatoes/i.test(rowText) &&
+        /in fridge/i.test(rowText),
       rowText.replaceAll('\n', ' ').slice(0, 160),
     )
     await screenshot(page, '04-shopping-toggled.png')
