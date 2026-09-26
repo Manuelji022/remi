@@ -1,10 +1,10 @@
 import { TrashIcon } from '#/components/icons'
-import type { CustomRecipe } from '#/data/types'
 import { useI18n } from '#/i18n'
+import type { Recipe } from '#/recipes/recipe'
 import { formatRecipeIngredient } from './utils'
 
 interface RecipeCardProps {
-  recipe: CustomRecipe
+  recipe: Recipe
   onDelete: () => void
 }
 
@@ -20,10 +20,7 @@ export function RecipeCard({ recipe, onDelete }: RecipeCardProps) {
         {ingredients.length > 0 ? (
           <ul className="panel-ingredient-list">
             {ingredients.map((ingredient) => (
-              <li
-                className="panel-ingredient-chip"
-                key={`${ingredient.name}-${ingredient.quantity ?? ''}-${ingredient.unit ?? ''}`}
-              >
+              <li className="panel-ingredient-chip" key={ingredient.id}>
                 {formatRecipeIngredient(ingredient, (unit) =>
                   t(`units.${unit}`),
                 )}

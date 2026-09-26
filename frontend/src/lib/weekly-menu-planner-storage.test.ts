@@ -11,23 +11,23 @@ import type {
   WeeklyMenuPlannerStorage,
 } from './weekly-menu-planner-storage'
 
+const lemonPasta = {
+  name: 'Lemon pasta',
+  slot: 'dinner' as const,
+  ingredients: [{ name: 'Pasta', quantity: 200, unit: 'g' as const }],
+}
+
 const persistedState: WeeklyMenuPlannerPersistedState = {
   savedPreferences: {
     dayContexts: { Monday: 'office' },
     planningScopes: { Monday: 'dinner' },
-    customRecipes: [
-      {
-        name: 'Lemon pasta',
-        slot: 'dinner',
-        ingredients: [{ name: 'Pasta', quantity: 200, unit: 'g' }],
-      },
-    ],
   },
   currentMenuIndex: 1,
   shoppingChecklist: {
     'produceAndFreshHerbs::Kale': { checked: true, inFridge: true },
     'pantryAndDryGoods::Olive oil': { checked: false, inFridge: false },
   },
+  legacyCustomRecipes: [],
 }
 
 function createMemoryStorage(
@@ -83,13 +83,70 @@ describe('weekly menu planner storage', () => {
     expect(readWeeklyMenuPlannerState(storage, 3)).toBeNull()
   })
 
-  it('round-trips valid planner state', () => {
+  it('round-trips planner state and leaves recipes out of the blob', () => {
     const storage = createMemoryStorage()
 
     writeWeeklyMenuPlannerState(storage, persistedState)
 
     expect(readWeeklyMenuPlannerState(storage, 3)).toEqual(persistedState)
-    expect(storage.snapshot()).toHaveProperty(WEEKLY_MENU_PLANNER_STORAGE_KEY)
+    expect(
+      JSON.parse(storage.snapshot()[WEEKLY_MENU_PLANNER_STORAGE_KEY])
+        .savedPreferences,
+    ).toEqual({
+      dayContexts: { Monday: 'office' },
+      planningScopes: { Monday: 'dinner' },
+    })
+  })
+
+  it('keeps legacy recipes until they are imported', () => {
+    const storage = createMemoryStorage({
+      [WEEKLY_MENU_PLANNER_STORAGE_KEY]: JSON.stringify({
+        savedPreferences: {
+          dayContexts: { Monday: 'office' },
+          planningScopes: { Monday: 'dinner' },
+          customRecipes: [lemonPasta],
+        },
+        currentMenuIndex: 1,
+        shoppingChecklist: persistedState.shoppingChecklist,
+      }),
+    })
+
+    expect(readWeeklyMenuPlannerState(storage, 3)).toEqual({
+      ...persistedState,
+      legacyCustomRecipes: [
+        {
+          name: 'Lemon pasta',
+          slot: 'dinner',
+          ingredients: [{ name: 'Pasta', quantity: 200, unit: 'g' }],
+        },
+      ],
+    })
+
+    writeWeeklyMenuPlannerState(storage, {
+      ...persistedState,
+      legacyCustomRecipes: [lemonPasta],
+    })
+
+    expect(
+      JSON.parse(storage.snapshot()[WEEKLY_MENU_PLANNER_STORAGE_KEY])
+        .savedPreferences.customRecipes,
+    ).toEqual([lemonPasta])
+  })
+
+  it('rejects a blob whose legacy recipe is invalid', () => {
+    const storage = createMemoryStorage({
+      [WEEKLY_MENU_PLANNER_STORAGE_KEY]: JSON.stringify({
+        savedPreferences: {
+          dayContexts: {},
+          planningScopes: {},
+          customRecipes: [{ name: 'Soup', slot: 'breakfast', ingredients: [] }],
+        },
+        currentMenuIndex: -1,
+        shoppingChecklist: {},
+      }),
+    })
+
+    expect(readWeeklyMenuPlannerState(storage, 3)).toBeNull()
   })
 
   it('ignores writes when storage is missing', () => {
