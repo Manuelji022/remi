@@ -42,7 +42,7 @@ Read-only. Run it before any click. If it exits non-zero, do not drive.
 Worth driving only when all of these are true:
 
 - Exactly one `LISTEN` socket on port 3001, and walking that process's parents reaches the pid in `run/dev.pid`. A listener you did not start is a shared instance. Stop.
-- `curl -fsS http://localhost:3001/` returns 200 and the body contains `Remi - Your weekly meal planner`, `Probando`, and `Weekly menu`.
+- `curl -fsS http://localhost:3001/` returns 200 and the body contains `Remi - Your weekly meal planner`, `Plan meals for this week and shop from one list.`, and `Weekly menu`.
 - `curl -fsS http://localhost:3001/api/auth/get-session` returns 200. With no cookie the body is `null`. That is a healthy logged-out app, including when `frontend/.env` is absent.
 - The dev log may contain `Base URL could not be determined` when `BETTER_AUTH_URL` is unset. That warning does not block planner, home, or `/es` checks. It does block treating sign-in as successful.
 
@@ -66,7 +66,7 @@ Requires a doctor-clean server. Writes evidence under `.cursor/skills/verify-rem
 
 What that script does, in order:
 
-1. `http://localhost:3001/` — `html[lang="en"]`, `main.home-page` text `Probando`, header `a.header-logo` accessible name `Remi home`, `nav[aria-label="Primary"]` links `Weekly menu`, `Log in`, `Sign up`.
+1. `http://localhost:3001/` — `html[lang="en"]`, `main.home-page` text `Plan meals for this week and shop from one list.`, header `a.header-logo` accessible name `Remi home`, `nav[aria-label="Primary"]` links `Weekly menu`, `Log in`, `Sign up`.
 2. Click `main.home-page a.planner-entry-link` (accessible name `Weekly menu`). Path becomes `/weekly-menu-planner`.
 3. Empty state: `h2` text `No Weekly Menu yet`. The `Shopping List` `button.tab-btn` is disabled. There is no `#planner-title` node; `aria-labelledby="planner-title"` on `.planner-shell` points at nothing.
 4. Click the first `button.planner-primary-btn` (text `Generate menu`). The client handler waits 700ms. Resulting state: `h2` `No Weekly Menu yet` is gone; Monday shows `Roasted Tomato Soup & Sourdough` and `Herb-Crusted Salmon with Lentils`; a primary button reads `Regenerate menu`; `.planner-state-note` reads `Mock set 1 of 3`.

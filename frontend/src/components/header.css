@@ -61,9 +61,9 @@
 .header-auth-button {
   padding: 0.45rem 0.7rem;
   border: var(--border-strong);
-  border-radius: var(--radius-pill);
-  background: white;
-  color: var(--text-color);
+  border-radius: var(--button-secondary-radius);
+  background: var(--button-secondary-bg);
+  color: var(--button-secondary-fg);
   font-size: 0.85rem;
   font-weight: 900;
   text-decoration: none;
@@ -72,8 +72,9 @@
 
 .header-auth-link-strong,
 .header-auth-button {
-  background: var(--highlight-color-3);
-  color: white;
+  border-radius: var(--button-primary-radius);
+  background: var(--button-primary-bg);
+  color: var(--button-primary-fg);
   cursor: pointer;
 }
 

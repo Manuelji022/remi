@@ -39,7 +39,7 @@
 }
 
 .day-card.weekend .day-name {
-  color: #c77d2e;
+  color: var(--text-color);
 }
 
 .day-context-badge {
@@ -79,7 +79,7 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #aaa;
+  color: var(--text-muted);
   border: 10px solid;
   border-image-slice: 1;
   border-width: 5px;
@@ -96,10 +96,10 @@
 
 .meal-name {
   font-size: 1rem;
-  font-weight: 100;
+  font-weight: 600;
   color: var(--text-color);
 }
 
 .meal-slot.unplanned .meal-name {
-  color: #8a7060;
+  color: var(--text-muted);
 }

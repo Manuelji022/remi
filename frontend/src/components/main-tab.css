@@ -33,9 +33,8 @@
 }
 
 .tab-btn:disabled {
-  color: #b8a997;
+  color: var(--text-disabled);
   cursor: not-allowed;
-  opacity: 0.72;
 }
 
 .tab-btn.active {
@@ -56,8 +55,8 @@
   min-width: 20px;
   padding: 0 6px;
   border-radius: var(--radius-pill);
-  background-color: #e65100;
-  color: #fff;
+  background-color: var(--button-primary-bg);
+  color: var(--button-primary-fg);
   font-size: 0.7rem;
   font-weight: 700;
 }

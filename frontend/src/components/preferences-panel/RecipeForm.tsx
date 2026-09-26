@@ -1,5 +1,5 @@
 import { useId, useState } from 'react'
-import { PlusIcon, TrashIcon } from '#/components/icons'
+import { CheckIcon, PlusIcon, TrashIcon } from '#/components/icons'
 import type { CustomRecipe, MealSlot } from '#/data/types'
 import { useI18n } from '#/i18n'
 import { INGREDIENT_UNITS, RECIPE_SLOT_OPTIONS } from './types'
@@ -94,12 +94,16 @@ export function RecipeForm({ onAddRecipe }: RecipeFormProps) {
         >
           {RECIPE_SLOT_OPTIONS.map((slot) => (
             <button
+              aria-pressed={recipeSlot === slot}
               className={`panel-scope-pill ${recipeSlot === slot ? 'selected' : ''}`}
               key={slot}
               type="button"
               onClick={() => setRecipeSlot(slot)}
             >
               {t(`slots.${slot}`)}
+              {recipeSlot === slot ? (
+                <CheckIcon aria-hidden="true" className="panel-pill-check" />
+              ) : null}
             </button>
           ))}
         </div>

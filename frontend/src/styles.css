@@ -35,6 +35,16 @@
   --highlight-color-3: #fd4400;
   --card-color: #e3dbcc;
   --text-color: #1a1a2e;
+  --text-muted: #4e4a44;
+  --text-disabled: #746e66;
+  --button-primary-bg: #3661d7;
+  --button-primary-fg: #ffffff;
+  --button-primary-radius: var(--radius-pill);
+  --button-secondary-bg: #ffffff;
+  --button-secondary-fg: var(--text-color);
+  --button-secondary-radius: var(--radius-pill);
+  --button-disabled-bg: #e6e0d6;
+  --button-disabled-fg: var(--text-disabled);
 
   /* Spacing */
   --space-xxs: 4px;
@@ -106,11 +116,19 @@
 }
 
 body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
   font-family: var(--font-body);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   background-color: var(--background-color);
   color: var(--text-color);
+}
+
+main {
+  flex: 1 0 auto;
+  width: 100%;
 }
 
 input,
@@ -159,8 +177,8 @@ p {
 }
 
 .planner-entry-link:hover {
-  background: var(--highlight-color);
-  color: white;
+  background: var(--button-primary-bg);
+  color: var(--button-primary-fg);
 }
 
 .planner-entry-link:focus-visible {

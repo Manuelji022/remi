@@ -4,6 +4,7 @@ footer {
 }
 
 .footer {
-  background-color: black;
-  color:var(--background-color);
+  margin-top: auto;
+  background-color: var(--text-color);
+  color: var(--background-color);
 }

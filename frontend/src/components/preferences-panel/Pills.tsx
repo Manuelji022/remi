@@ -1,4 +1,4 @@
-import { CalendarIcon, UtensilsIcon } from '#/components/icons'
+import { CalendarIcon, CheckIcon, UtensilsIcon } from '#/components/icons'
 import { useI18n } from '#/i18n'
 import type { PreferencesPanelTab } from './types'
 
@@ -47,12 +47,16 @@ export function DayContextPill({
 
   return (
     <button
+      aria-pressed={isSelected}
       className={`panel-context-pill ${isSelected ? 'selected' : ''}`}
       type="button"
       onClick={onClick}
     >
       <Icon aria-hidden="true" />
       {label}
+      {isSelected ? (
+        <CheckIcon aria-hidden="true" className="panel-pill-check" />
+      ) : null}
     </button>
   )
 }
@@ -72,12 +76,16 @@ export function PlanningScopePill({
 }: PlanningScopePillProps) {
   return (
     <button
+      aria-pressed={isSelected}
       className={`panel-scope-pill ${isSelected ? 'selected' : ''}`}
       disabled={isDisabled}
       type="button"
       onClick={onClick}
     >
       {label}
+      {isSelected ? (
+        <CheckIcon aria-hidden="true" className="panel-pill-check" />
+      ) : null}
     </button>
   )
 }

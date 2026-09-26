@@ -1,6 +1,6 @@
 # Home
 
-Route `/`. Component `IndexPage` in `frontend/src/routes/index.tsx`. Copy comes from `home.copy` (`Probando` in both locales).
+Route `/`. Component `IndexPage` in `frontend/src/routes/index.tsx`. Copy comes from `home.copy`. English is `Plan meals for this week and shop from one list.` Spanish is `Planifica las comidas de esta semana y compra con una sola lista.`
 
 ## Sub-features
 
@@ -17,7 +17,7 @@ Open `http://localhost:3001/`. The logo `Remi home` returns here from any Englis
 1. `Page.navigate` to `http://localhost:3001/`. Do not use `127.0.0.1`.
 2. `document.documentElement.lang` is `en`.
 3. `document.title` is `Remi - Your weekly meal planner`.
-4. `main.home-page` contains `Probando`.
+4. `main.home-page` contains `Plan meals for this week and shop from one list.`
 5. `nav[aria-label="Primary"] a.header-logo` has accessible name `Remi home`.
 6. `main.home-page a.planner-entry-link` text is `Weekly menu`. Click it with a real mouse event after hydration. `location.pathname` becomes `/weekly-menu-planner`.
 7. `a.header-auth-link` texts are `Log in` (`/login`) and `Sign up` (`/signup`) when `/api/auth/get-session` is `null`.
