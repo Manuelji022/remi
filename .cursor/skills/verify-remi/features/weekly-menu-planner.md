@@ -14,7 +14,7 @@ node .cursor/skills/verify-remi/scripts/drive-weekly-menu.mjs
 - Generate / regenerate: `button.planner-primary-btn`.
 - Menu tab and shopping tab: `button.tab-btn` texts `Weekly Menu` and `Shopping List`.
 - Day cards: `article.day-card`, day name in `.day-name`, meals in `.meal-name`.
-- Persistence: `localStorage` key `remi:weekly-menu-planner:state`.
+- Persistence: `localStorage` key `remi:weekly-menu-planner:state` for schedule, menu index, and checklist. Recipes are not in that document. See [preferences.md](preferences.md).
 
 ## How to get to it (user POV)
 
