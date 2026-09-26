@@ -10,10 +10,10 @@ Remi's primary surface is the TanStack Start app in `frontend/` (package name `f
 Secondary surfaces, not separate apps:
 
 - Better Auth HTTP under `/api/auth/*` (`frontend/src/routes/api/auth/$.ts`). The header calls `authClient.useSession()` on every page.
-- Postgres in `infraestructure/postgres/` for auth persistence only. The weekly menu planner does not read or write it.
+- Postgres in `infraestructure/postgres/` for auth sessions and the signed-in user's recipes (`recipe`, `recipe_ingredient`). Weekly schedule and the shopping checklist stay in `localStorage`.
 - Vitest (`pnpm --filter frontend test`) is unit tests, not a browser harness. There is no Playwright or Cypress suite.
 
-Do not start recipe-database work to verify the UI. Custom recipes in the preferences panel live in `localStorage`, not Postgres.
+Recipes in Preferences are rows for the signed-in user. Logged out, the Recipes tab says to sign in and does not call `/_serverFn/`. `drive-recipes.mjs` proves that path on every run. The create-and-reload path runs only when doctor prints `auth-submit: ready`. `/login` drops the session unless email OTP finishes, so that path does not submit the login form and does not fake an inbox. It calls `POST /api/auth/sign-up/email`, stores `better-auth.session_token`, and deletes that user at the end.
 
 ## Launch
 
@@ -75,6 +75,29 @@ What that script does, in order:
 
 Other features: same Chrome rules, selectors in `features/`. Do not add a second dev server to reach them.
 
+Recipes tab (separate packaged script, same Chrome rules):
+
+```bash
+node .cursor/skills/verify-remi/scripts/drive-recipes.mjs
+```
+
+Logged out, every run:
+
+1. Open `/weekly-menu-planner`, then `Preferences`, then `My Recipes`.
+2. `#preferences-recipes-panel` shows `Sign in to save recipes.` There is no `input[name="recipeName"]`.
+3. `remi:weekly-menu-planner:state` has no `customRecipes` key.
+4. No request URL contains `/_serverFn/`. `GET /api/auth/get-session` is still 200.
+
+Logged in, only when doctor printed `auth-submit: ready` (`frontend/.env` has `DATABASE_URL` and `BETTER_AUTH_SECRET`, and `pg_isready` succeeds). Set `BETTER_AUTH_URL=http://localhost:3001`. The script signs up a throwaway user, reloads with that session, adds `Lemon chickpea pasta` with `1` `g` of `chickpeas`, reloads, and the card is still on `My Recipes`. It then deletes the recipe and the user. If `auth-submit` is blocked, the report says `logged-in recipes: skipped` and the run can still pass the logged-out checks. That skip is not a create proof.
+
+Owner-scoped SQL, without Chrome:
+
+```bash
+RECIPE_DATABASE_TESTS=1 DATABASE_URL='postgres://…' pnpm --filter frontend exec vitest run src/recipes/store.test.ts
+```
+
+The file skips unless `RECIPE_DATABASE_TESTS=1`.
+
 Clicks before hydration do nothing. The helper retries a click until the expected text appears or the attempt budget is spent. Match that behavior if you drive by hand.
 
 ## Evidence
@@ -86,6 +109,8 @@ For the weekly menu run the helper writes:
 - `01-home.png`, `02-planner-empty.png`, `03-planner-generated.png`, `04-shopping-toggled.png`
 - `report.json` — final URL, `document.title`, visible assertions, `localStorage` snapshot, CDP network entries for the document and `/api/auth/get-session`, browser console errors
 - `report.md` — the same facts in a short pass/fail list
+
+`drive-recipes.mjs` writes its own timestamp directory: `01-recipes-signed-out.png`, and when auth submit is ready `02-recipe-added.png` and `03-recipe-after-reload.png`, plus `report.json` and `report.md`. A skipped logged-in step is named in the report. It is not a screenshot of a saved recipe.
 
 Proof is a pass only when all of these are in that directory:
 
@@ -116,6 +141,7 @@ Do not kill other `node` or `chrome` processes to get there.
 | Launch | `.cursor/skills/verify-remi/scripts/launch.sh` |
 | Doctor | `.cursor/skills/verify-remi/scripts/doctor.sh` |
 | Weekly menu drive | `node .cursor/skills/verify-remi/scripts/drive-weekly-menu.mjs` |
+| Recipes drive | `node .cursor/skills/verify-remi/scripts/drive-recipes.mjs` |
 | Cleanup | `.cursor/skills/verify-remi/scripts/cleanup.sh` |
 
 All paths are from the repo root. Shell helpers are executable. `drive-weekly-menu.mjs` is started with `node` so it does not depend on the executable bit.
