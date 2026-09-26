@@ -15,3 +15,5 @@ todos.json
 infraestructure/postgres/secrets/*
 infraestructure/postgres/data/*
 infraestructure/postgres/backups/*
+.cursor/skills/verify-remi/evidence/
+.cursor/skills/verify-remi/run/
