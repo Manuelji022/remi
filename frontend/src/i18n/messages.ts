@@ -94,24 +94,12 @@ export const messages = {
     'planner.generating': 'Generating',
     'planner.generateMenu': 'Generate menu',
     'planner.regenerateMenu': 'Regenerate menu',
-    'planner.mockSet': 'Mock set {current} of {total}',
     'planner.buildingTitle': 'Building your Weekly Menu',
-    'planner.buildingBody':
-      'Balancing lunch, dinner, variety, and your saved preferences.',
+    'planner.buildingBody': 'Assigning saved recipes to this week.',
     'planner.emptyTitle': 'No Weekly Menu yet',
     'planner.emptyBody':
-      'Start with a generated mock menu. The next phases will make this view richer, but the page state is already wired end to end.',
+      'Generate a menu from your saved recipes. Home slots stay empty until a recipe is assigned.',
     'planner.currentWeek': 'Current Calendar Week',
-    'planner.glanceBody':
-      'Both Meal Slots stay visible so later phases can distinguish home-planned and unplanned slots cleanly.',
-    'planner.reasoningKicker': 'Mock AI reasoning',
-    'planner.reasoningTitle': 'Why this Weekly Menu works',
-    'planner.reasoningOne':
-      'Alternates lighter lunches with richer dinners so the week feels varied without requiring a different cooking style every night.',
-    'planner.reasoningTwo':
-      'Keeps both lunch and dinner visible for each day, even when future preferences mark one slot as away from home.',
-    'planner.reasoningThree':
-      'Uses the selected mock set to prepare ingredient state for the downstream shopping checklist.',
     'tabs.menu': 'Weekly Menu',
     'tabs.ingredients': 'Shopping List',
     'meal.unplannedName': 'No home-planned meal',
@@ -157,32 +145,6 @@ export const messages = {
     'preferences.noRecipeIngredients': 'No ingredients added yet.',
     'preferences.deleteRecipe': 'Delete {name}',
     'preferences.save': 'Save preferences',
-    'shopping.emptyTitle': 'Generate a Weekly Menu first',
-    'shopping.emptyBody':
-      'The shopping checklist is tied to the selected mock menu set and will be expanded in the shopping-list phase.',
-    'shopping.unavailableTitle': 'Shopping data unavailable',
-    'shopping.unavailableBody':
-      'Generate the Weekly Menu again to rebuild the ingredient list.',
-    'shopping.kicker': 'Shopping List',
-    'shopping.title': 'Everything you need for this week',
-    'shopping.helper':
-      'Tick the items you already have. The rest becomes your shopping list for the week.',
-    'shopping.progressLabel':
-      '{stocked} of {total} ingredients already in fridge',
-    'shopping.progress': '{stocked}/{total} in fridge',
-    'shopping.reset': 'Reset checklist',
-    'shopping.needToBuy':
-      'You still need to buy {count} {itemWord} for this weekly menu.',
-    'shopping.itemSingular': 'item',
-    'shopping.itemPlural': 'items',
-    'shopping.stocked':
-      'Your fridge is stocked. Nothing left to buy this week.',
-    'shopping.inFridge': 'In fridge',
-    'categories.produceAndFreshHerbs': 'Produce & Fresh Herbs',
-    'categories.meatAndFish': 'Meat & Fish',
-    'categories.dairyAndEggs': 'Dairy & Eggs',
-    'categories.pantryAndDryGoods': 'Pantry & Dry Goods',
-    'categories.condimentsAndSauces': 'Condiments & Sauces',
     'units.unit': 'unit',
     'units.g': 'g',
     'units.kg': 'kg',
@@ -286,24 +248,12 @@ export const messages = {
     'planner.generating': 'Generando',
     'planner.generateMenu': 'Generar menú',
     'planner.regenerateMenu': 'Regenerar menú',
-    'planner.mockSet': 'Conjunto mock {current} de {total}',
     'planner.buildingTitle': 'Construyendo tu Menú Semanal',
-    'planner.buildingBody':
-      'Equilibrando comida, cena, variedad y tus preferencias guardadas.',
+    'planner.buildingBody': 'Asignando las recetas guardadas a esta semana.',
     'planner.emptyTitle': 'Todavía no hay Menú Semanal',
     'planner.emptyBody':
-      'Empieza con un menú mock generado. Las siguientes fases enriquecerán esta vista, pero el estado de la página ya está conectado de principio a fin.',
+      'Genera un menú a partir de tus recetas guardadas. Los espacios de casa se quedan vacíos hasta que se asigne una receta.',
     'planner.currentWeek': 'Semana Calendario actual',
-    'planner.glanceBody':
-      'Ambos Espacios de Comida permanecen visibles para que fases posteriores distingan claramente comidas planificadas en casa y espacios sin planificar.',
-    'planner.reasoningKicker': 'Razonamiento mock de IA',
-    'planner.reasoningTitle': 'Por qué funciona este Menú Semanal',
-    'planner.reasoningOne':
-      'Alterna comidas más ligeras con cenas más contundentes para que la semana resulte variada sin exigir un estilo de cocina distinto cada noche.',
-    'planner.reasoningTwo':
-      'Mantiene visibles comida y cena cada día, incluso cuando futuras preferencias marquen un espacio como fuera de casa.',
-    'planner.reasoningThree':
-      'Usa el conjunto mock seleccionado para preparar el estado de ingredientes de la lista de la compra posterior.',
     'tabs.menu': 'Menú Semanal',
     'tabs.ingredients': 'Lista de la compra',
     'meal.unplannedName': 'Sin comida planificada en casa',
@@ -349,32 +299,6 @@ export const messages = {
     'preferences.noRecipeIngredients': 'Todavía no hay ingredientes añadidos.',
     'preferences.deleteRecipe': 'Eliminar {name}',
     'preferences.save': 'Guardar preferencias',
-    'shopping.emptyTitle': 'Genera primero un Menú Semanal',
-    'shopping.emptyBody':
-      'La lista de la compra está vinculada al conjunto mock seleccionado y se ampliará en la fase de lista de la compra.',
-    'shopping.unavailableTitle': 'Datos de compra no disponibles',
-    'shopping.unavailableBody':
-      'Genera de nuevo el Menú Semanal para reconstruir la lista de ingredientes.',
-    'shopping.kicker': 'Lista de la compra',
-    'shopping.title': 'Todo lo que necesitas para esta semana',
-    'shopping.helper':
-      'Marca los artículos que ya tienes. El resto se convierte en tu lista de la compra de la semana.',
-    'shopping.progressLabel':
-      '{stocked} de {total} ingredientes ya están en la nevera',
-    'shopping.progress': '{stocked}/{total} en la nevera',
-    'shopping.reset': 'Restablecer lista',
-    'shopping.needToBuy':
-      'Todavía necesitas comprar {count} {itemWord} para este menú semanal.',
-    'shopping.itemSingular': 'artículo',
-    'shopping.itemPlural': 'artículos',
-    'shopping.stocked':
-      'Tu nevera está completa. No queda nada que comprar esta semana.',
-    'shopping.inFridge': 'En la nevera',
-    'categories.produceAndFreshHerbs': 'Verduras, frutas y hierbas frescas',
-    'categories.meatAndFish': 'Carne y pescado',
-    'categories.dairyAndEggs': 'Lácteos y huevos',
-    'categories.pantryAndDryGoods': 'Despensa y secos',
-    'categories.condimentsAndSauces': 'Condimentos y salsas',
     'units.unit': 'unidad',
     'units.g': 'g',
     'units.kg': 'kg',

@@ -10,7 +10,7 @@ Remi's primary surface is the TanStack Start app in `frontend/` (package name `f
 Secondary surfaces, not separate apps:
 
 - Better Auth HTTP under `/api/auth/*` (`frontend/src/routes/api/auth/$.ts`). The header calls `authClient.useSession()` on every page.
-- Postgres in `infraestructure/postgres/` for auth sessions, the signed-in user's recipes (`recipe`, `recipe_ingredient`), and the signed-in weekly menu (`weekly_menu`, `weekly_menu_day`). Logged out, the weekly schedule and the shopping checklist stay in `localStorage`. Signed in, day context and meal slots for the viewed Monday are Postgres rows. The mock menu index and the shopping checklist stay in `localStorage`.
+- Postgres in `infraestructure/postgres/` for auth sessions, the signed-in user's recipes (`recipe`, `recipe_ingredient`), and the signed-in weekly menu (`weekly_menu`, `weekly_menu_day`). Logged out, the weekly schedule stays in `localStorage`. Signed in, day context and recipe ids for the viewed Monday are Postgres rows. Generate does not store a mock menu index.
 - Vitest (`pnpm --filter frontend test`) is unit tests, not a browser harness. There is no Playwright or Cypress suite.
 
 Recipes in Preferences are rows for the signed-in user. Logged out, the Recipes tab says to sign in and does not call `/_serverFn/`. `drive-recipes.mjs` proves that path on every run. The create-and-reload path runs only when doctor prints `auth-submit: ready`. `/login` drops the session unless email OTP finishes, so that path does not submit the login form and does not fake an inbox. It calls `POST /api/auth/sign-up/email`, stores `better-auth.session_token`, and deletes that user at the end.
@@ -69,9 +69,7 @@ What that script does, in order:
 1. `http://localhost:3001/` — `html[lang="en"]`, `main.home-page` text `Plan meals for this week and shop from one list.`, header `a.header-logo` accessible name `Remi home`, `nav[aria-label="Primary"]` links `Weekly menu`, `Log in`, `Sign up`.
 2. Click `main.home-page a.planner-entry-link` (accessible name `Weekly menu`). Path becomes `/weekly-menu-planner`.
 3. Empty state: `h2` text `No Weekly Menu yet`. The `Shopping List` `button.tab-btn` is disabled. There is no `#planner-title` node; `aria-labelledby="planner-title"` on `.planner-shell` points at nothing.
-4. Click the first `button.planner-primary-btn` (text `Generate menu`). The client handler waits 700ms. Resulting state: `h2` `No Weekly Menu yet` is gone; Monday shows `Roasted Tomato Soup & Sourdough` and `Herb-Crusted Salmon with Lentils`; a primary button reads `Regenerate menu`; `.planner-state-note` reads `Mock set 1 of 3`.
-5. `localStorage['remi:weekly-menu-planner:state']` parses to `currentMenuIndex === 0`.
-6. Click the `button.tab-btn` whose text starts with `Shopping List`. Heading `Everything you need for this week` is visible. Click the first `button.planner-ingredient-row` (`Cherry tomatoes`). `aria-pressed` becomes `true`. The message catalog string is `In fridge`, and `.planner-in-fridge-tag` uses `text-transform: uppercase`, so `innerText` is `IN FRIDGE`. Storage checklist key `produceAndFreshHerbs::Cherry tomatoes` is `{ checked: true, inFridge: true }`.
+4. Click the first `button.planner-primary-btn` (text `Generate menu`). A guest click does not call the server. Resulting state: `h2` `No Weekly Menu yet` is gone; the body contains `No home-planned meal` and `Regenerate menu`; it does not contain `Roasted Tomato Soup & Sourdough`, `Herb-Crusted Salmon with Lentils`, or `Mock set`. The `Shopping List` button stays disabled.
 
 Other features: same Chrome rules, selectors in `features/`. Do not add a second dev server to reach them.
 
@@ -104,7 +102,7 @@ Signed-in weekly menu, when doctor printed `auth-submit: ready`:
 node .cursor/skills/verify-remi/scripts/drive-menu-week.mjs
 ```
 
-The script generates the first mock set while logged out, saves Tuesday as Eat out, then signs up a throwaway user the same way as `drive-recipes.mjs` and adopts that session without reloading. It sets Monday to Office and saves. Lunch on that Monday becomes the unplanned copy. Dinner keeps the mock name. Reload still shows Office. Previous week does not. Returning to the current week shows Office again. The guest `localStorage` schedule keeps Tuesday Eat out and does not gain that Monday context. Log out shows the guest Tuesday card again. Vitest `src/menu/store.test.ts` runs in `pnpm test` against in-process Postgres and checks the same owner split for the current Monday and the prior Monday.
+The script generates an empty guest grid while logged out, saves Tuesday as Eat out, then signs up a throwaway user the same way as `drive-recipes.mjs` and adopts that session without reloading. It adds a dinner recipe named `Lemon pasta` through the recipes form, sets Monday to Office, saves, and runs Generate. That Monday card shows Office, lunch `No home-planned meal`, and dinner `Lemon pasta`. Reload shows the same card. Previous week does not show that dinner name or Office. Returning to the current week shows them again. The guest `localStorage` schedule keeps Tuesday Eat out and does not gain that Monday context. A reload clears the in-memory guest grid, so after log out the script clicks Generate again. That grid shows Tuesday Eat out and no Monday Office. Vitest `src/menu/store.test.ts` runs in `pnpm test` against in-process Postgres and checks the same owner split for the current Monday and the prior Monday.
 
 Clicks before hydration do nothing. The helper retries a click until the expected text appears or the attempt budget is spent. Match that behavior if you drive by hand.
 
@@ -114,7 +112,7 @@ Directory: `.cursor/skills/verify-remi/evidence/<UTC timestamp>/`. Gitignored. C
 
 For the weekly menu run the helper writes:
 
-- `01-home.png`, `02-planner-empty.png`, `03-planner-generated.png`, `04-shopping-toggled.png`
+- `01-home.png`, `02-planner-empty.png`, `03-planner-generated.png`
 - `report.json` — final URL, `document.title`, visible assertions, `localStorage` snapshot, CDP network entries for the document and `/api/auth/get-session`, browser console errors
 - `report.md` — the same facts in a short pass/fail list
 
@@ -123,10 +121,10 @@ For the weekly menu run the helper writes:
 Proof is a pass only when all of these are in that directory:
 
 - The screenshots show the UI after the click, not a mock HTML file.
-- Each action has a resulting state (empty heading replaced by meal names; ingredient `aria-pressed` flipped).
+- Each action has a resulting state (empty heading replaced by `No home-planned meal` and `Regenerate menu`).
 - The side effect is the real `localStorage` document from that Chrome profile, not a hand-written JSON file.
 - `/api/auth/get-session` was answered by the dev server. Logged out, the body is `null`. Do not stub it.
-- Menu names come from `frontend/src/data/menu.ts` inside the app. That built-in mock set is the product. Do not intercept it and do not call a generated menu "verified" if those names were injected.
+- A guest Generate does not invent dish titles. Do not call the grid verified if `Roasted Tomato Soup & Sourdough`, `Herb-Crusted Salmon with Lentils`, or `Mock set` was injected.
 
 Copy the directory aside only by leaving it in place. Do not commit it.
 

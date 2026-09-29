@@ -14,49 +14,16 @@ export type IngredientUnit =
   | 'can'
   | 'pack'
 
-export interface Meal {
-  name: string
-  description: string
-}
-
-export interface DayMeals {
-  lunch: Meal
-  dinner: Meal
-}
-
-export type WeeklyMenu = Record<Day, DayMeals>
-
 export interface Preferences {
   dayContexts: Partial<Record<Day, DayContext | null>>
   planningScopes: Partial<Record<Day, PlanningScope | null>>
 }
-
-export interface ChecklistItemState {
-  checked: boolean
-  inFridge: boolean
-}
-
-export type ChecklistState = Record<string, ChecklistItemState>
 
 export function getDefaultPreferences(): Preferences {
   return {
     dayContexts: {},
     planningScopes: {},
   }
-}
-
-export function getPlanningScopeForDay(
-  preferences: Preferences,
-  day: Day,
-): PlanningScope {
-  return preferences.planningScopes[day] ?? 'both'
-}
-
-export function getDayContextForDay(
-  preferences: Preferences,
-  day: Day,
-): DayContext | null {
-  return preferences.dayContexts[day] ?? null
 }
 
 export function getActivePreferencesBadgeCount(

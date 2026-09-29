@@ -1,11 +1,6 @@
 import { DAYS } from '#/data/constants'
 import type { Day } from '#/data/constants'
-import type {
-  ChecklistState,
-  DayContext,
-  PlanningScope,
-  Preferences,
-} from '#/data/types'
+import type { DayContext, PlanningScope, Preferences } from '#/data/types'
 import { readRecipeInput } from '#/recipes/recipe'
 import type { RecipeInput } from '#/recipes/recipe'
 
@@ -28,8 +23,6 @@ export interface WeeklyMenuPlannerStorage {
 
 export interface WeeklyMenuPlannerPersistedState {
   savedPreferences: Preferences
-  currentMenuIndex: number
-  shoppingChecklist: ChecklistState
   legacyCustomRecipes: RecipeInput[]
 }
 
@@ -45,7 +38,6 @@ export function getBrowserStorage(): WeeklyMenuPlannerStorage | null {
 
 export function readWeeklyMenuPlannerState(
   storage: WeeklyMenuPlannerStorage | null,
-  menuCount: number,
 ): WeeklyMenuPlannerPersistedState | null {
   if (!storage) return null
 
@@ -60,7 +52,7 @@ export function readWeeklyMenuPlannerState(
   if (!raw) return null
 
   try {
-    return parsePersistedState(JSON.parse(raw), menuCount)
+    return parsePersistedState(JSON.parse(raw))
   } catch {
     return null
   }
@@ -85,8 +77,6 @@ export function writeWeeklyMenuPlannerState(
       WEEKLY_MENU_PLANNER_STORAGE_KEY,
       JSON.stringify({
         savedPreferences,
-        currentMenuIndex: state.currentMenuIndex,
-        shoppingChecklist: state.shoppingChecklist,
       }),
     )
   } catch {
@@ -94,46 +84,16 @@ export function writeWeeklyMenuPlannerState(
   }
 }
 
-export function mergeChecklistWithMenu(
-  menuChecklist: ChecklistState,
-  storedChecklist: ChecklistState,
-): ChecklistState {
-  const merged: ChecklistState = {}
-
-  for (const [key, item] of Object.entries(menuChecklist)) {
-    if (!Object.hasOwn(storedChecklist, key)) {
-      merged[key] = { checked: item.checked, inFridge: item.inFridge }
-      continue
-    }
-
-    const storedItem = storedChecklist[key]
-    merged[key] = {
-      checked: storedItem.checked,
-      inFridge: storedItem.inFridge,
-    }
-  }
-
-  return merged
-}
-
 function parsePersistedState(
   value: unknown,
-  menuCount: number,
 ): WeeklyMenuPlannerPersistedState | null {
   if (!isRecord(value)) return null
 
   const parsedPreferences = parsePreferences(value.savedPreferences)
-  const currentMenuIndex = parseMenuIndex(value.currentMenuIndex, menuCount)
-  const shoppingChecklist = parseChecklist(value.shoppingChecklist)
-
-  if (!parsedPreferences || currentMenuIndex === null || !shoppingChecklist) {
-    return null
-  }
+  if (!parsedPreferences) return null
 
   return {
     savedPreferences: parsedPreferences.preferences,
-    currentMenuIndex,
-    shoppingChecklist,
     legacyCustomRecipes: parsedPreferences.legacyCustomRecipes,
   }
 }
@@ -195,32 +155,6 @@ function toStoredRecipe(recipe: RecipeInput) {
       ...(ingredient.unit === null ? {} : { unit: ingredient.unit }),
     })),
   }
-}
-
-function parseMenuIndex(value: unknown, menuCount: number): number | null {
-  if (typeof value !== 'number' || !Number.isInteger(value)) return null
-  if (value < -1 || value >= menuCount) return null
-  return value
-}
-
-function parseChecklist(value: unknown): ChecklistState | null {
-  if (!isRecord(value)) return null
-
-  const checklist: ChecklistState = {}
-
-  for (const [key, item] of Object.entries(value)) {
-    if (!isRecord(item)) return null
-    if (
-      typeof item.checked !== 'boolean' ||
-      typeof item.inFridge !== 'boolean'
-    ) {
-      return null
-    }
-
-    checklist[key] = { checked: item.checked, inFridge: item.inFridge }
-  }
-
-  return checklist
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

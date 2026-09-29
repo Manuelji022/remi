@@ -1,16 +1,16 @@
 import './day-card.css'
 
 import type { Day } from '#/data/constants'
-import type { DayContext, Meal, MealSlot, PlanningScope } from '#/data/types'
+import type { DayContext, MealSlot } from '#/data/types'
 import { useI18n } from '#/i18n'
+import type { ShownMeal } from '#/menu/week'
 
 interface DayCardProps {
   day: Day
   isWeekend: boolean
-  lunch: Meal | null
-  dinner: Meal | null
+  lunch: ShownMeal
+  dinner: ShownMeal
   dayContext: DayContext | null
-  planningScope: PlanningScope
 }
 
 export function DayCard({
@@ -19,7 +19,6 @@ export function DayCard({
   lunch,
   dinner,
   dayContext,
-  planningScope,
 }: DayCardProps) {
   const { t } = useI18n()
   const dayContextLabel = dayContext ? t(`contexts.${dayContext}`) : null
@@ -33,56 +32,33 @@ export function DayCard({
         )}
       </div>
       <div className="day-meals">
-        <MealSlotDisplay
-          dayContextLabel={dayContextLabel}
-          meal={lunch}
-          planningScope={planningScope}
-          slot="lunch"
-        />
-        <MealSlotDisplay
-          dayContextLabel={dayContextLabel}
-          meal={dinner}
-          planningScope={planningScope}
-          slot="dinner"
-        />
+        <MealSlotDisplay meal={lunch} slot="lunch" />
+        <MealSlotDisplay meal={dinner} slot="dinner" />
       </div>
     </article>
   )
 }
 
 interface MealSlotDisplayProps {
-  dayContextLabel: string | null
-  meal: Meal | null
-  planningScope: PlanningScope
+  meal: ShownMeal
   slot: MealSlot
 }
 
-function MealSlotDisplay({
-  dayContextLabel,
-  meal,
-  planningScope,
-  slot,
-}: MealSlotDisplayProps) {
-  const isHomePlanned = planningScope === 'both' || planningScope === slot
+function MealSlotDisplay({ meal, slot }: MealSlotDisplayProps) {
   const { t } = useI18n()
+  const home = meal.kind === 'recipe' || meal.kind === 'unplanned'
+  const name = meal.kind === 'recipe' ? meal.name : t('meal.unplannedName')
 
   return (
-    <div className={`meal-slot ${isHomePlanned ? '' : 'unplanned'}`}>
+    <div className={`meal-slot ${home ? '' : 'unplanned'}`}>
       <span className="meal-label">{t(`slots.${slot}`)}</span>
-      {isHomePlanned && meal ? (
-        <>
-          <span className="meal-name">{meal.name}</span>
-        </>
-      ) : (
-        <>
-          <span className="meal-name">{t('meal.unplannedName')}</span>
-            {dayContextLabel
-              ? t('meal.coveredByContext', {
-                  context: dayContextLabel.toLowerCase(),
-                })
-              : t('meal.outsideScope')}
-        </>
-      )}
+      <span className="meal-name">{name}</span>
+      {meal.kind === 'covered'
+        ? t('meal.coveredByContext', {
+            context: t(`contexts.${meal.context}`).toLowerCase(),
+          })
+        : null}
+      {meal.kind === 'outside' ? t('meal.outsideScope') : null}
     </div>
   )
 }
