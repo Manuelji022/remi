@@ -94,8 +94,9 @@ export function WeeklyMenuPlanner() {
           [],
         )
       : null
-  // Guests stay disabled because they have no recipe catalog.
-  const shoppingEnabled = Boolean(userId) && hasSavedMenu && recipes !== null
+  const signedIn = Boolean(userId)
+  const catalogLoaded = recipes !== null
+  const shoppingEnabled = signedIn && hasSavedMenu && catalogLoaded
   const lines =
     shoppingEnabled && menuWeek ? shoppingList(menuWeek, recipes) : []
 
