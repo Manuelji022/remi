@@ -74,6 +74,7 @@ describe('menu week store', () => {
       lunchRecipeId: null,
       dinnerRecipeId: pastaId,
     })
+    expect(saved.hasSavedMenu).toBe(true)
     expect(saved.recipeNames).toEqual({ [pastaId]: 'Lemon pasta' })
 
     const loadedCurrent = await loadMenuWeekForUser(ownerId, '2026-09-28')
@@ -81,6 +82,7 @@ describe('menu week store', () => {
     const otherCurrent = await loadMenuWeekForUser(otherId, '2026-09-28')
 
     expect(loadedCurrent.menu.days.Monday.dinnerRecipeId).toBe(pastaId)
+    expect(loadedCurrent.hasSavedMenu).toBe(true)
     expect(loadedCurrent.recipeNames[pastaId]).toBe('Lemon pasta')
     expect(loadedPrior.menu.days.Tuesday).toEqual({
       context: 'eatOut',
@@ -95,6 +97,7 @@ describe('menu week store', () => {
       lunchRecipeId: null,
       dinnerRecipeId: null,
     })
+    expect(otherCurrent.hasSavedMenu).toBe(false)
 
     const ownerWeeks = await db
       .select({ weekStart: schema.weeklyMenu.weekStart })
@@ -117,6 +120,31 @@ describe('menu week store', () => {
       (await loadMenuWeekForUser(ownerId, '2026-09-28')).menu.days.Monday
         .dinnerRecipeId,
     ).toBe(pastaId)
+
+    const soupId = crypto.randomUUID()
+    await db.insert(schema.recipe).values({
+      id: soupId,
+      userId: ownerId,
+      name: 'Tomato soup',
+      slot: 'lunch',
+    })
+    const mismatched = emptyMenu('2026-10-05')
+    mismatched.days.Tuesday.dinnerRecipeId = soupId
+    await expect(
+      saveMenuWeekForUser(ownerId, mismatched),
+    ).rejects.toBeInstanceOf(MenuInputError)
+
+    const repeated = emptyMenu('2026-10-05')
+    repeated.days.Monday = {
+      context: 'office',
+      scope: 'dinner',
+      lunchRecipeId: null,
+      dinnerRecipeId: pastaId,
+    }
+    repeated.days.Tuesday.dinnerRecipeId = pastaId
+    await expect(saveMenuWeekForUser(ownerId, repeated)).rejects.toBeInstanceOf(
+      MenuInputError,
+    )
 
     await db.delete(schema.recipe).where(eq(schema.recipe.id, pastaId))
     expect(

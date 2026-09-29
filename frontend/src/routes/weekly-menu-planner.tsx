@@ -1,39 +1,24 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import type { CSSProperties } from 'react'
 import './weekly-menu-planner.css'
 import { DayCard, LoadingDots, MainTab, PreferencesPanel } from '#/components'
 import {
-  CheckIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
-  FridgeIcon,
-  RefreshIcon,
   SettingsIcon,
-  ShoppingCartIcon,
   SparkleIcon,
 } from '#/components/icons'
 import { DAYS, getWeekNumber, isWeekend } from '#/data/constants'
 import {
-  CATEGORY_META,
-  createChecklistState,
-  getIngredientSets,
-  getIngredientChecklistKey,
-  getNeededItemsCount,
-} from '#/data/ingredients'
-import type { IngredientCategory } from '#/data/ingredients'
-import { getMenuSets } from '#/data/menu'
-import {
   getActivePreferencesBadgeCount,
-  getDayContextForDay,
   getDefaultPreferences,
-  getPlanningScopeForDay,
 } from '#/data/types'
-import type { ChecklistState, Preferences, WeeklyMenu } from '#/data/types'
+import type { Preferences } from '#/data/types'
 import { authClient } from '#/lib/auth-client'
 import { loadWeeklyMenu, saveWeeklyMenu } from '#/menu/functions'
 import {
   applySchedule,
+  assignRecipesToWeek,
   emptyMenu,
   scheduleFromMenu,
   showMenuDay,
@@ -41,10 +26,10 @@ import {
 } from '#/menu/week'
 import type { CalendarWeekMenu } from '#/menu/week'
 import type { RecipeInput } from '#/recipes/recipe'
+import { listRecipes } from '#/recipes/functions'
 import { useI18n } from '#/i18n'
 import {
   getBrowserStorage,
-  mergeChecklistWithMenu,
   readWeeklyMenuPlannerState,
   writeWeeklyMenuPlannerState,
 } from '#/lib/weekly-menu-planner-storage'
@@ -56,10 +41,8 @@ export const Route = createFileRoute('/weekly-menu-planner')({
 })
 
 export function WeeklyMenuPlanner() {
-  const { locale, t, formatWeekRange } = useI18n()
+  const { t, formatWeekRange } = useI18n()
   const [isGenerating, setIsGenerating] = useState(false)
-  const [currentMenuIndex, setCurrentMenuIndex] = useState(-1)
-  const [animationKey, setAnimationKey] = useState(0)
   const [activeTab, setActiveTab] = useState<MainTabId>('menu')
   const [isPreferencesOpen, setIsPreferencesOpen] = useState(false)
   const [weekOffset, setWeekOffset] = useState(0)
@@ -69,114 +52,111 @@ export function WeeklyMenuPlanner() {
   const [draftPreferences, setDraftPreferences] = useState<Preferences>(() =>
     getDefaultPreferences(),
   )
-  const [shoppingChecklist, setShoppingChecklist] = useState<ChecklistState>({})
   const [legacyCustomRecipes, setLegacyCustomRecipes] = useState<RecipeInput[]>(
     [],
   )
   const [menuWeek, setMenuWeek] = useState<CalendarWeekMenu | null>(null)
   const [recipeNames, setRecipeNames] = useState<Record<string, string>>({})
+  const [hasSavedMenu, setHasSavedMenu] = useState(false)
+  const [guestGridOpen, setGuestGridOpen] = useState(false)
   const [isHydrated, setIsHydrated] = useState(false)
   const hasLoadedRef = useRef(false)
-  const skipChecklistSyncRef = useRef(false)
   const guestPreferencesRef = useRef<Preferences>(getDefaultPreferences())
   const previousUserIdRef = useRef<string | undefined>(undefined)
   const weekOffsetRef = useRef(weekOffset)
   const loadGenerationRef = useRef(0)
+  const writeInFlightRef = useRef(false)
   const { data: session } = authClient.useSession()
   const userId = session?.user.id
   weekOffsetRef.current = weekOffset
 
-  const menuSets = getMenuSets(locale)
-  const ingredientSets = getIngredientSets(locale)
-  const generatedMenu =
-    currentMenuIndex >= 0 ? menuSets[currentMenuIndex] : null
   const selectedWeekDate = new Date()
   selectedWeekDate.setDate(selectedWeekDate.getDate() + weekOffset * 7)
+  const viewedWeek = viewWeekStart(new Date(), weekOffset)
   const weekRange = formatWeekRange(selectedWeekDate)
   const activePreferenceCount = getActivePreferencesBadgeCount(savedPreferences)
-  const neededItems = getNeededItemsCount(shoppingChecklist)
+  const visibleMenu = userId
+    ? hasSavedMenu
+      ? menuWeek
+      : null
+    : guestGridOpen
+      ? assignRecipesToWeek(
+          applySchedule(emptyMenu(viewedWeek), savedPreferences),
+          [],
+        )
+      : null
 
   useEffect(() => {
     if (hasLoadedRef.current) return
     hasLoadedRef.current = true
 
-    const stored = readWeeklyMenuPlannerState(
-      getBrowserStorage(),
-      menuSets.length,
-    )
+    const stored = readWeeklyMenuPlannerState(getBrowserStorage())
 
     if (stored) {
-      const ingredientSet =
-        stored.currentMenuIndex >= 0
-          ? ingredientSets[stored.currentMenuIndex]
-          : undefined
-
       guestPreferencesRef.current = stored.savedPreferences
       setSavedPreferences(stored.savedPreferences)
       setDraftPreferences(stored.savedPreferences)
       setLegacyCustomRecipes(stored.legacyCustomRecipes)
-      setCurrentMenuIndex(stored.currentMenuIndex)
-
-      if (ingredientSet) {
-        // Changing the menu index rebuilds a blank checklist. Skip that once
-        // so the restored checklist is not cleared on load.
-        skipChecklistSyncRef.current = true
-        setShoppingChecklist(
-          mergeChecklistWithMenu(
-            createChecklistState(ingredientSet),
-            stored.shoppingChecklist,
-          ),
-        )
-      }
     }
 
     setIsHydrated(true)
-  }, [ingredientSets, menuSets.length])
+  }, [])
 
   useEffect(() => {
     if (!isHydrated) return
 
     writeWeeklyMenuPlannerState(getBrowserStorage(), {
       savedPreferences: guestPreferencesRef.current,
-      currentMenuIndex,
-      shoppingChecklist,
       legacyCustomRecipes,
     })
-  }, [
-    currentMenuIndex,
-    isHydrated,
-    legacyCustomRecipes,
-    savedPreferences,
-    shoppingChecklist,
-  ])
+  }, [isHydrated, legacyCustomRecipes, savedPreferences])
 
-  useEffect(() => {
-    if (!isHydrated || currentMenuIndex < 0) return
+  function handleGenerateMenu() {
+    if (writeInFlightRef.current) return
 
-    if (skipChecklistSyncRef.current) {
-      skipChecklistSyncRef.current = false
+    setActiveTab('menu')
+
+    if (!userId) {
+      setGuestGridOpen(true)
       return
     }
 
-    if (currentMenuIndex >= ingredientSets.length) return
+    if (!menuWeek) return
 
-    setShoppingChecklist(createChecklistState(ingredientSets[currentMenuIndex]))
-  }, [currentMenuIndex, ingredientSets, isHydrated, locale])
-
-  function handleGenerateMenu() {
-    if (isGenerating) return
-
+    const source = menuWeek
+    const savedWeekStart = source.weekStart
+    const saveGeneration = loadGenerationRef.current
+    writeInFlightRef.current = true
     setIsGenerating(true)
-    setActiveTab('menu')
 
-    window.setTimeout(() => {
-      const nextMenuIndex = (currentMenuIndex + 1) % menuSets.length
-
-      setCurrentMenuIndex(nextMenuIndex)
-      setShoppingChecklist(createChecklistState(ingredientSets[nextMenuIndex]))
-      setAnimationKey((key) => key + 1)
-      setIsGenerating(false)
-    }, 700)
+    void listRecipes()
+      .then((recipes) => {
+        const next = assignRecipesToWeek(
+          source,
+          recipes.map((recipe) => ({ id: recipe.id, slot: recipe.slot })),
+        )
+        return saveWeeklyMenu({ data: next })
+      })
+      .then((loaded) => {
+        if (loadGenerationRef.current !== saveGeneration) return
+        loadGenerationRef.current += 1
+        if (
+          viewWeekStart(new Date(), weekOffsetRef.current) !== savedWeekStart
+        ) {
+          return
+        }
+        setMenuWeek(loaded.menu)
+        setRecipeNames(loaded.recipeNames)
+        setHasSavedMenu(loaded.hasSavedMenu)
+        const saved = scheduleFromMenu(loaded.menu)
+        setSavedPreferences(saved)
+        setDraftPreferences(saved)
+      })
+      .catch(() => undefined)
+      .finally(() => {
+        writeInFlightRef.current = false
+        setIsGenerating(false)
+      })
   }
 
   function handleOpenPreferences() {
@@ -195,6 +175,7 @@ export function WeeklyMenuPlanner() {
     setDraftPreferences(guestPreferencesRef.current)
     setMenuWeek(null)
     setRecipeNames({})
+    setHasSavedMenu(false)
   }, [isHydrated, userId])
 
   useEffect(() => {
@@ -204,6 +185,7 @@ export function WeeklyMenuPlanner() {
     const generation = ++loadGenerationRef.current
     const weekStart = viewWeekStart(new Date(), weekOffset)
     setMenuWeek(null)
+    setHasSavedMenu(false)
     setSavedPreferences(getDefaultPreferences())
     setDraftPreferences(getDefaultPreferences())
 
@@ -212,6 +194,7 @@ export function WeeklyMenuPlanner() {
         if (cancelled || generation !== loadGenerationRef.current) return
         setMenuWeek(loaded.menu)
         setRecipeNames(loaded.recipeNames)
+        setHasSavedMenu(loaded.hasSavedMenu)
         const preferences = scheduleFromMenu(loaded.menu)
         setSavedPreferences(preferences)
         setDraftPreferences(preferences)
@@ -221,6 +204,7 @@ export function WeeklyMenuPlanner() {
         const empty = emptyMenu(weekStart)
         setMenuWeek(empty)
         setRecipeNames({})
+        setHasSavedMenu(false)
         const preferences = scheduleFromMenu(empty)
         setSavedPreferences(preferences)
         setDraftPreferences(preferences)
@@ -240,25 +224,35 @@ export function WeeklyMenuPlanner() {
       return
     }
 
+    if (writeInFlightRef.current) return
     if (!menuWeek) return
 
     const next = applySchedule(menuWeek, preferences)
     const savedWeekStart = next.weekStart
     const saveGeneration = loadGenerationRef.current
+    writeInFlightRef.current = true
 
-    void saveWeeklyMenu({ data: next }).then((loaded) => {
-      if (loadGenerationRef.current !== saveGeneration) return
-      loadGenerationRef.current += 1
-      if (viewWeekStart(new Date(), weekOffsetRef.current) !== savedWeekStart) {
-        return
-      }
-      setMenuWeek(loaded.menu)
-      setRecipeNames(loaded.recipeNames)
-      const saved = scheduleFromMenu(loaded.menu)
-      setSavedPreferences(saved)
-      setDraftPreferences(saved)
-      setIsPreferencesOpen(false)
-    })
+    void saveWeeklyMenu({ data: next })
+      .then((loaded) => {
+        if (loadGenerationRef.current !== saveGeneration) return
+        loadGenerationRef.current += 1
+        if (
+          viewWeekStart(new Date(), weekOffsetRef.current) !== savedWeekStart
+        ) {
+          return
+        }
+        setMenuWeek(loaded.menu)
+        setRecipeNames(loaded.recipeNames)
+        setHasSavedMenu(loaded.hasSavedMenu)
+        const saved = scheduleFromMenu(loaded.menu)
+        setSavedPreferences(saved)
+        setDraftPreferences(saved)
+        setIsPreferencesOpen(false)
+      })
+      .catch(() => undefined)
+      .finally(() => {
+        writeInFlightRef.current = false
+      })
   }
 
   const handleLegacyRecipesMigrated = useCallback(() => {
@@ -336,7 +330,7 @@ export function WeeklyMenuPlanner() {
               ) : (
                 <>
                   <SparkleIcon aria-hidden="true" />
-                  {generatedMenu
+                  {visibleMenu
                     ? t('planner.regenerateMenu')
                     : t('planner.generateMenu')}
                 </>
@@ -350,67 +344,18 @@ export function WeeklyMenuPlanner() {
         <div className="planner-toolbar">
           <MainTab
             activeTab={activeTab}
-            isIngredientsDisabled={!generatedMenu}
-            neededItems={generatedMenu ? neededItems : 0}
+            isIngredientsDisabled
+            neededItems={0}
             onTabChange={setActiveTab}
           />
-          {generatedMenu && (
-            <p className="planner-state-note">
-              {t('planner.mockSet', {
-                current: currentMenuIndex + 1,
-                total: menuSets.length,
-              })}
-            </p>
-          )}
         </div>
 
         {activeTab === 'menu' && (
           <MenuTab
-            animationKey={animationKey}
-            generatedMenu={generatedMenu}
             isGenerating={isGenerating}
-            menuWeek={userId ? menuWeek : null}
+            menu={visibleMenu}
             onGenerateMenu={handleGenerateMenu}
             recipeNames={recipeNames}
-            savedPreferences={savedPreferences}
-          />
-        )}
-
-        {activeTab === 'ingredients' && (
-          <ShoppingTab
-            checklist={shoppingChecklist}
-            generatedMenu={generatedMenu}
-            ingredientSet={
-              currentMenuIndex >= 0
-                ? ingredientSets[currentMenuIndex]
-                : undefined
-            }
-            isGenerating={isGenerating}
-            neededItems={neededItems}
-            onResetChecklist={() => {
-              if (currentMenuIndex < 0) return
-              setShoppingChecklist(
-                createChecklistState(ingredientSets[currentMenuIndex]),
-              )
-            }}
-            onToggleChecklistItem={(ingredientKey) => {
-              setShoppingChecklist((currentChecklist) => {
-                const currentItem = currentChecklist[ingredientKey] ?? {
-                  checked: false,
-                  inFridge: false,
-                }
-
-                const nextChecked = !currentItem.checked
-
-                return {
-                  ...currentChecklist,
-                  [ingredientKey]: {
-                    checked: nextChecked,
-                    inFridge: nextChecked,
-                  },
-                }
-              })
-            }}
           />
         )}
       </section>
@@ -428,23 +373,17 @@ export function WeeklyMenuPlanner() {
 }
 
 interface MenuTabProps {
-  animationKey: number
-  generatedMenu: WeeklyMenu | null
   isGenerating: boolean
-  menuWeek: CalendarWeekMenu | null
+  menu: CalendarWeekMenu | null
   onGenerateMenu: () => void
   recipeNames: Record<string, string>
-  savedPreferences: Preferences
 }
 
 function MenuTab({
-  animationKey,
-  generatedMenu,
   isGenerating,
-  menuWeek,
+  menu,
   onGenerateMenu,
   recipeNames,
-  savedPreferences,
 }: MenuTabProps) {
   const { t } = useI18n()
 
@@ -458,7 +397,7 @@ function MenuTab({
     )
   }
 
-  if (!generatedMenu) {
+  if (!menu) {
     return (
       <div className="planner-empty-state">
         <SparkleIcon aria-hidden="true" />
@@ -477,19 +416,12 @@ function MenuTab({
   }
 
   return (
-    <div className="planner-menu-tab" key={animationKey}>
+    <div className="planner-menu-tab">
       <div className="planner-section-heading"></div>
 
       <div className="planner-day-grid">
         {DAYS.map((day, index) => {
-          const shown = menuWeek
-            ? showMenuDay(menuWeek.days[day], recipeNames, generatedMenu[day])
-            : {
-                context: getDayContextForDay(savedPreferences, day),
-                scope: getPlanningScopeForDay(savedPreferences, day),
-                lunch: generatedMenu[day].lunch,
-                dinner: generatedMenu[day].dinner,
-              }
+          const shown = showMenuDay(menu.days[day], recipeNames)
 
           return (
             <div className={`delay-${index + 1}`} key={day}>
@@ -499,212 +431,10 @@ function MenuTab({
                 dinner={shown.dinner}
                 isWeekend={isWeekend(day)}
                 lunch={shown.lunch}
-                planningScope={shown.scope}
               />
             </div>
           )
         })}
-      </div>
-    </div>
-  )
-}
-
-interface ShoppingTabProps {
-  checklist: ChecklistState
-  generatedMenu: WeeklyMenu | null
-  ingredientSet?: ReturnType<typeof getIngredientSets>[number]
-  isGenerating: boolean
-  neededItems: number
-  onResetChecklist: () => void
-  onToggleChecklistItem: (ingredientKey: string) => void
-}
-
-function ShoppingTab({
-  checklist,
-  generatedMenu,
-  ingredientSet,
-  isGenerating,
-  neededItems,
-  onResetChecklist,
-  onToggleChecklistItem,
-}: ShoppingTabProps) {
-  const { t } = useI18n()
-
-  if (!generatedMenu || isGenerating) {
-    return (
-      <div className="planner-empty-state">
-        <ShoppingCartIcon aria-hidden="true" />
-        <h2>{t('shopping.emptyTitle')}</h2>
-        <p>{t('shopping.emptyBody')}</p>
-      </div>
-    )
-  }
-
-  const totalItems = Object.keys(checklist).length
-  const stockedItems = Object.values(checklist).filter(
-    (item) => item.checked || item.inFridge,
-  ).length
-  const completionPercent =
-    totalItems > 0 ? Math.round((stockedItems / totalItems) * 100) : 0
-
-  if (ingredientSet === undefined) {
-    return (
-      <div className="planner-empty-state">
-        <ShoppingCartIcon aria-hidden="true" />
-        <h2>{t('shopping.unavailableTitle')}</h2>
-        <p>{t('shopping.unavailableBody')}</p>
-      </div>
-    )
-  }
-
-  return (
-    <div className="planner-shopping-tab">
-      <div className="planner-shopping-header">
-        <div>
-          <p className="planner-section-kicker">{t('shopping.kicker')}</p>
-          <h2>{t('shopping.title')}</h2>
-          <p className="planner-shopping-helper">{t('shopping.helper')}</p>
-        </div>
-
-        <div className="planner-shopping-actions">
-          <div
-            aria-label={t('shopping.progressLabel', {
-              stocked: stockedItems,
-              total: totalItems,
-            })}
-            className="planner-progress-pill"
-          >
-            <div aria-hidden="true" className="planner-progress-track">
-              <div
-                className="planner-progress-fill"
-                style={{ width: `${completionPercent}%` }}
-              />
-            </div>
-            <span>
-              {t('shopping.progress', {
-                stocked: stockedItems,
-                total: totalItems,
-              })}
-            </span>
-          </div>
-
-          <button
-            className="planner-reset-btn"
-            type="button"
-            onClick={onResetChecklist}
-          >
-            <RefreshIcon aria-hidden="true" />
-            {t('shopping.reset')}
-          </button>
-        </div>
-      </div>
-
-      {neededItems > 0 && (
-        <section className="planner-summary-banner shopping" aria-live="polite">
-          <ShoppingCartIcon aria-hidden="true" />
-          <p>
-            {t('shopping.needToBuy', {
-              count: neededItems,
-              itemWord:
-                neededItems === 1
-                  ? t('shopping.itemSingular')
-                  : t('shopping.itemPlural'),
-            })}
-          </p>
-        </section>
-      )}
-
-      {neededItems === 0 && totalItems > 0 && (
-        <section className="planner-summary-banner stocked" aria-live="polite">
-          <CheckIcon aria-hidden="true" />
-          <p>{t('shopping.stocked')}</p>
-        </section>
-      )}
-
-      <div className="planner-ingredient-groups">
-        {(Object.keys(CATEGORY_META) as IngredientCategory[]).map(
-          (category) => {
-            const meta = CATEGORY_META[category]
-            const ingredients = ingredientSet[category]
-            const stockedCount = ingredients.filter((ingredient) => {
-              const itemState = checklist[
-                getIngredientChecklistKey(category, ingredient.name)
-              ] ?? { checked: false, inFridge: false }
-              return itemState.checked || itemState.inFridge
-            }).length
-
-            return (
-              <section
-                className="planner-ingredient-group"
-                key={category}
-                style={
-                  {
-                    '--category-accent': meta.accent,
-                    '--category-bg': meta.bg,
-                    '--category-border': meta.border,
-                  } as CSSProperties
-                }
-              >
-                <div className="planner-ingredient-group-header">
-                  <div className="planner-ingredient-group-title">
-                    <span className="planner-ingredient-group-accent" />
-                    <h3>{t(`categories.${category}`)}</h3>
-                  </div>
-                  <span className="planner-ingredient-group-progress">
-                    {stockedCount}/{ingredients.length}
-                  </span>
-                </div>
-
-                <div className="planner-ingredient-list">
-                  {ingredients.map((ingredient) => {
-                    const ingredientKey = getIngredientChecklistKey(
-                      category,
-                      ingredient.name,
-                    )
-                    const itemState = checklist[ingredientKey] ?? {
-                      checked: false,
-                      inFridge: false,
-                    }
-                    const isStocked = itemState.checked || itemState.inFridge
-
-                    return (
-                      <button
-                        key={`${category}-${ingredient.name}`}
-                        aria-pressed={isStocked}
-                        className={`planner-ingredient-row ${isStocked ? 'stocked' : ''}`}
-                        type="button"
-                        onClick={() => onToggleChecklistItem(ingredientKey)}
-                      >
-                        <span
-                          aria-hidden="true"
-                          className={`planner-ingredient-checkbox ${isStocked ? 'checked' : ''}`}
-                        >
-                          {isStocked && <CheckIcon aria-hidden="true" />}
-                        </span>
-
-                        <span className="planner-ingredient-copy">
-                          <span className="planner-ingredient-label">
-                            {ingredient.name}
-                          </span>
-                          <span className="planner-ingredient-qty">
-                            {ingredient.qty}
-                          </span>
-                        </span>
-
-                        {isStocked && (
-                          <span className="planner-in-fridge-tag">
-                            <FridgeIcon aria-hidden="true" />
-                            {t('shopping.inFridge')}
-                          </span>
-                        )}
-                      </button>
-                    )
-                  })}
-                </div>
-              </section>
-            )
-          },
-        )}
       </div>
     </div>
   )

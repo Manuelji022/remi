@@ -382,6 +382,56 @@ function deleteThrowaway(email) {
   )
 }
 
+async function openRecipesTab(page) {
+  let open = null
+  for (let i = 0; i < 6 && !open; i++) {
+    open = await page.evaluate(
+      "document.querySelector('aside.panel-drawer') ? 'yes' : ''",
+    )
+    if (open) break
+    await clickSelector(page, 'button.planner-secondary-btn')
+    open = await until(
+      page,
+      "document.querySelector('aside.panel-drawer') ? 'yes' : ''",
+      10,
+      200,
+    )
+  }
+  if (open !== 'yes') throw new Error('preferences dialog did not open')
+
+  let recipes = null
+  for (let i = 0; i < 4 && !recipes; i++) {
+    recipes = await page.evaluate(
+      "document.querySelector('#preferences-recipes-panel') ? 'yes' : ''",
+    )
+    if (recipes) break
+    await clickSelector(page, 'button#preferences-recipes-tab')
+    recipes = await until(
+      page,
+      "document.querySelector('#preferences-recipes-panel') ? 'yes' : ''",
+      8,
+      150,
+    )
+  }
+  if (recipes !== 'yes') throw new Error('recipes tab did not open')
+}
+
+async function setControl(page, selector, value) {
+  const ok = await page.evaluate(`(() => {
+    const el = document.querySelector(${JSON.stringify(selector)});
+    if (!el) return false;
+    const proto = el instanceof HTMLSelectElement
+      ? HTMLSelectElement.prototype
+      : HTMLInputElement.prototype;
+    const setter = Object.getOwnPropertyDescriptor(proto, 'value').set;
+    setter.call(el, ${JSON.stringify(value)});
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+    return true;
+  })()`)
+  if (!ok) throw new Error(`control not found: ${selector}`)
+}
+
 async function openSchedule(page) {
   let open = null
   for (let i = 0; i < 6 && !open; i++) {
@@ -436,7 +486,10 @@ async function main() {
     await navigate(page, `${ORIGIN}/weekly-menu-planner`)
     const generated = await until(
       page,
-      "document.body.innerText.includes('Roasted Tomato Soup & Sourdough') ? 'yes' : ''",
+      `(() => {
+        const text = document.body.innerText;
+        return text.includes('No home-planned meal') && text.includes('Regenerate menu') ? 'yes' : '';
+      })()`,
       8,
       200,
     )
@@ -445,11 +498,20 @@ async function main() {
     }
     const meals = await until(
       page,
-      "document.body.innerText.includes('Roasted Tomato Soup & Sourdough') && document.body.innerText.includes('Herb-Crusted Salmon with Lentils') ? 'yes' : ''",
+      `(() => {
+        const text = document.body.innerText;
+        return text.includes('No home-planned meal') &&
+          text.includes('Regenerate menu') &&
+          !text.includes('Roasted Tomato Soup & Sourdough') &&
+          !text.includes('Herb-Crusted Salmon with Lentils') &&
+          !text.includes('Mock set')
+          ? 'yes'
+          : '';
+      })()`,
       20,
       200,
     )
-    step('mock menu', meals === 'yes', 'first mock set is on screen')
+    step('guest menu', meals === 'yes', 'empty pool grid, no mock dishes')
     await openSchedule(page)
     await clickSelector(page, TUESDAY_EAT_OUT)
     const eatOutPressed = await until(
@@ -520,7 +582,48 @@ async function main() {
       "document.querySelector('.planner-week-pill')?.innerText || ''",
     )
     step('current week pill', /week/i.test(currentPill), currentPill)
-    await openSchedule(page)
+    await openRecipesTab(page)
+    const form = await until(
+      page,
+      "document.querySelector('input[name=\"recipeName\"]') ? 'yes' : ''",
+      25,
+      200,
+    )
+    step('recipe form', form === 'yes', 'name input visible')
+    await setControl(page, 'input[name="recipeName"]', 'Lemon pasta')
+    await setControl(page, 'input[placeholder="Ex. chickpeas"]', 'pasta')
+    await setControl(page, '.panel-ingredient-row input[type="number"]', '1')
+    await setControl(page, '.panel-ingredient-row select', 'g')
+    let added = null
+    for (let i = 0; i < 4 && !added; i++) {
+      added = await page.evaluate(
+        "document.body.innerText.includes('Lemon pasta') && document.querySelector('.panel-recipe-card') ? 'yes' : ''",
+      )
+      if (added) break
+      await clickSelector(page, 'button.panel-add-btn')
+      added = await until(
+        page,
+        "document.body.innerText.includes('Lemon pasta') && document.querySelector('.panel-recipe-card') ? 'yes' : ''",
+        15,
+        200,
+      )
+    }
+    const cardText = await page.evaluate(
+      "document.querySelector('.panel-recipe-card')?.innerText || ''",
+    )
+    step(
+      'add dinner recipe',
+      added === 'yes' && cardText.includes('Lemon pasta') && cardText.includes('Dinner'),
+      cardText.replaceAll('\n', ' ').slice(0, 180),
+    )
+    await clickSelector(page, 'button#preferences-schedule-tab')
+    const schedule = await until(
+      page,
+      "document.querySelector('#preferences-schedule-panel') ? 'yes' : ''",
+      10,
+      200,
+    )
+    step('schedule tab', schedule === 'yes', 'schedule panel visible')
     await clickSelector(
       page,
       '#preferences-schedule-panel .panel-day-card button.panel-context-pill',
@@ -533,19 +636,30 @@ async function main() {
     )
     step('monday office selected', officePressed === 'true', `pressed=${officePressed}`)
     await clickSelector(page, '.panel-footer button.panel-primary-btn')
+    const officeSaved = await until(
+      page,
+      `(() => {
+        const text = ${firstDayCardText()};
+        return /office/i.test(text) && text.includes('No home-planned meal') ? 'yes' : '';
+      })()`,
+      25,
+      200,
+    )
+    step('monday office saved', officeSaved === 'yes', 'Monday shows Office')
+    await clickSelector(page, 'button.planner-primary-btn')
     const officeCard = await until(
       page,
       `(() => {
         const text = ${firstDayCardText()};
-        return /office/i.test(text) && text.includes('No home-planned meal') && text.includes('Herb-Crusted Salmon with Lentils') ? 'yes' : '';
+        return /office/i.test(text) && text.includes('No home-planned meal') && text.includes('Lemon pasta') ? 'yes' : '';
       })()`,
       25,
       200,
     )
     step(
-      'current week shows office lunch away',
+      'generated monday dinner',
       officeCard === 'yes',
-      'Monday lunch is unplanned and dinner keeps the mock',
+      'Monday lunch is unplanned and dinner is Lemon pasta',
     )
     await screenshot(page, '01-current-week-office.png')
     const stored = await readStorage(page)
@@ -560,7 +674,7 @@ async function main() {
       page,
       `(() => {
         const text = ${firstDayCardText()};
-        return /office/i.test(text) && text.includes('No home-planned meal') ? 'yes' : '';
+        return /office/i.test(text) && text.includes('No home-planned meal') && text.includes('Lemon pasta') ? 'yes' : '';
       })()`,
       30,
       200,
@@ -573,8 +687,8 @@ async function main() {
       page,
       `(() => {
         const pill = document.querySelector('.planner-week-pill')?.innerText || '';
-        const text = ${firstDayCardText()};
-        return pill && pill !== ${JSON.stringify(currentPill)} && text.includes('Roasted Tomato Soup & Sourdough') && !/office/i.test(text) ? 'yes' : '';
+        const body = document.body.innerText;
+        return pill && pill !== ${JSON.stringify(currentPill)} && !body.includes('Lemon pasta') && !/office/i.test(body) ? 'yes' : '';
       })()`,
       30,
       200,
@@ -592,13 +706,21 @@ async function main() {
       `(() => {
         const pill = document.querySelector('.planner-week-pill')?.innerText || '';
         const text = ${firstDayCardText()};
-        return pill === ${JSON.stringify(currentPill)} && /office/i.test(text) && text.includes('No home-planned meal') ? 'yes' : '';
+        return pill === ${JSON.stringify(currentPill)} && /office/i.test(text) && text.includes('No home-planned meal') && text.includes('Lemon pasta') ? 'yes' : '';
       })()`,
       30,
       200,
     )
     step('current week returns', back === 'yes', 'Office is back on this Monday')
     await clickSelector(page, 'button.header-auth-button')
+    const loggedOut = await until(
+      page,
+      "document.querySelector('.header-user') ? '' : 'yes'",
+      30,
+      200,
+    )
+    step('logged out', loggedOut === 'yes', 'header user is gone')
+    await clickSelector(page, 'button.planner-primary-btn')
     const restored = await until(
       page,
       `(() => {

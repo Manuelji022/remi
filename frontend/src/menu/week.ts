@@ -2,8 +2,6 @@ import { DAYS } from '#/data/constants'
 import type { Day } from '#/data/constants'
 import type {
   DayContext,
-  DayMeals,
-  Meal,
   MealSlot,
   PlanningScope,
   Preferences,
@@ -34,7 +32,14 @@ export type CalendarWeekMenu = {
 export type LoadedMenuWeek = {
   menu: CalendarWeekMenu
   recipeNames: Record<string, string>
+  hasSavedMenu: boolean
 }
+
+export type ShownMeal =
+  | { kind: 'recipe'; name: string }
+  | { kind: 'unplanned' }
+  | { kind: 'covered'; context: DayContext }
+  | { kind: 'outside' }
 
 export class MenuInputError extends Error {
   constructor(message: string) {
@@ -100,6 +105,31 @@ export function applySchedule(
   return { weekStart: menu.weekStart, days }
 }
 
+export function assignRecipesToWeek(
+  menu: CalendarWeekMenu,
+  orderedPool: readonly { id: string; slot: MealSlot }[],
+): CalendarWeekMenu {
+  const queues = recipeQueues(orderedPool)
+  const days = {} as Record<Day, DayPlan>
+
+  for (const day of DAYS) {
+    const current = menu.days[day]
+    const planned = planDay(emptyDay(), current.context, current.scope)
+    days[day] = {
+      context: planned.context,
+      scope: planned.scope,
+      lunchRecipeId: scopeIncludes(planned.scope, 'lunch')
+        ? (queues.lunch.shift() ?? null)
+        : null,
+      dinnerRecipeId: scopeIncludes(planned.scope, 'dinner')
+        ? (queues.dinner.shift() ?? null)
+        : null,
+    }
+  }
+
+  return { weekStart: menu.weekStart, days }
+}
+
 export function scheduleFromMenu(menu: CalendarWeekMenu): Preferences {
   const dayContexts: Preferences['dayContexts'] = {}
   const planningScopes: Preferences['planningScopes'] = {}
@@ -116,18 +146,17 @@ export function scheduleFromMenu(menu: CalendarWeekMenu): Preferences {
 export function showMenuDay(
   plan: DayPlan,
   recipeNames: Readonly<Record<string, string>>,
-  mockDay: DayMeals | null,
 ): {
   context: DayContext | null
   scope: PlanningScope
-  lunch: Meal | null
-  dinner: Meal | null
+  lunch: ShownMeal
+  dinner: ShownMeal
 } {
   return {
     context: plan.context,
     scope: plan.scope,
-    lunch: mealForSlot('lunch', plan, recipeNames, mockDay),
-    dinner: mealForSlot('dinner', plan, recipeNames, mockDay),
+    lunch: showSlot('lunch', plan, recipeNames),
+    dinner: showSlot('dinner', plan, recipeNames),
   }
 }
 
@@ -202,19 +231,44 @@ function planDay(
   }
 }
 
-function mealForSlot(
+function showSlot(
   slot: MealSlot,
   plan: DayPlan,
   recipeNames: Readonly<Record<string, string>>,
-  mockDay: DayMeals | null,
-): Meal | null {
-  if (plan.scope !== 'both' && plan.scope !== slot) return null
+): ShownMeal {
+  if (!scopeIncludes(plan.scope, slot)) {
+    return plan.context
+      ? { kind: 'covered', context: plan.context }
+      : { kind: 'outside' }
+  }
 
   const recipeId = slot === 'lunch' ? plan.lunchRecipeId : plan.dinnerRecipeId
-  const recipeName = recipeId ? recipeNames[recipeId] : undefined
-  if (recipeName) return { name: recipeName, description: '' }
+  const name = recipeId ? recipeNames[recipeId] : undefined
+  if (name) return { kind: 'recipe', name }
 
-  return mockDay ? mockDay[slot] : null
+  return { kind: 'unplanned' }
+}
+
+function recipeQueues(orderedPool: readonly { id: string; slot: MealSlot }[]): {
+  lunch: string[]
+  dinner: string[]
+} {
+  const seen = new Set<string>()
+  const lunch: string[] = []
+  const dinner: string[] = []
+
+  for (const recipe of orderedPool) {
+    if (seen.has(recipe.id)) continue
+    seen.add(recipe.id)
+    if (recipe.slot === 'lunch') lunch.push(recipe.id)
+    else dinner.push(recipe.id)
+  }
+
+  return { lunch, dinner }
+}
+
+function scopeIncludes(scope: PlanningScope, slot: MealSlot): boolean {
+  return scope === 'both' || scope === slot
 }
 
 function parseDay(value: unknown): DayPlan {

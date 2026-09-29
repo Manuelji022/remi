@@ -18,10 +18,11 @@ export async function loadMenuWeekForUser(
   weekStart: string,
 ): Promise<LoadedMenuWeek> {
   const monday = parseWeekStart(weekStart)
-  const menu = await readMenu(userId, monday)
+  const loaded = await readMenu(userId, monday)
   return {
-    menu,
-    recipeNames: await recipeNamesFor(userId, menu),
+    menu: loaded.menu,
+    recipeNames: await recipeNamesFor(userId, loaded.menu),
+    hasSavedMenu: loaded.hasSavedMenu,
   }
 }
 
@@ -30,7 +31,7 @@ export async function saveMenuWeekForUser(
   input: CalendarWeekMenu,
 ): Promise<LoadedMenuWeek> {
   const menu = parseCalendarWeek(input)
-  await assertOwnedRecipes(userId, recipeIds(menu))
+  await assertPlacedRecipes(userId, menu)
 
   await db.transaction(async (tx) => {
     const saved = await tx
@@ -64,7 +65,7 @@ export async function saveMenuWeekForUser(
 async function readMenu(
   userId: string,
   weekStart: string,
-): Promise<CalendarWeekMenu> {
+): Promise<{ menu: CalendarWeekMenu; hasSavedMenu: boolean }> {
   const row = await db.query.weeklyMenu.findFirst({
     where: and(
       eq(weeklyMenu.userId, userId),
@@ -73,7 +74,7 @@ async function readMenu(
     with: { days: true },
   })
 
-  if (!row) return emptyMenu(weekStart)
+  if (!row) return { menu: emptyMenu(weekStart), hasSavedMenu: false }
 
   const days = {} as CalendarWeekMenu['days']
 
@@ -83,7 +84,7 @@ async function readMenu(
     days[day] = storedDay(stored)
   }
 
-  return { weekStart, days }
+  return { menu: { weekStart, days }, hasSavedMenu: true }
 }
 
 async function recipeNamesFor(
@@ -101,18 +102,54 @@ async function recipeNamesFor(
   return Object.fromEntries(rows.map((row) => [row.id, row.name]))
 }
 
-async function assertOwnedRecipes(
+async function assertPlacedRecipes(
   userId: string,
-  ids: string[],
+  menu: CalendarWeekMenu,
 ): Promise<void> {
-  if (ids.length === 0) return
+  const placed = placements(menu)
+  const seen = new Set<string>()
+
+  for (const placement of placed) {
+    if (seen.has(placement.id)) {
+      throw new MenuInputError('Recipe is already placed')
+    }
+    seen.add(placement.id)
+  }
+
+  if (placed.length === 0) return
 
   const rows = await db
-    .select({ id: recipe.id })
+    .select({ id: recipe.id, slot: recipe.slot })
     .from(recipe)
-    .where(and(eq(recipe.userId, userId), inArray(recipe.id, ids)))
+    .where(and(eq(recipe.userId, userId), inArray(recipe.id, [...seen])))
 
-  if (rows.length !== ids.length) throw new MenuInputError('Recipe not found')
+  const slots = new Map(rows.map((row) => [row.id, row.slot]))
+
+  for (const placement of placed) {
+    const slot = slots.get(placement.id)
+    if (!slot) throw new MenuInputError('Recipe not found')
+    if (slot !== placement.slot) {
+      throw new MenuInputError('Recipe slot does not match the meal')
+    }
+  }
+}
+
+function placements(
+  menu: CalendarWeekMenu,
+): { id: string; slot: 'lunch' | 'dinner' }[] {
+  const placed: { id: string; slot: 'lunch' | 'dinner' }[] = []
+
+  for (const day of DAYS) {
+    const plan = menu.days[day]
+    if (plan.lunchRecipeId) {
+      placed.push({ id: plan.lunchRecipeId, slot: 'lunch' })
+    }
+    if (plan.dinnerRecipeId) {
+      placed.push({ id: plan.dinnerRecipeId, slot: 'dinner' })
+    }
+  }
+
+  return placed
 }
 
 function recipeIds(menu: CalendarWeekMenu): string[] {

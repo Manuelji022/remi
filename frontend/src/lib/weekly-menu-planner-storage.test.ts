@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest'
 import {
   WEEKLY_MENU_PLANNER_STORAGE_KEY,
   getBrowserStorage,
-  mergeChecklistWithMenu,
   readWeeklyMenuPlannerState,
   writeWeeklyMenuPlannerState,
 } from './weekly-menu-planner-storage'
@@ -21,11 +20,6 @@ const persistedState: WeeklyMenuPlannerPersistedState = {
   savedPreferences: {
     dayContexts: { Monday: 'office' },
     planningScopes: { Monday: 'dinner' },
-  },
-  currentMenuIndex: 1,
-  shoppingChecklist: {
-    'produceAndFreshHerbs::Kale': { checked: true, inFridge: true },
-    'pantryAndDryGoods::Olive oil': { checked: false, inFridge: false },
   },
   legacyCustomRecipes: [],
 }
@@ -50,17 +44,17 @@ function createMemoryStorage(
 
 describe('weekly menu planner storage', () => {
   it('returns null when storage is missing', () => {
-    expect(readWeeklyMenuPlannerState(null, 3)).toBeNull()
+    expect(readWeeklyMenuPlannerState(null)).toBeNull()
     expect(getBrowserStorage()).toBeNull()
   })
 
   it('returns null for missing, corrupt, or invalid JSON', () => {
-    expect(readWeeklyMenuPlannerState(createMemoryStorage(), 3)).toBeNull()
+    expect(readWeeklyMenuPlannerState(createMemoryStorage())).toBeNull()
 
     const corrupt = createMemoryStorage({
       [WEEKLY_MENU_PLANNER_STORAGE_KEY]: '{not-json',
     })
-    expect(readWeeklyMenuPlannerState(corrupt, 3)).toBeNull()
+    expect(readWeeklyMenuPlannerState(corrupt)).toBeNull()
 
     const invalid = createMemoryStorage({
       [WEEKLY_MENU_PLANNER_STORAGE_KEY]: JSON.stringify({
@@ -69,18 +63,37 @@ describe('weekly menu planner storage', () => {
         shoppingChecklist: {},
       }),
     })
-    expect(readWeeklyMenuPlannerState(invalid, 3)).toBeNull()
+    expect(readWeeklyMenuPlannerState(invalid)).toBeNull()
   })
 
-  it('rejects a menu index outside the available sets', () => {
-    const storage = createMemoryStorage({
+  it('reads preferences from an old menu index and checklist', () => {
+    const preferences = {
+      dayContexts: { Monday: 'office' as const },
+      planningScopes: { Monday: 'dinner' as const },
+    }
+    const withIndex = createMemoryStorage({
       [WEEKLY_MENU_PLANNER_STORAGE_KEY]: JSON.stringify({
-        ...persistedState,
+        savedPreferences: preferences,
         currentMenuIndex: 4,
+        shoppingChecklist: { leftover: true },
       }),
     })
 
-    expect(readWeeklyMenuPlannerState(storage, 3)).toBeNull()
+    expect(readWeeklyMenuPlannerState(withIndex)).toEqual({
+      savedPreferences: preferences,
+      legacyCustomRecipes: [],
+    })
+
+    const missingIndex = createMemoryStorage({
+      [WEEKLY_MENU_PLANNER_STORAGE_KEY]: JSON.stringify({
+        savedPreferences: preferences,
+      }),
+    })
+
+    expect(readWeeklyMenuPlannerState(missingIndex)).toEqual({
+      savedPreferences: preferences,
+      legacyCustomRecipes: [],
+    })
   })
 
   it('round-trips planner state and leaves recipes out of the blob', () => {
@@ -88,13 +101,15 @@ describe('weekly menu planner storage', () => {
 
     writeWeeklyMenuPlannerState(storage, persistedState)
 
-    expect(readWeeklyMenuPlannerState(storage, 3)).toEqual(persistedState)
-    expect(
-      JSON.parse(storage.snapshot()[WEEKLY_MENU_PLANNER_STORAGE_KEY])
-        .savedPreferences,
-    ).toEqual({
-      dayContexts: { Monday: 'office' },
-      planningScopes: { Monday: 'dinner' },
+    expect(readWeeklyMenuPlannerState(storage)).toEqual(persistedState)
+    const written = JSON.parse(
+      storage.snapshot()[WEEKLY_MENU_PLANNER_STORAGE_KEY],
+    )
+    expect(written).toEqual({
+      savedPreferences: {
+        dayContexts: { Monday: 'office' },
+        planningScopes: { Monday: 'dinner' },
+      },
     })
   })
 
@@ -107,11 +122,13 @@ describe('weekly menu planner storage', () => {
           customRecipes: [lemonPasta],
         },
         currentMenuIndex: 1,
-        shoppingChecklist: persistedState.shoppingChecklist,
+        shoppingChecklist: {
+          'produceAndFreshHerbs::Kale': { checked: true, inFridge: true },
+        },
       }),
     })
 
-    expect(readWeeklyMenuPlannerState(storage, 3)).toEqual({
+    expect(readWeeklyMenuPlannerState(storage)).toEqual({
       ...persistedState,
       legacyCustomRecipes: [
         {
@@ -146,26 +163,12 @@ describe('weekly menu planner storage', () => {
       }),
     })
 
-    expect(readWeeklyMenuPlannerState(storage, 3)).toBeNull()
+    expect(readWeeklyMenuPlannerState(storage)).toBeNull()
   })
 
   it('ignores writes when storage is missing', () => {
     expect(() =>
       writeWeeklyMenuPlannerState(null, persistedState),
     ).not.toThrow()
-  })
-
-  it('keeps checks only for ingredients in the current menu', () => {
-    const menuChecklist = {
-      'produceAndFreshHerbs::Kale': { checked: false, inFridge: false },
-      'dairyAndEggs::Eggs': { checked: false, inFridge: false },
-    }
-
-    expect(
-      mergeChecklistWithMenu(menuChecklist, persistedState.shoppingChecklist),
-    ).toEqual({
-      'produceAndFreshHerbs::Kale': { checked: true, inFridge: true },
-      'dairyAndEggs::Eggs': { checked: false, inFridge: false },
-    })
   })
 })

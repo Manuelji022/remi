@@ -373,129 +373,49 @@ async function main() {
 
     let generated = null
     for (let i = 0; i < 6 && !generated; i++) {
-      generated = await page.evaluate(
-        "document.body.innerText.includes('Roasted Tomato Soup & Sourdough') ? 'yes' : ''",
-      )
+      generated = await page.evaluate(`(() => {
+        const text = document.body.innerText;
+        return text.includes('No home-planned meal') && text.includes('Regenerate menu')
+          ? 'yes'
+          : '';
+      })()`)
       if (generated) break
       await clickSelector(page, 'button.planner-primary-btn')
       generated = await until(
         page,
-        "document.body.innerText.includes('Roasted Tomato Soup & Sourdough') ? 'yes' : ''",
+        `(() => {
+          const text = document.body.innerText;
+          return text.includes('No home-planned meal') && text.includes('Regenerate menu')
+            ? 'yes'
+            : '';
+        })()`,
         12,
         200,
       )
     }
     const afterGenerate = await bodyText(page)
-    step(
-      'generate menu',
-      afterGenerate.includes('Roasted Tomato Soup & Sourdough') &&
-        afterGenerate.includes('Herb-Crusted Salmon with Lentils') &&
-        afterGenerate.includes('Regenerate menu') &&
-        afterGenerate.includes('Mock set 1 of 3') &&
-        !afterGenerate.includes('No Weekly Menu yet'),
-      'Monday meals, regenerate label, mock set 1 of 3',
-    )
-    await screenshot(page, '03-planner-generated.png')
-
-    const storageAfterGenerate = await page.evaluate(`(() => {
-      const raw = localStorage.getItem(${JSON.stringify(STORAGE_KEY)});
-      return raw ? JSON.parse(raw) : null;
+    const shoppingDisabledAfter = await page.evaluate(`(() => {
+      const button = [...document.querySelectorAll('button.tab-btn')]
+        .find((node) => node.innerText.startsWith('Shopping List'));
+      return Boolean(button && button.disabled);
     })()`)
     step(
-      'storage index',
-      storageAfterGenerate?.currentMenuIndex === 0,
-      `currentMenuIndex=${storageAfterGenerate?.currentMenuIndex}`,
+      'generate menu',
+      afterGenerate.includes('No home-planned meal') &&
+        afterGenerate.includes('Regenerate menu') &&
+        !afterGenerate.includes('Roasted Tomato Soup & Sourdough') &&
+        !afterGenerate.includes('Herb-Crusted Salmon with Lentils') &&
+        !afterGenerate.includes('Mock set') &&
+        !afterGenerate.includes('No Weekly Menu yet') &&
+        shoppingDisabledAfter,
+      'unplanned home slots, regenerate label, shopping stays disabled',
     )
-
-    let shopping = null
-    for (let i = 0; i < 4 && !shopping; i++) {
-      shopping = await page.evaluate(
-        "document.body.innerText.includes('Everything you need for this week') ? 'yes' : ''",
-      )
-      if (shopping) break
-      await page.evaluate(`(() => {
-        const button = [...document.querySelectorAll('button.tab-btn')]
-          .find((node) => node.innerText.startsWith('Shopping List'));
-        if (!button) return false;
-        button.scrollIntoView({ block: 'center' });
-        return true;
-      })()`)
-      const buttons = await page.evaluate(`(() => {
-        return [...document.querySelectorAll('button.tab-btn')].map((node) => ({
-          text: node.innerText.trim().slice(0, 40),
-          disabled: node.disabled,
-        }));
-      })()`)
-      const target = await page.evaluate(`(() => {
-        const button = [...document.querySelectorAll('button.tab-btn')]
-          .find((node) => node.innerText.startsWith('Shopping List'));
-        if (!button || button.disabled) return null;
-        const rect = button.getBoundingClientRect();
-        return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
-      })()`)
-      if (!target) {
-        await sleep(300)
-        continue
-      }
-      for (const type of ['mousePressed', 'mouseReleased']) {
-        await page.send('Input.dispatchMouseEvent', {
-          type,
-          x: target.x,
-          y: target.y,
-          button: 'left',
-          clickCount: 1,
-        })
-      }
-      shopping = await until(
-        page,
-        "document.body.innerText.includes('Everything you need for this week') ? 'yes' : ''",
-        10,
-        200,
-      )
-      if (!shopping) report.console.push({ type: 'debug', text: JSON.stringify(buttons) })
-    }
-    step('shopping tab', shopping === 'yes', 'Everything you need for this week')
-
-    let pressed = null
-    for (let i = 0; i < 4 && pressed !== 'true'; i++) {
-      pressed = await page.evaluate(`(() => {
-        const row = document.querySelector('button.planner-ingredient-row');
-        return row ? row.getAttribute('aria-pressed') : '';
-      })()`)
-      if (pressed === 'true') break
-      await clickSelector(page, 'button.planner-ingredient-row')
-      pressed = await until(
-        page,
-        `(() => {
-          const row = document.querySelector('button.planner-ingredient-row');
-          return row && row.getAttribute('aria-pressed') === 'true' ? 'true' : '';
-        })()`,
-        8,
-        150,
-      )
-    }
-    const rowText = await page.evaluate(
-      "document.querySelector('button.planner-ingredient-row')?.innerText || ''",
-    )
-    step(
-      'toggle ingredient',
-      pressed === 'true' &&
-        /cherry tomatoes/i.test(rowText) &&
-        /in fridge/i.test(rowText),
-      rowText.replaceAll('\n', ' ').slice(0, 160),
-    )
-    await screenshot(page, '04-shopping-toggled.png')
+    await screenshot(page, '03-planner-generated.png')
 
     report.storage = await page.evaluate(`(() => {
       const raw = localStorage.getItem(${JSON.stringify(STORAGE_KEY)});
       return raw ? JSON.parse(raw) : null;
     })()`)
-    const item = report.storage?.shoppingChecklist?.['produceAndFreshHerbs::Cherry tomatoes']
-    step(
-      'storage checklist',
-      item?.checked === true && item?.inFridge === true,
-      JSON.stringify(item),
-    )
 
     report.network = [...page.requests.values()].filter((entry) =>
       /\/api\/auth\/get-session|localhost:3001\/($|weekly-menu-planner)/.test(entry.url),
