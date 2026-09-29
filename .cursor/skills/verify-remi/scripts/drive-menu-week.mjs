@@ -319,6 +319,16 @@ function firstDayCardText() {
   })()`
 }
 
+const TUESDAY_EAT_OUT =
+  '#preferences-schedule-panel .panel-day-list > .panel-day-card:nth-child(2) .panel-control-group:nth-child(2) button.panel-context-pill:nth-child(2)'
+
+function guestBlobIntact(stored) {
+  const dayContexts = stored?.savedPreferences?.dayContexts
+  return (
+    dayContexts?.Tuesday === 'eatOut' && dayContexts.Monday === undefined
+  )
+}
+
 function databaseUrl() {
   const text = execFileSync(
     'bash',
@@ -423,25 +433,7 @@ async function main() {
   let email = null
   try {
     page = await newPage()
-    email = `week-drive-${Date.now()}@example.com`
-    const token = await signUpThrowaway(email)
-    const cookie = await page.send('Network.setCookie', {
-      name: 'better-auth.session_token',
-      value: token,
-      url: ORIGIN,
-      httpOnly: true,
-      path: '/',
-      sameSite: 'Lax',
-    })
-    step('session cookie', cookie.success === true, 'better-auth.session_token')
     await navigate(page, `${ORIGIN}/weekly-menu-planner`)
-    const user = await until(
-      page,
-      "document.querySelector('.header-user')?.innerText || ''",
-      20,
-      200,
-    )
-    step('signed-in header', user === 'Week Drive', `header=${user}`)
     const generated = await until(
       page,
       "document.body.innerText.includes('Roasted Tomato Soup & Sourdough') ? 'yes' : ''",
@@ -458,6 +450,72 @@ async function main() {
       200,
     )
     step('mock menu', meals === 'yes', 'first mock set is on screen')
+    await openSchedule(page)
+    await clickSelector(page, TUESDAY_EAT_OUT)
+    const eatOutPressed = await until(
+      page,
+      `document.querySelector(${JSON.stringify(TUESDAY_EAT_OUT)})?.getAttribute('aria-pressed')`,
+      10,
+      100,
+    )
+    step(
+      'tuesday eat out selected',
+      eatOutPressed === 'true',
+      `pressed=${eatOutPressed}`,
+    )
+    await clickSelector(page, '.panel-footer button.panel-primary-btn')
+    const guestSaved = await until(
+      page,
+      `(() => {
+        const raw = localStorage.getItem(${JSON.stringify(STORAGE_KEY)});
+        if (!raw) return '';
+        const dayContexts = JSON.parse(raw).savedPreferences?.dayContexts;
+        return dayContexts?.Tuesday === 'eatOut' && dayContexts.Monday === undefined ? 'yes' : '';
+      })()`,
+      20,
+      100,
+    )
+    step(
+      'guest save writes tuesday eat out',
+      guestSaved === 'yes',
+      'Monday stays unset',
+    )
+    email = `week-drive-${Date.now()}@example.com`
+    const token = await signUpThrowaway(email)
+    const cookie = await page.send('Network.setCookie', {
+      name: 'better-auth.session_token',
+      value: token,
+      url: ORIGIN,
+      httpOnly: true,
+      path: '/',
+      sameSite: 'Lax',
+    })
+    step('session cookie', cookie.success === true, 'better-auth.session_token')
+    await page.evaluate(
+      "globalThis[Symbol.for('better-auth:focus-manager')].setFocused(true)",
+    )
+    const user = await until(
+      page,
+      "document.querySelector('.header-user')?.innerText || ''",
+      25,
+      200,
+    )
+    step('signed-in header', user === 'Week Drive', `header=${user}`)
+    const afterSignIn = await readStorage(page)
+    step(
+      'sign-in keeps the guest blob',
+      guestBlobIntact(afterSignIn),
+      JSON.stringify(afterSignIn?.savedPreferences?.dayContexts ?? null),
+    )
+    let weekLoaded = false
+    for (let i = 0; i < 30; i++) {
+      weekLoaded = [...page.requests.values()].some(
+        (entry) => entry.url.includes('/_serverFn/') && entry.status === 200,
+      )
+      if (weekLoaded) break
+      await sleep(200)
+    }
+    step('week load', weekLoaded, weekLoaded ? 'server fn 200' : 'no server fn response')
     const currentPill = await page.evaluate(
       "document.querySelector('.planner-week-pill')?.innerText || ''",
     )
@@ -493,7 +551,7 @@ async function main() {
     const stored = await readStorage(page)
     step(
       'guest blob does not take the signed-in week',
-      stored?.savedPreferences?.dayContexts?.Monday === undefined,
+      guestBlobIntact(stored),
       JSON.stringify(stored?.savedPreferences?.dayContexts ?? null),
     )
 
@@ -540,6 +598,31 @@ async function main() {
       200,
     )
     step('current week returns', back === 'yes', 'Office is back on this Monday')
+    await clickSelector(page, 'button.header-auth-button')
+    const restored = await until(
+      page,
+      `(() => {
+        const header = document.querySelector('.header-user')?.innerText || '';
+        const cards = [...document.querySelectorAll('.planner-day-grid .day-card')];
+        const monday = cards[0]?.innerText || '';
+        const tuesday = cards[1]?.innerText || '';
+        if (header) return '';
+        return !/office/i.test(monday) && /eat out/i.test(tuesday) ? 'yes' : '';
+      })()`,
+      30,
+      200,
+    )
+    step(
+      'logout restores guest schedule',
+      restored === 'yes',
+      'Tuesday is Eat out and Monday Office is gone',
+    )
+    const afterLogout = await readStorage(page)
+    step(
+      'logout keeps the guest blob',
+      guestBlobIntact(afterLogout),
+      JSON.stringify(afterLogout?.savedPreferences?.dayContexts ?? null),
+    )
     const posts = [...page.requests.values()].filter(
       (entry) => entry.url.includes('/_serverFn/') && entry.method === 'POST',
     )

@@ -51,6 +51,6 @@ Screenshots from the packaged script: `02-planner-empty.png`, `03-planner-genera
 node .cursor/skills/verify-remi/scripts/drive-menu-week.mjs
 ```
 
-Requires `auth-submit: ready`. The script does not use `/login`. It signs up, stores `better-auth.session_token`, generates the first mock set, sets Monday to Office, and saves.
+Requires `auth-submit: ready`. The script does not use `/login`. Logged out, it generates the first mock set and saves Tuesday as Eat out. It then signs up, stores `better-auth.session_token`, and refetches the session on the same page. Sets Monday to Office and saves.
 
-Resulting state on the current Monday: `.day-context-badge` is `Office`, lunch `.meal-name` is `No home-planned meal`, dinner keeps `Herb-Crusted Salmon with Lentils`. Reload shows the same card. `Previous week` changes the week pill, Monday lunch is `Roasted Tomato Soup & Sourdough`, and there is no Office badge. `Next week` restores the original pill and Office. `savedPreferences.dayContexts.Monday` stays absent from `localStorage`. A `POST` whose URL contains `/_serverFn/` returns 200. The script deletes the throwaway user.
+Resulting state on the current Monday: `.day-context-badge` is `Office`, lunch `.meal-name` is `No home-planned meal`, dinner keeps `Herb-Crusted Salmon with Lentils`. Reload shows the same card. `Previous week` changes the week pill, Monday lunch is `Roasted Tomato Soup & Sourdough`, and there is no Office badge. `Next week` restores the original pill and Office. `savedPreferences.dayContexts.Tuesday` stays `"eatOut"` and Monday stays absent. Log out shows Tuesday Eat out and no Monday Office badge. A `POST` whose URL contains `/_serverFn/` returns 200. The script deletes the throwaway user.

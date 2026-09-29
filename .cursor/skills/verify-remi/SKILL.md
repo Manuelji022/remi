@@ -104,7 +104,7 @@ Signed-in weekly menu, when doctor printed `auth-submit: ready`:
 node .cursor/skills/verify-remi/scripts/drive-menu-week.mjs
 ```
 
-The script signs up a throwaway user the same way as `drive-recipes.mjs`, generates the first mock set, sets Monday to Office, and saves. Lunch on that Monday becomes the unplanned copy. Dinner keeps the mock name. Reload still shows Office. Previous week does not. Returning to the current week shows Office again. The guest `localStorage` schedule does not gain that Monday context. Vitest `src/menu/store.test.ts` runs in `pnpm test` against in-process Postgres and checks the same owner split for the current Monday and the prior Monday.
+The script generates the first mock set while logged out, saves Tuesday as Eat out, then signs up a throwaway user the same way as `drive-recipes.mjs` and adopts that session without reloading. It sets Monday to Office and saves. Lunch on that Monday becomes the unplanned copy. Dinner keeps the mock name. Reload still shows Office. Previous week does not. Returning to the current week shows Office again. The guest `localStorage` schedule keeps Tuesday Eat out and does not gain that Monday context. Log out shows the guest Tuesday card again. Vitest `src/menu/store.test.ts` runs in `pnpm test` against in-process Postgres and checks the same owner split for the current Monday and the prior Monday.
 
 Clicks before hydration do nothing. The helper retries a click until the expected text appears or the attempt budget is spent. Match that behavior if you drive by hand.
 

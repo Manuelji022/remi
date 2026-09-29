@@ -79,6 +79,7 @@ export function WeeklyMenuPlanner() {
   const hasLoadedRef = useRef(false)
   const skipChecklistSyncRef = useRef(false)
   const guestPreferencesRef = useRef<Preferences>(getDefaultPreferences())
+  const previousUserIdRef = useRef<string | undefined>(undefined)
   const weekOffsetRef = useRef(weekOffset)
   const loadGenerationRef = useRef(0)
   const { data: session } = authClient.useSession()
@@ -136,7 +137,7 @@ export function WeeklyMenuPlanner() {
     if (!isHydrated) return
 
     writeWeeklyMenuPlannerState(getBrowserStorage(), {
-      savedPreferences: userId ? guestPreferencesRef.current : savedPreferences,
+      savedPreferences: guestPreferencesRef.current,
       currentMenuIndex,
       shoppingChecklist,
       legacyCustomRecipes,
@@ -147,7 +148,6 @@ export function WeeklyMenuPlanner() {
     legacyCustomRecipes,
     savedPreferences,
     shoppingChecklist,
-    userId,
   ])
 
   useEffect(() => {
@@ -185,6 +185,19 @@ export function WeeklyMenuPlanner() {
   }
 
   useEffect(() => {
+    if (!isHydrated) return
+
+    const previous = previousUserIdRef.current
+    previousUserIdRef.current = userId
+    if (!previous || userId) return
+
+    setSavedPreferences(guestPreferencesRef.current)
+    setDraftPreferences(guestPreferencesRef.current)
+    setMenuWeek(null)
+    setRecipeNames({})
+  }, [isHydrated, userId])
+
+  useEffect(() => {
     if (!userId || !isHydrated) return
 
     let cancelled = false
@@ -220,6 +233,7 @@ export function WeeklyMenuPlanner() {
 
   function handleSavePreferences(preferences: Preferences) {
     if (!userId) {
+      guestPreferencesRef.current = preferences
       setSavedPreferences(preferences)
       setDraftPreferences(preferences)
       setIsPreferencesOpen(false)
