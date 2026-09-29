@@ -30,6 +30,16 @@ import {
   getPlanningScopeForDay,
 } from '#/data/types'
 import type { ChecklistState, Preferences, WeeklyMenu } from '#/data/types'
+import { authClient } from '#/lib/auth-client'
+import { loadWeeklyMenu, saveWeeklyMenu } from '#/menu/functions'
+import {
+  applySchedule,
+  emptyMenu,
+  scheduleFromMenu,
+  showMenuDay,
+  viewWeekStart,
+} from '#/menu/week'
+import type { CalendarWeekMenu } from '#/menu/week'
 import type { RecipeInput } from '#/recipes/recipe'
 import { useI18n } from '#/i18n'
 import {
@@ -63,9 +73,18 @@ export function WeeklyMenuPlanner() {
   const [legacyCustomRecipes, setLegacyCustomRecipes] = useState<RecipeInput[]>(
     [],
   )
+  const [menuWeek, setMenuWeek] = useState<CalendarWeekMenu | null>(null)
+  const [recipeNames, setRecipeNames] = useState<Record<string, string>>({})
   const [isHydrated, setIsHydrated] = useState(false)
   const hasLoadedRef = useRef(false)
   const skipChecklistSyncRef = useRef(false)
+  const guestPreferencesRef = useRef<Preferences>(getDefaultPreferences())
+  const previousUserIdRef = useRef<string | undefined>(undefined)
+  const weekOffsetRef = useRef(weekOffset)
+  const loadGenerationRef = useRef(0)
+  const { data: session } = authClient.useSession()
+  const userId = session?.user.id
+  weekOffsetRef.current = weekOffset
 
   const menuSets = getMenuSets(locale)
   const ingredientSets = getIngredientSets(locale)
@@ -92,6 +111,7 @@ export function WeeklyMenuPlanner() {
           ? ingredientSets[stored.currentMenuIndex]
           : undefined
 
+      guestPreferencesRef.current = stored.savedPreferences
       setSavedPreferences(stored.savedPreferences)
       setDraftPreferences(stored.savedPreferences)
       setLegacyCustomRecipes(stored.legacyCustomRecipes)
@@ -117,7 +137,7 @@ export function WeeklyMenuPlanner() {
     if (!isHydrated) return
 
     writeWeeklyMenuPlannerState(getBrowserStorage(), {
-      savedPreferences,
+      savedPreferences: guestPreferencesRef.current,
       currentMenuIndex,
       shoppingChecklist,
       legacyCustomRecipes,
@@ -164,10 +184,81 @@ export function WeeklyMenuPlanner() {
     setIsPreferencesOpen(true)
   }
 
+  useEffect(() => {
+    if (!isHydrated) return
+
+    const previous = previousUserIdRef.current
+    previousUserIdRef.current = userId
+    if (!previous || userId) return
+
+    setSavedPreferences(guestPreferencesRef.current)
+    setDraftPreferences(guestPreferencesRef.current)
+    setMenuWeek(null)
+    setRecipeNames({})
+  }, [isHydrated, userId])
+
+  useEffect(() => {
+    if (!userId || !isHydrated) return
+
+    let cancelled = false
+    const generation = ++loadGenerationRef.current
+    const weekStart = viewWeekStart(new Date(), weekOffset)
+    setMenuWeek(null)
+    setSavedPreferences(getDefaultPreferences())
+    setDraftPreferences(getDefaultPreferences())
+
+    void loadWeeklyMenu({ data: { weekStart } })
+      .then((loaded) => {
+        if (cancelled || generation !== loadGenerationRef.current) return
+        setMenuWeek(loaded.menu)
+        setRecipeNames(loaded.recipeNames)
+        const preferences = scheduleFromMenu(loaded.menu)
+        setSavedPreferences(preferences)
+        setDraftPreferences(preferences)
+      })
+      .catch(() => {
+        if (cancelled || generation !== loadGenerationRef.current) return
+        const empty = emptyMenu(weekStart)
+        setMenuWeek(empty)
+        setRecipeNames({})
+        const preferences = scheduleFromMenu(empty)
+        setSavedPreferences(preferences)
+        setDraftPreferences(preferences)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [isHydrated, userId, weekOffset])
+
   function handleSavePreferences(preferences: Preferences) {
-    setSavedPreferences(preferences)
-    setDraftPreferences(preferences)
-    setIsPreferencesOpen(false)
+    if (!userId) {
+      guestPreferencesRef.current = preferences
+      setSavedPreferences(preferences)
+      setDraftPreferences(preferences)
+      setIsPreferencesOpen(false)
+      return
+    }
+
+    if (!menuWeek) return
+
+    const next = applySchedule(menuWeek, preferences)
+    const savedWeekStart = next.weekStart
+    const saveGeneration = loadGenerationRef.current
+
+    void saveWeeklyMenu({ data: next }).then((loaded) => {
+      if (loadGenerationRef.current !== saveGeneration) return
+      loadGenerationRef.current += 1
+      if (viewWeekStart(new Date(), weekOffsetRef.current) !== savedWeekStart) {
+        return
+      }
+      setMenuWeek(loaded.menu)
+      setRecipeNames(loaded.recipeNames)
+      const saved = scheduleFromMenu(loaded.menu)
+      setSavedPreferences(saved)
+      setDraftPreferences(saved)
+      setIsPreferencesOpen(false)
+    })
   }
 
   const handleLegacyRecipesMigrated = useCallback(() => {
@@ -278,7 +369,9 @@ export function WeeklyMenuPlanner() {
             animationKey={animationKey}
             generatedMenu={generatedMenu}
             isGenerating={isGenerating}
+            menuWeek={userId ? menuWeek : null}
             onGenerateMenu={handleGenerateMenu}
+            recipeNames={recipeNames}
             savedPreferences={savedPreferences}
           />
         )}
@@ -338,7 +431,9 @@ interface MenuTabProps {
   animationKey: number
   generatedMenu: WeeklyMenu | null
   isGenerating: boolean
+  menuWeek: CalendarWeekMenu | null
   onGenerateMenu: () => void
+  recipeNames: Record<string, string>
   savedPreferences: Preferences
 }
 
@@ -346,7 +441,9 @@ function MenuTab({
   animationKey,
   generatedMenu,
   isGenerating,
+  menuWeek,
   onGenerateMenu,
+  recipeNames,
   savedPreferences,
 }: MenuTabProps) {
   const { t } = useI18n()
@@ -385,18 +482,24 @@ function MenuTab({
 
       <div className="planner-day-grid">
         {DAYS.map((day, index) => {
-          const planningScope = getPlanningScopeForDay(savedPreferences, day)
-          const dayContext = getDayContextForDay(savedPreferences, day)
+          const shown = menuWeek
+            ? showMenuDay(menuWeek.days[day], recipeNames, generatedMenu[day])
+            : {
+                context: getDayContextForDay(savedPreferences, day),
+                scope: getPlanningScopeForDay(savedPreferences, day),
+                lunch: generatedMenu[day].lunch,
+                dinner: generatedMenu[day].dinner,
+              }
 
           return (
             <div className={`delay-${index + 1}`} key={day}>
               <DayCard
                 day={day}
-                dayContext={dayContext}
-                dinner={generatedMenu[day].dinner}
+                dayContext={shown.context}
+                dinner={shown.dinner}
                 isWeekend={isWeekend(day)}
-                lunch={generatedMenu[day].lunch}
-                planningScope={planningScope}
+                lunch={shown.lunch}
+                planningScope={shown.scope}
               />
             </div>
           )
