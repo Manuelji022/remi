@@ -14,7 +14,7 @@ node .cursor/skills/verify-remi/scripts/drive-weekly-menu.mjs
 - Generate / regenerate: `button.planner-primary-btn`.
 - Menu tab and shopping tab: `button.tab-btn` texts `Weekly Menu` and `Shopping List`.
 - Day cards: `article.day-card`, day name in `.day-name`, meals in `.meal-name`.
-- Persistence: `localStorage` key `remi:weekly-menu-planner:state` for schedule, menu index, and checklist. Recipes are not in that document. See [preferences.md](preferences.md).
+- Persistence: logged out, `localStorage` key `remi:weekly-menu-planner:state` holds the schedule, menu index, and checklist. Signed in, the viewed Monday's day context and meal slots are `weekly_menu` / `weekly_menu_day` rows for that user. The mock menu index and the shopping checklist stay in `localStorage`. Recipes are not in that document. See [preferences.md](preferences.md).
 
 ## How to get to it (user POV)
 
@@ -44,3 +44,13 @@ Screenshots from the packaged script: `02-planner-empty.png`, `03-planner-genera
 - Generation is local. There is no menu POST. The names are the first set in `frontend/src/data/menu.ts`. Seeing those names is the product, not a stub you should replace.
 - The shopping badge on the tab is the count of items still needed. Ticking `Cherry tomatoes` decreases it. Assert the row, not a hard-coded badge number, because the count depends on the whole list.
 - `Regenerate menu` cycles the three English sets. Set 2 Monday lunch is `Miso Soup with Tofu & Wakame`. If you see that on the first generate, the profile was not empty or the button was clicked twice.
+
+## Signed-in week
+
+```bash
+node .cursor/skills/verify-remi/scripts/drive-menu-week.mjs
+```
+
+Requires `auth-submit: ready`. The script does not use `/login`. It signs up, stores `better-auth.session_token`, generates the first mock set, sets Monday to Office, and saves.
+
+Resulting state on the current Monday: `.day-context-badge` is `Office`, lunch `.meal-name` is `No home-planned meal`, dinner keeps `Herb-Crusted Salmon with Lentils`. Reload shows the same card. `Previous week` changes the week pill, Monday lunch is `Roasted Tomato Soup & Sourdough`, and there is no Office badge. `Next week` restores the original pill and Office. `savedPreferences.dayContexts.Monday` stays absent from `localStorage`. A `POST` whose URL contains `/_serverFn/` returns 200. The script deletes the throwaway user.
