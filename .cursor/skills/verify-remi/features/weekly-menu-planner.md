@@ -37,7 +37,7 @@ Screenshots from the packaged script: `02-planner-empty.png`, `03-planner-genera
 - TanStack devtools renders a small `TanStack` button at the bottom-left in `pnpm dev`. It is not product UI. Do not click it. Clicks use `elementFromPoint` so a covered target fails instead of hitting the devtools shell.
 - `curl` of this route always shows the empty state. A guest grid is memory only, so a refresh returns to `No Weekly Menu yet`.
 - A guest Generate assigns nothing. Home slots read `No home-planned meal`. Do not treat an invented dish title as a successful generate.
-- `Shopping List` stays disabled. The tab badge stays at zero.
+- A guest `Shopping List` stays disabled before Generate and after Generate. The guest tab badge stays at zero. The signed-in list does not enable this guest tab.
 
 ## Signed-in week
 
@@ -45,10 +45,12 @@ Screenshots from the packaged script: `02-planner-empty.png`, `03-planner-genera
 node .cursor/skills/verify-remi/scripts/drive-menu-week.mjs
 ```
 
-Requires `auth-submit: ready`. The script does not use `/login`. Logged out, it generates the empty guest grid and saves Tuesday as Eat out. It then signs up, stores `better-auth.session_token`, and refetches the session on the same page. It adds dinner recipe `Lemon pasta` on My Recipes, sets Monday to Office, saves, and clicks Generate.
+Requires `auth-submit: ready`. The script does not use `/login`. Logged out, it generates the empty guest grid and saves Tuesday as Eat out. It then signs up, stores `better-auth.session_token`, and refetches the session on the same page. It adds dinner recipe `Lemon pasta` on My Recipes with ingredient name `pasta`, quantity `1`, and unit `g`, sets Monday to Office, saves, and clicks Generate.
 
-Resulting state on the current Monday: `.day-context-badge` is `Office`, lunch `.meal-name` is `No home-planned meal`, dinner `.meal-name` is `Lemon pasta`. Reload shows the same card. `Previous week` changes the week pill and does not show `Lemon pasta` or Office. `Next week` restores the original pill, Office, and `Lemon pasta`.
+Resulting state on the current Monday: `.day-context-badge` is `Office`, lunch `.meal-name` is `No home-planned meal`, dinner `.meal-name` is `Lemon pasta`. The `Shopping List` `button.tab-btn` is enabled. Opening it shows `1 g pasta` and no second ingredient. Reload shows the same Monday card. `Previous week` changes the week pill and does not show `Lemon pasta` or Office. `Next week` restores the original pill, Office, and `Lemon pasta`.
 
-The script then adds dinner `Herb rice`, clicks `Next week`, and clicks Generate. The next Monday dinner `.meal-name` is `Herb rice`. The next Tuesday dinner `.meal-name` is `Lemon pasta`. That repeat is the thin dinner pool: both owned dinners are placed, and the one from the previous Monday comes second. Later dinners stay `No home-planned meal`. `Previous week` restores Office and `Lemon pasta` on the original Monday.
+The script then adds dinner `Herb rice` with ingredient name `rice`, quantity `2`, and unit `g`, clicks `Next week`, and clicks Generate. The next Monday dinner `.meal-name` is `Herb rice`. The next Tuesday dinner `.meal-name` is `Lemon pasta`. That repeat is the thin dinner pool: both owned dinners are placed, and the one from the previous Monday comes second. Later dinners stay `No home-planned meal`. Shopping List contains `2 g rice` and `1 g pasta`. `Previous week` restores Office and `Lemon pasta` on the original Monday. Shopping List then contains `1 g pasta` and does not contain `2 g rice`.
+
+A guest Shopping List stays disabled before Generate and after a guest Generate. These signed-in checks do not enable the guest tab.
 
 `savedPreferences.dayContexts.Tuesday` stays `"eatOut"` and Monday stays absent. Log out, then Generate, shows Tuesday Eat out and no Monday Office badge. A `POST` whose URL contains `/_serverFn/` returns 200. The script deletes the throwaway user. A guest Generate never reads the previous Monday.

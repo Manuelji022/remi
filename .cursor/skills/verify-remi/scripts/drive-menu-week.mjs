@@ -296,6 +296,52 @@ async function clickSelector(page, selector) {
   return point
 }
 
+async function clickTab(page, prefix) {
+  const expression = `(() => {
+    const el = [...document.querySelectorAll('button.tab-btn')]
+      .find((node) => (node.innerText || '').startsWith(${JSON.stringify(prefix)}));
+    if (!el) return null;
+    el.scrollIntoView({ block: 'center', inline: 'center' });
+    const rect = el.getBoundingClientRect();
+    const x = rect.left + rect.width / 2;
+    const y = rect.top + rect.height / 2;
+    if (x < 0 || y < 0 || x >= window.innerWidth || y >= window.innerHeight) {
+      return { pending: true, x, y, width: window.innerWidth };
+    }
+    const top = document.elementFromPoint(x, y);
+    const hit = top === el || (top && el.contains(top));
+    return {
+      x, y, hit,
+      disabled: Boolean(el.disabled),
+      text: (el.innerText || '').trim().slice(0, 120),
+      tag: top ? top.tagName + '.' + String(top.className) : null,
+    };
+  })()`
+  let point = null
+  for (let i = 0; i < 40; i++) {
+    point = await page.evaluate(expression)
+    if (point && !point.pending && point.hit && !point.disabled) break
+    await sleep(200)
+  }
+  if (!point) throw new Error(`tab not found: ${prefix}`)
+  if (point.disabled) throw new Error(`tab disabled: ${prefix}`)
+  if (point.pending || !point.hit) {
+    throw new Error(
+      `tab ${prefix} is covered by ${point.tag ?? 'nothing'} at ${point.x},${point.y}`,
+    )
+  }
+  for (const type of ['mousePressed', 'mouseReleased']) {
+    await page.send('Input.dispatchMouseEvent', {
+      type,
+      x: point.x,
+      y: point.y,
+      button: 'left',
+      clickCount: 1,
+    })
+  }
+  return point
+}
+
 async function until(page, predicateSource, attempts, pauseMs) {
   for (let i = 0; i < attempts; i++) {
     const value = await page.evaluate(predicateSource)
@@ -676,6 +722,26 @@ async function main() {
       'Monday lunch is unplanned and dinner is Lemon pasta',
     )
     await screenshot(page, '01-current-week-office.png')
+    await clickTab(page, 'Shopping List')
+    const currentShopping = await until(
+      page,
+      `(() => {
+        const text = document.body.innerText;
+        const items = [...document.querySelectorAll('.planner-shopping-tab li')]
+          .map((node) => (node.innerText || '').trim());
+        return text.includes('1 g pasta') && items.length === 1 && items[0] === '1 g pasta'
+          ? 'yes'
+          : '';
+      })()`,
+      20,
+      200,
+    )
+    step(
+      'current week shopping list',
+      currentShopping === 'yes',
+      '1 g pasta and no second ingredient',
+    )
+    await screenshot(page, '05-current-week-shopping.png')
     const stored = await readStorage(page)
     step(
       'guest blob does not take the signed-in week',
@@ -737,7 +803,7 @@ async function main() {
     step('second recipe form', herbForm === 'yes', 'name input visible')
     await setControl(page, 'input[name="recipeName"]', 'Herb rice')
     await setControl(page, 'input[placeholder="Ex. chickpeas"]', 'rice')
-    await setControl(page, '.panel-ingredient-row input[type="number"]', '1')
+    await setControl(page, '.panel-ingredient-row input[type="number"]', '2')
     await setControl(page, '.panel-ingredient-row select', 'g')
     let herb = null
     for (let i = 0; i < 4 && !herb; i++) {
@@ -808,6 +874,26 @@ async function main() {
       avoided === 'yes',
       'Monday dinner is Herb rice and Tuesday repeats Lemon pasta',
     )
+    await clickTab(page, 'Shopping List')
+    const nextShopping = await until(
+      page,
+      `(() => {
+        const items = [...document.querySelectorAll('.planner-shopping-tab li')]
+          .map((node) => (node.innerText || '').trim());
+        return items.length === 2 && items.includes('2 g rice') && items.includes('1 g pasta')
+          ? 'yes'
+          : '';
+      })()`,
+      20,
+      200,
+    )
+    step(
+      'next week shopping list',
+      nextShopping === 'yes',
+      '2 g rice and 1 g pasta',
+    )
+    await screenshot(page, '06-next-week-shopping.png')
+    await clickTab(page, 'Weekly Menu')
     await screenshot(page, '04-next-week-avoids-prior.png')
 
     await clickSelector(page, 'button[aria-label="Previous week"]')
@@ -826,6 +912,23 @@ async function main() {
       stillCurrent === 'yes',
       'generating next week did not replace this Monday',
     )
+    await clickTab(page, 'Shopping List')
+    const returnedShopping = await until(
+      page,
+      `(() => {
+        const items = [...document.querySelectorAll('.planner-shopping-tab li')]
+          .map((node) => (node.innerText || '').trim());
+        return items.length === 1 && items[0] === '1 g pasta' ? 'yes' : '';
+      })()`,
+      20,
+      200,
+    )
+    step(
+      'returned week shopping list',
+      returnedShopping === 'yes',
+      '1 g pasta is present and 2 g rice is absent',
+    )
+    await screenshot(page, '07-returned-week-shopping.png')
 
     await clickSelector(page, 'button.header-auth-button')
     const loggedOut = await until(
