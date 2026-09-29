@@ -20,8 +20,10 @@ import {
   applySchedule,
   assignRecipesToWeek,
   emptyMenu,
+  placedRecipeIds,
   scheduleFromMenu,
   showMenuDay,
+  shiftWeekStart,
   viewWeekStart,
 } from '#/menu/week'
 import type { CalendarWeekMenu } from '#/menu/week'
@@ -129,11 +131,17 @@ export function WeeklyMenuPlanner() {
     writeInFlightRef.current = true
     setIsGenerating(true)
 
-    void listRecipes()
-      .then((recipes) => {
+    void Promise.all([
+      listRecipes(),
+      loadWeeklyMenu({
+        data: { weekStart: shiftWeekStart(savedWeekStart, -1) },
+      }),
+    ])
+      .then(([recipes, priorWeek]) => {
         const next = assignRecipesToWeek(
           source,
           recipes.map((recipe) => ({ id: recipe.id, slot: recipe.slot })),
+          placedRecipeIds(priorWeek.menu),
         )
         return saveWeeklyMenu({ data: next })
       })
