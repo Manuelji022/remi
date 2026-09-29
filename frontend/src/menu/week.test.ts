@@ -7,6 +7,7 @@ import {
   emptyMenu,
   parseCalendarWeek,
   parseWeekStart,
+  placedRecipeIds,
   scheduleFromMenu,
   shiftWeekStart,
   showMenuDay,
@@ -215,6 +216,87 @@ describe('calendar week', () => {
       context: null,
       scope: 'both',
       lunchRecipeId: 'l2',
+      dinnerRecipeId: null,
+    })
+  })
+
+  it('fills a slot from last week only after fresh recipes in that slot are used', () => {
+    const menu = applySchedule(emptyMenu('2026-09-28'), {
+      dayContexts: { Monday: 'office' },
+      planningScopes: {},
+    })
+    const pool = [
+      { id: 'l1', slot: 'lunch' as const },
+      { id: 'l2', slot: 'lunch' as const },
+      { id: 'd1', slot: 'dinner' as const },
+      { id: 'd2', slot: 'dinner' as const },
+      { id: 'd3', slot: 'dinner' as const },
+    ]
+    const priorRecipeIds = new Set(['l1', 'd1', 'not-in-pool'])
+
+    const assigned = assignRecipesToWeek(menu, pool, priorRecipeIds)
+
+    expect(assigned.days.Monday).toEqual({
+      context: 'office',
+      scope: 'dinner',
+      lunchRecipeId: null,
+      dinnerRecipeId: 'd2',
+    })
+    expect(assigned.days.Tuesday).toEqual({
+      context: null,
+      scope: 'both',
+      lunchRecipeId: 'l2',
+      dinnerRecipeId: 'd3',
+    })
+    expect(assigned.days.Wednesday).toEqual({
+      context: null,
+      scope: 'both',
+      lunchRecipeId: 'l1',
+      dinnerRecipeId: 'd1',
+    })
+    expect(assigned.days.Thursday).toEqual({
+      context: null,
+      scope: 'both',
+      lunchRecipeId: null,
+      dinnerRecipeId: null,
+    })
+    expect([...placedRecipeIds(assigned)].sort()).toEqual([
+      'd1',
+      'd2',
+      'd3',
+      'l1',
+      'l2',
+    ])
+    expect(assignRecipesToWeek(menu, pool, new Set()).days.Monday).toEqual({
+      context: 'office',
+      scope: 'dinner',
+      lunchRecipeId: null,
+      dinnerRecipeId: 'd1',
+    })
+    expect(assignRecipesToWeek(assigned, pool, priorRecipeIds).days).toEqual(
+      assigned.days,
+    )
+  })
+
+  it('keeps pool order when every owned recipe was used last week', () => {
+    const menu = emptyMenu('2026-09-28')
+    const pool = [
+      { id: 'l1', slot: 'lunch' as const },
+      { id: 'd1', slot: 'dinner' as const },
+    ]
+
+    const assigned = assignRecipesToWeek(menu, pool, new Set(['l1', 'd1']))
+
+    expect(assigned.days.Monday).toEqual({
+      context: null,
+      scope: 'both',
+      lunchRecipeId: 'l1',
+      dinnerRecipeId: 'd1',
+    })
+    expect(assigned.days.Tuesday).toEqual({
+      context: null,
+      scope: 'both',
+      lunchRecipeId: null,
       dinnerRecipeId: null,
     })
   })

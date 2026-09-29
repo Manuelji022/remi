@@ -105,11 +105,26 @@ export function applySchedule(
   return { weekStart: menu.weekStart, days }
 }
 
+const NO_PRIOR_RECIPE_IDS: ReadonlySet<string> = new Set()
+
+export function placedRecipeIds(menu: CalendarWeekMenu): ReadonlySet<string> {
+  const ids = new Set<string>()
+
+  for (const day of DAYS) {
+    const plan = menu.days[day]
+    if (plan.lunchRecipeId) ids.add(plan.lunchRecipeId)
+    if (plan.dinnerRecipeId) ids.add(plan.dinnerRecipeId)
+  }
+
+  return ids
+}
+
 export function assignRecipesToWeek(
   menu: CalendarWeekMenu,
   orderedPool: readonly { id: string; slot: MealSlot }[],
+  priorRecipeIds: ReadonlySet<string> = NO_PRIOR_RECIPE_IDS,
 ): CalendarWeekMenu {
-  const queues = recipeQueues(orderedPool)
+  const queues = recipeQueues(orderedPool, priorRecipeIds)
   const days = {} as Record<Day, DayPlan>
 
   for (const day of DAYS) {
@@ -249,22 +264,28 @@ function showSlot(
   return { kind: 'unplanned' }
 }
 
-function recipeQueues(orderedPool: readonly { id: string; slot: MealSlot }[]): {
+function recipeQueues(
+  orderedPool: readonly { id: string; slot: MealSlot }[],
+  priorRecipeIds: ReadonlySet<string>,
+): {
   lunch: string[]
   dinner: string[]
 } {
   const seen = new Set<string>()
-  const lunch: string[] = []
-  const dinner: string[] = []
+  const fresh = { lunch: [] as string[], dinner: [] as string[] }
+  const usedLastWeek = { lunch: [] as string[], dinner: [] as string[] }
 
   for (const recipe of orderedPool) {
     if (seen.has(recipe.id)) continue
     seen.add(recipe.id)
-    if (recipe.slot === 'lunch') lunch.push(recipe.id)
-    else dinner.push(recipe.id)
+    const buckets = priorRecipeIds.has(recipe.id) ? usedLastWeek : fresh
+    buckets[recipe.slot].push(recipe.id)
   }
 
-  return { lunch, dinner }
+  return {
+    lunch: [...fresh.lunch, ...usedLastWeek.lunch],
+    dinner: [...fresh.dinner, ...usedLastWeek.dinner],
+  }
 }
 
 function scopeIncludes(scope: PlanningScope, slot: MealSlot): boolean {
