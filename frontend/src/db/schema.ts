@@ -7,6 +7,8 @@ import {
   index,
   integer,
   doublePrecision,
+  date,
+  uniqueIndex,
 } from 'drizzle-orm/pg-core'
 
 export const user = pgTable('user', {
@@ -132,11 +134,59 @@ export const recipeIngredient = pgTable(
   (table) => [index('recipeIngredient_recipeId_idx').on(table.recipeId)],
 )
 
+export const weeklyMenu = pgTable(
+  'weekly_menu',
+  {
+    id: text('id').primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    weekStart: date('week_start', { mode: 'string' }).notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at')
+      .defaultNow()
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    uniqueIndex('weeklyMenu_userId_weekStart_uidx').on(
+      table.userId,
+      table.weekStart,
+    ),
+  ],
+)
+
+export const weeklyMenuDay = pgTable(
+  'weekly_menu_day',
+  {
+    id: text('id').primaryKey(),
+    weeklyMenuId: text('weekly_menu_id')
+      .notNull()
+      .references(() => weeklyMenu.id, { onDelete: 'cascade' }),
+    day: text('day').notNull(),
+    context: text('context'),
+    scope: text('scope').notNull(),
+    lunchRecipeId: text('lunch_recipe_id').references(() => recipe.id, {
+      onDelete: 'set null',
+    }),
+    dinnerRecipeId: text('dinner_recipe_id').references(() => recipe.id, {
+      onDelete: 'set null',
+    }),
+  },
+  (table) => [
+    uniqueIndex('weeklyMenuDay_menuId_day_uidx').on(
+      table.weeklyMenuId,
+      table.day,
+    ),
+  ],
+)
+
 export const userRelations = relations(user, ({ many }) => ({
   sessions: many(session),
   accounts: many(account),
   twoFactors: many(twoFactor),
   recipes: many(recipe),
+  weeklyMenus: many(weeklyMenu),
 }))
 
 export const sessionRelations = relations(session, ({ one }) => ({
@@ -177,3 +227,18 @@ export const recipeIngredientRelations = relations(
     }),
   }),
 )
+
+export const weeklyMenuRelations = relations(weeklyMenu, ({ one, many }) => ({
+  user: one(user, {
+    fields: [weeklyMenu.userId],
+    references: [user.id],
+  }),
+  days: many(weeklyMenuDay),
+}))
+
+export const weeklyMenuDayRelations = relations(weeklyMenuDay, ({ one }) => ({
+  weeklyMenu: one(weeklyMenu, {
+    fields: [weeklyMenuDay.weeklyMenuId],
+    references: [weeklyMenu.id],
+  }),
+}))
