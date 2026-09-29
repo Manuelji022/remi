@@ -319,6 +319,20 @@ function firstDayCardText() {
   })()`
 }
 
+function mealName(dayIndex, slotIndex) {
+  return `(() => {
+    const card = document.querySelectorAll('.planner-day-grid .day-card')[${dayIndex}];
+    const slot = card?.querySelectorAll('.meal-slot')[${slotIndex}];
+    return slot?.querySelector('.meal-name')?.innerText || '';
+  })()`
+}
+
+function serverFnOkCount(page) {
+  return [...page.requests.values()].filter(
+    (entry) => entry.url.includes('/_serverFn/') && entry.status === 200,
+  ).length
+}
+
 const TUESDAY_EAT_OUT =
   '#preferences-schedule-panel .panel-day-list > .panel-day-card:nth-child(2) .panel-control-group:nth-child(2) button.panel-context-pill:nth-child(2)'
 
@@ -712,6 +726,107 @@ async function main() {
       200,
     )
     step('current week returns', back === 'yes', 'Office is back on this Monday')
+
+    await openRecipesTab(page)
+    const herbForm = await until(
+      page,
+      "document.querySelector('input[name=\"recipeName\"]') ? 'yes' : ''",
+      25,
+      200,
+    )
+    step('second recipe form', herbForm === 'yes', 'name input visible')
+    await setControl(page, 'input[name="recipeName"]', 'Herb rice')
+    await setControl(page, 'input[placeholder="Ex. chickpeas"]', 'rice')
+    await setControl(page, '.panel-ingredient-row input[type="number"]', '1')
+    await setControl(page, '.panel-ingredient-row select', 'g')
+    let herb = null
+    for (let i = 0; i < 4 && !herb; i++) {
+      herb = await page.evaluate(
+        "document.body.innerText.includes('Herb rice') && document.querySelectorAll('.panel-recipe-card').length >= 2 ? 'yes' : ''",
+      )
+      if (herb) break
+      await clickSelector(page, 'button.panel-add-btn')
+      herb = await until(
+        page,
+        "document.body.innerText.includes('Herb rice') && document.querySelectorAll('.panel-recipe-card').length >= 2 ? 'yes' : ''",
+        15,
+        200,
+      )
+    }
+    step('add second dinner', herb === 'yes', 'Herb rice is saved')
+    await clickSelector(page, 'button.panel-close-btn')
+    const panelClosed = await until(
+      page,
+      "document.querySelector('aside.panel-drawer') ? '' : 'yes'",
+      15,
+      100,
+    )
+    step('recipes panel closed', panelClosed === 'yes', 'drawer is gone')
+
+    const loadsBeforeNext = serverFnOkCount(page)
+    await clickSelector(page, 'button[aria-label="Next week"]')
+    const nextWeek = await until(
+      page,
+      `(() => {
+        const pill = document.querySelector('.planner-week-pill')?.innerText || '';
+        return pill && pill !== ${JSON.stringify(currentPill)} ? pill : '';
+      })()`,
+      30,
+      200,
+    )
+    let nextLoaded = false
+    for (let i = 0; i < 30 && !nextLoaded; i++) {
+      nextLoaded = serverFnOkCount(page) > loadsBeforeNext
+      if (!nextLoaded) await sleep(200)
+    }
+    step(
+      'next week loaded',
+      Boolean(nextWeek) && nextLoaded,
+      nextWeek || 'pill did not change',
+    )
+    let avoided = null
+    for (let i = 0; i < 4 && avoided !== 'yes'; i++) {
+      await clickSelector(page, 'button.planner-primary-btn')
+      avoided = await until(
+        page,
+        `(() => {
+          const mondayLunch = ${mealName(0, 0)};
+          const mondayDinner = ${mealName(0, 1)};
+          const tuesdayDinner = ${mealName(1, 1)};
+          return mondayLunch === 'No home-planned meal' &&
+            mondayDinner === 'Herb rice' &&
+            tuesdayDinner === 'Lemon pasta'
+            ? 'yes'
+            : '';
+        })()`,
+        20,
+        200,
+      )
+    }
+    step(
+      'next week avoids the prior dinner',
+      avoided === 'yes',
+      'Monday dinner is Herb rice and Tuesday repeats Lemon pasta',
+    )
+    await screenshot(page, '04-next-week-avoids-prior.png')
+
+    await clickSelector(page, 'button[aria-label="Previous week"]')
+    const stillCurrent = await until(
+      page,
+      `(() => {
+        const pill = document.querySelector('.planner-week-pill')?.innerText || '';
+        const text = ${firstDayCardText()};
+        return pill === ${JSON.stringify(currentPill)} && /office/i.test(text) && text.includes('Lemon pasta') ? 'yes' : '';
+      })()`,
+      30,
+      200,
+    )
+    step(
+      'prior week stays the saved menu',
+      stillCurrent === 'yes',
+      'generating next week did not replace this Monday',
+    )
+
     await clickSelector(page, 'button.header-auth-button')
     const loggedOut = await until(
       page,
