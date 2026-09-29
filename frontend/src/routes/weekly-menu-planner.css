@@ -311,6 +311,15 @@
   line-height: 1.65;
 }
 
+.planner-shopping-tab ul {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding-left: 20px;
+  color: #625d54;
+  line-height: 1.65;
+}
+
 .planner-shopping-actions {
   display: flex;
   flex-direction: column;

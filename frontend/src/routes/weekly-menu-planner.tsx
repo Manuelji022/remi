@@ -8,6 +8,7 @@ import {
   SettingsIcon,
   SparkleIcon,
 } from '#/components/icons'
+import { formatRecipeIngredient } from '#/components/preferences-panel/utils'
 import { DAYS, getWeekNumber, isWeekend } from '#/data/constants'
 import {
   getActivePreferencesBadgeCount,
@@ -16,6 +17,8 @@ import {
 import type { Preferences } from '#/data/types'
 import { authClient } from '#/lib/auth-client'
 import { loadWeeklyMenu, saveWeeklyMenu } from '#/menu/functions'
+import { shoppingList } from '#/menu/shopping'
+import type { ShoppingLine } from '#/menu/shopping'
 import {
   applySchedule,
   assignRecipesToWeek,
@@ -27,7 +30,7 @@ import {
   viewWeekStart,
 } from '#/menu/week'
 import type { CalendarWeekMenu } from '#/menu/week'
-import type { RecipeInput } from '#/recipes/recipe'
+import type { Recipe, RecipeInput } from '#/recipes/recipe'
 import { listRecipes } from '#/recipes/functions'
 import { useI18n } from '#/i18n'
 import {
@@ -58,6 +61,7 @@ export function WeeklyMenuPlanner() {
     [],
   )
   const [menuWeek, setMenuWeek] = useState<CalendarWeekMenu | null>(null)
+  const [recipes, setRecipes] = useState<Recipe[] | null>(null)
   const [recipeNames, setRecipeNames] = useState<Record<string, string>>({})
   const [hasSavedMenu, setHasSavedMenu] = useState(false)
   const [guestGridOpen, setGuestGridOpen] = useState(false)
@@ -66,11 +70,14 @@ export function WeeklyMenuPlanner() {
   const guestPreferencesRef = useRef<Preferences>(getDefaultPreferences())
   const previousUserIdRef = useRef<string | undefined>(undefined)
   const weekOffsetRef = useRef(weekOffset)
+  const activeTabRef = useRef(activeTab)
+  const preferencesOpenRef = useRef(false)
   const loadGenerationRef = useRef(0)
   const writeInFlightRef = useRef(false)
   const { data: session } = authClient.useSession()
   const userId = session?.user.id
   weekOffsetRef.current = weekOffset
+  activeTabRef.current = activeTab
 
   const selectedWeekDate = new Date()
   selectedWeekDate.setDate(selectedWeekDate.getDate() + weekOffset * 7)
@@ -87,6 +94,10 @@ export function WeeklyMenuPlanner() {
           [],
         )
       : null
+  // Guests stay disabled because they have no recipe catalog.
+  const shoppingEnabled = Boolean(userId) && hasSavedMenu && recipes !== null
+  const lines =
+    shoppingEnabled && menuWeek ? shoppingList(menuWeek, recipes) : []
 
   useEffect(() => {
     if (hasLoadedRef.current) return
@@ -137,15 +148,18 @@ export function WeeklyMenuPlanner() {
         data: { weekStart: shiftWeekStart(savedWeekStart, -1) },
       }),
     ])
-      .then(([recipes, priorWeek]) => {
+      .then(([catalog, priorWeek]) => {
         const next = assignRecipesToWeek(
           source,
-          recipes.map((recipe) => ({ id: recipe.id, slot: recipe.slot })),
+          catalog.map((recipe) => ({ id: recipe.id, slot: recipe.slot })),
           placedRecipeIds(priorWeek.menu),
         )
-        return saveWeeklyMenu({ data: next })
+        return saveWeeklyMenu({ data: next }).then((loaded) => ({
+          loaded,
+          catalog,
+        }))
       })
-      .then((loaded) => {
+      .then(({ loaded, catalog }) => {
         if (loadGenerationRef.current !== saveGeneration) return
         loadGenerationRef.current += 1
         if (
@@ -156,6 +170,7 @@ export function WeeklyMenuPlanner() {
         setMenuWeek(loaded.menu)
         setRecipeNames(loaded.recipeNames)
         setHasSavedMenu(loaded.hasSavedMenu)
+        setRecipes(catalog)
         const saved = scheduleFromMenu(loaded.menu)
         setSavedPreferences(saved)
         setDraftPreferences(saved)
@@ -184,6 +199,8 @@ export function WeeklyMenuPlanner() {
     setMenuWeek(null)
     setRecipeNames({})
     setHasSavedMenu(false)
+    setRecipes(null)
+    if (activeTabRef.current === 'ingredients') setActiveTab('menu')
   }, [isHydrated, userId])
 
   useEffect(() => {
@@ -194,6 +211,7 @@ export function WeeklyMenuPlanner() {
     const weekStart = viewWeekStart(new Date(), weekOffset)
     setMenuWeek(null)
     setHasSavedMenu(false)
+    setRecipes(null)
     setSavedPreferences(getDefaultPreferences())
     setDraftPreferences(getDefaultPreferences())
 
@@ -218,10 +236,36 @@ export function WeeklyMenuPlanner() {
         setDraftPreferences(preferences)
       })
 
+    void listRecipes()
+      .then((catalog) => {
+        if (cancelled || generation !== loadGenerationRef.current) return
+        setRecipes(catalog)
+      })
+      .catch(() => undefined)
+
     return () => {
       cancelled = true
     }
   }, [isHydrated, userId, weekOffset])
+
+  useEffect(() => {
+    const wasOpen = preferencesOpenRef.current
+    preferencesOpenRef.current = isPreferencesOpen
+    if (!userId || !wasOpen || isPreferencesOpen) return
+
+    let cancelled = false
+    const generation = loadGenerationRef.current
+    void listRecipes()
+      .then((catalog) => {
+        if (cancelled || generation !== loadGenerationRef.current) return
+        setRecipes(catalog)
+      })
+      .catch(() => undefined)
+
+    return () => {
+      cancelled = true
+    }
+  }, [isPreferencesOpen, userId])
 
   function handleSavePreferences(preferences: Preferences) {
     if (!userId) {
@@ -352,8 +396,8 @@ export function WeeklyMenuPlanner() {
         <div className="planner-toolbar">
           <MainTab
             activeTab={activeTab}
-            isIngredientsDisabled
-            neededItems={0}
+            isIngredientsDisabled={!shoppingEnabled}
+            neededItems={lines.length}
             onTabChange={setActiveTab}
           />
         </div>
@@ -365,6 +409,10 @@ export function WeeklyMenuPlanner() {
             onGenerateMenu={handleGenerateMenu}
             recipeNames={recipeNames}
           />
+        )}
+
+        {activeTab === 'ingredients' && shoppingEnabled && (
+          <ShoppingTab lines={lines} />
         )}
       </section>
 
@@ -444,6 +492,32 @@ function MenuTab({
           )
         })}
       </div>
+    </div>
+  )
+}
+
+function ShoppingTab({ lines }: { lines: readonly ShoppingLine[] }) {
+  const { t } = useI18n()
+
+  return (
+    <div className="planner-shopping-tab">
+      <h2>{t('tabs.ingredients')}</h2>
+      <p className="planner-shopping-helper">{t('planner.shoppingHelper')}</p>
+      {lines.length === 0 ? (
+        <p>{t('planner.shoppingEmpty')}</p>
+      ) : (
+        <ul>
+          {lines.map((line) => (
+            <li
+              key={`${line.name}\0${line.unit ?? ''}\0${
+                line.quantity === null ? 'unknown' : 'number'
+              }`}
+            >
+              {formatRecipeIngredient(line, (unit) => t(`units.${unit}`))}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   )
 }
