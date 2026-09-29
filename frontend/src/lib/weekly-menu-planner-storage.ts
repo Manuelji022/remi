@@ -2,13 +2,12 @@ import { DAYS } from '#/data/constants'
 import type { Day } from '#/data/constants'
 import type {
   ChecklistState,
-  CustomRecipe,
-  CustomRecipeIngredient,
   DayContext,
-  IngredientUnit,
   PlanningScope,
   Preferences,
 } from '#/data/types'
+import { readRecipeInput } from '#/recipes/recipe'
+import type { RecipeInput } from '#/recipes/recipe'
 
 export const WEEKLY_MENU_PLANNER_STORAGE_KEY = 'remi:weekly-menu-planner:state'
 
@@ -16,23 +15,11 @@ const DAY_CONTEXTS = [
   'office',
   'eatOut',
 ] as const satisfies readonly DayContext[]
-const MEAL_SLOTS = ['lunch', 'dinner'] as const
 const PLANNING_SCOPES = [
   'lunch',
   'dinner',
   'both',
 ] as const satisfies readonly PlanningScope[]
-const INGREDIENT_UNITS = [
-  'unit',
-  'g',
-  'kg',
-  'ml',
-  'l',
-  'tbsp',
-  'tsp',
-  'can',
-  'pack',
-] as const satisfies readonly IngredientUnit[]
 
 export interface WeeklyMenuPlannerStorage {
   getItem: (key: string) => string | null
@@ -43,6 +30,7 @@ export interface WeeklyMenuPlannerPersistedState {
   savedPreferences: Preferences
   currentMenuIndex: number
   shoppingChecklist: ChecklistState
+  legacyCustomRecipes: RecipeInput[]
 }
 
 export function getBrowserStorage(): WeeklyMenuPlannerStorage | null {
@@ -84,10 +72,25 @@ export function writeWeeklyMenuPlannerState(
 ): void {
   if (!storage) return
 
+  const savedPreferences =
+    state.legacyCustomRecipes.length > 0
+      ? {
+          ...state.savedPreferences,
+          customRecipes: state.legacyCustomRecipes.map(toStoredRecipe),
+        }
+      : state.savedPreferences
+
   try {
-    storage.setItem(WEEKLY_MENU_PLANNER_STORAGE_KEY, JSON.stringify(state))
+    storage.setItem(
+      WEEKLY_MENU_PLANNER_STORAGE_KEY,
+      JSON.stringify({
+        savedPreferences,
+        currentMenuIndex: state.currentMenuIndex,
+        shoppingChecklist: state.shoppingChecklist,
+      }),
+    )
   } catch {
-    // Ignore quota and privacy-mode failures. The planner still works in memory.
+    return
   }
 }
 
@@ -119,22 +122,29 @@ function parsePersistedState(
 ): WeeklyMenuPlannerPersistedState | null {
   if (!isRecord(value)) return null
 
-  const savedPreferences = parsePreferences(value.savedPreferences)
+  const parsedPreferences = parsePreferences(value.savedPreferences)
   const currentMenuIndex = parseMenuIndex(value.currentMenuIndex, menuCount)
   const shoppingChecklist = parseChecklist(value.shoppingChecklist)
 
-  if (!savedPreferences || currentMenuIndex === null || !shoppingChecklist) {
+  if (!parsedPreferences || currentMenuIndex === null || !shoppingChecklist) {
     return null
   }
 
-  return { savedPreferences, currentMenuIndex, shoppingChecklist }
+  return {
+    savedPreferences: parsedPreferences.preferences,
+    currentMenuIndex,
+    shoppingChecklist,
+    legacyCustomRecipes: parsedPreferences.legacyCustomRecipes,
+  }
 }
 
-function parsePreferences(value: unknown): Preferences | null {
+function parsePreferences(value: unknown): {
+  preferences: Preferences
+  legacyCustomRecipes: RecipeInput[]
+} | null {
   if (!isRecord(value)) return null
   if (!isRecord(value.dayContexts) || !isRecord(value.planningScopes))
     return null
-  if (!Array.isArray(value.customRecipes)) return null
 
   const dayContexts: Preferences['dayContexts'] = {}
 
@@ -150,54 +160,41 @@ function parsePreferences(value: unknown): Preferences | null {
     planningScopes[day] = scope
   }
 
-  const customRecipes: CustomRecipe[] = []
+  if (!('customRecipes' in value)) {
+    return {
+      preferences: { dayContexts, planningScopes },
+      legacyCustomRecipes: [],
+    }
+  }
+
+  if (!Array.isArray(value.customRecipes)) return null
+
+  const legacyCustomRecipes: RecipeInput[] = []
 
   for (const recipe of value.customRecipes) {
-    const parsedRecipe = parseRecipe(recipe)
-    if (!parsedRecipe) return null
-    customRecipes.push(parsedRecipe)
+    const parsedRecipe = readRecipeInput(recipe)
+    if (!parsedRecipe.ok) return null
+    legacyCustomRecipes.push(parsedRecipe.value)
   }
 
-  return { dayContexts, planningScopes, customRecipes }
+  return {
+    preferences: { dayContexts, planningScopes },
+    legacyCustomRecipes,
+  }
 }
 
-function parseRecipe(value: unknown): CustomRecipe | null {
-  if (!isRecord(value) || typeof value.name !== 'string') return null
-  if (!isOneOf(value.slot, MEAL_SLOTS)) return null
-  if (!Array.isArray(value.ingredients)) return null
-
-  const ingredients: CustomRecipeIngredient[] = []
-
-  for (const ingredient of value.ingredients) {
-    const parsedIngredient = parseIngredient(ingredient)
-    if (!parsedIngredient) return null
-    ingredients.push(parsedIngredient)
+function toStoredRecipe(recipe: RecipeInput) {
+  return {
+    name: recipe.name,
+    slot: recipe.slot,
+    ingredients: recipe.ingredients.map((ingredient) => ({
+      name: ingredient.name,
+      ...(ingredient.quantity === null
+        ? {}
+        : { quantity: ingredient.quantity }),
+      ...(ingredient.unit === null ? {} : { unit: ingredient.unit }),
+    })),
   }
-
-  return { name: value.name, slot: value.slot, ingredients }
-}
-
-function parseIngredient(value: unknown): CustomRecipeIngredient | null {
-  if (!isRecord(value) || typeof value.name !== 'string') return null
-
-  const ingredient: CustomRecipeIngredient = { name: value.name }
-
-  if ('quantity' in value && value.quantity !== undefined) {
-    if (
-      typeof value.quantity !== 'number' ||
-      !Number.isFinite(value.quantity)
-    ) {
-      return null
-    }
-    ingredient.quantity = value.quantity
-  }
-
-  if ('unit' in value && value.unit !== undefined) {
-    if (!isOneOf(value.unit, INGREDIENT_UNITS)) return null
-    ingredient.unit = value.unit
-  }
-
-  return ingredient
 }
 
 function parseMenuIndex(value: unknown, menuCount: number): number | null {

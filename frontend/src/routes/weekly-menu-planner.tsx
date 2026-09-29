@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
 import './weekly-menu-planner.css'
 import { DayCard, LoadingDots, MainTab, PreferencesPanel } from '#/components'
@@ -30,6 +30,7 @@ import {
   getPlanningScopeForDay,
 } from '#/data/types'
 import type { ChecklistState, Preferences, WeeklyMenu } from '#/data/types'
+import type { RecipeInput } from '#/recipes/recipe'
 import { useI18n } from '#/i18n'
 import {
   getBrowserStorage,
@@ -59,6 +60,9 @@ export function WeeklyMenuPlanner() {
     getDefaultPreferences(),
   )
   const [shoppingChecklist, setShoppingChecklist] = useState<ChecklistState>({})
+  const [legacyCustomRecipes, setLegacyCustomRecipes] = useState<RecipeInput[]>(
+    [],
+  )
   const [isHydrated, setIsHydrated] = useState(false)
   const hasLoadedRef = useRef(false)
   const skipChecklistSyncRef = useRef(false)
@@ -90,6 +94,7 @@ export function WeeklyMenuPlanner() {
 
       setSavedPreferences(stored.savedPreferences)
       setDraftPreferences(stored.savedPreferences)
+      setLegacyCustomRecipes(stored.legacyCustomRecipes)
       setCurrentMenuIndex(stored.currentMenuIndex)
 
       if (ingredientSet) {
@@ -115,8 +120,15 @@ export function WeeklyMenuPlanner() {
       savedPreferences,
       currentMenuIndex,
       shoppingChecklist,
+      legacyCustomRecipes,
     })
-  }, [currentMenuIndex, isHydrated, savedPreferences, shoppingChecklist])
+  }, [
+    currentMenuIndex,
+    isHydrated,
+    legacyCustomRecipes,
+    savedPreferences,
+    shoppingChecklist,
+  ])
 
   useEffect(() => {
     if (!isHydrated || currentMenuIndex < 0) return
@@ -157,6 +169,10 @@ export function WeeklyMenuPlanner() {
     setDraftPreferences(preferences)
     setIsPreferencesOpen(false)
   }
+
+  const handleLegacyRecipesMigrated = useCallback(() => {
+    setLegacyCustomRecipes([])
+  }, [])
 
   return (
     <main className="planner-page">
@@ -308,7 +324,9 @@ export function WeeklyMenuPlanner() {
 
       <PreferencesPanel
         isOpen={isPreferencesOpen}
+        legacyCustomRecipes={legacyCustomRecipes}
         onClose={() => setIsPreferencesOpen(false)}
+        onLegacyRecipesMigrated={handleLegacyRecipesMigrated}
         onSave={handleSavePreferences}
         savedPrefs={draftPreferences}
       />

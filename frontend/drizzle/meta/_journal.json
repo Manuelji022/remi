@@ -15,6 +15,13 @@
       "when": 1779721652299,
       "tag": "0001_add_mandatory_email_otp_2fa",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790432938927,
+      "tag": "0002_user_recipes",
+      "breakpoints": true
     }
   ]
 }
