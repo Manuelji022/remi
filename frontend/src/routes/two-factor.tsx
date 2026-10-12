@@ -1,6 +1,5 @@
-import './auth.css'
-
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
+import './auth.css'
 import type { ComponentProps } from 'react'
 import { useEffect, useRef, useState } from 'react'
 import { getLocalizedPath, useI18n } from '#/i18n'
@@ -71,7 +70,7 @@ export function TwoFactorPage() {
   }
 
   return (
-    <main className="auth-page">
+    <main className="auth-page" id="main">
       <section className="auth-card" aria-labelledby="two-factor-title">
         <h1 id="two-factor-title">{t('auth.otpTitle')}</h1>
         <p className="auth-copy">{t('auth.otpCopy')}</p>

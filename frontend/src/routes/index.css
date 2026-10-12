@@ -1,0 +1,21 @@
+@layer components {
+  .home-card {
+    background: var(--bg-surface);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card);
+    padding-block: var(--pad-empty-block);
+    padding-inline: var(--pad-card);
+    display: grid;
+    justify-items: center;
+    gap: var(--gap-stack-md);
+    text-align: center;
+  }
+
+  .home-title {
+    max-inline-size: var(--measure);
+    font-size: var(--type-large-title-size);
+    line-height: var(--type-large-title-lh);
+    letter-spacing: var(--type-large-title-track);
+    font-weight: var(--weight-bold);
+  }
+}

@@ -1,105 +1,48 @@
-/* --- Day Card --- */
-.day-card {
-  background-color: #fff;
-  border-radius: var(--radius-lg);
-  padding: 20px;
-  border: 1px solid #f0e6d8;
-  box-shadow: var(--shadow-soft);
-  animation: popIn 0.5s ease-out both;
-  transition:
-    box-shadow var(--transition-ui),
-    transform var(--transition-ui);
-}
+@layer components {
+  .day-card {
+    background: var(--bg-surface);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card);
+    padding: var(--pad-card-compact);
+  }
 
-.day-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-  transform: translateY(-2px);
-}
+  .day-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--gap-inline);
+    margin-block-end: var(--gap-stack-md);
+  }
 
-.day-card.weekend {
-  background-color: #fffaf5;
-  border-color: #f5e6d3;
-}
+  .day-meals {
+    display: grid;
+  }
 
-.day-card-header {
-  display: flex;
-  min-height: 28px;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-xs);
-  margin-bottom: var(--space-sm);
-}
+  .meal-slot + .meal-slot {
+    margin-block-start: var(--gap-stack-md);
+    padding-block-start: var(--gap-stack-md);
+    border-block-start: var(--border-width) solid var(--border-subtle);
+  }
 
-.day-name {
-  font-size: 1rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--text-color);
-}
+  .meal-slot {
+    color: var(--text-secondary);
+    font-size: var(--type-caption-size);
+    line-height: var(--type-caption-lh);
+  }
 
-.day-card.weekend .day-name {
-  color: var(--text-color);
-}
+  .meal-label {
+    display: block;
+    margin-block-end: var(--gap-stack-xs);
+  }
 
-.day-context-badge {
-  flex: 0 0 auto;
-  padding: 3px 7px;
-  border-radius: var(--radius-pill);
-  background: rgba(181, 113, 58, 0.11);
-  color: #8f5627;
-  font-size: 0.66rem;
-  font-weight: 800;
-  line-height: 1.4;
-  text-transform: uppercase;
-}
+  .meal-name {
+    display: block;
+    color: var(--text-primary);
+    font-size: var(--type-callout-size);
+    line-height: var(--type-callout-lh);
+  }
 
-.day-meals {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-sm);
-}
-
-.meal-slot {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xxs);
-  min-height: 112px;
-  border-radius: var(--radius-sm);
-  background: rgba(255, 255, 255, 0.64);
-}
-
-.meal-slot.unplanned {
-  border-style: dashed;
-  background: rgba(245, 240, 235, 0.56);
-}
-
-.meal-label {
-  font-size: 0.7rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--text-muted);
-  border: 10px solid;
-  border-image-slice: 1;
-  border-width: 5px;
-  border-image-source: linear-gradient(
-    90deg,
-    transparent,
-    rgba(138, 112, 96, 0.28),
-    transparent
-  );
-  border-top: 0;
-  border-right: 0;
-  border-left: 0;
-}
-
-.meal-name {
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--text-color);
-}
-
-.meal-slot.unplanned .meal-name {
-  color: var(--text-muted);
+  .meal-slot.unplanned .meal-name {
+    color: var(--text-secondary);
+  }
 }

@@ -6,7 +6,7 @@ import {
 } from '@tanstack/react-router'
 import Footer from '../components/Footer'
 import Header from '../components/Header'
-import { I18nProvider, getLocaleFromPathname } from '#/i18n'
+import { I18nProvider, getLocaleFromPathname, useI18n } from '#/i18n'
 import { messages } from '#/i18n/messages'
 import { useEffect } from 'react'
 
@@ -23,6 +23,14 @@ export const Route = createRootRoute({
         content: 'width=device-width, initial-scale=1',
       },
       {
+        name: 'color-scheme',
+        content: 'light',
+      },
+      {
+        name: 'theme-color',
+        content: '#F5F5F7',
+      },
+      {
         title: 'Remi - Your weekly meal planner',
       },
     ],
@@ -35,6 +43,16 @@ export const Route = createRootRoute({
   }),
   shellComponent: RootDocument,
 })
+
+function SkipLink() {
+  const { t } = useI18n()
+
+  return (
+    <a className="skip" href="#main">
+      {t('common.skip')}
+    </a>
+  )
+}
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   const location = useLocation()
@@ -52,6 +70,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <I18nProvider locale={locale}>
+          <SkipLink />
           <Header />
           {children}
           <Footer />

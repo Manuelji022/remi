@@ -1,6 +1,5 @@
-import './preferences-panel.css'
-
 import { Link, useLocation } from '@tanstack/react-router'
+import './preferences-panel.css'
 import { Globe2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { CheckIcon, CloseIcon, SettingsIcon } from '#/components/icons'
@@ -48,6 +47,36 @@ export function PreferencesPanel({
     setDraftPrefs(savedPrefs)
     setActiveTab('schedule')
   }, [isOpen, savedPrefs])
+
+  useEffect(() => {
+    if (!isOpen) return
+
+    const scrollY = window.scrollY
+    const root = document.documentElement
+    const body = document.body
+    const previous = {
+      rootOverflow: root.style.overflow,
+      bodyPosition: body.style.position,
+      bodyInsetBlockStart: body.style.insetBlockStart,
+      bodyInlineSize: body.style.inlineSize,
+      bodyOverflow: body.style.overflow,
+    }
+
+    root.style.overflow = 'hidden'
+    body.style.position = 'fixed'
+    body.style.insetBlockStart = `-${scrollY}px`
+    body.style.inlineSize = '100%'
+    body.style.overflow = 'hidden'
+
+    return () => {
+      root.style.overflow = previous.rootOverflow
+      body.style.position = previous.bodyPosition
+      body.style.insetBlockStart = previous.bodyInsetBlockStart
+      body.style.inlineSize = previous.bodyInlineSize
+      body.style.overflow = previous.bodyOverflow
+      window.scrollTo(0, scrollY)
+    }
+  }, [isOpen])
 
   useEffect(() => {
     if (

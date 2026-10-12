@@ -68,6 +68,7 @@ export const messages = {
     'about.body':
       'TanStack Start gives you type-safe routing, server functions, and modern SSR defaults. Use this as a clean foundation, then layer in your own routes, styling, and add-ons.',
     'common.loading': 'Loading',
+    'common.skip': 'Skip to content',
     'common.weekend': 'Weekend',
     'common.cancel': 'Cancel',
     'days.Monday': 'Monday',
@@ -126,13 +127,13 @@ export const messages = {
     'preferences.recipesBody':
       'Add favorite meals and their ingredients so they can influence future menu generation.',
     'preferences.recipeName': 'Recipe name',
-    'preferences.recipeNamePlaceholder': 'Ex. Lemon chickpea pasta',
+    'preferences.recipeNamePlaceholder': 'Ex. Lemon chickpea pasta…',
     'preferences.recipeSlot': 'Recipe meal',
     'preferences.recipeSlotHelp':
       'Choose whether this recipe is for lunch or dinner',
     'preferences.recipeIngredients': 'Ingredients',
     'preferences.ingredientName': 'Ingredient',
-    'preferences.ingredientNamePlaceholder': 'Ex. chickpeas',
+    'preferences.ingredientNamePlaceholder': 'Ex. chickpeas…',
     'preferences.ingredientQuantity': 'Qty',
     'preferences.ingredientUnit': 'Unit',
     'preferences.ingredientNoUnit': 'No unit',
@@ -141,6 +142,7 @@ export const messages = {
     'preferences.invalidIngredientQuantity':
       'Ingredient quantities must be zero or greater.',
     'preferences.addRecipe': 'Add recipe',
+    'preferences.addRecipeHint': 'Add a recipe name to save it.',
     'preferences.emptyRecipes': 'No recipes saved yet.',
     'preferences.signInToSaveRecipes': 'Sign in to save recipes.',
     'preferences.recipesLoading': 'Loading recipes...',
@@ -225,6 +227,7 @@ export const messages = {
     'about.body':
       'TanStack Start ofrece rutas con tipos seguros, funciones de servidor y valores modernos de SSR. Úsalo como una base limpia y añade tus propias rutas, estilos y mejoras.',
     'common.loading': 'Cargando',
+    'common.skip': 'Saltar al contenido',
     'common.weekend': 'Fin de semana',
     'common.cancel': 'Cancelar',
     'days.Monday': 'Lunes',
@@ -284,12 +287,12 @@ export const messages = {
     'preferences.recipesBody':
       'Añade comidas favoritas y sus ingredientes para que influyan en futuros menús.',
     'preferences.recipeName': 'Nombre de la receta',
-    'preferences.recipeNamePlaceholder': 'Ej. pasta de garbanzos al limón',
+    'preferences.recipeNamePlaceholder': 'Ej. pasta de garbanzos al limón…',
     'preferences.recipeSlot': 'Momento de la receta',
     'preferences.recipeSlotHelp': 'Elige si esta receta es para comida o cena',
     'preferences.recipeIngredients': 'Ingredientes',
     'preferences.ingredientName': 'Ingrediente',
-    'preferences.ingredientNamePlaceholder': 'Ej. garbanzos',
+    'preferences.ingredientNamePlaceholder': 'Ej. garbanzos…',
     'preferences.ingredientQuantity': 'Cant.',
     'preferences.ingredientUnit': 'Unidad',
     'preferences.ingredientNoUnit': 'Sin unidad',
@@ -298,6 +301,7 @@ export const messages = {
     'preferences.invalidIngredientQuantity':
       'Las cantidades deben ser cero o mayores.',
     'preferences.addRecipe': 'Añadir receta',
+    'preferences.addRecipeHint': 'Añade un nombre de receta para guardarla.',
     'preferences.emptyRecipes': 'Todavía no hay recetas.',
     'preferences.signInToSaveRecipes': 'Inicia sesión para guardar recetas.',
     'preferences.recipesLoading': 'Cargando recetas...',

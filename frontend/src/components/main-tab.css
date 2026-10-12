@@ -1,62 +1,35 @@
-/* --- Main Tab --- */
-.main-tab {
-  display: flex;
-  gap: var(--space-xxs);
-  padding: var(--space-xxs);
-  background-color: #f0ebe4;
-  border-radius: var(--radius-control);
-  width: fit-content;
-}
+@layer components {
+  .main-tab {
+    display: inline-flex;
+    padding: var(--pad-track);
+    background: var(--bg-fill);
+    border-radius: var(--radius-segment-track);
+    gap: var(--gap-inline-xs);
+    max-inline-size: 100%;
+  }
 
-.tab-btn {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: var(--space-xs) var(--radius-lg);
-  border-radius: var(--radius-md);
-  border: none;
-  background: transparent;
-  color: #666;
-  font-size: 0.9rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition:
-    background-color var(--transition-ui),
-    box-shadow var(--transition-ui),
-    color var(--transition-ui),
-    transform var(--transition-ui);
-}
+  .tab-btn {
+    font: inherit;
+    font-size: var(--type-callout-size);
+    font-weight: var(--weight-semibold);
+    line-height: var(--type-callout-lh);
+    color: var(--text-secondary);
+    border: var(--gap-none);
+    background: transparent;
+    min-block-size: var(--segment-thumb-height);
+    padding-inline: var(--pad-control-inline);
+    border-radius: var(--radius-segment-thumb);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--gap-inline);
+    cursor: pointer;
+    touch-action: manipulation;
+  }
 
-.tab-btn:hover {
-  color: #333;
-}
-
-.tab-btn:disabled {
-  color: var(--text-disabled);
-  cursor: not-allowed;
-}
-
-.tab-btn.active {
-  background-color: #fff;
-  color: #1a1a2e;
-  box-shadow: var(--shadow-soft);
-}
-
-.tab-btn:focus-visible {
-  outline: var(--focus-ring);
-  outline-offset: var(--focus-offset);
-}
-
-.tab-btn .badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 20px;
-  padding: 0 6px;
-  border-radius: var(--radius-pill);
-  background-color: var(--button-primary-bg);
-  color: var(--button-primary-fg);
-  font-size: 0.7rem;
-  font-weight: 700;
+  .tab-btn.active {
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    box-shadow: var(--shadow-thumb);
+  }
 }

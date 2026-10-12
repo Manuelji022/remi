@@ -1,6 +1,5 @@
-import './auth.css'
-
 import { createFileRoute, useNavigate, useSearch } from '@tanstack/react-router'
+import './auth.css'
 import type { ComponentProps } from 'react'
 import { useState } from 'react'
 import { getLocalizedPath, useI18n } from '#/i18n'
@@ -23,8 +22,7 @@ export function ResetPasswordPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [done, setDone] = useState(false)
 
-  const token =
-    typeof search.token === 'string' ? search.token : undefined
+  const token = typeof search.token === 'string' ? search.token : undefined
 
   async function handleSubmit(event: FormSubmitEvent) {
     event.preventDefault()
@@ -54,15 +52,13 @@ export function ResetPasswordPage() {
 
   if (done) {
     return (
-      <main className="auth-page">
+      <main className="auth-page" id="main">
         <section className="auth-card" aria-labelledby="reset-done-title">
           <h1 id="reset-done-title">{t('auth.resetPasswordDoneTitle')}</h1>
           <p className="auth-copy">{t('auth.resetPasswordDoneCopy')}</p>
           <button
             className="auth-button"
-            onClick={() =>
-              navigate({ to: getLocalizedPath('/login', locale) })
-            }
+            onClick={() => navigate({ to: getLocalizedPath('/login', locale) })}
             type="button"
           >
             {t('auth.login')}
@@ -73,7 +69,7 @@ export function ResetPasswordPage() {
   }
 
   return (
-    <main className="auth-page">
+    <main className="auth-page" id="main">
       <section className="auth-card" aria-labelledby="reset-title">
         <h1 id="reset-title">{t('auth.resetPasswordTitle')}</h1>
         <p className="auth-copy">{t('auth.resetPasswordCopy')}</p>
@@ -94,11 +90,7 @@ export function ResetPasswordPage() {
 
           {error ? <p className="auth-error">{error}</p> : null}
 
-          <button
-            className="auth-button"
-            disabled={isSubmitting}
-            type="submit"
-          >
+          <button className="auth-button" disabled={isSubmitting} type="submit">
             {isSubmitting
               ? t('auth.resettingPassword')
               : t('auth.resetPassword')}
