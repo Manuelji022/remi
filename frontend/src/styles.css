@@ -1,13 +1,9 @@
+/* Declared once, before any other sheet, so route and component imports
+   cannot reorder the cascade. */
+@layer tokens, base, components;
+
 @import './styles/tokens.css';
 @import './styles/controls.css';
-@import './components/header.css';
-@import './components/footer.css';
-@import './components/loading-dots.css';
-@import './components/main-tab.css';
-@import './components/day-card.css';
-@import './routes/weekly-menu-planner.css';
-@import './routes/auth.css';
-@import './components/preferences-panel/preferences-panel.css';
 
 @layer base {
   *,
@@ -99,27 +95,5 @@
     margin-inline: auto;
     padding-block: var(--pad-page-block-start) var(--pad-page-block-end);
     padding-inline: var(--pad-page-inline);
-  }
-}
-
-@layer components {
-  .home-card {
-    background: var(--bg-surface);
-    border-radius: var(--radius-card);
-    box-shadow: var(--shadow-card);
-    padding-block: var(--pad-empty-block);
-    padding-inline: var(--pad-card);
-    display: grid;
-    justify-items: center;
-    gap: var(--gap-stack-md);
-    text-align: center;
-  }
-
-  .home-title {
-    max-inline-size: var(--measure);
-    font-size: var(--type-large-title-size);
-    line-height: var(--type-large-title-lh);
-    letter-spacing: var(--type-large-title-track);
-    font-weight: var(--weight-bold);
   }
 }

@@ -1,4 +1,5 @@
 import { useI18n } from '#/i18n'
+import './main-tab.css'
 
 interface MainTabProps {
   activeTab: 'menu' | 'ingredients'

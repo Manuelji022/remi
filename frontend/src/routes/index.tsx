@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
+import './index.css'
 import { getLocalizedPath, useI18n } from '#/i18n'
 
 export const Route = createFileRoute('/')({ component: IndexPage })

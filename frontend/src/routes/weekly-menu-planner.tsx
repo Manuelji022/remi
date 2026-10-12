@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
+import './weekly-menu-planner.css'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { DayCard, LoadingDots, MainTab, PreferencesPanel } from '#/components'
 import {

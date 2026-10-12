@@ -1,4 +1,5 @@
 import { Link, useLocation } from '@tanstack/react-router'
+import './preferences-panel.css'
 import { Globe2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { CheckIcon, CloseIcon, SettingsIcon } from '#/components/icons'

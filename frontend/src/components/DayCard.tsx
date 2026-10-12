@@ -1,4 +1,5 @@
 import type { Day } from '#/data/constants'
+import './day-card.css'
 import type { DayContext, MealSlot } from '#/data/types'
 import { useI18n } from '#/i18n'
 import type { ShownMeal } from '#/menu/week'

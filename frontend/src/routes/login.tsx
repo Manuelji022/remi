@@ -1,4 +1,5 @@
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
+import './auth.css'
 import type { ComponentProps } from 'react'
 import { useState } from 'react'
 import { getLocalizedPath, useI18n } from '#/i18n'

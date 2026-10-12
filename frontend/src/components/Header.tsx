@@ -1,4 +1,5 @@
 import { Link } from '@tanstack/react-router'
+import './header.css'
 import { getLocalizedPath, useI18n } from '#/i18n'
 import { authClient } from '#/lib/auth-client'
 

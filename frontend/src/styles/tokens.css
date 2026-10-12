@@ -1,5 +1,5 @@
-/* Remi · Apple-like design tokens. The ONLY file allowed to hold raw values. */
-@layer tokens, base, components;
+/* Remi · Apple-like design tokens. The ONLY file allowed to hold raw values.
+   Layer order is declared once in styles.css. */
 
 /* Self-hosted Inter (latin, 400/600/700). Chrome treats -apple-system and
    BlinkMacSystemFont as the platform UI font on non-Apple devices, so those
