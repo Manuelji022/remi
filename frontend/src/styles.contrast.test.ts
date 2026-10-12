@@ -87,6 +87,9 @@ describe('contrast tokens', () => {
     expect(
       contrast(token('--green-700'), token('--gray-0')),
     ).toBeGreaterThanOrEqual(4.5)
+    expect(
+      contrast(token('--green-700'), token('--gray-100')),
+    ).toBeGreaterThanOrEqual(4.5)
   })
 
   it('keeps the focus ring and control border at 3:1', () => {

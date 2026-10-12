@@ -651,7 +651,7 @@ async function main() {
     )
     step('recipe form', form === 'yes', 'name input visible')
     await setControl(page, 'input[name="recipeName"]', 'Lemon pasta')
-    await setControl(page, 'input[placeholder="Ex. chickpeas"]', 'pasta')
+    await setControl(page, 'input[name$="-name-0"]', 'pasta')
     await setControl(page, '.panel-ingredient-row input[type="number"]', '1')
     await setControl(page, '.panel-ingredient-row select', 'g')
     let added = null
@@ -802,7 +802,7 @@ async function main() {
     )
     step('second recipe form', herbForm === 'yes', 'name input visible')
     await setControl(page, 'input[name="recipeName"]', 'Herb rice')
-    await setControl(page, 'input[placeholder="Ex. chickpeas"]', 'rice')
+    await setControl(page, 'input[name$="-name-0"]', 'rice')
     await setControl(page, '.panel-ingredient-row input[type="number"]', '2')
     await setControl(page, '.panel-ingredient-row select', 'g')
     let herb = null

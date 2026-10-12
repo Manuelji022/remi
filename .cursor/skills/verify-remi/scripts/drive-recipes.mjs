@@ -528,7 +528,7 @@ async function main() {
       )
       step('recipe form', form === 'yes', 'name input visible')
       await setControl(page, 'input[name="recipeName"]', RECIPE_NAME)
-      await setControl(page, 'input[placeholder="Ex. chickpeas"]', 'chickpeas')
+      await setControl(page, 'input[name$="-name-0"]', 'chickpeas')
       await setControl(page, '.panel-ingredient-row input[type="number"]', '1')
       await setControl(page, '.panel-ingredient-row select', 'g')
       let added = null
