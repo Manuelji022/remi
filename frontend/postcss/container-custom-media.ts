@@ -1,16 +1,32 @@
+type CustomMediaAtRule = {
+  params: string
+}
+
+type CustomMediaRoot = {
+  walkAtRules: (
+    name: string,
+    callback: (atRule: CustomMediaAtRule) => void,
+  ) => void
+}
+
+type ContainerCustomMediaPlugin = {
+  postcssPlugin: string
+  Once: (root: CustomMediaRoot) => void
+}
+
 /** Expands `@container name (--cq-*)` from the @custom-media block.
  * postcss-custom-media covers @media only. @custom-media names are not valid
  * inside @container, so this mirrors the proposal's build.py substitution.
  */
-export default function containerCustomMedia() {
+function containerCustomMedia(): ContainerCustomMediaPlugin {
   return {
     postcssPlugin: 'remi-container-custom-media',
     Once(root) {
-      const media = new Map()
+      const media = new Map<string, string>()
 
       root.walkAtRules('custom-media', (atRule) => {
         const match = /^(--[\w-]+)\s+(.+)$/.exec(atRule.params.trim())
-        if (!match) return
+        if (!match?.[1] || !match[2]) return
         media.set(match[1], match[2].trim())
       })
 
@@ -27,4 +43,8 @@ export default function containerCustomMedia() {
   }
 }
 
-containerCustomMedia.postcss = true
+const containerCustomMediaPlugin = Object.assign(containerCustomMedia, {
+  postcss: true as const,
+})
+
+export default containerCustomMediaPlugin

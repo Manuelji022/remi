@@ -9,7 +9,7 @@ import { tanstackStart } from '@tanstack/react-start/plugin/vite'
 import postcssCustomMedia from 'postcss-custom-media'
 import viteReact from '@vitejs/plugin-react'
 import { nitro } from 'nitro/vite'
-import containerCustomMedia from './postcss/container-custom-media.mjs'
+import containerCustomMedia from './postcss/container-custom-media.ts'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
