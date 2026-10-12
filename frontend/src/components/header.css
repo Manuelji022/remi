@@ -84,7 +84,7 @@
     white-space: nowrap;
   }
 
-  @media (--bp-md) {
+  @media (min-width: 48rem) {
     .header-leading .planner-entry-link {
       display: inline-flex;
     }

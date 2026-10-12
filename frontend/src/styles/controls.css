@@ -334,7 +334,7 @@
     font-variant-numeric: var(--numeric);
   }
 
-  @media (--bp-md) {
+  @media (min-width: 48rem) {
     .planner-secondary-btn,
     .panel-secondary-btn,
     .panel-add-btn,

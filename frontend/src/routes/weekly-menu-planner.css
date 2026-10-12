@@ -118,7 +118,7 @@
     border-block-start: var(--border-width) solid var(--border-subtle);
   }
 
-  @media (--bp-md) {
+  @media (min-width: 48rem) {
     .planner-actions {
       inline-size: auto;
     }

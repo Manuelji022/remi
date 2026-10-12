@@ -1,6 +1,76 @@
 /* Remi · Apple-like design tokens. The ONLY file allowed to hold raw values. */
 @layer tokens, base, components;
 
+/* Self-hosted Inter (latin, 400/600/700). Chrome treats -apple-system and
+   BlinkMacSystemFont as the platform UI font on non-Apple devices, so those
+   names have to be faced here or the stack never reaches Inter. local() keeps
+   real SF Pro on Apple; the woff2 is the fallback. */
+@font-face {
+  font-family: -apple-system;
+  src:
+    local('.SF NS Text'),
+    local('SF Pro Text'),
+    url('/fonts/inter-latin-400-normal.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: -apple-system;
+  src:
+    local('.SF NS Text'),
+    local('SF Pro Text'),
+    url('/fonts/inter-latin-600-normal.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: -apple-system;
+  src:
+    local('.SF NS Text'),
+    local('SF Pro Text'),
+    url('/fonts/inter-latin-700-normal.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: BlinkMacSystemFont;
+  src:
+    local('.SF NS Text'),
+    local('SF Pro Text'),
+    url('/fonts/inter-latin-400-normal.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: BlinkMacSystemFont;
+  src:
+    local('.SF NS Text'),
+    local('SF Pro Text'),
+    url('/fonts/inter-latin-600-normal.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: BlinkMacSystemFont;
+  src:
+    local('.SF NS Text'),
+    local('SF Pro Text'),
+    url('/fonts/inter-latin-700-normal.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 @font-face {
   font-family: Inter;
   src: url('/fonts/inter-latin-400-normal.woff2') format('woff2');
@@ -25,18 +95,9 @@
   font-display: swap;
 }
 
-/* Breakpoint scale: single source of truth. Mobile-first, min-width only.
-   @custom-media is not shipped in browsers yet: it needs PostCSS (postcss-custom-media)
-   or Lightning CSS (drafts.customMedia). For these mockups, build.py compiles it into
-   components.compiled.css with the SAME values (that file is generated; don't edit it). */
-@custom-media --bp-sm (min-width: 40rem);
-@custom-media --bp-md (min-width: 48rem);
-@custom-media --bp-lg (min-width: 64rem);
-@custom-media --bp-xl (min-width: 80rem);
-/* Container query sizes (same rule: mirror in --cq-*). Used as
-   @container <name> (min-width: …) via the --cq-* names in build.py. */
-@custom-media --cq-sm (min-width: 28rem);
-@custom-media --cq-md (min-width: 36rem);
+/* Breakpoints, mobile-first, min-width only. Each query writes the value.
+   sm 40rem, md 48rem, lg 64rem, xl 80rem.
+   The preferences drawer container query is min-width 28rem. */
 
 @layer tokens {
   :root {
@@ -126,6 +187,7 @@
     --size-1200: 75rem;
     --measure-32em: 32em;
     --viewport-full: 100vh;
+    --viewport-dynamic: 100dvh;
 
     /* --- Fluid primitives (vw slopes for clamp) --- */
     --fluid-2: 2.5vw;
@@ -147,7 +209,7 @@
     --z-20: 20;
     --z-30: 30;
 
-    /* --- Breakpoint mirrors (DOCUMENTATION / JS ONLY: var() does not work in @media) --- */
+    /* --- Breakpoint mirrors (documentation only; queries write the rem values) --- */
     --bp-sm: 40rem; /* 640  */
     --bp-md: 48rem; /* 768  */
     --bp-lg: 64rem; /* 1024 */
@@ -251,6 +313,7 @@
     --content-max: var(--size-1200);
     --auth-max: var(--size-400);
     --drawer-width: var(--size-480);
+    --drawer-height: var(--viewport-dynamic);
     --header-height: var(--size-64);
     --day-col-min: var(--size-144);
     --qty-col: var(--size-80);

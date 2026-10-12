@@ -1,7 +1,23 @@
 @layer components {
+  html:has(.panel-root) {
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+
+  html:has(.panel-root) body {
+    position: fixed;
+    inset: var(--inset-none);
+    inline-size: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+
   .panel-root {
     position: fixed;
     inset: var(--inset-none);
+    block-size: var(--drawer-height);
+    max-block-size: var(--drawer-height);
+    overflow: hidden;
     z-index: var(--z-overlay);
   }
 
@@ -19,15 +35,19 @@
     inset-block: var(--inset-none);
     inset-inline-end: var(--inset-none);
     inline-size: min(var(--drawer-width), 100%);
+    block-size: var(--drawer-height);
+    max-block-size: var(--drawer-height);
     background: var(--bg-page);
     z-index: var(--z-drawer);
     display: flex;
     flex-direction: column;
+    overflow: hidden;
     box-shadow: var(--shadow-raised);
     overscroll-behavior: contain;
   }
 
   .panel-header {
+    flex: none;
     padding-block: var(--pad-card) var(--pad-card-compact);
     padding-inline: var(--pad-card);
     display: flex;
@@ -61,6 +81,7 @@
   }
 
   .panel-tablist {
+    flex: none;
     display: flex;
     padding: var(--pad-track);
     margin-inline: var(--pad-card);
@@ -99,6 +120,7 @@
   .panel-content {
     container: drawer / inline-size;
     flex: 1;
+    min-block-size: var(--inset-none);
     overflow: auto;
     padding-block: var(--gap-none) var(--pad-card);
     padding-inline: var(--pad-card);
@@ -291,6 +313,8 @@
   }
 
   .panel-footer {
+    flex: none;
+    margin-block-start: auto;
     padding-block: var(--pad-card-compact);
     padding-inline: var(--pad-card);
     border-block-start: var(--border-width) solid var(--border-subtle);
@@ -307,7 +331,7 @@
     flex: 1;
   }
 
-  @container drawer (--cq-sm) {
+  @container drawer (min-width: 28rem) {
     .panel-ingredient-row {
       grid-template-columns:
         minmax(var(--ingredient-col-min), 1fr) var(--qty-col)
@@ -319,7 +343,7 @@
     }
   }
 
-  @media (--bp-md) {
+  @media (min-width: 48rem) {
     .panel-footer-actions .panel-secondary-btn {
       flex: none;
     }
