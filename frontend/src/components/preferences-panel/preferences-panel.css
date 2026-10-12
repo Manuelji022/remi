@@ -4,14 +4,6 @@
     overscroll-behavior: none;
   }
 
-  html:has(.panel-root) body {
-    position: fixed;
-    inset: var(--inset-none);
-    inline-size: 100%;
-    overflow: hidden;
-    overscroll-behavior: none;
-  }
-
   .panel-root {
     position: fixed;
     inset: var(--inset-none);

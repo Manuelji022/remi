@@ -1,7 +1,7 @@
 import { Link, useLocation } from '@tanstack/react-router'
 import './preferences-panel.css'
 import { Globe2 } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { CheckIcon, CloseIcon, SettingsIcon } from '#/components/icons'
 import type { Day } from '#/data/constants'
 import type { DayContext, PlanningScope, Preferences } from '#/data/types'
@@ -40,6 +40,15 @@ export function PreferencesPanel({
   const [activeTab, setActiveTab] = useState<PreferencesPanelTab>('schedule')
   const [migrationFailed, setMigrationFailed] = useState(false)
   const userId = session?.user.id
+  const scrollYRef = useRef<number | null>(null)
+
+  if (typeof window !== 'undefined') {
+    if (isOpen) {
+      if (scrollYRef.current === null) scrollYRef.current = window.scrollY
+    } else {
+      scrollYRef.current = null
+    }
+  }
 
   useEffect(() => {
     if (!isOpen) return
@@ -48,10 +57,10 @@ export function PreferencesPanel({
     setActiveTab('schedule')
   }, [isOpen, savedPrefs])
 
-  useEffect(() => {
-    if (!isOpen) return
+  useLayoutEffect(() => {
+    if (!isOpen || scrollYRef.current === null) return
 
-    const scrollY = window.scrollY
+    const scrollY = scrollYRef.current
     const root = document.documentElement
     const body = document.body
     const previous = {

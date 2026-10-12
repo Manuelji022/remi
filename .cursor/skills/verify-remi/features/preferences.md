@@ -33,7 +33,7 @@ Start from a doctor-clean planner page.
 6. Open the dialog again. Click `button#preferences-recipes-tab`. Logged out, `#preferences-recipes-panel` shows `Sign in to save recipes.` and a `Log in` link. `input[name="recipeName"]` is absent. No request URL contains `/_serverFn/`. Storage has no `savedPreferences.customRecipes`.
 7. Logged-in checks require doctor `auth-submit: ready`. Do not use `/login` for them. That page signs the user out unless OTP redirects to `/two-factor`, and OTP needs `RESEND_API_KEY`. `drive-recipes.mjs` signs up through `POST /api/auth/sign-up/email` and sets `better-auth.session_token`.
 8. With that session, reopen `My Recipes`. Wait until `input[name="recipeName"]` exists (`Loading recipes...` means the list call is still in flight). The empty copy is `No recipes saved yet.`
-9. Fill `input[name="recipeName"]` with `Lemon chickpea pasta`. The slot group labelled `Choose whether this recipe is for lunch or dinner` defaults to `Dinner`. Fill `input[placeholder="Ex. chickpeas"]` with `chickpeas`, the quantity `input[type="number"]` with `1`, and the unit `select` with `g`.
+9. Fill `input[name="recipeName"]` with `Lemon chickpea pasta`. The slot group labelled `Choose whether this recipe is for lunch or dinner` defaults to `Dinner`. Fill `input[name$="-name-0"]` with `chickpeas`, the quantity `input[type="number"]` with `1`, and the unit `select` with `g`.
 10. Click `button.panel-add-btn` (`Add recipe`). Result: `.panel-recipe-card` contains the name, `Dinner`, and `chickpeas`. The name input is cleared. This POST hits `/_serverFn/`. `Save preferences` is not required.
 11. Reload `/weekly-menu-planner`. Open Preferences, then `My Recipes`. The same card is still there. Delete with the button whose accessible name is `Delete Lemon chickpea pasta`. The empty copy returns. Storage still has no `customRecipes` key.
 
@@ -44,7 +44,7 @@ Start from a doctor-clean planner page.
 - A recipe POST persists immediately. `Cancel` does not remove it. `Save preferences` only writes schedule fields.
 - Logged out, do not look for the form. The sign-in copy is the result.
 - `Add recipe` stays disabled until the name is non-empty. A negative quantity shows `Ingredient quantities must be zero or greater.` and keeps the button disabled.
-- Ingredient `name` attributes are generated with `useId()` and change between reloads. Use the placeholder `Ex. chickpeas` or the label `Ingredient`, not a hard-coded id.
+- Ingredient `name` attributes are generated with `useId()` and change between reloads. The first row always ends in `-name-0`, so use `input[name$="-name-0"]`, not the placeholder or a hard-coded id.
 - The badge counts schedule context only, not recipes. Assert the Monday card and the recipe card, not a combined number.
 - Server function ids are content hashes under `/_serverFn/`. Match that prefix. Do not pin a hash.
 - `auth-submit: blocked` means skip the create path. Record the skip. Do not claim the card survived a reload.
