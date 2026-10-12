@@ -6,8 +6,10 @@ import { devtools } from '@tanstack/devtools-vite'
 
 import { tanstackStart } from '@tanstack/react-start/plugin/vite'
 
+import postcssCustomMedia from 'postcss-custom-media'
 import viteReact from '@vitejs/plugin-react'
 import { nitro } from 'nitro/vite'
+import containerCustomMedia from './postcss/container-custom-media.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -18,6 +20,11 @@ const config = defineConfig({
       '@components': path.resolve(__dirname, './src/components'),
       '@data': path.resolve(__dirname, './src/data'),
       '@routes': path.resolve(__dirname, './src/routes'),
+    },
+  },
+  css: {
+    postcss: {
+      plugins: [containerCustomMedia(), postcssCustomMedia()],
     },
   },
   plugins: [

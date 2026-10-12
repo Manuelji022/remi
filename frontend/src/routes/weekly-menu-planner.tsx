@@ -1,6 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import './weekly-menu-planner.css'
 import { DayCard, LoadingDots, MainTab, PreferencesPanel } from '#/components'
 import {
   ChevronLeftIcon,
@@ -313,7 +312,7 @@ export function WeeklyMenuPlanner() {
   }, [])
 
   return (
-    <main className="planner-page">
+    <main className="planner-page" id="main">
       <section className="planner-shell" aria-labelledby="planner-title">
         <div className="planner-hero">
           <div className="planner-card-meta">

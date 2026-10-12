@@ -1,656 +1,131 @@
-/* ---------------------------------------------------------------
-   Weekly Menu Planner — Component Styles
-   --------------------------------------------------------------- */
-
-/* --- Planner Shell --- */
-.planner-shell {
-  padding: 28px;
-  border: 1px solid rgba(138, 112, 96, 0.18);
-  border-radius: var(--radius-sm);
-  background: #ffffff;
-  box-shadow: 0 24px 80px rgba(62, 48, 35, 0.12);
-}
-
-.planner-hero {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 28px;
-  align-items: start;
-}
-
-.planner-copy {
-  max-width: 720px;
-}
-
-.planner-card-meta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px;
-}
-
-.planner-week-nav {
-  display: inline-grid;
-  grid-template-columns: 38px minmax(0, auto) 38px;
-  align-items: stretch;
-  width: fit-content;
-  max-width: 100%;
-  border: 1px solid rgba(138, 112, 96, 0.24);
-  border-radius: var(--radius-sm);
-  background: #fffdf8;
-  overflow: hidden;
-}
-
-.planner-week-nav-btn {
-  display: inline-flex;
-  width: 38px;
-  min-height: 38px;
-  align-items: center;
-  justify-content: center;
-  border: 0;
-  background: transparent;
-  color: var(--text-color);
-  cursor: pointer;
-  transition:
-    background-color var(--transition-ui),
-    color var(--transition-ui);
-}
-
-.planner-week-nav-btn:hover,
-.planner-week-nav-btn:focus-visible {
-  background: var(--highlight-color-2);
-  color: #ffffff;
-}
-
-.planner-week-nav-btn:disabled {
-  color: var(--text-disabled);
-  cursor: not-allowed;
-}
-
-.planner-week-nav-btn:disabled:hover {
-  background: transparent;
-  color: var(--text-disabled);
-}
-
-.planner-week-nav-btn:focus-visible {
-  outline: 2px solid var(--highlight-color-2);
-  outline-offset: -2px;
-}
-
-.planner-week-pill {
-  display: inline-flex;
-  min-height: 38px;
-  align-items: center;
-  gap: var(--space-xs);
-  margin: 0;
-  padding: 0.45rem 0.75rem;
-  border-inline: 1px solid rgba(138, 112, 96, 0.24);
-  color: var(--text-color);
-  font-size: 0.8rem;
-  font-weight: 900;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-.planner-kicker,
-.planner-section-kicker {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-xs);
-  color: var(--text-muted);
-  font-size: 0.78rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.planner-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-sm);
-  justify-content: center;
-}
-
-.planner-primary-btn,
-.planner-secondary-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 44px;
-  gap: 10px;
-  border-radius: var(--button-primary-radius);
-  border: var(--border-strong);
-  padding: 10px 16px;
-  font-weight: 800;
-  cursor: pointer;
-  transition:
-    background-color var(--transition-ui),
-    border-color var(--transition-ui),
-    color var(--transition-ui),
-    transform var(--transition-ui);
-}
-
-.planner-primary-btn {
-  background: var(--button-primary-bg);
-  color: var(--button-primary-fg);
-}
-
-.planner-primary-btn:hover:not(:disabled),
-.planner-secondary-btn:hover {
-  transform: var(--hover-lift);
-}
-
-.planner-primary-btn:disabled {
-  border-color: var(--text-disabled);
-  background: var(--button-disabled-bg);
-  color: var(--button-disabled-fg);
-  cursor: wait;
-}
-
-.planner-secondary-btn {
-  position: relative;
-  background: var(--button-secondary-bg);
-  color: var(--button-secondary-fg);
-  border-radius: var(--button-secondary-radius);
-}
-
-.planner-btn-badge {
-  display: inline-flex;
-  min-width: 20px;
-  height: 20px;
-  align-items: center;
-  justify-content: center;
-  padding: 0 6px;
-  border-radius: var(--radius-pill);
-  background: var(--button-primary-bg);
-  color: var(--button-primary-fg);
-  font-size: 0.7rem;
-}
-
-.planner-divider {
-  height: 1px;
-  margin: 28px 0;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(138, 112, 96, 0.28),
-    transparent
-  );
-}
-
-.planner-toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: var(--space-lg);
-}
-
-.planner-state-note {
-  color: #7a746b;
-  font-size: 0.88rem;
-  font-weight: 700;
-}
-
-.planner-empty-state {
-  display: grid;
-  min-height: 330px;
-  place-items: center;
-  align-content: center;
-  gap: var(--space-control);
-  padding: 36px var(--space-lg);
-  border: 1px dashed rgba(138, 112, 96, 0.28);
-  border-radius: var(--radius-sm);
-  background: rgba(255, 255, 255, 0.54);
-  color: var(--text-muted);
-  text-align: center;
-  animation: fadeSlideUp var(--transition-enter) both;
-}
-
-.planner-empty-state > svg {
-  width: 34px;
-  height: 34px;
-  color: #b5713a;
-}
-
-.planner-empty-state h2,
-.planner-section-heading h2,
-.planner-shopping-tab h2 {
-  color: #1a1a2e;
-  font-size: 1.6rem;
-  line-height: 1.15;
-  letter-spacing: 0;
-}
-
-.planner-empty-state p {
-  max-width: 520px;
-  line-height: 1.7;
-}
-
-.planner-menu-tab {
-  animation: fadeSlideUp var(--transition-enter) both;
-}
-
-.planner-section-heading {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(240px, 380px);
-  gap: var(--space-lg);
-  align-items: end;
-  margin-bottom: 20px;
-}
-
-.planner-section-heading p:last-child {
-  color: #6f695f;
-  font-size: 0.92rem;
-  line-height: 1.6;
-}
-
-.planner-day-grid {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: var(--space-sm);
-}
-
-.planner-reasoning {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: 18px;
-  margin-top: 24px;
-  padding: 22px;
-  border: 1px solid rgba(123, 148, 96, 0.2);
-  border-radius: var(--radius-sm);
-  background:
-    linear-gradient(135deg, rgba(123, 148, 96, 0.1), transparent 48%), #fffdf8;
-  animation: fadeSlideUp 0.45s ease-out both;
-}
-
-.planner-reasoning-icon {
-  display: inline-grid;
-  width: 42px;
-  height: 42px;
-  place-items: center;
-  border-radius: var(--radius-sm);
-  background: rgba(123, 148, 96, 0.12);
-  color: #50683f;
-}
-
-.planner-reasoning h2 {
-  margin-top: 6px;
-  color: #1a1a2e;
-  font-size: 1.45rem;
-  letter-spacing: 0;
-  line-height: 1.15;
-}
-
-.planner-reasoning ul {
-  display: grid;
-  gap: 10px;
-  margin-top: 14px;
-  padding-left: 20px;
-  color: #625d54;
-  line-height: 1.65;
-}
-
-.planner-shopping-tab {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  animation: fadeSlideUp var(--transition-enter) both;
-}
-
-.planner-shopping-header {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 20px;
-  align-items: start;
-}
-
-.planner-shopping-helper {
-  color: #6f695f;
-  line-height: 1.65;
-}
-
-.planner-shopping-tab ul {
-  display: grid;
-  gap: 10px;
-  margin: 0;
-  padding-left: 20px;
-  color: #625d54;
-  line-height: 1.65;
-}
-
-.planner-shopping-actions {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 10px;
-}
-
-.planner-progress-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 18px;
-  border: 1px solid rgba(193, 168, 120, 0.22);
-  border-radius: var(--radius-pill);
-  background: linear-gradient(135deg, #fefcf8, #faf5ea);
-  color: var(--text-muted);
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-}
-
-.planner-progress-track {
-  width: 84px;
-  height: 6px;
-  overflow: hidden;
-  border-radius: var(--radius-pill);
-  background: rgba(193, 168, 120, 0.25);
-}
-
-.planner-progress-fill {
-  height: 100%;
-  border-radius: var(--radius-pill);
-  background: linear-gradient(to right, #7b9460, #a3b87a);
-  transition: width var(--transition-enter);
-}
-
-.planner-reset-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-xs);
-  border: 1px solid rgba(193, 168, 120, 0.35);
-  border-radius: var(--radius-pill);
-  padding: 8px 14px;
-  background: transparent;
-  color: var(--text-color);
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition:
-    border-color var(--transition-ui),
-    color var(--transition-ui),
-    transform var(--transition-ui);
-}
-
-.planner-reset-btn:hover {
-  border-color: var(--text-color);
-  color: var(--text-color);
-  transform: var(--hover-lift);
-}
-
-.planner-reset-btn:focus-visible,
-.planner-ingredient-row:focus-visible {
-  outline: var(--focus-ring);
-  outline-offset: var(--focus-offset);
-}
-
-.planner-summary-banner {
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  padding: var(--space-control) 20px;
-  border-radius: var(--radius-control);
-  animation: popIn 0.3s ease both;
-}
-
-.planner-summary-banner p {
-  margin: 0;
-  font-size: 1.05rem;
-}
-
-.planner-summary-banner.shopping {
-  border: 1px solid rgba(181, 113, 58, 0.18);
-  background: linear-gradient(
-    135deg,
-    rgba(181, 113, 58, 0.07),
-    rgba(181, 113, 58, 0.03)
-  );
-  color: var(--text-color);
-}
-
-.planner-summary-banner.stocked {
-  border: 1px solid rgba(123, 148, 96, 0.22);
-  background: linear-gradient(
-    135deg,
-    rgba(123, 148, 96, 0.1),
-    rgba(123, 148, 96, 0.04)
-  );
-  color: var(--text-color);
-}
-
-.planner-ingredient-groups {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-
-.planner-ingredient-group {
-  overflow: hidden;
-  border: 1px solid var(--category-border);
-  border-radius: var(--radius-lg);
-  background: linear-gradient(135deg, #fefcf8, #faf5ea);
-  box-shadow: 0 16px 38px rgba(95, 73, 40, 0.06);
-}
-
-.planner-ingredient-group-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-control);
-  padding: 16px 20px;
-  border-bottom: 1px solid var(--category-border);
-  background: var(--category-bg);
-}
-
-.planner-ingredient-group-title {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.planner-ingredient-group-accent {
-  width: 4px;
-  height: 22px;
-  border-radius: var(--radius-pill);
-  background: var(--category-accent);
-}
-
-.planner-ingredient-group-title h3 {
-  margin: 0;
-  color: var(--text-color);
-  font-size: 0.88rem;
-  font-weight: 800;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-}
-
-.planner-ingredient-group-progress {
-  color: var(--text-muted);
-  font-size: 0.74rem;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-}
-
-.planner-ingredient-list {
-  display: flex;
-  flex-direction: column;
-}
-
-.planner-ingredient-row {
-  display: flex;
-  align-items: center;
-  gap: var(--space-control);
-  width: 100%;
-  padding: var(--space-sm) 20px;
-  border: 0;
-  border-bottom: 1px solid rgba(193, 168, 120, 0.12);
-  background: transparent;
-  text-align: left;
-  cursor: pointer;
-  transition: background-color var(--transition-ui);
-}
-
-.planner-ingredient-row:last-child {
-  border-bottom: 0;
-}
-
-.planner-ingredient-row:hover {
-  background: rgba(193, 168, 120, 0.08);
-}
-
-.planner-ingredient-row.stocked {
-  background: rgba(123, 148, 96, 0.05);
-}
-
-.planner-ingredient-row.stocked:hover {
-  background: rgba(123, 148, 96, 0.09);
-}
-
-.planner-ingredient-checkbox {
-  display: inline-flex;
-  width: 22px;
-  height: 22px;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 auto;
-  border: 1.5px solid rgba(193, 168, 120, 0.5);
-  border-radius: 6px;
-  color: #fff;
-  transition:
-    border-color var(--transition-ui),
-    background-color var(--transition-ui),
-    box-shadow var(--transition-ui);
-}
-
-.planner-ingredient-checkbox svg {
-  width: 12px;
-  height: 12px;
-}
-
-.planner-ingredient-checkbox.checked {
-  border-color: var(--button-primary-bg);
-  background: var(--button-primary-bg);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
-}
-
-.planner-ingredient-copy {
-  display: flex;
-  min-width: 0;
-  flex: 1;
-  align-items: baseline;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.planner-ingredient-label {
-  color: #4a3520;
-  font-size: 1.03rem;
-  letter-spacing: 0.01em;
-}
-
-.planner-ingredient-row.stocked .planner-ingredient-label {
-  color: var(--text-muted);
-  text-decoration: line-through;
-  text-decoration-color: rgba(160, 144, 128, 0.6);
-}
-
-.planner-ingredient-qty {
-  color: var(--text-muted);
-  font-size: 0.83rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-}
-
-.planner-in-fridge-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  flex: 0 0 auto;
-  color: var(--text-muted);
-  font-size: 0.68rem;
-  font-weight: 800;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-.planner-in-fridge-tag svg {
-  width: 14px;
-  height: 14px;
-}
-
-@media (max-width: 900px) {
+@layer components {
   .planner-shell {
-    padding: 22px;
+    display: grid;
   }
 
-  .planner-hero,
-  .planner-section-heading,
-  .planner-shopping-header {
-    grid-template-columns: 1fr;
-  }
-
-  .planner-actions {
-    justify-content: flex-start;
-  }
-
-  .planner-week-pill {
-    white-space: normal;
+  .planner-hero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--gap-inline-lg);
+    flex-wrap: wrap;
+    margin-block-end: var(--section-gap);
   }
 
   .planner-week-nav {
-    grid-template-columns: 38px minmax(0, 1fr) 38px;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--gap-inline-xs);
   }
 
-  .planner-shopping-actions {
-    align-items: flex-start;
+  .planner-week-pill {
+    font-weight: var(--weight-semibold);
+    font-size: var(--type-body-size);
+    line-height: var(--type-body-lh);
+    padding-inline: var(--pad-control-inline-tight);
   }
 
-  .planner-day-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: 620px) {
-  .planner-page {
-    padding: 28px var(--space-sm) var(--space-xxl);
+  .planner-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-inline);
+    inline-size: 100%;
   }
 
-  .planner-shell {
-    padding: 16px;
+  .planner-actions .planner-secondary-btn,
+  .planner-actions .planner-primary-btn {
+    flex: 1;
+  }
+
+  .planner-divider,
+  .planner-section-heading:empty {
+    display: none;
   }
 
   .planner-toolbar {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
-  .planner-actions,
-  .planner-primary-btn,
-  .planner-secondary-btn {
-    width: 100%;
-  }
-
-  .planner-day-grid,
-  .planner-reasoning {
-    grid-template-columns: 1fr;
-  }
-
-  .planner-progress-pill {
-    width: 100%;
+    display: flex;
+    align-items: center;
     justify-content: space-between;
-  }
-
-  .planner-ingredient-row {
-    align-items: flex-start;
+    gap: var(--gap-inline-lg);
     flex-wrap: wrap;
+    margin-block-end: var(--section-gap-sm);
   }
 
-  .planner-in-fridge-tag {
-    width: 100%;
-    padding-left: 36px;
+  .planner-empty-state {
+    text-align: center;
+    padding-block: var(--pad-empty-block);
+    padding-inline: var(--pad-card);
+    display: grid;
+    justify-items: center;
+    gap: var(--gap-stack-md);
+    background: var(--bg-surface);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card);
+  }
+
+  .planner-empty-state > svg {
+    inline-size: var(--icon-empty);
+    block-size: var(--icon-empty);
+    color: var(--accent-solid);
+  }
+
+  .planner-empty-state p {
+    max-inline-size: var(--measure);
+    color: var(--text-secondary);
+    font-size: var(--type-body-size);
+    line-height: var(--type-body-lh);
+    font-weight: var(--weight-regular);
+  }
+
+  .planner-day-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(var(--day-col-min), 1fr));
+    gap: var(--gap-stack-md);
+  }
+
+  .planner-shopping-tab {
+    display: grid;
+    gap: var(--gap-stack-md);
+  }
+
+  .planner-shopping-helper {
+    color: var(--text-secondary);
+    font-size: var(--type-body-size);
+    line-height: var(--type-body-lh);
+  }
+
+  .planner-shopping-tab ul {
+    list-style: none;
+    margin: var(--gap-none);
+    padding: var(--gap-none);
+    background: var(--bg-surface);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+  }
+
+  .planner-shopping-tab li {
+    min-block-size: var(--hit-min);
+    padding-block: var(--pad-control-block);
+    padding-inline: var(--pad-card);
+    display: flex;
+    align-items: center;
+    font-size: var(--type-callout-size);
+    line-height: var(--type-callout-lh);
+  }
+
+  .planner-shopping-tab li + li {
+    border-block-start: var(--border-width) solid var(--border-subtle);
+  }
+
+  @media (--bp-md) {
+    .planner-actions {
+      inline-size: auto;
+    }
+
+    .planner-actions .planner-secondary-btn,
+    .planner-actions .planner-primary-btn {
+      flex: none;
+    }
   }
 }

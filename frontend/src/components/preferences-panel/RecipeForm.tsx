@@ -105,10 +105,10 @@ export function RecipeForm({ onAddRecipe }: RecipeFormProps) {
               type="button"
               onClick={() => setRecipeSlot(slot)}
             >
-              {t(`slots.${slot}`)}
               {recipeSlot === slot ? (
                 <CheckIcon aria-hidden="true" className="panel-pill-check" />
               ) : null}
+              {t(`slots.${slot}`)}
             </button>
           ))}
         </div>
@@ -227,6 +227,9 @@ export function RecipeForm({ onAddRecipe }: RecipeFormProps) {
         <PlusIcon aria-hidden="true" />
         {t('preferences.addRecipe')}
       </button>
+      {!recipeName.trim() ? (
+        <p className="panel-add-hint">{t('preferences.addRecipeHint')}</p>
+      ) : null}
     </div>
   )
 }

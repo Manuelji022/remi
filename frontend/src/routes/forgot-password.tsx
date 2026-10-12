@@ -1,5 +1,3 @@
-import './auth.css'
-
 import { Link, createFileRoute } from '@tanstack/react-router'
 import type { ComponentProps } from 'react'
 import { useState } from 'react'
@@ -48,7 +46,7 @@ export function ForgotPasswordPage() {
   }
 
   return (
-    <main className="auth-page">
+    <main className="auth-page" id="main">
       <section className="auth-card" aria-labelledby="forgot-title">
         <h1 id="forgot-title">{t('auth.forgotPasswordTitle')}</h1>
         <p className="auth-copy">{t('auth.forgotPasswordCopy')}</p>
@@ -62,6 +60,7 @@ export function ForgotPasswordPage() {
               <input
                 autoComplete="email"
                 name="email"
+                spellCheck={false}
                 onChange={(event) => setEmail(event.target.value)}
                 required
                 type="email"

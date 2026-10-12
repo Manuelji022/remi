@@ -1,0 +1,331 @@
+/* Remi · Apple-like design tokens. The ONLY file allowed to hold raw values. */
+@layer tokens, base, components;
+
+@font-face {
+  font-family: Inter;
+  src: url('/fonts/inter-latin-400-normal.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: Inter;
+  src: url('/fonts/inter-latin-600-normal.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: Inter;
+  src: url('/fonts/inter-latin-700-normal.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Breakpoint scale: single source of truth. Mobile-first, min-width only.
+   @custom-media is not shipped in browsers yet: it needs PostCSS (postcss-custom-media)
+   or Lightning CSS (drafts.customMedia). For these mockups, build.py compiles it into
+   components.compiled.css with the SAME values (that file is generated; don't edit it). */
+@custom-media --bp-sm (min-width: 40rem);
+@custom-media --bp-md (min-width: 48rem);
+@custom-media --bp-lg (min-width: 64rem);
+@custom-media --bp-xl (min-width: 80rem);
+/* Container query sizes (same rule: mirror in --cq-*). Used as
+   @container <name> (min-width: …) via the --cq-* names in build.py. */
+@custom-media --cq-sm (min-width: 28rem);
+@custom-media --cq-md (min-width: 36rem);
+
+@layer tokens {
+  :root {
+    color-scheme: light;
+
+    /* =====================================================================
+     PRIMITIVES — raw values. Components never reference these directly.
+     ===================================================================== */
+
+    /* --- Color primitives --- */
+    --gray-0: #ffffff;
+    --gray-50: #f5f5f7;
+    --gray-100: #e8e8ed;
+    --gray-200: #d2d2d7;
+    --gray-400: #86868b;
+    --gray-600: #6e6e73;
+    --gray-900: #1d1d1f;
+    --blue-50: #e8f1fc;
+    --blue-500: #0071e3;
+    --blue-600: #0066cc;
+    --blue-700: #0055b3;
+    --red-600: #d70015;
+    --green-700: #1e7a35;
+    --ink-a04: rgb(29 29 31 / 0.04);
+    --ink-a06: rgb(29 29 31 / 0.06);
+    --ink-a08: rgb(29 29 31 / 0.08);
+    --ink-a30: rgb(29 29 31 / 0.3);
+    --white-a72: rgb(255 255 255 / 0.72);
+
+    /* --- Spacing primitives: ONE base unit, everything derived (change this to rescale all spacing) --- */
+    --space-unit: 0.25rem; /* 4px */
+    --space-0: calc(var(--space-unit) * 0); /* 0  */
+    --space-half: calc(var(--space-unit) * 1); /* 4  */
+    --space-1: calc(var(--space-unit) * 2); /* 8  */
+    --space-2: calc(var(--space-unit) * 4); /* 16 */
+    --space-3: calc(var(--space-unit) * 6); /* 24 */
+    --space-4: calc(var(--space-unit) * 8); /* 32 */
+    --space-5: calc(var(--space-unit) * 10); /* 40 */
+    --space-6: calc(var(--space-unit) * 12); /* 48 */
+    --space-8: calc(var(--space-unit) * 16); /* 64 */
+    --space-11: calc(var(--space-unit) * 11); /* 44 — hit target */
+
+    /* --- Type primitives --- */
+    --font-family-system:
+      -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', system-ui,
+      sans-serif;
+    --font-size-34: 2.125rem;
+    --font-size-22: 1.375rem;
+    --font-size-17: 1.0625rem;
+    --font-size-15: 0.9375rem;
+    --font-size-13: 0.8125rem;
+    --line-height-110: 1.1;
+    --line-height-120: 1.2;
+    --line-height-130: 1.3;
+    --line-height-135: 1.35;
+    --line-height-140: 1.4;
+    --line-height-147: 1.47;
+    --tracking-tight-2: -0.02em;
+    --tracking-tight-1: -0.01em;
+    --tracking-0: 0;
+    --weight-400: 400;
+    --weight-600: 600;
+    --weight-700: 700;
+
+    /* --- Radius primitives --- */
+    --radius-6: 0.375rem;
+    --radius-12: 0.75rem;
+    --radius-16: 1rem;
+    --radius-full: 62rem;
+
+    /* --- Border-width primitives --- */
+    --border-1: 1px;
+    --border-2: 2px;
+
+    /* --- Size primitives --- */
+    --size-16: 1rem;
+    --size-20: 1.25rem;
+    --size-24: 1.5rem;
+    --size-48: 3rem;
+    --size-64: 4rem;
+    --size-80: 5rem;
+    --size-96: 6rem;
+    --size-120: 7.5rem;
+    --size-144: 9rem;
+    --size-400: 25rem;
+    --size-480: 30rem;
+    --size-1200: 75rem;
+    --measure-32em: 32em;
+    --viewport-full: 100vh;
+
+    /* --- Fluid primitives (vw slopes for clamp) --- */
+    --fluid-2: 2.5vw;
+    --fluid-3: 3vw;
+    --fluid-4: 4vw;
+    --fluid-5: 5vw;
+
+    /* --- Motion primitives --- */
+    --ms-0: 0ms;
+    --ms-120: 120ms;
+    --ms-200: 200ms;
+    --ms-320: 320ms;
+    --ms-1400: 1400ms;
+    --bezier-standard: cubic-bezier(0.25, 0.1, 0.25, 1);
+    --bezier-out: cubic-bezier(0.22, 1, 0.36, 1);
+
+    /* --- Z-index primitives --- */
+    --z-10: 10;
+    --z-20: 20;
+    --z-30: 30;
+
+    /* --- Breakpoint mirrors (DOCUMENTATION / JS ONLY: var() does not work in @media) --- */
+    --bp-sm: 40rem; /* 640  */
+    --bp-md: 48rem; /* 768  */
+    --bp-lg: 64rem; /* 1024 */
+    --bp-xl: 80rem; /* 1280 */
+    --cq-sm: 28rem; /* container: 448 */
+    --cq-md: 36rem; /* container: 576 */
+
+    /* =====================================================================
+     SEMANTIC TOKENS — the only names components.css may use.
+     ===================================================================== */
+
+    /* --- Color: surfaces --- */
+    --bg-page: var(--gray-50);
+    --bg-surface: var(--gray-0);
+    --bg-fill: var(--gray-100);
+    --bg-fill-hover: var(--gray-200);
+    --bg-selected-soft: var(--blue-50);
+    --bg-overlay: var(--ink-a30);
+    --bg-bar: var(--white-a72);
+    --bg-disabled: var(--gray-100);
+    --theme-color: var(--gray-50); /* mirrored in <meta name="theme-color"> */
+
+    /* --- Color: text --- */
+    --text-primary: var(--gray-900);
+    --text-secondary: var(--gray-600);
+    --text-disabled: var(--gray-600); /* 4.15:1 on --bg-disabled */
+    --accent-text: var(--blue-600);
+    --on-accent: var(--gray-0);
+    --destructive: var(--red-600);
+    --success-text: var(--green-700);
+
+    /* --- Color: accent & borders --- */
+    --accent-solid: var(--blue-500);
+    --accent-solid-hover: var(--blue-600);
+    --accent-solid-pressed: var(--blue-700);
+    --border-subtle: var(--gray-200); /* decorative separators only */
+    --border-control: var(--gray-400); /* inputs, checkboxes, ≥3:1 */
+    --border-hairline: var(--ink-a08);
+    --focus-ring-color: var(--blue-500);
+
+    /* --- Typography --- */
+    --font-sans: var(--font-family-system);
+    --weight-regular: var(--weight-400);
+    --weight-semibold: var(--weight-600);
+    --weight-bold: var(--weight-700);
+    --type-large-title-size: var(--font-size-34);
+    --type-large-title-lh: var(--line-height-110);
+    --type-large-title-track: var(--tracking-tight-2);
+    --type-title-size: var(--font-size-22);
+    --type-title-lh: var(--line-height-120);
+    --type-title-track: var(--tracking-tight-1);
+    --type-headline-size: var(--font-size-17);
+    --type-headline-lh: var(--line-height-130);
+    --type-body-size: var(--font-size-17);
+    --type-body-lh: var(--line-height-147);
+    --type-callout-size: var(--font-size-15);
+    --type-callout-lh: var(--line-height-140);
+    --type-caption-size: var(--font-size-13);
+    --type-caption-lh: var(--line-height-135);
+    --track-normal: var(--tracking-0);
+    --numeric: tabular-nums;
+
+    /* --- Layout: stacks (vertical rhythm between siblings) --- */
+    --gap-none: var(--space-0);
+    --gap-stack-xs: var(--space-half); /* label → value */
+    --gap-stack-sm: var(--space-1); /* title → subtitle, label → field */
+    --gap-stack-md: var(--space-2); /* within a card */
+    --gap-stack-lg: var(--space-3); /* between blocks in a view */
+
+    /* --- Layout: inline gaps --- */
+    --gap-inline-xs: var(--space-half); /* segment items, week arrows */
+    --gap-inline: var(
+      --space-1
+    ); /* icon ↔ label, chip ↔ chip, button ↔ button */
+    --gap-inline-lg: var(--space-2); /* toolbar groups, list rows */
+
+    /* --- Layout: padding --- */
+    --pad-card: var(--space-3);
+    --pad-card-compact: var(--space-2);
+    --pad-control-inline: var(--space-2);
+    --pad-control-inline-tight: var(--space-1);
+    --pad-control-block: var(--space-1);
+    --pad-track: var(--space-half); /* segmented track inset */
+    --pad-page-inline: clamp(var(--space-2), var(--fluid-4), var(--space-3));
+    --pad-page-block-start: clamp(
+      var(--space-3),
+      var(--fluid-3),
+      var(--space-5)
+    );
+    --pad-page-block-end: clamp(var(--space-6), var(--fluid-5), var(--space-8));
+    --pad-auth-block: clamp(var(--space-4), var(--fluid-3), var(--space-5));
+    --pad-auth-inline: clamp(var(--space-3), var(--fluid-2), var(--space-4));
+    --pad-empty-block: var(--space-8);
+    --pad-empty-inline-block: var(--space-4);
+    --offset-skip: var(--space-2);
+    --inset-none: var(--space-0);
+
+    /* --- Layout: sections & containers --- */
+    --section-gap: var(--space-4); /* toolbar → content */
+    --section-gap-sm: var(--space-3); /* tabs/heading → content */
+    --content-max: var(--size-1200);
+    --auth-max: var(--size-400);
+    --drawer-width: var(--size-480);
+    --header-height: var(--size-64);
+    --day-col-min: var(--size-144);
+    --qty-col: var(--size-80);
+    --unit-col: var(--size-120);
+    --ingredient-col-min: var(--space-0);
+    --measure: var(--measure-32em);
+    --page-min-height: var(--viewport-full);
+
+    /* --- Radii (concentric: inner = outer − padding) --- */
+    --radius-card: var(--radius-16);
+    --radius-control: var(--radius-12);
+    --radius-segment-track: var(--radius-12);
+    --radius-segment-thumb: calc(
+      var(--radius-segment-track) - var(--pad-track)
+    ); /* 12 − 4 = 8 */
+    --radius-check: var(--radius-6);
+    --radius-pill: var(--radius-full);
+    --radius-link: var(--radius-6);
+    --radius-nav-link: calc(var(--radius-control) - var(--pad-track)); /* 8 */
+
+    /* --- Borders --- */
+    --border-width: var(--border-1);
+    --border-width-control: var(--border-1);
+
+    /* --- Shadows (layered: hairline + ambient + direct) --- */
+    --shadow-card:
+      0 0 0 var(--border-width) var(--border-hairline),
+      0 1px 2px var(--ink-a04), 0 4px 16px var(--ink-a04);
+    --shadow-raised:
+      0 0 0 var(--border-width) var(--border-hairline),
+      0 2px 4px var(--ink-a06), 0 12px 32px var(--ink-a08);
+    --shadow-thumb: 0 1px 2px var(--ink-a08), 0 2px 6px var(--ink-a04);
+    --bar-filter: saturate(1.8) blur(20px);
+
+    /* --- Focus --- */
+    --focus-ring-width: var(--border-2);
+    --focus-ring-offset: var(--border-2);
+
+    /* --- Hit targets & control sizes --- */
+    --hit-min: var(--space-11); /* 44 */
+    --control-height: var(--hit-min);
+    --segment-thumb-height: calc(
+      var(--hit-min) - var(--pad-track) * 2
+    ); /* 36 */
+    --icon-sm: var(--size-16);
+    --icon-md: var(--size-20);
+    --icon-empty: var(--size-48);
+    --loader-dot: var(--space-1);
+    --check-size: var(--size-20);
+    --badge-min: var(--size-24);
+    --progress-width: var(--size-96);
+    --progress-height: var(--space-half);
+
+    /* --- Motion --- */
+    --duration-fast: var(--ms-120);
+    --duration-base: var(--ms-200);
+    --duration-slow: var(--ms-320);
+    --duration-loader: var(--ms-1400);
+    --ease-standard: var(--bezier-standard);
+    --ease-out: var(--bezier-out);
+    --press-scale: 0.98;
+
+    /* --- Elevation (z-index) --- */
+    --z-header: var(--z-10);
+    --z-overlay: var(--z-20);
+    --z-drawer: var(--z-30);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :root {
+      --duration-fast: var(--ms-0);
+      --duration-base: var(--ms-0);
+      --duration-slow: var(--ms-0);
+      --duration-loader: var(--ms-0);
+      --press-scale: 1;
+    }
+  }
+}

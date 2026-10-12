@@ -1,5 +1,3 @@
-import './footer.css'
-
 import { useI18n } from '#/i18n'
 
 export default function Footer() {

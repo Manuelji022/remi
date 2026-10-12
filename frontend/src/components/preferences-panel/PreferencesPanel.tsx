@@ -1,5 +1,3 @@
-import './preferences-panel.css'
-
 import { Link, useLocation } from '@tanstack/react-router'
 import { Globe2 } from 'lucide-react'
 import { useEffect, useState } from 'react'

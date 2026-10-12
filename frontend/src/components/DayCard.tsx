@@ -1,5 +1,3 @@
-import './day-card.css'
-
 import type { Day } from '#/data/constants'
 import type { DayContext, MealSlot } from '#/data/types'
 import { useI18n } from '#/i18n'

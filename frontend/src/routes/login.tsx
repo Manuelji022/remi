@@ -1,5 +1,3 @@
-import './auth.css'
-
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import type { ComponentProps } from 'react'
 import { useState } from 'react'
@@ -51,7 +49,7 @@ export function LoginPage() {
   }
 
   return (
-    <main className="auth-page">
+    <main className="auth-page" id="main">
       <section className="auth-card" aria-labelledby="login-title">
         <h1 id="login-title">{t('auth.loginTitle')}</h1>
         <p className="auth-copy">{t('auth.loginCopy')}</p>
@@ -62,6 +60,7 @@ export function LoginPage() {
             <input
               autoComplete="email"
               name="email"
+              spellCheck={false}
               onChange={(event) => setEmail(event.target.value)}
               required
               type="email"

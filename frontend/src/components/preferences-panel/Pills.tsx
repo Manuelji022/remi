@@ -52,11 +52,11 @@ export function DayContextPill({
       type="button"
       onClick={onClick}
     >
-      <Icon aria-hidden="true" />
-      {label}
       {isSelected ? (
         <CheckIcon aria-hidden="true" className="panel-pill-check" />
       ) : null}
+      <Icon aria-hidden="true" />
+      {label}
     </button>
   )
 }
@@ -82,10 +82,10 @@ export function PlanningScopePill({
       type="button"
       onClick={onClick}
     >
-      {label}
       {isSelected ? (
         <CheckIcon aria-hidden="true" className="panel-pill-check" />
       ) : null}
+      {label}
     </button>
   )
 }

@@ -1,5 +1,3 @@
-import './loading-dots.css'
-
 import { useI18n } from '#/i18n'
 
 export function LoadingDots() {

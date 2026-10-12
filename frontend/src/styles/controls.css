@@ -1,0 +1,352 @@
+/* Shared controls. Semantic tokens only. */
+@layer components {
+  svg {
+    inline-size: var(--icon-sm);
+    block-size: var(--icon-sm);
+    flex: none;
+  }
+
+  h1,
+  .home-title,
+  .panel-header h2,
+  .planner-shopping-tab h2 {
+    font-size: var(--type-large-title-size);
+    line-height: var(--type-large-title-lh);
+    letter-spacing: var(--type-large-title-track);
+    font-weight: var(--weight-bold);
+  }
+
+  h2,
+  h3,
+  .planner-empty-state h2 {
+    font-size: var(--type-title-size);
+    line-height: var(--type-title-lh);
+    letter-spacing: var(--type-title-track);
+    font-weight: var(--weight-semibold);
+  }
+
+  h4,
+  .day-name {
+    font-size: var(--type-headline-size);
+    line-height: var(--type-headline-lh);
+    font-weight: var(--weight-semibold);
+  }
+
+  .skip {
+    position: absolute;
+    inset-inline-start: var(--offset-skip);
+    inset-block-start: var(--inset-none);
+    z-index: var(--z-drawer);
+    transform: translateY(-200%);
+    font-size: var(--type-callout-size);
+    font-weight: var(--weight-semibold);
+    line-height: var(--type-callout-lh);
+    min-block-size: var(--control-height);
+    min-inline-size: var(--hit-min);
+    padding-inline: var(--pad-control-inline);
+    border-radius: var(--radius-control);
+    background: var(--bg-fill);
+    color: var(--text-primary);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .skip:focus-visible {
+    transform: none;
+  }
+
+  .planner-primary-btn,
+  .auth-button,
+  .panel-primary-btn,
+  .home-page .planner-entry-link {
+    font-size: var(--type-callout-size);
+    font-weight: var(--weight-semibold);
+    line-height: var(--type-callout-lh);
+    min-block-size: var(--control-height);
+    min-inline-size: var(--hit-min);
+    padding-inline: var(--pad-control-inline);
+    border-radius: var(--radius-control);
+    border: var(--gap-none);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--gap-inline);
+    cursor: pointer;
+    text-decoration: none;
+    touch-action: manipulation;
+    white-space: nowrap;
+    background: var(--accent-solid);
+    color: var(--on-accent);
+    transition:
+      background-color var(--duration-fast) var(--ease-standard),
+      transform var(--duration-fast) var(--ease-standard);
+  }
+
+  .planner-primary-btn:hover,
+  .auth-button:hover,
+  .panel-primary-btn:hover,
+  .home-page .planner-entry-link:hover {
+    background: var(--accent-solid-hover);
+  }
+
+  .planner-primary-btn:active,
+  .auth-button:active,
+  .panel-primary-btn:active,
+  .home-page .planner-entry-link:active {
+    background: var(--accent-solid-pressed);
+    transform: scale(var(--press-scale));
+  }
+
+  .planner-secondary-btn,
+  .auth-secondary-button,
+  .panel-secondary-btn,
+  .panel-add-btn,
+  .panel-language-switcher,
+  .header-auth-link-strong,
+  .header-auth-button {
+    font-size: var(--type-callout-size);
+    font-weight: var(--weight-semibold);
+    line-height: var(--type-callout-lh);
+    min-block-size: var(--control-height);
+    min-inline-size: var(--hit-min);
+    padding-inline: var(--pad-control-inline-tight);
+    border-radius: var(--radius-control);
+    border: var(--gap-none);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--gap-inline);
+    cursor: pointer;
+    text-decoration: none;
+    touch-action: manipulation;
+    white-space: nowrap;
+    background: var(--bg-fill);
+    color: var(--text-primary);
+    transition:
+      background-color var(--duration-fast) var(--ease-standard),
+      transform var(--duration-fast) var(--ease-standard);
+  }
+
+  .planner-secondary-btn:hover,
+  .auth-secondary-button:hover,
+  .panel-secondary-btn:hover,
+  .panel-add-btn:hover,
+  .panel-language-switcher:hover,
+  .header-auth-link-strong:hover,
+  .header-auth-button:hover {
+    background: var(--bg-fill-hover);
+  }
+
+  .planner-secondary-btn:active,
+  .auth-secondary-button:active,
+  .panel-secondary-btn:active,
+  .panel-add-btn:active,
+  .header-auth-link-strong:active,
+  .header-auth-button:active {
+    transform: scale(var(--press-scale));
+  }
+
+  .header-auth-link:not(.header-auth-link-strong),
+  .panel-add-ingredient-btn,
+  .auth-forgot a,
+  .auth-switch a,
+  .panel-text-link {
+    font-size: var(--type-callout-size);
+    font-weight: var(--weight-semibold);
+    line-height: var(--type-callout-lh);
+    min-block-size: var(--control-height);
+    min-inline-size: var(--hit-min);
+    padding-inline: var(--pad-control-inline-tight);
+    border-radius: var(--radius-link);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--gap-inline);
+    text-decoration: none;
+    color: var(--accent-text);
+    background: transparent;
+    touch-action: manipulation;
+  }
+
+  .header-auth-link:not(.header-auth-link-strong):hover,
+  .panel-add-ingredient-btn:hover,
+  .auth-forgot a:hover,
+  .auth-switch a:hover,
+  .panel-text-link:hover {
+    background: var(--bg-selected-soft);
+    text-decoration: underline;
+  }
+
+  .planner-week-nav-btn,
+  .panel-close-btn,
+  .panel-icon-btn {
+    inline-size: var(--hit-min);
+    block-size: var(--hit-min);
+    min-inline-size: var(--hit-min);
+    min-block-size: var(--hit-min);
+    padding: var(--gap-none);
+    border: var(--gap-none);
+    border-radius: var(--radius-pill);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    touch-action: manipulation;
+    transition:
+      background-color var(--duration-fast) var(--ease-standard),
+      transform var(--duration-fast) var(--ease-standard);
+  }
+
+  .panel-close-btn {
+    background: var(--bg-fill);
+    color: var(--text-primary);
+  }
+
+  .planner-week-nav-btn:hover,
+  .panel-close-btn:hover {
+    background: var(--bg-fill-hover);
+    color: var(--text-primary);
+  }
+
+  .panel-icon-btn:hover {
+    background: var(--bg-fill);
+    color: var(--destructive);
+  }
+
+  .planner-week-nav-btn:active,
+  .panel-close-btn:active,
+  .panel-icon-btn:active {
+    transform: scale(var(--press-scale));
+  }
+
+  .planner-primary-btn:disabled,
+  .auth-button:disabled,
+  .panel-primary-btn:disabled,
+  .planner-secondary-btn:disabled,
+  .auth-secondary-button:disabled,
+  .panel-add-btn:disabled,
+  .planner-week-nav-btn:disabled,
+  .tab-btn:disabled,
+  .panel-scope-pill:disabled {
+    background: var(--bg-disabled);
+    color: var(--text-disabled);
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  .badge,
+  .planner-btn-badge,
+  .day-context-badge,
+  .panel-day-badge {
+    font-size: var(--type-caption-size);
+    font-weight: var(--weight-semibold);
+    line-height: var(--type-caption-lh);
+    min-inline-size: var(--badge-min);
+    min-block-size: var(--badge-min);
+    padding-inline: var(--pad-control-inline-tight);
+    border-radius: var(--radius-pill);
+    background: var(--bg-fill-hover);
+    color: var(--text-primary);
+    text-align: center;
+    font-variant-numeric: var(--numeric);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .panel-context-pill,
+  .panel-scope-pill {
+    font: inherit;
+    font-size: var(--type-callout-size);
+    font-weight: var(--weight-semibold);
+    line-height: var(--type-callout-lh);
+    min-block-size: var(--hit-min);
+    padding-inline: var(--pad-control-inline);
+    border-radius: var(--radius-pill);
+    border: var(--gap-none);
+    background: var(--bg-fill);
+    color: var(--text-primary);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--gap-inline);
+    cursor: pointer;
+    touch-action: manipulation;
+    transition:
+      background-color var(--duration-fast) var(--ease-standard),
+      transform var(--duration-fast) var(--ease-standard);
+  }
+
+  .panel-context-pill:hover,
+  .panel-scope-pill:hover:not(:disabled) {
+    background: var(--bg-fill-hover);
+  }
+
+  .panel-context-pill[aria-pressed='true'],
+  .panel-scope-pill[aria-pressed='true'] {
+    background: var(--accent-solid);
+    color: var(--on-accent);
+  }
+
+  .panel-context-pill[aria-pressed='true']:hover,
+  .panel-scope-pill[aria-pressed='true']:hover:not(:disabled) {
+    background: var(--accent-solid-hover);
+  }
+
+  .panel-scope-pill:disabled[aria-pressed='true'] {
+    background: var(--bg-disabled);
+    color: var(--text-disabled);
+  }
+
+  .panel-context-pill:active,
+  .panel-scope-pill:active:not(:disabled) {
+    transform: scale(var(--press-scale));
+  }
+
+  .auth-field input,
+  .panel-recipe-form input,
+  .panel-recipe-form select {
+    font: inherit;
+    font-size: var(--type-body-size);
+    line-height: var(--type-body-lh);
+    min-block-size: var(--control-height);
+    inline-size: 100%;
+    padding-inline: var(--pad-control-inline);
+    border-radius: var(--radius-control);
+    border: var(--border-width-control) solid var(--border-control);
+    background-color: var(--bg-surface);
+    color: var(--text-primary);
+  }
+
+  .auth-field input::placeholder,
+  .panel-recipe-form input::placeholder {
+    color: var(--text-secondary);
+  }
+
+  .panel-ingredient-quantity-field input,
+  .planner-week-pill,
+  .planner-shopping-tab li,
+  .panel-ingredient-chip {
+    font-variant-numeric: var(--numeric);
+  }
+
+  @media (--bp-md) {
+    .planner-secondary-btn,
+    .panel-secondary-btn,
+    .panel-add-btn,
+    .panel-language-switcher,
+    .header-auth-link-strong,
+    .header-auth-button {
+      padding-inline: var(--pad-control-inline);
+    }
+
+    .header-auth-link:not(.header-auth-link-strong),
+    .panel-add-ingredient-btn {
+      padding-inline: var(--pad-control-inline-tight);
+    }
+  }
+}

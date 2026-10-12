@@ -1,10 +1,16 @@
-footer {
-  font-size: 1rem;
-  padding: 1rem;
-}
+@layer components {
+  .footer {
+    border-block-start: var(--border-width) solid var(--border-subtle);
+    background: transparent;
+    color: var(--text-secondary);
+  }
 
-.footer {
-  margin-top: auto;
-  background-color: var(--text-color);
-  color: var(--background-color);
+  .footer p {
+    max-inline-size: var(--content-max);
+    margin-inline: auto;
+    padding-block: var(--pad-card);
+    padding-inline: var(--pad-page-inline);
+    font-size: var(--type-caption-size);
+    line-height: var(--type-caption-lh);
+  }
 }

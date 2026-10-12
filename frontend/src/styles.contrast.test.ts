@@ -3,22 +3,11 @@ import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 
-const stylesPath = resolve(
+const tokensPath = resolve(
   dirname(fileURLToPath(import.meta.url)),
-  'styles.css',
+  'styles/tokens.css',
 )
-const styles = readFileSync(stylesPath, 'utf8')
-
-const surfaces = [
-  '#ffffff',
-  '#f0eee6',
-  '#e3dbcc',
-  '#fffaf5',
-  '#fffdf8',
-  '#fefcf8',
-  '#f0ebe4',
-  '#fff8e6',
-]
+const tokens = readFileSync(tokensPath, 'utf8')
 
 function channel(value: number) {
   const unit = value / 255
@@ -41,7 +30,7 @@ function contrast(foreground: string, background: string) {
 }
 
 function token(name: string) {
-  const match = styles.match(new RegExp(`${name}:\\s*(#[0-9a-fA-F]{6})`))
+  const match = tokens.match(new RegExp(`${name}:\\s*(#[0-9a-fA-F]{6})`))
   if (!match?.[1]) {
     throw new Error(`missing ${name}`)
   }
@@ -49,25 +38,66 @@ function token(name: string) {
 }
 
 describe('contrast tokens', () => {
-  it('keeps muted text at 4.5:1 on app surfaces', () => {
-    const muted = token('--text-muted')
-    for (const surface of surfaces) {
-      expect(contrast(muted, surface)).toBeGreaterThanOrEqual(4.5)
-    }
+  it('keeps primary text at 4.5:1 on page, surface, and fill', () => {
+    const text = token('--gray-900')
+    expect(contrast(text, token('--gray-50'))).toBeGreaterThanOrEqual(4.5)
+    expect(contrast(text, token('--gray-0'))).toBeGreaterThanOrEqual(4.5)
+    expect(contrast(text, token('--gray-100'))).toBeGreaterThanOrEqual(4.5)
+    expect(contrast(text, token('--gray-200'))).toBeGreaterThanOrEqual(4.5)
+    expect(contrast(text, token('--blue-50'))).toBeGreaterThanOrEqual(4.5)
   })
 
-  it('keeps primary button text at 4.5:1', () => {
+  it('keeps secondary text at 4.5:1 on page and surface', () => {
+    const text = token('--gray-600')
+    expect(contrast(text, token('--gray-0'))).toBeGreaterThanOrEqual(4.5)
+    expect(contrast(text, token('--gray-50'))).toBeGreaterThanOrEqual(4.5)
+  })
+
+  it('keeps accent text and filled buttons at 4.5:1', () => {
     expect(
-      contrast(token('--button-primary-fg'), token('--button-primary-bg')),
+      contrast(token('--gray-0'), token('--blue-500')),
+    ).toBeGreaterThanOrEqual(4.5)
+    expect(
+      contrast(token('--gray-0'), token('--blue-600')),
+    ).toBeGreaterThanOrEqual(4.5)
+    expect(
+      contrast(token('--gray-0'), token('--blue-700')),
+    ).toBeGreaterThanOrEqual(4.5)
+    expect(
+      contrast(token('--blue-600'), token('--gray-0')),
+    ).toBeGreaterThanOrEqual(4.5)
+    expect(
+      contrast(token('--blue-600'), token('--gray-50')),
+    ).toBeGreaterThanOrEqual(4.5)
+    expect(
+      contrast(token('--blue-600'), token('--blue-50')),
     ).toBeGreaterThanOrEqual(4.5)
   })
 
-  it('keeps disabled UI at 3:1', () => {
-    const disabled = token('--text-disabled')
+  it('keeps disabled text at 3:1 and destructive text readable', () => {
     expect(
-      contrast(disabled, token('--button-disabled-bg')),
+      contrast(token('--gray-600'), token('--gray-100')),
     ).toBeGreaterThanOrEqual(3)
-    expect(contrast(disabled, '#f0ebe4')).toBeGreaterThanOrEqual(3)
-    expect(contrast(disabled, '#ffffff')).toBeGreaterThanOrEqual(3)
+    expect(
+      contrast(token('--red-600'), token('--gray-0')),
+    ).toBeGreaterThanOrEqual(4.5)
+    expect(
+      contrast(token('--red-600'), token('--gray-100')),
+    ).toBeGreaterThanOrEqual(3)
+    expect(
+      contrast(token('--green-700'), token('--gray-0')),
+    ).toBeGreaterThanOrEqual(4.5)
+  })
+
+  it('keeps the focus ring and control border at 3:1', () => {
+    expect(
+      contrast(token('--blue-500'), token('--gray-0')),
+    ).toBeGreaterThanOrEqual(3)
+    expect(
+      contrast(token('--blue-500'), token('--gray-50')),
+    ).toBeGreaterThanOrEqual(3)
+    expect(
+      contrast(token('--gray-400'), token('--gray-0')),
+    ).toBeGreaterThanOrEqual(3)
   })
 })
