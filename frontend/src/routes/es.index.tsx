@@ -1,7 +1,4 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { IndexPage } from './index'
+import { HomePage } from '#/features/home/HomePage'
 
-export const Route = createFileRoute('/es/')({
-  component: IndexPage,
-})
-
+export const Route = createFileRoute('/es/')({ component: HomePage })

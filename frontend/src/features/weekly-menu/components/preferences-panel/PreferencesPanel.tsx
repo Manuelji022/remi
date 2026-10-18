@@ -1,0 +1,269 @@
+import { Link, useLocation } from '@tanstack/react-router'
+import './preferences-panel.css'
+import { Globe2 } from 'lucide-react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { CheckIcon, CloseIcon, SettingsIcon } from '#/components/primitives'
+import type { Day } from '#/features/weekly-menu/constants'
+import type {
+  DayContext,
+  PlanningScope,
+  Preferences,
+} from '#/features/weekly-menu/types'
+import { getLocalizedPath, useI18n } from '#/shared/i18n'
+import { authClient } from '#/features/auth/auth-client'
+import { importLegacyRecipes } from '#/features/recipes/migrate'
+import type { RecipeInput } from '#/features/recipes/recipe'
+import { RecipesTab } from '#/features/recipes/components/RecipesTab'
+import { PanelTabButton } from './Pills'
+import { ScheduleTab } from './ScheduleTab'
+import type { PreferencesPanelTab } from './types'
+import { getBlockedPlanningScopes, getPlanningScopeForContext } from './utils'
+
+interface PreferencesPanelProps {
+  isOpen: boolean
+  onClose: () => void
+  savedPrefs: Preferences
+  onSave: (prefs: Preferences) => void
+  legacyCustomRecipes: RecipeInput[]
+  onLegacyRecipesMigrated: () => void
+}
+
+export function PreferencesPanel({
+  isOpen,
+  onClose,
+  savedPrefs,
+  onSave,
+  legacyCustomRecipes,
+  onLegacyRecipesMigrated,
+}: PreferencesPanelProps) {
+  const { locale, t } = useI18n()
+  const location = useLocation()
+  const { data: session, isPending: isSessionPending } = authClient.useSession()
+  const alternateLocale = locale === 'en' ? 'es' : 'en'
+  const [draftPrefs, setDraftPrefs] = useState<Preferences>(savedPrefs)
+  const [activeTab, setActiveTab] = useState<PreferencesPanelTab>('schedule')
+  const [migrationFailed, setMigrationFailed] = useState(false)
+  const userId = session?.user.id
+  const scrollYRef = useRef<number | null>(null)
+
+  if (typeof window !== 'undefined') {
+    if (isOpen) {
+      if (scrollYRef.current === null) scrollYRef.current = window.scrollY
+    } else {
+      scrollYRef.current = null
+    }
+  }
+
+  useEffect(() => {
+    if (!isOpen) return
+
+    setDraftPrefs(savedPrefs)
+    setActiveTab('schedule')
+  }, [isOpen, savedPrefs])
+
+  useLayoutEffect(() => {
+    if (!isOpen || scrollYRef.current === null) return
+
+    const scrollY = scrollYRef.current
+    const root = document.documentElement
+    const body = document.body
+    const previous = {
+      rootOverflow: root.style.overflow,
+      bodyPosition: body.style.position,
+      bodyInsetBlockStart: body.style.insetBlockStart,
+      bodyInlineSize: body.style.inlineSize,
+      bodyOverflow: body.style.overflow,
+    }
+
+    root.style.overflow = 'hidden'
+    body.style.position = 'fixed'
+    body.style.insetBlockStart = `-${scrollY}px`
+    body.style.inlineSize = '100%'
+    body.style.overflow = 'hidden'
+
+    return () => {
+      root.style.overflow = previous.rootOverflow
+      body.style.position = previous.bodyPosition
+      body.style.insetBlockStart = previous.bodyInsetBlockStart
+      body.style.inlineSize = previous.bodyInlineSize
+      body.style.overflow = previous.bodyOverflow
+      window.scrollTo(0, scrollY)
+    }
+  }, [isOpen])
+
+  useEffect(() => {
+    if (
+      !isOpen ||
+      isSessionPending ||
+      !userId ||
+      legacyCustomRecipes.length === 0
+    ) {
+      return
+    }
+
+    const controller = { cancelled: false }
+
+    void importLegacyRecipes(legacyCustomRecipes, () => controller.cancelled)
+      .then((imported) => {
+        if (!imported || controller.cancelled) return
+        setMigrationFailed(false)
+        onLegacyRecipesMigrated()
+      })
+      .catch(() => {
+        if (controller.cancelled) return
+        setMigrationFailed(true)
+      })
+
+    return () => {
+      controller.cancelled = true
+    }
+  }, [
+    isOpen,
+    isSessionPending,
+    legacyCustomRecipes,
+    onLegacyRecipesMigrated,
+    userId,
+  ])
+
+  if (!isOpen) return null
+
+  function updateDayContext(day: Day, nextContext: DayContext) {
+    const currentContext = draftPrefs.dayContexts[day] ?? null
+    const dayContexts = { ...draftPrefs.dayContexts }
+    const currentScope = draftPrefs.planningScopes[day] ?? 'both'
+    const nextActiveContext =
+      currentContext === nextContext ? null : nextContext
+
+    if (currentContext === nextContext) {
+      delete dayContexts[day]
+    } else {
+      dayContexts[day] = nextContext
+    }
+
+    setDraftPrefs({
+      ...draftPrefs,
+      dayContexts,
+      planningScopes: {
+        ...draftPrefs.planningScopes,
+        [day]: getPlanningScopeForContext(nextActiveContext, currentScope),
+      },
+    })
+  }
+
+  function updatePlanningScope(day: Day, nextScope: PlanningScope) {
+    const dayContext = draftPrefs.dayContexts[day] ?? null
+    const blockedScopes = getBlockedPlanningScopes(dayContext)
+
+    if (blockedScopes.includes(nextScope)) return
+
+    setDraftPrefs({
+      ...draftPrefs,
+      planningScopes: { ...draftPrefs.planningScopes, [day]: nextScope },
+    })
+  }
+
+  return (
+    <div className="panel-root" aria-hidden={!isOpen}>
+      <button
+        className="panel-overlay"
+        type="button"
+        aria-label={t('preferences.close')}
+        onClick={onClose}
+      />
+
+      <aside
+        aria-labelledby="preferences-panel-title"
+        aria-modal="true"
+        className="panel-drawer"
+        role="dialog"
+      >
+        <div className="panel-header">
+          <div>
+            <p className="panel-kicker">
+              <SettingsIcon aria-hidden="true" />
+              {t('preferences.kicker')}
+            </p>
+            <h2 id="preferences-panel-title">{t('preferences.title')}</h2>
+          </div>
+          <div className="panel-header-actions">
+            <Link
+              aria-label={`${t('header.languageLabel')}: ${
+                alternateLocale === 'en'
+                  ? t('header.languageEn')
+                  : t('header.languageEs')
+              }`}
+              className="panel-language-switcher"
+              to={getLocalizedPath(location.pathname, alternateLocale)}
+            >
+              <Globe2 aria-hidden="true" />
+              <span>{locale === 'en' ? 'ES' : 'EN'}</span>
+            </Link>
+            <button
+              className="panel-close-btn"
+              type="button"
+              aria-label={t('preferences.close')}
+              onClick={onClose}
+            >
+              <CloseIcon aria-hidden="true" />
+            </button>
+          </div>
+        </div>
+
+        <div
+          className="panel-tablist"
+          role="tablist"
+          aria-label={t('preferences.sections')}
+        >
+          <PanelTabButton
+            id="schedule"
+            isActive={activeTab === 'schedule'}
+            label={t('preferences.weeklySchedule')}
+            onClick={() => setActiveTab('schedule')}
+          />
+          <PanelTabButton
+            id="recipes"
+            isActive={activeTab === 'recipes'}
+            label={t('preferences.myRecipes')}
+            onClick={() => setActiveTab('recipes')}
+          />
+        </div>
+
+        <div className="panel-content">
+          {activeTab === 'schedule' ? (
+            <ScheduleTab
+              dayContexts={draftPrefs.dayContexts}
+              planningScopes={draftPrefs.planningScopes}
+              onUpdateDayContext={updateDayContext}
+              onUpdatePlanningScope={updatePlanningScope}
+            />
+          ) : (
+            <RecipesTab
+              legacyPending={legacyCustomRecipes.length > 0}
+              migrationFailed={migrationFailed}
+            />
+          )}
+        </div>
+
+        <div className="panel-footer">
+          <div className="panel-footer-actions">
+            <button
+              className="panel-secondary-btn"
+              type="button"
+              onClick={onClose}
+            >
+              {t('common.cancel')}
+            </button>
+            <button
+              className="panel-primary-btn"
+              type="button"
+              onClick={() => onSave(draftPrefs)}
+            >
+              <CheckIcon aria-hidden="true" />
+              {t('preferences.save')}
+            </button>
+          </div>
+        </div>
+      </aside>
+    </div>
+  )
+}

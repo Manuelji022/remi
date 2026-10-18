@@ -9,51 +9,26 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as WeeklyMenuPlannerRouteImport } from './routes/weekly-menu-planner'
-import { Route as TwoFactorRouteImport } from './routes/two-factor'
-import { Route as SignupRouteImport } from './routes/signup'
-import { Route as ResetPasswordRouteImport } from './routes/reset-password'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
-import { Route as EsRouteImport } from './routes/es'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as EsRouteImport } from './routes/es'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as SignupRouteImport } from './routes/signup'
+import { Route as TwoFactorRouteImport } from './routes/two-factor'
+import { Route as WeeklyMenuPlannerRouteImport } from './routes/weekly-menu-planner'
 import { Route as EsIndexRouteImport } from './routes/es.index'
-import { Route as EsWeeklyMenuPlannerRouteImport } from './routes/es.weekly-menu-planner'
-import { Route as EsTwoFactorRouteImport } from './routes/es.two-factor'
-import { Route as EsSignupRouteImport } from './routes/es.signup'
-import { Route as EsResetPasswordRouteImport } from './routes/es.reset-password'
-import { Route as EsLoginRouteImport } from './routes/es.login'
 import { Route as EsForgotPasswordRouteImport } from './routes/es.forgot-password'
+import { Route as EsLoginRouteImport } from './routes/es.login'
+import { Route as EsResetPasswordRouteImport } from './routes/es.reset-password'
+import { Route as EsSignupRouteImport } from './routes/es.signup'
+import { Route as EsTwoFactorRouteImport } from './routes/es.two-factor'
+import { Route as EsWeeklyMenuPlannerRouteImport } from './routes/es.weekly-menu-planner'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
-const WeeklyMenuPlannerRoute = WeeklyMenuPlannerRouteImport.update({
-  id: '/weekly-menu-planner',
-  path: '/weekly-menu-planner',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TwoFactorRoute = TwoFactorRouteImport.update({
-  id: '/two-factor',
-  path: '/two-factor',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SignupRoute = SignupRouteImport.update({
-  id: '/signup',
-  path: '/signup',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ResetPasswordRoute = ResetPasswordRouteImport.update({
-  id: '/reset-password',
-  path: '/reset-password',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
-  id: '/forgot-password',
-  path: '/forgot-password',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EsRoute = EsRouteImport.update({
@@ -61,9 +36,34 @@ const EsRoute = EsRouteImport.update({
   path: '/es',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TwoFactorRoute = TwoFactorRouteImport.update({
+  id: '/two-factor',
+  path: '/two-factor',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WeeklyMenuPlannerRoute = WeeklyMenuPlannerRouteImport.update({
+  id: '/weekly-menu-planner',
+  path: '/weekly-menu-planner',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EsIndexRoute = EsIndexRouteImport.update({
@@ -71,24 +71,9 @@ const EsIndexRoute = EsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => EsRoute,
 } as any)
-const EsWeeklyMenuPlannerRoute = EsWeeklyMenuPlannerRouteImport.update({
-  id: '/weekly-menu-planner',
-  path: '/weekly-menu-planner',
-  getParentRoute: () => EsRoute,
-} as any)
-const EsTwoFactorRoute = EsTwoFactorRouteImport.update({
-  id: '/two-factor',
-  path: '/two-factor',
-  getParentRoute: () => EsRoute,
-} as any)
-const EsSignupRoute = EsSignupRouteImport.update({
-  id: '/signup',
-  path: '/signup',
-  getParentRoute: () => EsRoute,
-} as any)
-const EsResetPasswordRoute = EsResetPasswordRouteImport.update({
-  id: '/reset-password',
-  path: '/reset-password',
+const EsForgotPasswordRoute = EsForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
   getParentRoute: () => EsRoute,
 } as any)
 const EsLoginRoute = EsLoginRouteImport.update({
@@ -96,9 +81,24 @@ const EsLoginRoute = EsLoginRouteImport.update({
   path: '/login',
   getParentRoute: () => EsRoute,
 } as any)
-const EsForgotPasswordRoute = EsForgotPasswordRouteImport.update({
-  id: '/forgot-password',
-  path: '/forgot-password',
+const EsResetPasswordRoute = EsResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => EsRoute,
+} as any)
+const EsSignupRoute = EsSignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => EsRoute,
+} as any)
+const EsTwoFactorRoute = EsTwoFactorRouteImport.update({
+  id: '/two-factor',
+  path: '/two-factor',
+  getParentRoute: () => EsRoute,
+} as any)
+const EsWeeklyMenuPlannerRoute = EsWeeklyMenuPlannerRouteImport.update({
+  id: '/weekly-menu-planner',
+  path: '/weekly-menu-planner',
   getParentRoute: () => EsRoute,
 } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
@@ -231,46 +231,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/weekly-menu-planner': {
-      id: '/weekly-menu-planner'
-      path: '/weekly-menu-planner'
-      fullPath: '/weekly-menu-planner'
-      preLoaderRoute: typeof WeeklyMenuPlannerRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/two-factor': {
-      id: '/two-factor'
-      path: '/two-factor'
-      fullPath: '/two-factor'
-      preLoaderRoute: typeof TwoFactorRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/signup': {
-      id: '/signup'
-      path: '/signup'
-      fullPath: '/signup'
-      preLoaderRoute: typeof SignupRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/reset-password': {
-      id: '/reset-password'
-      path: '/reset-password'
-      fullPath: '/reset-password'
-      preLoaderRoute: typeof ResetPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/forgot-password': {
-      id: '/forgot-password'
-      path: '/forgot-password'
-      fullPath: '/forgot-password'
-      preLoaderRoute: typeof ForgotPasswordRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/es': {
@@ -280,11 +245,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/two-factor': {
+      id: '/two-factor'
+      path: '/two-factor'
+      fullPath: '/two-factor'
+      preLoaderRoute: typeof TwoFactorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/weekly-menu-planner': {
+      id: '/weekly-menu-planner'
+      path: '/weekly-menu-planner'
+      fullPath: '/weekly-menu-planner'
+      preLoaderRoute: typeof WeeklyMenuPlannerRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/es/': {
@@ -294,32 +294,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EsIndexRouteImport
       parentRoute: typeof EsRoute
     }
-    '/es/weekly-menu-planner': {
-      id: '/es/weekly-menu-planner'
-      path: '/weekly-menu-planner'
-      fullPath: '/es/weekly-menu-planner'
-      preLoaderRoute: typeof EsWeeklyMenuPlannerRouteImport
-      parentRoute: typeof EsRoute
-    }
-    '/es/two-factor': {
-      id: '/es/two-factor'
-      path: '/two-factor'
-      fullPath: '/es/two-factor'
-      preLoaderRoute: typeof EsTwoFactorRouteImport
-      parentRoute: typeof EsRoute
-    }
-    '/es/signup': {
-      id: '/es/signup'
-      path: '/signup'
-      fullPath: '/es/signup'
-      preLoaderRoute: typeof EsSignupRouteImport
-      parentRoute: typeof EsRoute
-    }
-    '/es/reset-password': {
-      id: '/es/reset-password'
-      path: '/reset-password'
-      fullPath: '/es/reset-password'
-      preLoaderRoute: typeof EsResetPasswordRouteImport
+    '/es/forgot-password': {
+      id: '/es/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/es/forgot-password'
+      preLoaderRoute: typeof EsForgotPasswordRouteImport
       parentRoute: typeof EsRoute
     }
     '/es/login': {
@@ -329,11 +308,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EsLoginRouteImport
       parentRoute: typeof EsRoute
     }
-    '/es/forgot-password': {
-      id: '/es/forgot-password'
-      path: '/forgot-password'
-      fullPath: '/es/forgot-password'
-      preLoaderRoute: typeof EsForgotPasswordRouteImport
+    '/es/reset-password': {
+      id: '/es/reset-password'
+      path: '/reset-password'
+      fullPath: '/es/reset-password'
+      preLoaderRoute: typeof EsResetPasswordRouteImport
+      parentRoute: typeof EsRoute
+    }
+    '/es/signup': {
+      id: '/es/signup'
+      path: '/signup'
+      fullPath: '/es/signup'
+      preLoaderRoute: typeof EsSignupRouteImport
+      parentRoute: typeof EsRoute
+    }
+    '/es/two-factor': {
+      id: '/es/two-factor'
+      path: '/two-factor'
+      fullPath: '/es/two-factor'
+      preLoaderRoute: typeof EsTwoFactorRouteImport
+      parentRoute: typeof EsRoute
+    }
+    '/es/weekly-menu-planner': {
+      id: '/es/weekly-menu-planner'
+      path: '/weekly-menu-planner'
+      fullPath: '/es/weekly-menu-planner'
+      preLoaderRoute: typeof EsWeeklyMenuPlannerRouteImport
       parentRoute: typeof EsRoute
     }
     '/api/auth/$': {

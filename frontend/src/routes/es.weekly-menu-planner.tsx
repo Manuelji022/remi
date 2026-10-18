@@ -1,7 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { WeeklyMenuPlanner } from './weekly-menu-planner'
+import { WeeklyMenuPlanner } from '#/features/weekly-menu/pages/WeeklyMenuPlanner'
 
 export const Route = createFileRoute('/es/weekly-menu-planner')({
   component: WeeklyMenuPlanner,
 })
-

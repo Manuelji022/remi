@@ -4,13 +4,13 @@ import {
   createRootRoute,
   useLocation,
 } from '@tanstack/react-router'
-import Footer from '../components/Footer'
-import Header from '../components/Header'
-import { I18nProvider, getLocaleFromPathname, useI18n } from '#/i18n'
-import { messages } from '#/i18n/messages'
+import Footer from '#/app/layout/Footer'
+import Header from '#/app/layout/Header'
+import { I18nProvider, getLocaleFromPathname, useI18n } from '#/shared/i18n'
+import { messages } from '#/shared/i18n/messages'
 import { useEffect } from 'react'
 
-import appCss from '../styles.css?url'
+import appCss from '../app/styles.css?url'
 
 export const Route = createRootRoute({
   head: () => ({

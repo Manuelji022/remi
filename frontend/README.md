@@ -52,6 +52,10 @@ The build output is a self-contained Node server. To deploy, push the `dist/` di
 
 For host-specific presets (Vercel, Netlify, Cloudflare, AWS Lambda, etc.) and tuning, see https://v3.nitro.build/deploy.
 
+## Source organization
+
+Feature code lives in `src/features/<feature>/` (for example `auth`, `recipes`, `weekly-menu`, and `home`). Keep feature-specific pages, components, domain logic, server functions, styles, and tests together. `src/routes/` contains only TanStack file-route declarations that connect URLs to feature pages. Feature-agnostic UI primitives live in `src/components/primitives/`; shared infrastructure (database, i18n, and global styles) lives in `src/shared/`. The app shell lives in `src/app/`.
+
 ## Routing
 
 This project uses [TanStack Router](https://tanstack.com/router) with file-based routing. Routes are managed as files in `src/routes`.

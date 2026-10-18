@@ -17,3 +17,5 @@ infraestructure/postgres/data/*
 infraestructure/postgres/backups/*
 .cursor/skills/verify-remi/evidence/
 .cursor/skills/verify-remi/run/
+.agents/
+skills-lock.json

@@ -1,23 +1,4 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
-import './index.css'
-import { getLocalizedPath, useI18n } from '#/i18n'
+import { createFileRoute } from '@tanstack/react-router'
+import { HomePage } from '#/features/home/HomePage'
 
-export const Route = createFileRoute('/')({ component: IndexPage })
-
-export function IndexPage() {
-  const { locale, t } = useI18n()
-
-  return (
-    <main className="home-page" id="main">
-      <section className="home-card">
-        <p className="home-title">{t('home.copy')}</p>
-        <Link
-          className="planner-entry-link"
-          to={getLocalizedPath('/weekly-menu-planner', locale)}
-        >
-          {t('nav.weeklyMenu')}
-        </Link>
-      </section>
-    </main>
-  )
-}
+export const Route = createFileRoute('/')({ component: HomePage })
