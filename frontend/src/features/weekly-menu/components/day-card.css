@@ -1,0 +1,48 @@
+@layer components {
+  .day-card {
+    background: var(--bg-surface);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card);
+    padding: var(--pad-card-compact);
+  }
+
+  .day-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--gap-inline);
+    margin-block-end: var(--gap-stack-md);
+  }
+
+  .day-meals {
+    display: grid;
+  }
+
+  .meal-slot + .meal-slot {
+    margin-block-start: var(--gap-stack-md);
+    padding-block-start: var(--gap-stack-md);
+    border-block-start: var(--border-width) solid var(--border-subtle);
+  }
+
+  .meal-slot {
+    color: var(--text-secondary);
+    font-size: var(--type-caption-size);
+    line-height: var(--type-caption-lh);
+  }
+
+  .meal-label {
+    display: block;
+    margin-block-end: var(--gap-stack-xs);
+  }
+
+  .meal-name {
+    display: block;
+    color: var(--text-primary);
+    font-size: var(--type-callout-size);
+    line-height: var(--type-callout-lh);
+  }
+
+  .meal-slot.unplanned .meal-name {
+    color: var(--text-secondary);
+  }
+}
