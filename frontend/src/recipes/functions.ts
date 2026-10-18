@@ -21,21 +21,21 @@ export const listRecipes = createServerFn({ method: 'GET' }).handler(
 )
 
 export const createRecipe = createServerFn({ method: 'POST' })
-  .inputValidator(parseRecipeInput)
+  .validator(parseRecipeInput)
   .handler(async ({ data }) => {
     const userId = await requireUserId()
     return createRecipeForUser(userId, data)
   })
 
 export const updateRecipe = createServerFn({ method: 'POST' })
-  .inputValidator(parseRecipeUpdate)
+  .validator(parseRecipeUpdate)
   .handler(async ({ data }) => {
     const userId = await requireUserId()
     return updateRecipeForUser(userId, data)
   })
 
 export const deleteRecipe = createServerFn({ method: 'POST' })
-  .inputValidator(parseRecipeId)
+  .validator(parseRecipeId)
   .handler(async ({ data }) => {
     const userId = await requireUserId()
     return deleteRecipeForUser(userId, data.id)

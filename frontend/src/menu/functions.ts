@@ -5,7 +5,7 @@ import { loadMenuWeekForUser, saveMenuWeekForUser } from '#/menu/store'
 import { parseCalendarWeek, parseWeekStart } from '#/menu/week'
 
 export const loadWeeklyMenu = createServerFn({ method: 'GET' })
-  .inputValidator((value: unknown) => {
+  .validator((value: unknown) => {
     if (!isRecord(value)) throw new Error('Week start must be a Monday')
     return { weekStart: parseWeekStart(value.weekStart) }
   })
@@ -15,7 +15,7 @@ export const loadWeeklyMenu = createServerFn({ method: 'GET' })
   })
 
 export const saveWeeklyMenu = createServerFn({ method: 'POST' })
-  .inputValidator(parseCalendarWeek)
+  .validator(parseCalendarWeek)
   .handler(async ({ data }) => {
     const userId = await requireUserId()
     return saveMenuWeekForUser(userId, data)
