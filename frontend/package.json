@@ -14,7 +14,7 @@
     "lint": "eslint",
     "format": "prettier --write . && eslint --fix",
     "check": "prettier --check .",
-    "auth:generate": "pnpm dlx @better-auth/cli@latest generate --config src/lib/auth.ts",
+    "auth:generate": "pnpm dlx @better-auth/cli@latest generate --config src/features/auth/auth.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate"
   },

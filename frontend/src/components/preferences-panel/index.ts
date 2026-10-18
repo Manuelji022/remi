@@ -1,1 +1,0 @@
-export { PreferencesPanel } from './PreferencesPanel'
