@@ -5,7 +5,7 @@ import { authClient } from '#/features/auth/auth-client'
 
 export default function Header() {
   const { locale, t } = useI18n()
-  const homePath = locale === 'es' ? '/es' : '/'
+  const homePath = getLocalizedPath('/', locale)
   const { data: session } = authClient.useSession()
 
   async function handleSignOut() {

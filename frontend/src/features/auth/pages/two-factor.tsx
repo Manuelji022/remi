@@ -62,7 +62,7 @@ export function TwoFactorPage() {
       return
     }
 
-    await navigate({ to: locale === 'es' ? '/es' : '/' })
+    await navigate({ to: getLocalizedPath('/', locale) })
   }
 
   return (

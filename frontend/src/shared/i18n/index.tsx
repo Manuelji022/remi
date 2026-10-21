@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react'
 import type { ReactNode } from 'react'
-import { messages } from './messages'
+import { LOCALES, messages } from './messages'
 import type { Locale, MessageKey } from './messages'
 
 const DATE_LOCALES: Record<Locale, string> = {
@@ -16,19 +16,23 @@ interface I18nContextValue {
 
 const I18nContext = createContext<I18nContextValue | null>(null)
 
+export function isLocale(value: string): value is Locale {
+  return LOCALES.includes(value as Locale)
+}
+
 export function getLocaleFromPathname(pathname: string): Locale {
-  return pathname === '/es' || pathname.startsWith('/es/') ? 'es' : 'en'
+  const pathLocale = pathname.split('/')[1]
+  return pathLocale && isLocale(pathLocale) ? pathLocale : 'en'
 }
 
 export function getLocalizedPath(pathname: string, targetLocale: Locale) {
+  const unlocalizedPath = pathname.replace(/^\/(?:en|es)(?=\/|$)/, '') || '/'
+
   if (targetLocale === 'es') {
-    if (pathname === '/es' || pathname.startsWith('/es/')) return pathname
-    return pathname === '/' ? '/es' : `/es${pathname}`
+    return unlocalizedPath === '/' ? '/es' : `/es${unlocalizedPath}`
   }
 
-  if (pathname === '/es') return '/'
-  if (pathname.startsWith('/es/')) return pathname.slice(3) || '/'
-  return pathname
+  return unlocalizedPath
 }
 
 export function I18nProvider({
