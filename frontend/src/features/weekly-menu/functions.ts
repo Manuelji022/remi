@@ -1,4 +1,5 @@
 import { createServerFn } from '@tanstack/react-start'
+import { z } from 'zod'
 import { getRequest } from '@tanstack/react-start/server'
 import { auth } from '#/features/auth/auth'
 import { AUTH_DISABLED } from '#/features/auth/testing'
@@ -7,13 +8,10 @@ import {
   loadMenuWeekForUser,
   saveMenuWeekForUser,
 } from '#/features/weekly-menu/store'
-import { parseCalendarWeek, parseWeekStart } from '#/features/weekly-menu/week'
+import { parseCalendarWeek, weekStartSchema } from '#/features/weekly-menu/week'
 
 export const loadWeeklyMenu = createServerFn({ method: 'GET' })
-  .validator((value: unknown) => {
-    if (!isRecord(value)) throw new Error('Week start must be a Monday')
-    return { weekStart: parseWeekStart(value.weekStart) }
-  })
+  .validator(z.object({ weekStart: weekStartSchema }))
   .handler(async ({ data }) => {
     const userId = await requireUserId()
     return loadMenuWeekForUser(userId, data.weekStart)
@@ -34,8 +32,4 @@ async function requireUserId(): Promise<string> {
   })
   if (!session?.user.id) throw new Error('Unauthorized')
   return session.user.id
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value)
 }

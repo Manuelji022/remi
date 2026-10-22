@@ -1,24 +1,14 @@
-import { DAYS } from '#/features/weekly-menu/constants'
-import type { Day } from '#/features/weekly-menu/constants'
-import type {
-  DayContext,
-  PlanningScope,
-  Preferences,
-} from '#/features/weekly-menu/types'
+import { z } from 'zod'
+import { preferencesSchema } from '#/features/weekly-menu/types'
+import type { Preferences } from '#/features/weekly-menu/types'
 import { readRecipeInput } from '#/features/recipes/recipe'
 import type { RecipeInput } from '#/features/recipes/recipe'
 
 export const WEEKLY_MENU_PLANNER_STORAGE_KEY = 'remi:weekly-menu-planner:state'
 
-const DAY_CONTEXTS = [
-  'office',
-  'eatOut',
-] as const satisfies readonly DayContext[]
-const PLANNING_SCOPES = [
-  'lunch',
-  'dinner',
-  'both',
-] as const satisfies readonly PlanningScope[]
+const persistedPreferencesSchema = preferencesSchema.extend({
+  customRecipes: z.array(z.unknown()).optional(),
+})
 
 export interface WeeklyMenuPlannerStorage {
   getItem: (key: string) => string | null
@@ -91,58 +81,22 @@ export function writeWeeklyMenuPlannerState(
 function parsePersistedState(
   value: unknown,
 ): WeeklyMenuPlannerPersistedState | null {
-  if (!isRecord(value)) return null
+  const state = z
+    .object({ savedPreferences: persistedPreferencesSchema })
+    .safeParse(value)
+  if (!state.success) return null
 
-  const parsedPreferences = parsePreferences(value.savedPreferences)
-  if (!parsedPreferences) return null
-
-  return {
-    savedPreferences: parsedPreferences.preferences,
-    legacyCustomRecipes: parsedPreferences.legacyCustomRecipes,
-  }
-}
-
-function parsePreferences(value: unknown): {
-  preferences: Preferences
-  legacyCustomRecipes: RecipeInput[]
-} | null {
-  if (!isRecord(value)) return null
-  if (!isRecord(value.dayContexts) || !isRecord(value.planningScopes))
-    return null
-
-  const dayContexts: Preferences['dayContexts'] = {}
-
-  for (const [day, context] of Object.entries(value.dayContexts)) {
-    if (!isDay(day) || !isNullable(context, DAY_CONTEXTS)) return null
-    dayContexts[day] = context
-  }
-
-  const planningScopes: Preferences['planningScopes'] = {}
-
-  for (const [day, scope] of Object.entries(value.planningScopes)) {
-    if (!isDay(day) || !isNullable(scope, PLANNING_SCOPES)) return null
-    planningScopes[day] = scope
-  }
-
-  if (!('customRecipes' in value)) {
-    return {
-      preferences: { dayContexts, planningScopes },
-      legacyCustomRecipes: [],
-    }
-  }
-
-  if (!Array.isArray(value.customRecipes)) return null
-
+  const { dayContexts, planningScopes, customRecipes } =
+    state.data.savedPreferences
   const legacyCustomRecipes: RecipeInput[] = []
-
-  for (const recipe of value.customRecipes) {
-    const parsedRecipe = readRecipeInput(recipe)
-    if (!parsedRecipe.ok) return null
-    legacyCustomRecipes.push(parsedRecipe.value)
+  for (const recipe of customRecipes ?? []) {
+    const parsed = readRecipeInput(recipe)
+    if (!parsed.ok) return null
+    legacyCustomRecipes.push(parsed.value)
   }
 
   return {
-    preferences: { dayContexts, planningScopes },
+    savedPreferences: { dayContexts, planningScopes },
     legacyCustomRecipes,
   }
 }
@@ -159,28 +113,4 @@ function toStoredRecipe(recipe: RecipeInput) {
       ...(ingredient.unit === null ? {} : { unit: ingredient.unit }),
     })),
   }
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value)
-}
-
-function isDay(value: string): value is Day {
-  return (DAYS as readonly string[]).includes(value)
-}
-
-function isOneOf<T extends string>(
-  value: unknown,
-  options: readonly T[],
-): value is T {
-  return (
-    typeof value === 'string' && (options as readonly string[]).includes(value)
-  )
-}
-
-function isNullable<T extends string>(
-  value: unknown,
-  options: readonly T[],
-): value is T | null {
-  return value === null || isOneOf(value, options)
 }

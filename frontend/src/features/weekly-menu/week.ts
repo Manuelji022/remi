@@ -1,33 +1,40 @@
 import { DAYS } from '#/features/weekly-menu/constants'
 import type { Day } from '#/features/weekly-menu/constants'
+import {
+  dayContextSchema,
+  planningScopeSchema,
+} from '#/features/weekly-menu/types'
 import type {
   DayContext,
   PlanningScope,
   Preferences,
 } from '#/features/weekly-menu/types'
 import type { MealSlot } from '#/features/recipes/recipe'
+import { z } from 'zod'
 
-const DAY_CONTEXTS = [
-  'office',
-  'eatOut',
-] as const satisfies readonly DayContext[]
-const PLANNING_SCOPES = [
-  'lunch',
-  'dinner',
-  'both',
-] as const satisfies readonly PlanningScope[]
+export const weekStartSchema = z
+  .string()
+  .refine(isMonday, 'Week start must be a Monday')
+export const dayPlanSchema = z.object({
+  context: dayContextSchema.nullable(),
+  scope: planningScopeSchema,
+  lunchRecipeId: z
+    .string()
+    .refine((value) => value.trim() !== '' && value === value.trim())
+    .nullable(),
+  dinnerRecipeId: z
+    .string()
+    .refine((value) => value.trim() !== '' && value === value.trim())
+    .nullable(),
+})
 
-export type DayPlan = {
-  context: DayContext | null
-  scope: PlanningScope
-  lunchRecipeId: string | null
-  dinnerRecipeId: string | null
-}
+export type DayPlan = z.infer<typeof dayPlanSchema>
 
-export type CalendarWeekMenu = {
-  weekStart: string
-  days: Record<Day, DayPlan>
-}
+export const calendarWeekSchema = z.object({
+  weekStart: weekStartSchema,
+  days: z.record(z.enum(DAYS), dayPlanSchema),
+})
+export type CalendarWeekMenu = z.infer<typeof calendarWeekSchema>
 
 export type LoadedMenuWeek = {
   menu: CalendarWeekMenu
@@ -176,11 +183,9 @@ export function showMenuDay(
 }
 
 export function parseWeekStart(value: unknown): string {
-  if (typeof value !== 'string' || !isMonday(value)) {
-    throw new MenuInputError('Week start must be a Monday')
-  }
-
-  return value
+  const parsed = weekStartSchema.safeParse(value)
+  if (!parsed.success) throw new MenuInputError('Week start must be a Monday')
+  return parsed.data
 }
 
 export function readStoredDay(value: unknown): DayPlan {
@@ -193,18 +198,26 @@ export function readStoredDay(value: unknown): DayPlan {
 }
 
 export function parseCalendarWeek(value: unknown): CalendarWeekMenu {
-  if (!isRecord(value)) throw new MenuInputError('Week is required')
-
-  const weekStart = parseWeekStart(value.weekStart)
-  if (!isRecord(value.days)) throw new MenuInputError('Week days are required')
-
-  const days = {} as Record<Day, DayPlan>
-
-  for (const day of DAYS) {
-    days[day] = parseDay(value.days[day])
+  const parsedWeek = calendarWeekSchema.safeParse(value)
+  if (!parsedWeek.success) {
+    if (
+      parsedWeek.error.issues.some((issue) => issue.path[0] === 'weekStart')
+    ) {
+      throw new MenuInputError('Week start must be a Monday')
+    }
+    if (
+      parsedWeek.error.issues.some(
+        (issue) => issue.path[0] === 'days' && issue.path.length === 1,
+      )
+    ) {
+      throw new MenuInputError('Week days are required')
+    }
+    throw new MenuInputError('Invalid menu day')
   }
 
-  return { weekStart, days }
+  const days = {} as Record<Day, DayPlan>
+  for (const day of DAYS) days[day] = parseDay(parsedWeek.data.days[day])
+  return { weekStart: parsedWeek.data.weekStart, days }
 }
 
 function planDay(
@@ -293,12 +306,10 @@ function scopeIncludes(scope: PlanningScope, slot: MealSlot): boolean {
 }
 
 function parseDay(value: unknown): DayPlan {
-  if (!isRecord(value)) throw new MenuInputError('Day plan is required')
+  const parsed = dayPlanSchema.safeParse(value)
+  if (!parsed.success) throw new MenuInputError('Day plan is required')
 
-  const context = parseContext(value.context)
-  const scope = parseScope(value.scope)
-  const lunchRecipeId = parseRecipeId(value.lunchRecipeId)
-  const dinnerRecipeId = parseRecipeId(value.dinnerRecipeId)
+  const { context, scope, lunchRecipeId, dinnerRecipeId } = parsed.data
   const plan = planDay(
     { context: null, scope: 'both', lunchRecipeId, dinnerRecipeId },
     context,
@@ -315,30 +326,6 @@ function parseDay(value: unknown): DayPlan {
   }
 
   return plan
-}
-
-function parseContext(value: unknown): DayContext | null {
-  if (value === null) return null
-  if (typeof value === 'string' && isListed(DAY_CONTEXTS, value)) return value
-  throw new MenuInputError('Day context must be office, eat out, or empty')
-}
-
-function parseScope(value: unknown): PlanningScope {
-  if (typeof value === 'string' && isListed(PLANNING_SCOPES, value))
-    return value
-  throw new MenuInputError('Planning scope must be lunch, dinner, or both')
-}
-
-function parseRecipeId(value: unknown): string | null {
-  if (value === null) return null
-  if (
-    typeof value !== 'string' ||
-    value.trim() === '' ||
-    value !== value.trim()
-  ) {
-    throw new MenuInputError('Recipe id is required')
-  }
-  return value
 }
 
 function emptyDay(): DayPlan {
@@ -369,15 +356,4 @@ function isMonday(value: string): boolean {
 
 function formatIsoDate(year: number, month: number, day: number): string {
   return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
-}
-
-function isListed<T extends string>(
-  list: readonly T[],
-  value: string,
-): value is T {
-  return list.some((item) => item === value)
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
