@@ -1,3 +1,4 @@
+import { recipeQuantityDraftSchema } from '../recipe'
 import type { IngredientUnit, RecipeIngredientInput } from '../recipe'
 
 export type RecipeIngredientDraft = {
@@ -41,9 +42,6 @@ export function hasInvalidRecipeIngredientQuantity(
   return recipeIngredients.some((ingredient) => {
     const quantity = ingredient.quantity.trim()
 
-    return (
-      quantity !== '' &&
-      (!Number.isFinite(Number(quantity)) || Number(quantity) < 0)
-    )
+    return !recipeQuantityDraftSchema.safeParse(quantity).success
   })
 }

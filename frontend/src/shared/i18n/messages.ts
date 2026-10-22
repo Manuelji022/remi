@@ -1,6 +1,9 @@
-export type Locale = 'en' | 'es'
+import { z } from 'zod'
 
-export const LOCALES: readonly Locale[] = ['en', 'es']
+export const localeSchema = z.enum(['en', 'es'])
+export type Locale = z.infer<typeof localeSchema>
+
+export const LOCALES = localeSchema.options
 
 export const messages = {
   en: {

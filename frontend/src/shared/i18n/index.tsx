@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react'
 import type { ReactNode } from 'react'
-import { LOCALES, messages } from './messages'
+import { localeSchema, messages } from './messages'
 import type { Locale, MessageKey } from './messages'
 
 const DATE_LOCALES: Record<Locale, string> = {
@@ -17,7 +17,7 @@ interface I18nContextValue {
 const I18nContext = createContext<I18nContextValue | null>(null)
 
 export function isLocale(value: string): value is Locale {
-  return LOCALES.includes(value as Locale)
+  return localeSchema.safeParse(value).success
 }
 
 export function getLocaleFromPathname(pathname: string): Locale {

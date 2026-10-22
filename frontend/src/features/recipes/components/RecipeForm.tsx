@@ -1,7 +1,12 @@
 import { useId, useState } from 'react'
 import { CheckIcon, PlusIcon, TrashIcon } from '#/components/primitives'
 import { useI18n } from '#/shared/i18n'
-import { INGREDIENT_UNITS, MEAL_SLOTS } from '#/features/recipes/recipe'
+import {
+  INGREDIENT_UNITS,
+  MEAL_SLOTS,
+  recipeInputSchema,
+  recipeQuantityDraftSchema,
+} from '#/features/recipes/recipe'
 import type { MealSlot, RecipeInput } from '#/features/recipes/recipe'
 import {
   buildRecipeIngredients,
@@ -29,14 +34,16 @@ export function RecipeForm({ onAddRecipe }: RecipeFormProps) {
   async function handleAddRecipe() {
     const name = recipeName.trim()
 
-    if (!name || hasInvalidIngredientQuantity) return
+    if (hasInvalidIngredientQuantity) return
+    const recipe = recipeInputSchema.safeParse({
+      name,
+      slot: recipeSlot,
+      ingredients: buildRecipeIngredients(recipeIngredients),
+    })
+    if (!recipe.success) return
 
     try {
-      await onAddRecipe({
-        name,
-        slot: recipeSlot,
-        ingredients: buildRecipeIngredients(recipeIngredients),
-      })
+      await onAddRecipe(recipe.data)
     } catch {
       return
     }
@@ -122,8 +129,7 @@ export function RecipeForm({ onAddRecipe }: RecipeFormProps) {
             const ingredientUnitId = `${recipeIngredientsId}-unit-${ingredientIndex}`
             const quantity = ingredient.quantity.trim()
             const hasInvalidQuantity =
-              quantity !== '' &&
-              (!Number.isFinite(Number(quantity)) || Number(quantity) < 0)
+              !recipeQuantityDraftSchema.safeParse(quantity).success
 
             return (
               <div className="panel-ingredient-row" key={ingredientIndex}>

@@ -1,13 +1,17 @@
-import type { Day } from './constants'
-import type { MealSlot } from '#/features/recipes/recipe'
+import { z } from 'zod'
+import { DAYS } from './constants'
+import { mealSlotSchema } from '#/features/recipes/recipe'
 
-export type PlanningScope = MealSlot | 'both'
-export type DayContext = 'office' | 'eatOut'
+export const planningScopeSchema = z.union([mealSlotSchema, z.literal('both')])
+export const dayContextSchema = z.enum(['office', 'eatOut'])
+export const preferencesSchema = z.object({
+  dayContexts: z.partialRecord(z.enum(DAYS), dayContextSchema.nullable()),
+  planningScopes: z.partialRecord(z.enum(DAYS), planningScopeSchema.nullable()),
+})
 
-export interface Preferences {
-  dayContexts: Partial<Record<Day, DayContext | null>>
-  planningScopes: Partial<Record<Day, PlanningScope | null>>
-}
+export type PlanningScope = z.infer<typeof planningScopeSchema>
+export type DayContext = z.infer<typeof dayContextSchema>
+export type Preferences = z.infer<typeof preferencesSchema>
 
 export function getDefaultPreferences(): Preferences {
   return {
