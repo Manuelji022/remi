@@ -184,6 +184,27 @@
           "concurrently": false,
           "method": "btree",
           "with": {}
+        },
+        "recipe_id_userId_uidx": {
+          "name": "recipe_id_userId_uidx",
+          "columns": [
+            {
+              "expression": "id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
       "foreignKeys": {
@@ -204,7 +225,12 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
-      "checkConstraints": {},
+      "checkConstraints": {
+        "recipe_slot_check": {
+          "name": "recipe_slot_check",
+          "value": "\"recipe\".\"slot\" in ('lunch', 'dinner')"
+        }
+      },
       "isRLSEnabled": false
     },
     "public.recipe_ingredient": {
@@ -673,6 +699,27 @@
           "concurrently": false,
           "method": "btree",
           "with": {}
+        },
+        "weeklyMenu_id_userId_uidx": {
+          "name": "weeklyMenu_id_userId_uidx",
+          "columns": [
+            {
+              "expression": "id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
       "foreignKeys": {
@@ -708,6 +755,12 @@
         },
         "weekly_menu_id": {
           "name": "weekly_menu_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true
@@ -767,19 +820,6 @@
         }
       },
       "foreignKeys": {
-        "weekly_menu_day_weekly_menu_id_weekly_menu_id_fk": {
-          "name": "weekly_menu_day_weekly_menu_id_weekly_menu_id_fk",
-          "tableFrom": "weekly_menu_day",
-          "tableTo": "weekly_menu",
-          "columnsFrom": [
-            "weekly_menu_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
         "weekly_menu_day_lunch_recipe_id_recipe_id_fk": {
           "name": "weekly_menu_day_lunch_recipe_id_recipe_id_fk",
           "tableFrom": "weekly_menu_day",
@@ -805,12 +845,70 @@
           ],
           "onDelete": "set null",
           "onUpdate": "no action"
+        },
+        "weeklyMenuDay_menuId_userId_fk": {
+          "name": "weeklyMenuDay_menuId_userId_fk",
+          "tableFrom": "weekly_menu_day",
+          "tableTo": "weekly_menu",
+          "columnsFrom": [
+            "weekly_menu_id",
+            "user_id"
+          ],
+          "columnsTo": [
+            "id",
+            "user_id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "weeklyMenuDay_lunchRecipeId_userId_fk": {
+          "name": "weeklyMenuDay_lunchRecipeId_userId_fk",
+          "tableFrom": "weekly_menu_day",
+          "tableTo": "recipe",
+          "columnsFrom": [
+            "lunch_recipe_id",
+            "user_id"
+          ],
+          "columnsTo": [
+            "id",
+            "user_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "weeklyMenuDay_dinnerRecipeId_userId_fk": {
+          "name": "weeklyMenuDay_dinnerRecipeId_userId_fk",
+          "tableFrom": "weekly_menu_day",
+          "tableTo": "recipe",
+          "columnsFrom": [
+            "dinner_recipe_id",
+            "user_id"
+          ],
+          "columnsTo": [
+            "id",
+            "user_id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
-      "checkConstraints": {},
+      "checkConstraints": {
+        "weeklyMenuDay_day_check": {
+          "name": "weeklyMenuDay_day_check",
+          "value": "\"weekly_menu_day\".\"day\" in ('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday')"
+        },
+        "weeklyMenuDay_context_check": {
+          "name": "weeklyMenuDay_context_check",
+          "value": "\"weekly_menu_day\".\"context\" is null or \"weekly_menu_day\".\"context\" in ('office', 'eatOut')"
+        },
+        "weeklyMenuDay_scope_check": {
+          "name": "weeklyMenuDay_scope_check",
+          "value": "\"weekly_menu_day\".\"scope\" in ('lunch', 'dinner', 'both')"
+        }
+      },
       "isRLSEnabled": false
     }
   },

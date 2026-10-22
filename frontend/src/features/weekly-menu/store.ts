@@ -60,7 +60,9 @@ export async function saveMenuWeekForUser(
 
     await tx
       .insert(weeklyMenuDay)
-      .values(DAYS.map((day) => dayRow(weeklyMenuId, day, menu.days[day])))
+      .values(
+        DAYS.map((day) => dayRow(weeklyMenuId, userId, day, menu.days[day])),
+      )
   })
 
   return loadMenuWeekForUser(userId, menu.weekStart)
@@ -168,10 +170,11 @@ function recipeIds(menu: CalendarWeekMenu): string[] {
   return [...ids]
 }
 
-function dayRow(weeklyMenuId: string, day: Day, plan: DayPlan) {
+function dayRow(weeklyMenuId: string, userId: string, day: Day, plan: DayPlan) {
   return {
     id: crypto.randomUUID(),
     weeklyMenuId,
+    userId,
     day,
     context: plan.context,
     scope: plan.scope,

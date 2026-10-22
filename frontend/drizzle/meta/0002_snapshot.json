@@ -184,6 +184,27 @@
           "concurrently": false,
           "method": "btree",
           "with": {}
+        },
+        "recipe_id_userId_uidx": {
+          "name": "recipe_id_userId_uidx",
+          "columns": [
+            {
+              "expression": "id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
       "foreignKeys": {
@@ -204,7 +225,12 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
-      "checkConstraints": {},
+      "checkConstraints": {
+        "recipe_slot_check": {
+          "name": "recipe_slot_check",
+          "value": "\"recipe\".\"slot\" in ('lunch', 'dinner')"
+        }
+      },
       "isRLSEnabled": false
     },
     "public.recipe_ingredient": {

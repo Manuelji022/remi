@@ -156,6 +156,90 @@ describe('menu week store', () => {
         .dinnerRecipeId,
     ).toBeNull()
   })
+
+  it('enforces weekly-menu integrity constraints in the database', async () => {
+    const constraintOwnerId = crypto.randomUUID()
+    const foreignOwnerId = crypto.randomUUID()
+    const weeklyMenuId = crypto.randomUUID()
+    const dinnerRecipeId = crypto.randomUUID()
+
+    await insertUser(constraintOwnerId)
+    await insertUser(foreignOwnerId)
+    await db.insert(schema.weeklyMenu).values({
+      id: weeklyMenuId,
+      userId: constraintOwnerId,
+      weekStart: '2030-01-07',
+    })
+
+    await expect(
+      db.insert(schema.recipe).values({
+        id: crypto.randomUUID(),
+        userId: constraintOwnerId,
+        name: 'Invalid slot',
+        slot: 'breakfast',
+      }),
+    ).rejects.toThrow()
+
+    await db.insert(schema.recipe).values({
+      id: dinnerRecipeId,
+      userId: constraintOwnerId,
+      name: 'Dinner recipe',
+      slot: 'dinner',
+    })
+
+    const baseDay = {
+      id: crypto.randomUUID(),
+      weeklyMenuId,
+      userId: constraintOwnerId,
+      day: 'Monday',
+      scope: 'both',
+    }
+
+    await expect(
+      db.insert(schema.weeklyMenuDay).values({ ...baseDay, day: 'Funday' }),
+    ).rejects.toThrow()
+    await expect(
+      db
+        .insert(schema.weeklyMenuDay)
+        .values({ ...baseDay, context: 'vacation' }),
+    ).rejects.toThrow()
+    await expect(
+      db
+        .insert(schema.weeklyMenuDay)
+        .values({ ...baseDay, scope: 'breakfast' }),
+    ).rejects.toThrow()
+    await expect(
+      db
+        .insert(schema.weeklyMenuDay)
+        .values({ ...baseDay, userId: foreignOwnerId, day: 'Tuesday' }),
+    ).rejects.toThrow()
+    await expect(
+      db
+        .insert(schema.weeklyMenuDay)
+        .values({ ...baseDay, lunchRecipeId: dinnerRecipeId }),
+    ).rejects.toThrow()
+
+    await db.insert(schema.weeklyMenuDay).values({
+      ...baseDay,
+      day: 'Tuesday',
+      dinnerRecipeId,
+    })
+    await expect(
+      db
+        .update(schema.recipe)
+        .set({ slot: 'lunch' })
+        .where(eq(schema.recipe.id, dinnerRecipeId)),
+    ).rejects.toThrow()
+
+    await db.delete(schema.recipe).where(eq(schema.recipe.id, dinnerRecipeId))
+    const savedDay = await db.query.weeklyMenuDay.findFirst({
+      where: eq(schema.weeklyMenuDay.weeklyMenuId, weeklyMenuId),
+    })
+    expect(savedDay?.dinnerRecipeId).toBeNull()
+
+    await db.delete(schema.user).where(eq(schema.user.id, constraintOwnerId))
+    await db.delete(schema.user).where(eq(schema.user.id, foreignOwnerId))
+  })
 })
 
 async function insertUser(id: string) {
