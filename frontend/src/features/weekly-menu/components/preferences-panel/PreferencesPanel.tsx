@@ -11,6 +11,7 @@ import type {
 } from '#/features/weekly-menu/types'
 import { getLocalizedPath, useI18n } from '#/shared/i18n'
 import { authClient } from '#/features/auth/auth-client'
+import { AUTH_DISABLED, DEV_USER_ID } from '#/features/auth/testing'
 import { importLegacyRecipes } from '#/features/recipes/migrate'
 import type { RecipeInput } from '#/features/recipes/recipe'
 import { RecipesTab } from '#/features/recipes/components/RecipesTab'
@@ -43,7 +44,7 @@ export function PreferencesPanel({
   const [draftPrefs, setDraftPrefs] = useState<Preferences>(savedPrefs)
   const [activeTab, setActiveTab] = useState<PreferencesPanelTab>('schedule')
   const [migrationFailed, setMigrationFailed] = useState(false)
-  const userId = session?.user.id
+  const userId = AUTH_DISABLED ? DEV_USER_ID : session?.user.id
   const scrollYRef = useRef<number | null>(null)
 
   if (typeof window !== 'undefined') {
@@ -94,7 +95,7 @@ export function PreferencesPanel({
   useEffect(() => {
     if (
       !isOpen ||
-      isSessionPending ||
+      (!AUTH_DISABLED && isSessionPending) ||
       !userId ||
       legacyCustomRecipes.length === 0
     ) {

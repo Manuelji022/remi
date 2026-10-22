@@ -1,6 +1,8 @@
 import { createServerFn } from '@tanstack/react-start'
 import { getRequest } from '@tanstack/react-start/server'
 import { auth } from '#/features/auth/auth'
+import { AUTH_DISABLED } from '#/features/auth/testing'
+import { ensureDevUser } from '#/features/auth/dev-user.server'
 import {
   parseRecipeId,
   parseRecipeInput,
@@ -42,6 +44,8 @@ export const deleteRecipe = createServerFn({ method: 'POST' })
   })
 
 async function requireUserId(): Promise<string> {
+  if (AUTH_DISABLED) return ensureDevUser()
+
   const session = await auth.api.getSession({
     headers: getRequest().headers,
   })

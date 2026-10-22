@@ -22,6 +22,7 @@ import {
 } from '#/features/weekly-menu/types'
 import type { Preferences } from '#/features/weekly-menu/types'
 import { authClient } from '#/features/auth/auth-client'
+import { AUTH_DISABLED, DEV_USER_ID } from '#/features/auth/testing'
 import {
   loadWeeklyMenu,
   saveWeeklyMenu,
@@ -80,7 +81,7 @@ export function WeeklyMenuPlanner() {
   const loadGenerationRef = useRef(0)
   const writeInFlightRef = useRef(false)
   const { data: session } = authClient.useSession()
-  const userId = session?.user.id
+  const userId = AUTH_DISABLED ? DEV_USER_ID : session?.user.id
   weekOffsetRef.current = weekOffset
   activeTabRef.current = activeTab
 

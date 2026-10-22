@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import { PlusIcon } from '#/components/primitives'
 import { getLocalizedPath, useI18n } from '#/shared/i18n'
 import { authClient } from '#/features/auth/auth-client'
+import { AUTH_DISABLED, DEV_USER_ID } from '#/features/auth/testing'
 import {
   createRecipe,
   deleteRecipe,
@@ -23,10 +24,11 @@ export function RecipesTab({
 }: RecipesTabProps) {
   const { locale, t } = useI18n()
   const { data: session, isPending } = authClient.useSession()
+  const sessionPending = !AUTH_DISABLED && isPending
   const [recipes, setRecipes] = useState<Recipe[] | null>(null)
   const [actionFailed, setActionFailed] = useState(false)
   const deletingIds = useRef(new Set<string>())
-  const userId = session?.user.id
+  const userId = AUTH_DISABLED ? DEV_USER_ID : session?.user.id
 
   useEffect(() => {
     if (!userId) {
@@ -100,7 +102,7 @@ export function RecipesTab({
         <p>{t('preferences.recipesBody')}</p>
       </div>
 
-      {isPending ? (
+      {sessionPending ? (
         <p>{t('preferences.recipesLoading')}</p>
       ) : !userId ? (
         <div className="panel-empty-recipes">
