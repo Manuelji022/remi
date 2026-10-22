@@ -19,4 +19,6 @@ CREATE TABLE "recipe_ingredient" (
 ALTER TABLE "recipe" ADD CONSTRAINT "recipe_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "recipe_ingredient" ADD CONSTRAINT "recipe_ingredient_recipe_id_recipe_id_fk" FOREIGN KEY ("recipe_id") REFERENCES "public"."recipe"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 CREATE INDEX "recipe_userId_idx" ON "recipe" USING btree ("user_id");--> statement-breakpoint
-CREATE INDEX "recipeIngredient_recipeId_idx" ON "recipe_ingredient" USING btree ("recipe_id");
+CREATE UNIQUE INDEX "recipe_id_userId_uidx" ON "recipe" USING btree ("id","user_id");--> statement-breakpoint
+CREATE INDEX "recipeIngredient_recipeId_idx" ON "recipe_ingredient" USING btree ("recipe_id");--> statement-breakpoint
+ALTER TABLE "recipe" ADD CONSTRAINT "recipe_slot_check" CHECK ("slot" in ('lunch', 'dinner'));

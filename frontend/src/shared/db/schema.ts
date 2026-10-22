@@ -1,4 +1,4 @@
-import { relations } from 'drizzle-orm'
+import { relations, sql } from 'drizzle-orm'
 import {
   pgTable,
   text,
@@ -9,6 +9,8 @@ import {
   doublePrecision,
   date,
   uniqueIndex,
+  check,
+  foreignKey,
 } from 'drizzle-orm/pg-core'
 
 export const user = pgTable('user', {
@@ -116,7 +118,11 @@ export const recipe = pgTable(
       .$onUpdate(() => /* @__PURE__ */ new Date())
       .notNull(),
   },
-  (table) => [index('recipe_userId_idx').on(table.userId)],
+  (table) => [
+    index('recipe_userId_idx').on(table.userId),
+    uniqueIndex('recipe_id_userId_uidx').on(table.id, table.userId),
+    check('recipe_slot_check', sql`${table.slot} in ('lunch', 'dinner')`),
+  ],
 )
 
 export const recipeIngredient = pgTable(
@@ -153,6 +159,7 @@ export const weeklyMenu = pgTable(
       table.userId,
       table.weekStart,
     ),
+    uniqueIndex('weeklyMenu_id_userId_uidx').on(table.id, table.userId),
   ],
 )
 
@@ -160,9 +167,8 @@ export const weeklyMenuDay = pgTable(
   'weekly_menu_day',
   {
     id: text('id').primaryKey(),
-    weeklyMenuId: text('weekly_menu_id')
-      .notNull()
-      .references(() => weeklyMenu.id, { onDelete: 'cascade' }),
+    weeklyMenuId: text('weekly_menu_id').notNull(),
+    userId: text('user_id').notNull(),
     day: text('day').notNull(),
     context: text('context'),
     scope: text('scope').notNull(),
@@ -177,6 +183,33 @@ export const weeklyMenuDay = pgTable(
     uniqueIndex('weeklyMenuDay_menuId_day_uidx').on(
       table.weeklyMenuId,
       table.day,
+    ),
+    foreignKey({
+      name: 'weeklyMenuDay_menuId_userId_fk',
+      columns: [table.weeklyMenuId, table.userId],
+      foreignColumns: [weeklyMenu.id, weeklyMenu.userId],
+    }).onDelete('cascade'),
+    foreignKey({
+      name: 'weeklyMenuDay_lunchRecipeId_userId_fk',
+      columns: [table.lunchRecipeId, table.userId],
+      foreignColumns: [recipe.id, recipe.userId],
+    }),
+    foreignKey({
+      name: 'weeklyMenuDay_dinnerRecipeId_userId_fk',
+      columns: [table.dinnerRecipeId, table.userId],
+      foreignColumns: [recipe.id, recipe.userId],
+    }),
+    check(
+      'weeklyMenuDay_day_check',
+      sql`${table.day} in ('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday')`,
+    ),
+    check(
+      'weeklyMenuDay_context_check',
+      sql`${table.context} is null or ${table.context} in ('office', 'eatOut')`,
+    ),
+    check(
+      'weeklyMenuDay_scope_check',
+      sql`${table.scope} in ('lunch', 'dinner', 'both')`,
     ),
   ],
 )
