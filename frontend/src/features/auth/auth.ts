@@ -8,10 +8,16 @@ import { sendOtpEmail, sendResetPasswordEmail } from '#/features/auth/email'
 const baseURL = process.env.BETTER_AUTH_URL
 const appName = 'Remi'
 
+const additionalTrustedOrigins = (process.env.BETTER_AUTH_TRUSTED_ORIGINS ?? '')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean)
+
 const trustedOrigins = [
   baseURL,
   'http://localhost:3001',
   'http://127.0.0.1:3001',
+  ...additionalTrustedOrigins,
 ].filter((origin): origin is string => Boolean(origin))
 
 export const auth = betterAuth({

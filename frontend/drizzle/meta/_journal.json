@@ -29,6 +29,13 @@
       "when": 1790675695929,
       "tag": "0003_weekly_menu",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1792928601344,
+      "tag": "0004_two_factor_lockout",
+      "breakpoints": true
     }
   ]
 }
