@@ -96,6 +96,10 @@ export const twoFactor = pgTable(
       .notNull()
       .references(() => user.id, { onDelete: 'cascade' }),
     verified: boolean('verified').default(true),
+    failedVerificationCount: integer('failed_verification_count')
+      .default(0)
+      .notNull(),
+    lockedUntil: timestamp('locked_until'),
   },
   (table) => [
     index('twoFactor_secret_idx').on(table.secret),

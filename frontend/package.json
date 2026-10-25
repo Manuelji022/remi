@@ -16,7 +16,8 @@
     "check": "prettier --check .",
     "auth:generate": "pnpm dlx @better-auth/cli@latest generate --config src/features/auth/auth.ts",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate"
+    "db:migrate": "drizzle-kit migrate",
+    "db:seed-user": "tsx scripts/seed-dev-user.ts"
   },
   "dependencies": {
     "@better-auth/drizzle-adapter": "1.7.10",
@@ -44,6 +45,7 @@
     "eslint": "10.13.0",
     "jsdom": "28.1.0",
     "prettier": "3.9.10",
+    "tsx": "4.21.0",
     "typescript": "6.0.2",
     "vite": "8.3.4",
     "vitest": "4.1.11"

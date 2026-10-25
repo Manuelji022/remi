@@ -17,6 +17,35 @@ To build this application for production:
 pnpm build
 ```
 
+## Local development account
+
+To create a repeatable local account, set `DEV_SEED_USER_NAME`,
+`DEV_SEED_USER_EMAIL`, and `DEV_SEED_USER_PASSWORD` in `.env`, then run:
+
+```bash
+pnpm db:migrate
+pnpm db:seed-user
+```
+
+The seed command creates a Better Auth email/password account and leaves an
+existing account's password unchanged. It requires a localhost auth URL. For a
+remote development database only, set `DEV_SEED_ALLOW_REMOTE_DATABASE=true`
+after confirming the target; the command refuses remote databases by default.
+Sign in through the normal login page.
+This app requires a one-time email code, so configure `RESEND_API_KEY` and
+`OTP_EMAIL_FROM` and use an email address whose inbox you can access.
+
+This is seed data, not a schema migration: migrations define database structure
+and run across environments. Seed only a development database; localhost is
+required by default, and a remote development database requires the explicit
+opt-in above.
+
+When accessing the dev server through Tailscale with `pnpm dev --host`, add the
+exact browser origin to `BETTER_AUTH_TRUSTED_ORIGINS` in `.env`, for example
+`http://100.x.y.z:3001` for a Tailscale IP or
+`https://machine.tailnet-name.ts.net` for Tailscale Serve. Keep this an
+explicit origin (no wildcard) and restart the dev server after changing it.
+
 ## Testing
 
 This project uses [Vitest](https://vitest.dev/) for testing. You can run the tests with:
