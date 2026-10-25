@@ -10,7 +10,7 @@ jobs:
   node-ci:
     uses: Manuelji022/github-workflows/.github/workflows/node-ci.yml@main
     with:
-      node-version: "24"
+      node-version: "24.22.1"
       package-manager: pnpm
       run-lint: true
       run-tests: true
@@ -28,7 +28,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version: "24"
+          node-version: "24.22.1"
           package-manager-cache: false
       - name: Enable project-pinned pnpm
         run: corepack enable pnpm
