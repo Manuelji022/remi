@@ -36,6 +36,13 @@
       "when": 1792928601344,
       "tag": "0004_two_factor_lockout",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1793034580982,
+      "tag": "0005_seed_mock_recipes",
+      "breakpoints": true
     }
   ]
 }

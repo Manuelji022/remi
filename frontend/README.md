@@ -40,6 +40,24 @@ and run across environments. Seed only a development database; localhost is
 required by default, and a remote development database requires the explicit
 opt-in above.
 
+### Mock recipes
+
+`drizzle/0005_seed_mock_recipes.sql` adds 25 lunch/dinner recipes with ingredients
+for the existing mock account `manueljialt@gmail.com`. It does not create a user
+or modify other accounts. `pnpm db:migrate` applies it automatically if that
+account already exists; otherwise it safely skips the data insert.
+
+On a fresh database, create the development account first using the commands
+above, then apply the data migration explicitly from `frontend/` (with
+`DATABASE_URL` exported in your shell):
+
+```bash
+psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f drizzle/0005_seed_mock_recipes.sql
+```
+
+This file targets the email above, not `DEV_SEED_USER_EMAIL` dynamically. Reapplying
+it does not duplicate recipes or overwrite existing recipe/ingredient edits.
+
 When accessing the dev server through Tailscale with `pnpm dev --host`, add the
 exact browser origin to `BETTER_AUTH_TRUSTED_ORIGINS` in `.env`, for example
 `http://100.x.y.z:3001` for a Tailscale IP or
