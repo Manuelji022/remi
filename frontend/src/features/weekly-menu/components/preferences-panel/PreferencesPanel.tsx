@@ -22,6 +22,9 @@ import { getBlockedPlanningScopes, getPlanningScopeForContext } from './utils'
 interface PreferencesPanelProps {
   isOpen: boolean
   isSaving: boolean
+  isRecipeMutationPending: boolean
+  onRecipeMutation: () => Promise<void>
+  onRecipeMutationPendingChange: (pending: boolean) => void
   saveDisabled: boolean
   saveError: string | null
   onClose: () => void
@@ -34,6 +37,9 @@ interface PreferencesPanelProps {
 export function PreferencesPanel({
   isOpen,
   isSaving,
+  isRecipeMutationPending,
+  onRecipeMutation,
+  onRecipeMutationPendingChange,
   saveDisabled,
   saveError,
   onClose,
@@ -50,6 +56,7 @@ export function PreferencesPanel({
   const [activeTab, setActiveTab] = useState<PreferencesPanelTab>('schedule')
   const [migrationFailed, setMigrationFailed] = useState(false)
   const userId = session?.user.id
+  const savedPrefsRef = useRef(savedPrefs)
   const scrollYRef = useRef<number | null>(null)
 
   if (typeof window !== 'undefined') {
@@ -60,12 +67,16 @@ export function PreferencesPanel({
     }
   }
 
+  useLayoutEffect(() => {
+    savedPrefsRef.current = savedPrefs
+  }, [savedPrefs])
+
   useEffect(() => {
     if (!isOpen) return
 
-    setDraftPrefs(savedPrefs)
+    setDraftPrefs(savedPrefsRef.current)
     setActiveTab('schedule')
-  }, [isOpen, savedPrefs])
+  }, [isOpen])
 
   useLayoutEffect(() => {
     if (!isOpen || scrollYRef.current === null) return
@@ -172,7 +183,7 @@ export function PreferencesPanel({
     <div className="panel-root" aria-hidden={!isOpen}>
       <button
         className="panel-overlay"
-        disabled={isSaving}
+        disabled={isSaving || isRecipeMutationPending}
         type="button"
         aria-label={t('preferences.close')}
         onClick={onClose}
@@ -181,7 +192,7 @@ export function PreferencesPanel({
       <aside
         aria-labelledby="preferences-panel-title"
         aria-modal="true"
-        aria-busy={isSaving}
+        aria-busy={isSaving || isRecipeMutationPending}
         className="panel-drawer"
         role="dialog"
       >
@@ -208,7 +219,7 @@ export function PreferencesPanel({
             </Link>
             <button
               className="panel-close-btn"
-              disabled={isSaving}
+              disabled={isSaving || isRecipeMutationPending}
               type="button"
               aria-label={t('preferences.close')}
               onClick={onClose}
@@ -226,12 +237,14 @@ export function PreferencesPanel({
           <PanelTabButton
             id="schedule"
             isActive={activeTab === 'schedule'}
+            isDisabled={isRecipeMutationPending}
             label={t('preferences.weeklySchedule')}
             onClick={() => setActiveTab('schedule')}
           />
           <PanelTabButton
             id="recipes"
             isActive={activeTab === 'recipes'}
+            isDisabled={isRecipeMutationPending}
             label={t('preferences.myRecipes')}
             onClick={() => setActiveTab('recipes')}
           />
@@ -239,7 +252,7 @@ export function PreferencesPanel({
 
         <fieldset
           className="panel-content panel-edit-fields"
-          disabled={isSaving}
+          disabled={isSaving || isRecipeMutationPending}
         >
           {activeTab === 'schedule' ? (
             <ScheduleTab
@@ -252,6 +265,8 @@ export function PreferencesPanel({
             <RecipesTab
               legacyPending={legacyCustomRecipes.length > 0}
               migrationFailed={migrationFailed}
+              onRecipeMutation={onRecipeMutation}
+              onRecipeMutationPendingChange={onRecipeMutationPendingChange}
             />
           )}
         </fieldset>
@@ -265,7 +280,7 @@ export function PreferencesPanel({
           <div className="panel-footer-actions">
             <button
               className="panel-secondary-btn"
-              disabled={isSaving}
+              disabled={isSaving || isRecipeMutationPending}
               type="button"
               onClick={onClose}
             >
@@ -273,7 +288,7 @@ export function PreferencesPanel({
             </button>
             <button
               className="panel-primary-btn"
-              disabled={saveDisabled}
+              disabled={saveDisabled || isRecipeMutationPending}
               type="button"
               onClick={() => onSave(draftPrefs)}
             >

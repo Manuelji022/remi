@@ -15,17 +15,23 @@ import { RecipeForm } from './RecipeForm'
 interface RecipesTabProps {
   legacyPending: boolean
   migrationFailed: boolean
+  onRecipeMutation: () => Promise<void>
+  onRecipeMutationPendingChange: (pending: boolean) => void
 }
 
 export function RecipesTab({
   legacyPending,
   migrationFailed,
+  onRecipeMutation,
+  onRecipeMutationPendingChange,
 }: RecipesTabProps) {
   const { locale, t } = useI18n()
   const { data: session, isPending } = authClient.useSession()
   const sessionPending = isPending
   const [recipes, setRecipes] = useState<Recipe[] | null>(null)
   const [actionFailed, setActionFailed] = useState(false)
+  const [isAddingRecipe, setIsAddingRecipe] = useState(false)
+  const addingRecipe = useRef(false)
   const deletingIds = useRef(new Set<string>())
   const userId = session?.user.id
 
@@ -54,13 +60,32 @@ export function RecipesTab({
   }, [userId, legacyPending])
 
   async function handleAddRecipe(input: RecipeInput) {
+    if (addingRecipe.current) return
+
+    addingRecipe.current = true
+    setIsAddingRecipe(true)
+    onRecipeMutationPendingChange(true)
+
     try {
-      const recipe = await createRecipe({ data: input })
+      let recipe: Recipe
+      try {
+        recipe = await createRecipe({ data: input })
+      } catch (error) {
+        setActionFailed(true)
+        throw error
+      }
+
       setRecipes((current) => [...(current ?? []), recipe])
       setActionFailed(false)
-    } catch (error) {
-      setActionFailed(true)
-      throw error
+      try {
+        await onRecipeMutation()
+      } catch {
+        setActionFailed(true)
+      }
+    } finally {
+      addingRecipe.current = false
+      setIsAddingRecipe(false)
+      onRecipeMutationPendingChange(false)
     }
   }
 
@@ -68,6 +93,7 @@ export function RecipesTab({
     if (deletingIds.current.has(recipeId)) return
 
     deletingIds.current.add(recipeId)
+    onRecipeMutationPendingChange(true)
 
     try {
       await deleteRecipe({ data: { id: recipeId } })
@@ -76,10 +102,16 @@ export function RecipesTab({
           current?.filter((recipe) => recipe.id !== recipeId) ?? null,
       )
       setActionFailed(false)
+      try {
+        await onRecipeMutation()
+      } catch {
+        setActionFailed(true)
+      }
     } catch {
       setActionFailed(true)
     } finally {
       deletingIds.current.delete(recipeId)
+      onRecipeMutationPendingChange(false)
     }
   }
 
@@ -99,6 +131,7 @@ export function RecipesTab({
         </p>
         <h3 id="preferences-recipes-title">{t('preferences.recipesTitle')}</h3>
         <p>{t('preferences.recipesBody')}</p>
+        {userId && <p>{t('preferences.recipeChangesImmediate')}</p>}
       </div>
 
       {sessionPending ? (
@@ -126,7 +159,10 @@ export function RecipesTab({
           {showError && (
             <p className="panel-field-error">{t('preferences.recipesError')}</p>
           )}
-          <RecipeForm onAddRecipe={handleAddRecipe} />
+          <RecipeForm
+            isAddingRecipe={isAddingRecipe}
+            onAddRecipe={handleAddRecipe}
+          />
           {recipes.length === 0 ? (
             <div className="panel-empty-recipes">
               <p>{t('preferences.emptyRecipes')}</p>

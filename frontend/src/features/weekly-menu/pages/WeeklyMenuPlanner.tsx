@@ -83,6 +83,7 @@ export function WeeklyMenuPlanner() {
   )
   const [data, setData] = useState<PlannerData | null>(null)
   const [action, setAction] = useState<PlannerAction | null>(null)
+  const [isRecipeMutationPending, setIsRecipeMutationPending] = useState(false)
   const [loadAttempt, setLoadAttempt] = useState(0)
   const [guestGridOpen, setGuestGridOpen] = useState(false)
   const [isHydrated, setIsHydrated] = useState(false)
@@ -115,7 +116,11 @@ export function WeeklyMenuPlanner() {
     isSessionPending ||
     Boolean(userId && (!currentData || currentData.status === 'loading'))
   const loadFailed = Boolean(userId && currentData?.status === 'error')
-  const canWrite = !isLoading && !loadFailed && (!userId || Boolean(readyData))
+  const canWrite =
+    !isLoading &&
+    !loadFailed &&
+    !isRecipeMutationPending &&
+    (!userId || Boolean(readyData))
   const menuWeek = readyData?.week.menu
   const savedPreferences = useMemo(
     () => (menuWeek ? scheduleFromMenu(menuWeek) : guestPreferences),
@@ -229,6 +234,37 @@ export function WeeklyMenuPlanner() {
     setData(null)
     setLoadAttempt((attempt) => attempt + 1)
   }
+
+  const handleRecipeMutation = useCallback(async () => {
+    const view = currentViewRef.current
+    if (!view.userId || view.isSessionPending) return
+
+    const identity = { userId: view.userId, weekStart: view.viewedWeek }
+    const generation = ++loadGenerationRef.current
+    const isCurrent = () => {
+      const currentView = currentViewRef.current
+      return (
+        generation === loadGenerationRef.current &&
+        currentView.userId === identity.userId &&
+        currentView.viewedWeek === identity.weekStart &&
+        !currentView.isSessionPending
+      )
+    }
+
+    setAction(null)
+
+    try {
+      const [week, recipes] = await Promise.all([
+        loadWeeklyMenu({ data: { weekStart: identity.weekStart } }),
+        listRecipes(),
+      ])
+      if (isCurrent()) {
+        setData({ ...identity, status: 'ready', week, recipes })
+      }
+    } catch {
+      if (isCurrent()) setData({ ...identity, status: 'error' })
+    }
+  }, [])
 
   function handleOpenPreferences() {
     if (!canWrite || isWriting) return
@@ -474,6 +510,9 @@ export function WeeklyMenuPlanner() {
       <PreferencesPanel
         isOpen={isPreferencesOpen}
         isSaving={isSavingPreferences}
+        isRecipeMutationPending={isRecipeMutationPending}
+        onRecipeMutation={handleRecipeMutation}
+        onRecipeMutationPendingChange={setIsRecipeMutationPending}
         saveDisabled={!canWrite || isWriting}
         saveError={saveError}
         legacyCustomRecipes={legacyCustomRecipes}
