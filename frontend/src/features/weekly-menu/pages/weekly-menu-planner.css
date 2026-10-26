@@ -77,6 +77,19 @@
     font-weight: var(--weight-regular);
   }
 
+  .planner-feedback {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--gap-inline);
+    padding: var(--pad-card);
+    margin-block-end: var(--section-gap-sm);
+    background: var(--bg-surface);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card);
+  }
+
   .planner-day-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(var(--day-col-min), 1fr));

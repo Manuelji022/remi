@@ -117,6 +117,18 @@ export const messages = {
     'planner.actionsLabel': 'Planner actions',
     'planner.preferences': 'Preferences',
     'planner.generating': 'Generating',
+    'planner.loadingWeek': 'Loading this week and your recipes...',
+    'planner.loadErrorTitle': 'Could not load this week',
+    'planner.loadErrorBody':
+      'We could not load your menu or recipes. Retry loading before making changes.',
+    'planner.retryLoad': 'Retry loading',
+    'planner.generateError':
+      'Could not finish generating and saving your menu. Your last loaded menu is still shown. Retry to save again.',
+    'planner.retryGenerate': 'Retry generation',
+    'planner.saveError':
+      'Could not confirm your preferences were saved. Your draft is still here. Retry saving, or reload to check the saved week.',
+    'planner.preferencesSaved': 'Preferences saved.',
+    'planner.menuSaved': 'Weekly Menu saved.',
     'planner.generateMenu': 'Generate menu',
     'planner.regenerateMenu': 'Regenerate menu',
     'planner.buildingTitle': 'Building your Weekly Menu',
@@ -174,6 +186,7 @@ export const messages = {
     'preferences.noRecipeIngredients': 'No ingredients added yet.',
     'preferences.deleteRecipe': 'Delete {name}',
     'preferences.save': 'Save preferences',
+    'preferences.saving': 'Saving preferences...',
     'units.unit': 'unit',
     'units.g': 'g',
     'units.kg': 'kg',
@@ -296,6 +309,18 @@ export const messages = {
     'planner.actionsLabel': 'Acciones del planificador',
     'planner.preferences': 'Preferencias',
     'planner.generating': 'Generando',
+    'planner.loadingWeek': 'Cargando esta semana y tus recetas...',
+    'planner.loadErrorTitle': 'No se pudo cargar esta semana',
+    'planner.loadErrorBody':
+      'No se pudieron cargar tu menú o tus recetas. Vuelve a cargar antes de hacer cambios.',
+    'planner.retryLoad': 'Volver a cargar',
+    'planner.generateError':
+      'No se pudo completar la generación y el guardado del menú. Se sigue mostrando el último menú cargado. Reintenta para guardarlo de nuevo.',
+    'planner.retryGenerate': 'Reintentar generación',
+    'planner.saveError':
+      'No se pudo confirmar el guardado de tus preferencias. Tu borrador sigue aquí. Reintenta guardarlo o recarga para comprobar la semana guardada.',
+    'planner.preferencesSaved': 'Preferencias guardadas.',
+    'planner.menuSaved': 'Menú Semanal guardado.',
     'planner.generateMenu': 'Generar menú',
     'planner.regenerateMenu': 'Regenerar menú',
     'planner.buildingTitle': 'Construyendo tu Menú Semanal',
@@ -354,6 +379,7 @@ export const messages = {
     'preferences.noRecipeIngredients': 'Todavía no hay ingredientes añadidos.',
     'preferences.deleteRecipe': 'Eliminar {name}',
     'preferences.save': 'Guardar preferencias',
+    'preferences.saving': 'Guardando preferencias...',
     'units.unit': 'unidad',
     'units.g': 'g',
     'units.kg': 'kg',

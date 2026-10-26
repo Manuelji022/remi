@@ -1,0 +1,58 @@
+[
+  {
+    "scenario": "failed read is not an empty week; retry restores existing data",
+    "verdict": "PASS"
+  },
+  {
+    "scenario": "auth pending blocks writes until resolved",
+    "verdict": "PASS"
+  },
+  {
+    "scenario": "load pending blocks writes until resolved",
+    "verdict": "PASS"
+  },
+  {
+    "scenario": "generation failRecipes fails before any POST",
+    "verdict": "PASS"
+  },
+  {
+    "scenario": "generation failLoad fails before any POST",
+    "verdict": "PASS"
+  },
+  {
+    "scenario": "failed generation POST retains menu and retry succeeds",
+    "verdict": "PASS"
+  },
+  {
+    "scenario": "schedule failure retains draft; pending retry is guarded and succeeds",
+    "verdict": "PASS"
+  },
+  {
+    "scenario": "late successful read cannot replace another week",
+    "verdict": "PASS"
+  },
+  {
+    "scenario": "late failed read cannot replace another week",
+    "verdict": "PASS"
+  },
+  {
+    "scenario": "sign-out invalidates pending generation save",
+    "verdict": "PASS"
+  },
+  {
+    "scenario": "sign-out invalidates pending generation load",
+    "verdict": "PASS"
+  },
+  {
+    "scenario": "catalog failure is actionable and retry restores shopping",
+    "verdict": "PASS"
+  },
+  {
+    "scenario": "successful empty read permits first generation",
+    "verdict": "PASS"
+  },
+  {
+    "scenario": "Spanish load/save failures and recovery are localized",
+    "verdict": "PASS"
+  }
+]

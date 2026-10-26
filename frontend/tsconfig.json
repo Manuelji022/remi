@@ -1,8 +1,9 @@
 {
-  "include": ["**/*.ts", "**/*.tsx", "eslint.config.js", "prettier.config.js", "vite.config.js"],
+  "include": ["**/*.ts", "**/*.tsx", "e2e/*.js", "eslint.config.js", "prettier.config.js", "vite.config.js"],
 
   "compilerOptions": {
     "target": "ES2022",
+    "allowJs": true,
     "jsx": "react-jsx",
     "module": "ESNext",
     "paths": {
