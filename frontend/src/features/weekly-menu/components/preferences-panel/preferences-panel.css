@@ -109,6 +109,12 @@
     box-shadow: var(--shadow-thumb);
   }
 
+  .panel-edit-fields {
+    border: 0;
+    margin: 0;
+    min-inline-size: 0;
+  }
+
   .panel-content {
     container: drawer / inline-size;
     flex: 1;

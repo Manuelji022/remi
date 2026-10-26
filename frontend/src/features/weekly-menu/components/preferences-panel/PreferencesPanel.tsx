@@ -21,6 +21,9 @@ import { getBlockedPlanningScopes, getPlanningScopeForContext } from './utils'
 
 interface PreferencesPanelProps {
   isOpen: boolean
+  isSaving: boolean
+  saveDisabled: boolean
+  saveError: string | null
   onClose: () => void
   savedPrefs: Preferences
   onSave: (prefs: Preferences) => void
@@ -30,6 +33,9 @@ interface PreferencesPanelProps {
 
 export function PreferencesPanel({
   isOpen,
+  isSaving,
+  saveDisabled,
+  saveError,
   onClose,
   savedPrefs,
   onSave,
@@ -166,6 +172,7 @@ export function PreferencesPanel({
     <div className="panel-root" aria-hidden={!isOpen}>
       <button
         className="panel-overlay"
+        disabled={isSaving}
         type="button"
         aria-label={t('preferences.close')}
         onClick={onClose}
@@ -174,6 +181,7 @@ export function PreferencesPanel({
       <aside
         aria-labelledby="preferences-panel-title"
         aria-modal="true"
+        aria-busy={isSaving}
         className="panel-drawer"
         role="dialog"
       >
@@ -200,6 +208,7 @@ export function PreferencesPanel({
             </Link>
             <button
               className="panel-close-btn"
+              disabled={isSaving}
               type="button"
               aria-label={t('preferences.close')}
               onClick={onClose}
@@ -228,7 +237,10 @@ export function PreferencesPanel({
           />
         </div>
 
-        <div className="panel-content">
+        <fieldset
+          className="panel-content panel-edit-fields"
+          disabled={isSaving}
+        >
           {activeTab === 'schedule' ? (
             <ScheduleTab
               dayContexts={draftPrefs.dayContexts}
@@ -242,12 +254,18 @@ export function PreferencesPanel({
               migrationFailed={migrationFailed}
             />
           )}
-        </div>
+        </fieldset>
 
         <div className="panel-footer">
+          {saveError && (
+            <p className="panel-field-error" role="alert">
+              {saveError}
+            </p>
+          )}
           <div className="panel-footer-actions">
             <button
               className="panel-secondary-btn"
+              disabled={isSaving}
               type="button"
               onClick={onClose}
             >
@@ -255,11 +273,12 @@ export function PreferencesPanel({
             </button>
             <button
               className="panel-primary-btn"
+              disabled={saveDisabled}
               type="button"
               onClick={() => onSave(draftPrefs)}
             >
               <CheckIcon aria-hidden="true" />
-              {t('preferences.save')}
+              {t(isSaving ? 'preferences.saving' : 'preferences.save')}
             </button>
           </div>
         </div>
