@@ -1,4 +1,4 @@
-import { useId, useState } from 'react'
+import { useId, useRef, useState } from 'react'
 import { CheckIcon, PlusIcon, TrashIcon } from '#/components/primitives'
 import { useI18n } from '#/shared/i18n'
 import {
@@ -16,16 +16,18 @@ import {
 import type { RecipeIngredientDraft } from './recipe-form-utils'
 
 interface RecipeFormProps {
+  isAddingRecipe: boolean
   onAddRecipe: (recipe: RecipeInput) => Promise<void>
 }
 
-export function RecipeForm({ onAddRecipe }: RecipeFormProps) {
+export function RecipeForm({ isAddingRecipe, onAddRecipe }: RecipeFormProps) {
   const { t } = useI18n()
   const [recipeName, setRecipeName] = useState('')
   const [recipeSlot, setRecipeSlot] = useState<MealSlot>('dinner')
   const [recipeIngredients, setRecipeIngredients] = useState<
     RecipeIngredientDraft[]
   >([getEmptyRecipeIngredient()])
+  const submissionInFlight = useRef(false)
   const recipeNameId = useId()
   const recipeIngredientsId = useId()
   const hasInvalidIngredientQuantity =
@@ -34,7 +36,7 @@ export function RecipeForm({ onAddRecipe }: RecipeFormProps) {
   async function handleAddRecipe() {
     const name = recipeName.trim()
 
-    if (hasInvalidIngredientQuantity) return
+    if (submissionInFlight.current || hasInvalidIngredientQuantity) return
     const recipe = recipeInputSchema.safeParse({
       name,
       slot: recipeSlot,
@@ -42,15 +44,17 @@ export function RecipeForm({ onAddRecipe }: RecipeFormProps) {
     })
     if (!recipe.success) return
 
+    submissionInFlight.current = true
     try {
       await onAddRecipe(recipe.data)
+      setRecipeName('')
+      setRecipeSlot('dinner')
+      setRecipeIngredients([getEmptyRecipeIngredient()])
     } catch {
       return
+    } finally {
+      submissionInFlight.current = false
     }
-
-    setRecipeName('')
-    setRecipeSlot('dinner')
-    setRecipeIngredients([getEmptyRecipeIngredient()])
   }
 
   function updateRecipeIngredient(
@@ -226,11 +230,15 @@ export function RecipeForm({ onAddRecipe }: RecipeFormProps) {
       <button
         className="panel-add-btn"
         type="button"
-        disabled={!recipeName.trim() || hasInvalidIngredientQuantity}
+        disabled={
+          isAddingRecipe || !recipeName.trim() || hasInvalidIngredientQuantity
+        }
         onClick={handleAddRecipe}
       >
         <PlusIcon aria-hidden="true" />
-        {t('preferences.addRecipe')}
+        {t(
+          isAddingRecipe ? 'preferences.addingRecipe' : 'preferences.addRecipe',
+        )}
       </button>
       {!recipeName.trim() ? (
         <p className="panel-add-hint">{t('preferences.addRecipeHint')}</p>

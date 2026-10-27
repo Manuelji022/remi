@@ -1,0 +1,54 @@
+{
+  "verdict": "PASS",
+  "scenarios": [
+    "immediate recipe persistence note",
+    "assigned recipe deletion refreshes menu and names before writes",
+    "schedule save omits deleted recipe ID",
+    "pending create is single-submit and blocks conflicting actions",
+    "cancel retains created recipe"
+  ],
+  "posts": {
+    "success": true,
+    "resultCategory": "success",
+    "data": {
+      "origin": "http://127.0.0.1:3101/weekly-menu-planner",
+      "result": [
+        {
+          "deletedId": "assigned-dinner",
+          "kind": "recipe-delete"
+        },
+        {
+          "kind": "menu-save",
+          "scheduledDinnerId": null
+        },
+        {
+          "kind": "recipe-create",
+          "name": "Persistent recipe"
+        }
+      ]
+    },
+    "error": null,
+    "summary": "Eval result: [",
+    "successCategory": "completed",
+    "nextActions": [
+      {
+        "id": "inspect-after-mutation",
+        "params": {
+          "args": [
+            "--namespace",
+            "",
+            "--session",
+            "piab-tiamat-186c541f89e1-7b2a42f0-fresh-51b05107c8",
+            "snapshot",
+            "-i"
+          ]
+        },
+        "reason": "Refresh interactive refs after a browser mutation, navigation, scroll, or rerender.",
+        "safety": "Do not reuse prior @refs until a fresh snapshot confirms they still exist.",
+        "tool": "agent_browser"
+      }
+    ],
+    "sessionName": "piab-tiamat-186c541f89e1-7b2a42f0-fresh-51b05107c8",
+    "namespace": ""
+  }
+}

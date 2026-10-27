@@ -25,11 +25,11 @@ The frontend is beyond a mock. Core signed-in data mutations use authenticated T
 - [x] Verify failed reads cannot lead to overwriting an existing menu with an artificial empty menu.
 - [x] Capture repeatable browser regression evidence for failure and recovery paths: see [the browser regression guide](../e2e/PLANNER-RELIABILITY.md) and [recorded results](../e2e/RESULTS.md).
 
-## 2. Recipe/menu consistency — later PR
+## 2. Recipe/menu consistency — completed in this change
 
-- [ ] Refresh/invalidate the selected menu and its recipe names after recipe mutations. Deleting an assigned recipe currently clears its database reference, but the planner can continue displaying stale meal names until reloaded; later saves can submit the deleted recipe ID.
-- [ ] Prevent duplicate recipe submissions while a create request is pending.
-- [ ] Make recipe mutation timing explicit: additions/deletions save immediately, and cancelling the preferences drawer does not undo them.
+- [x] Refresh the selected menu and its recipe names after recipe mutations. After a deletion, the planner reloads the selected week before writes are re-enabled, so stale recipe IDs cannot be submitted by later saves. See the [browser regression guide](../e2e/RECIPE-MENU-CONSISTENCY.md) and [recorded results](../e2e/artifacts/recipe-menu-consistency.json).
+- [x] Prevent duplicate recipe submissions while a create request is pending.
+- [x] Make recipe mutation timing explicit: additions/deletions save immediately, and cancelling the preferences drawer does not undo them.
 
 ## 3. Useful generation — later PR
 

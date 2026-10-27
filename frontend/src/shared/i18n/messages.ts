@@ -162,6 +162,8 @@ export const messages = {
     'preferences.recipesTitle': 'Save recipes to reuse later',
     'preferences.recipesBody':
       'Add favorite meals and their ingredients so they can influence future menu generation.',
+    'preferences.recipeChangesImmediate':
+      'Recipes are saved immediately. Cancel only discards schedule changes.',
     'preferences.recipeName': 'Recipe name',
     'preferences.recipeNamePlaceholder': 'Ex. Lemon chickpea pasta…',
     'preferences.recipeSlot': 'Recipe meal',
@@ -178,6 +180,7 @@ export const messages = {
     'preferences.invalidIngredientQuantity':
       'Ingredient quantities must be zero or greater.',
     'preferences.addRecipe': 'Add recipe',
+    'preferences.addingRecipe': 'Adding recipe...',
     'preferences.addRecipeHint': 'Add a recipe name to save it.',
     'preferences.emptyRecipes': 'No recipes saved yet.',
     'preferences.signInToSaveRecipes': 'Sign in to save recipes.',
@@ -355,6 +358,8 @@ export const messages = {
     'preferences.recipesTitle': 'Guarda recetas para reutilizarlas',
     'preferences.recipesBody':
       'Añade comidas favoritas y sus ingredientes para que influyan en futuros menús.',
+    'preferences.recipeChangesImmediate':
+      'Las recetas se guardan de inmediato. Cancelar solo descarta los cambios de la planificación semanal.',
     'preferences.recipeName': 'Nombre de la receta',
     'preferences.recipeNamePlaceholder': 'Ej. pasta de garbanzos al limón…',
     'preferences.recipeSlot': 'Momento de la receta',
@@ -370,6 +375,7 @@ export const messages = {
     'preferences.invalidIngredientQuantity':
       'Las cantidades deben ser cero o mayores.',
     'preferences.addRecipe': 'Añadir receta',
+    'preferences.addingRecipe': 'Añadiendo receta...',
     'preferences.addRecipeHint': 'Añade un nombre de receta para guardarla.',
     'preferences.emptyRecipes': 'Todavía no hay recetas.',
     'preferences.signInToSaveRecipes': 'Inicia sesión para guardar recetas.',
