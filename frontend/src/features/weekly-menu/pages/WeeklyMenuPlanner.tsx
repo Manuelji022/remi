@@ -73,6 +73,9 @@ type PlannerAction = PlannerIdentity & {
 export function WeeklyMenuPlanner() {
   const { t, formatWeekRange } = useI18n()
   const [activeTab, setActiveTab] = useState<MainTabId>('menu')
+  const [checkedIngredients, setCheckedIngredients] = useState<Set<string>>(
+    () => new Set(),
+  )
   const [isPreferencesOpen, setIsPreferencesOpen] = useState(false)
   const [weekOffset, setWeekOffset] = useState(0)
   const [guestPreferences, setGuestPreferences] = useState<Preferences>(() =>
@@ -503,7 +506,19 @@ export function WeeklyMenuPlanner() {
             recipeNames={readyData?.week.recipeNames ?? {}}
           />
         ) : shoppingEnabled ? (
-          <ShoppingTab lines={lines} />
+          <ShoppingTab
+            lines={lines}
+            checklistId={JSON.stringify([userId, viewedWeek])}
+            checkedIngredients={checkedIngredients}
+            onToggleIngredient={(key) => {
+              setCheckedIngredients((previous) => {
+                const next = new Set(previous)
+                if (next.has(key)) next.delete(key)
+                else next.add(key)
+                return next
+              })
+            }}
+          />
         ) : null}
       </section>
 
@@ -595,7 +610,17 @@ function MenuTab({
   )
 }
 
-function ShoppingTab({ lines }: { lines: readonly ShoppingLine[] }) {
+function ShoppingTab({
+  lines,
+  checklistId,
+  checkedIngredients,
+  onToggleIngredient,
+}: {
+  lines: readonly ShoppingLine[]
+  checklistId: string
+  checkedIngredients: ReadonlySet<string>
+  onToggleIngredient: (key: string) => void
+}) {
   const { t } = useI18n()
 
   return (
@@ -606,15 +631,29 @@ function ShoppingTab({ lines }: { lines: readonly ShoppingLine[] }) {
         <p>{t('planner.shoppingEmpty')}</p>
       ) : (
         <ul>
-          {lines.map((line) => (
-            <li
-              key={`${line.name}\0${line.unit ?? ''}\0${
-                line.quantity === null ? 'unknown' : 'number'
-              }`}
-            >
-              {formatRecipeIngredient(line, (unit) => t(`units.${unit}`))}
-            </li>
-          ))}
+          {lines.map((line) => {
+            const key = JSON.stringify([
+              checklistId,
+              line.name,
+              line.unit,
+              line.quantity,
+            ])
+
+            return (
+              <li key={key}>
+                <label className="planner-shopping-item">
+                  <input
+                    type="checkbox"
+                    checked={checkedIngredients.has(key)}
+                    onChange={() => onToggleIngredient(key)}
+                  />
+                  <span>
+                    {formatRecipeIngredient(line, (unit) => t(`units.${unit}`))}
+                  </span>
+                </label>
+              </li>
+            )
+          })}
         </ul>
       )}
     </div>
