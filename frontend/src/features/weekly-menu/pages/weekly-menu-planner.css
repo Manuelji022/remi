@@ -117,14 +117,21 @@
     overflow: hidden;
   }
 
-  .planner-shopping-tab li {
+  .planner-shopping-item {
     min-block-size: var(--hit-min);
     padding-block: var(--pad-control-block);
     padding-inline: var(--pad-card);
     display: flex;
     align-items: center;
+    gap: var(--gap-inline);
+    cursor: pointer;
     font-size: var(--type-callout-size);
     line-height: var(--type-callout-lh);
+  }
+
+  .planner-shopping-item input:checked + span {
+    color: var(--text-secondary);
+    text-decoration: line-through;
   }
 
   .planner-shopping-tab li + li {
