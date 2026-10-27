@@ -136,7 +136,7 @@ export const messages = {
     'planner.emptyTitle': 'No Weekly Menu yet',
     'planner.emptyBody':
       'Generate a menu from your saved recipes. Home slots stay empty until a recipe is assigned.',
-    'planner.currentWeek': 'Current Calendar Week',
+    'planner.currentWeek': 'Current week',
     'planner.shoppingHelper':
       'Ingredients from the home meals planned this week.',
     'planner.shoppingEmpty': 'No ingredients for the home meals in this week.',
@@ -330,7 +330,7 @@ export const messages = {
     'planner.emptyTitle': 'Todavía no hay Menú Semanal',
     'planner.emptyBody':
       'Genera un menú a partir de tus recetas guardadas. Los espacios de casa se quedan vacíos hasta que se asigne una receta.',
-    'planner.currentWeek': 'Semana Calendario actual',
+    'planner.currentWeek': 'Semana actual',
     'planner.shoppingHelper':
       'Ingredientes de las comidas en casa planificadas esta semana.',
     'planner.shoppingEmpty':
