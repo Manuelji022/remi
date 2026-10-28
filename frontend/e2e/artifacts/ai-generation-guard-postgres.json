@@ -1,0 +1,36 @@
+{
+  "suite": "AI Weekly Menu PostgreSQL generation guard",
+  "verdict": "PASS",
+  "isolatedContainerImage": "postgres:18",
+  "binding": "127.0.0.1:32771",
+  "migrations": "pnpm db:migrate applied the repository Drizzle migrations including 0006",
+  "cleanup": "synthetic rows deleted; disposable container removed before artifact creation",
+  "runs": [
+    {
+      "mode": "multi",
+      "pgmax": "3",
+      "checks": [
+        "postgres-js/Drizzle wrapped SQLSTATE 55P03 maps to AiGenerationInProgressError",
+        "contending request never invokes provider callback",
+        "first guarded provider callback completes",
+        "different users may hold independent generation guards concurrently",
+        "five accepted calls in one hour are counted and the sixth is rejected before provider work",
+        "calls older than the rolling-hour cutoff are removed before accepting a new call",
+        "mock provider failure is returned after its accepted attempt is committed",
+        "a provider failure counts as one of five accepted calls in the rolling hour",
+        "a separate user is not affected by other users’ request counts or locks",
+        "mocked provider work crossing Sunday-to-Monday is rejected by the production post-provider target check",
+        "accepted requests, including the failure, are recorded durably"
+      ]
+    },
+    {
+      "mode": "single",
+      "pgmax": "1",
+      "checks": [
+        "application postgres-js pool is configured with max=1",
+        "real owned catalog and current/previous history load with a single DB connection",
+        "guarded mocked provider callback completes after context reads using PGMAX=1"
+      ]
+    }
+  ]
+}
