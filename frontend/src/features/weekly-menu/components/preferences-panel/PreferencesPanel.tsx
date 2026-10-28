@@ -17,7 +17,10 @@ import { RecipesTab } from '#/features/recipes/components/RecipesTab'
 import { PanelTabButton } from './Pills'
 import { ScheduleTab } from './ScheduleTab'
 import type { PreferencesPanelTab } from './types'
-import { getBlockedPlanningScopes, getPlanningScopeForContext } from './utils'
+import {
+  updateScheduleDayContext as transitionScheduleDayContext,
+  updateSchedulePlanningScope as transitionSchedulePlanningScope,
+} from '#/features/weekly-menu/schedule-domain'
 
 interface PreferencesPanelProps {
   isOpen: boolean
@@ -145,38 +148,11 @@ export function PreferencesPanel({
   if (!isOpen) return null
 
   function updateDayContext(day: Day, nextContext: DayContext) {
-    const currentContext = draftPrefs.dayContexts[day] ?? null
-    const dayContexts = { ...draftPrefs.dayContexts }
-    const currentScope = draftPrefs.planningScopes[day] ?? 'both'
-    const nextActiveContext =
-      currentContext === nextContext ? null : nextContext
-
-    if (currentContext === nextContext) {
-      delete dayContexts[day]
-    } else {
-      dayContexts[day] = nextContext
-    }
-
-    setDraftPrefs({
-      ...draftPrefs,
-      dayContexts,
-      planningScopes: {
-        ...draftPrefs.planningScopes,
-        [day]: getPlanningScopeForContext(nextActiveContext, currentScope),
-      },
-    })
+    setDraftPrefs(transitionScheduleDayContext(draftPrefs, day, nextContext))
   }
 
   function updatePlanningScope(day: Day, nextScope: PlanningScope) {
-    const dayContext = draftPrefs.dayContexts[day] ?? null
-    const blockedScopes = getBlockedPlanningScopes(dayContext)
-
-    if (blockedScopes.includes(nextScope)) return
-
-    setDraftPrefs({
-      ...draftPrefs,
-      planningScopes: { ...draftPrefs.planningScopes, [day]: nextScope },
-    })
+    setDraftPrefs(transitionSchedulePlanningScope(draftPrefs, day, nextScope))
   }
 
   return (
