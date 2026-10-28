@@ -43,6 +43,20 @@
       "when": 1793034580982,
       "tag": "0005_seed_mock_recipes",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1793099905587,
+      "tag": "0006_cool_emma_frost",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1793121172324,
+      "tag": "0007_ai_generation_lease",
+      "breakpoints": true
     }
   ]
 }

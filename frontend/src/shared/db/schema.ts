@@ -27,6 +27,14 @@ export const user = pgTable('user', {
     .notNull(),
 })
 
+export const aiMenuGenerationLease = pgTable('ai_menu_generation_lease', {
+  userId: text('user_id')
+    .primaryKey()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  token: text('token').notNull(),
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+})
+
 export const session = pgTable(
   'session',
   {
@@ -279,3 +287,22 @@ export const weeklyMenuDayRelations = relations(weeklyMenuDay, ({ one }) => ({
     references: [weeklyMenu.id],
   }),
 }))
+
+export const aiMenuGenerationRequest = pgTable(
+  'ai_menu_generation_request',
+  {
+    id: text('id').primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index('aiMenuGenerationRequest_user_created_idx').on(
+      table.userId,
+      table.createdAt,
+    ),
+  ],
+)
