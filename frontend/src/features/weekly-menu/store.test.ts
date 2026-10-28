@@ -146,9 +146,9 @@ describe('menu week store', () => {
       dinnerRecipeId: pastaId,
     }
     repeated.days.Tuesday.dinnerRecipeId = pastaId
-    await expect(saveMenuWeekForUser(ownerId, repeated)).rejects.toBeInstanceOf(
-      MenuInputError,
-    )
+    const repeatedSaved = await saveMenuWeekForUser(ownerId, repeated)
+    expect(repeatedSaved.menu.days.Monday.dinnerRecipeId).toBe(pastaId)
+    expect(repeatedSaved.menu.days.Tuesday.dinnerRecipeId).toBe(pastaId)
 
     await db.delete(schema.recipe).where(eq(schema.recipe.id, pastaId))
     expect(

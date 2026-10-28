@@ -113,21 +113,14 @@ async function assertPlacedRecipes(
   menu: CalendarWeekMenu,
 ): Promise<void> {
   const placed = placements(menu)
-  const seen = new Set<string>()
+  const ids = [...new Set(placed.map((placement) => placement.id))]
 
-  for (const placement of placed) {
-    if (seen.has(placement.id)) {
-      throw new MenuInputError('Recipe is already placed')
-    }
-    seen.add(placement.id)
-  }
-
-  if (placed.length === 0) return
+  if (ids.length === 0) return
 
   const rows = await db
     .select({ id: recipe.id, slot: recipe.slot })
     .from(recipe)
-    .where(and(eq(recipe.userId, userId), inArray(recipe.id, [...seen])))
+    .where(and(eq(recipe.userId, userId), inArray(recipe.id, ids)))
 
   const slots = new Map(rows.map((row) => [row.id, row.slot]))
 
