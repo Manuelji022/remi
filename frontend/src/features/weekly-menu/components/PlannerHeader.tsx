@@ -50,6 +50,11 @@ export function PlannerHeader(props: PlannerHeaderProps) {
               end: props.weekRange.end,
             })}
           </p>
+          {props.weekOffset === 0 && (
+            <span className="planner-current-week-label">
+              {t('planner.currentWeek')}
+            </span>
+          )}
           <button
             className="planner-week-nav-btn"
             type="button"

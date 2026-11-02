@@ -25,6 +25,17 @@
     padding-inline: var(--pad-control-inline-tight);
   }
 
+  .planner-current-week-label {
+    padding: var(--space-half) var(--pad-control-inline-tight);
+    border-radius: var(--radius-pill);
+    background: var(--bg-selected-soft);
+    color: var(--accent-text);
+    font-size: var(--type-caption-size);
+    font-weight: var(--weight-semibold);
+    line-height: var(--type-caption-lh);
+    white-space: nowrap;
+  }
+
   .planner-actions {
     display: flex;
     align-items: center;
@@ -225,14 +236,21 @@
     overflow: hidden;
   }
 
-  .planner-shopping-tab li {
+  .planner-shopping-item {
     min-block-size: var(--hit-min);
     padding-block: var(--pad-control-block);
     padding-inline: var(--pad-card);
     display: flex;
     align-items: center;
+    gap: var(--gap-inline);
+    cursor: pointer;
     font-size: var(--type-callout-size);
     line-height: var(--type-callout-lh);
+  }
+
+  .planner-shopping-item input:checked + span {
+    color: var(--text-secondary);
+    text-decoration: line-through;
   }
 
   .planner-shopping-tab li + li {

@@ -183,14 +183,13 @@ export const messages = {
     'planner.emptyTitle': 'No Weekly Menu yet',
     'planner.emptyBody':
       'Generate a menu from your saved recipes. Home slots stay empty until a recipe is assigned.',
-    'planner.currentWeek': 'Current Calendar Week',
+    'planner.currentWeek': 'Current week',
     'planner.shoppingHelper':
       'Ingredients from the home meals planned this week.',
     'planner.shoppingEmpty': 'No ingredients for the home meals in this week.',
     'tabs.menu': 'Weekly Menu',
     'tabs.ingredients': 'Shopping List',
     'meal.unplannedName': 'No home-planned meal',
-    'meal.coveredByContext': 'Covered by {context} context.',
     'meal.outsideScope': 'Outside the current planning scope.',
     'preferences.close': 'Close preferences panel',
     'preferences.kicker': 'Meal planning',
@@ -425,7 +424,7 @@ export const messages = {
     'planner.emptyTitle': 'Todavía no hay Menú Semanal',
     'planner.emptyBody':
       'Genera un menú a partir de tus recetas guardadas. Los espacios de casa se quedan vacíos hasta que se asigne una receta.',
-    'planner.currentWeek': 'Semana Calendario actual',
+    'planner.currentWeek': 'Semana actual',
     'planner.shoppingHelper':
       'Ingredientes de las comidas en casa planificadas esta semana.',
     'planner.shoppingEmpty':
@@ -433,7 +432,6 @@ export const messages = {
     'tabs.menu': 'Menú Semanal',
     'tabs.ingredients': 'Lista de la compra',
     'meal.unplannedName': 'Sin comida planificada en casa',
-    'meal.coveredByContext': 'Cubierto por el contexto de {context}.',
     'meal.outsideScope': 'Fuera del alcance de planificación actual.',
     'preferences.close': 'Cerrar panel de preferencias',
     'preferences.kicker': 'Planificación de comidas',

@@ -30,7 +30,7 @@
 
 ## Screenshots
 
-<!-- Add screenshots or recordings for UI changes. Remove this section when not applicable. -->
+<!-- For every frontend/UI change, attach screenshot(s) showing the changed UI here so reviewers can inspect the result. Include relevant desktop/mobile states when the change affects responsive layouts. Write "Not applicable" only when the PR has no frontend/UI changes. -->
 
 ## Checklist
 
@@ -42,4 +42,5 @@
 - [ ] Tests pass
 - [ ] Lint, formatting, and type checks pass where applicable
 - [ ] Documentation was updated where necessary
+- [ ] Frontend/UI changes include screenshot evidence in the Screenshots section
 - [ ] Breaking changes or migrations are clearly documented

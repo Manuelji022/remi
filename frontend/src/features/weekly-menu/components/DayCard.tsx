@@ -71,11 +71,6 @@ function MealSlotDisplay({ meal, slot, editableMeal }: MealSlotDisplayProps) {
     <div className={`meal-slot ${home ? '' : 'unplanned'}`}>
       <span className="meal-label">{t(`slots.${slot}`)}</span>
       <span className="meal-name">{name}</span>
-      {meal.kind === 'covered'
-        ? t('meal.coveredByContext', {
-            context: t(`contexts.${meal.context}`).toLowerCase(),
-          })
-        : null}
       {meal.kind === 'outside' ? t('meal.outsideScope') : null}
       {editableMeal && (
         <label className="meal-recipe-editor">
