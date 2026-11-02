@@ -107,6 +107,114 @@
     gap: var(--gap-stack-md);
   }
 
+  .planner-ai-preview {
+    display: grid;
+    gap: var(--gap-stack-md);
+  }
+
+  .planner-ai-preview-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--gap-inline-lg);
+    flex-wrap: wrap;
+    padding: var(--pad-card);
+    background: var(--bg-surface);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card);
+  }
+
+  .planner-ai-preview-banner > div:first-child {
+    display: grid;
+    gap: var(--gap-stack-xs);
+  }
+
+  .planner-ai-preview-banner p {
+    color: var(--text-secondary);
+    font-size: var(--type-body-size);
+    line-height: var(--type-body-lh);
+  }
+
+  .planner-ai-preview-kicker {
+    color: var(--text-primary) !important;
+    font-weight: var(--weight-semibold);
+  }
+
+  .planner-ai-preview-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-inline);
+    flex-wrap: wrap;
+  }
+
+  .planner-ai-shortage {
+    padding: var(--pad-card-compact);
+    color: var(--text-secondary);
+    background: var(--bg-surface);
+    border-inline-start: var(--border-width-control) solid var(--accent-solid);
+    border-radius: var(--radius-card);
+  }
+
+  .planner-ai-dialog,
+  .planner-ai-discard-dialog {
+    position: fixed;
+    inset: 50% auto auto 50%;
+    transform: translate(-50%, -50%);
+    margin: 0;
+    inline-size: min(calc(100% - 2rem), 58rem);
+    max-block-size: min(92dvh, 58rem);
+    overflow-y: auto;
+    padding: var(--pad-card);
+    background: var(--bg-page);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-raised);
+  }
+
+  .planner-ai-dialog::backdrop,
+  .planner-ai-discard-dialog::backdrop {
+    background: rgb(24 31 28 / 58%);
+  }
+
+  .planner-ai-dialog-header h2,
+  .planner-ai-discard-dialog h2 {
+    font-size: var(--type-title-size);
+    line-height: var(--type-title-lh);
+  }
+
+  .planner-ai-dialog-range {
+    margin-block-start: var(--gap-stack-xs);
+    color: var(--text-secondary);
+  }
+
+  .planner-ai-dialog-copy {
+    margin-block: var(--gap-stack-md);
+    color: var(--text-secondary);
+  }
+
+  .planner-ai-schedule-fields {
+    min-inline-size: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .planner-ai-dialog-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--gap-inline);
+    margin-block-start: var(--gap-stack-md);
+  }
+
+  .planner-ai-discard-dialog {
+    inline-size: min(100%, 32rem);
+  }
+
+  .planner-ai-discard-dialog p {
+    margin-block-start: var(--gap-stack-sm);
+    color: var(--text-secondary);
+    line-height: var(--type-body-lh);
+  }
+
   .planner-shopping-tab {
     display: grid;
     gap: var(--gap-stack-md);

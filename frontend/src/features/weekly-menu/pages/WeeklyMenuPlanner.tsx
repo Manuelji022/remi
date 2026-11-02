@@ -1,56 +1,38 @@
 import './weekly-menu-planner.css'
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
-import { DayCard } from '../components/DayCard'
-import { LoadingDots } from '../components/LoadingDots'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useBlocker } from '@tanstack/react-router'
+import { AiMenuPreview } from '../components/AiMenuPreview'
+import { MenuTab } from '../components/MenuTab'
+import { PlannerHeader } from '../components/PlannerHeader'
 import { MainTab } from '../components/MainTab'
 import { PreferencesPanel } from '../components/preferences-panel'
-import {
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  SettingsIcon,
-  SparkleIcon,
-} from '#/components/primitives'
+import { AiGenerationScheduleDialog } from '../components/AiGenerationScheduleDialog'
+import { DiscardPreviewDialog } from '../components/DiscardPreviewDialog'
+import type { Day } from '#/features/weekly-menu/constants'
 import { formatRecipeIngredient } from '#/features/recipes/format'
-import {
-  DAYS,
-  getWeekNumber,
-  isWeekend,
-} from '#/features/weekly-menu/constants'
 import {
   getActivePreferencesBadgeCount,
   getDefaultPreferences,
 } from '#/features/weekly-menu/types'
-import type { Preferences } from '#/features/weekly-menu/types'
+import type {
+  DayContext,
+  PlanningScope,
+  Preferences,
+} from '#/features/weekly-menu/types'
 import { authClient } from '#/features/auth/auth-client'
-import {
-  loadWeeklyMenu,
-  saveWeeklyMenu,
-} from '#/features/weekly-menu/functions'
+import { useAiMenuGeneration } from '#/features/weekly-menu/hooks/useAiMenuGeneration'
+import { usePlannerWeek } from '#/features/weekly-menu/hooks/usePlannerWeek'
 import { shoppingList } from '#/features/weekly-menu/shopping'
 import type { ShoppingLine } from '#/features/weekly-menu/shopping'
 import {
   applySchedule,
   assignRecipesToWeek,
   emptyMenu,
-  placedRecipeIds,
   scheduleFromMenu,
-  showMenuDay,
-  shiftWeekStart,
   viewWeekStart,
+  weekStartFromDate,
 } from '#/features/weekly-menu/week'
-import type {
-  CalendarWeekMenu,
-  LoadedMenuWeek,
-} from '#/features/weekly-menu/week'
-import type { Recipe, RecipeInput } from '#/features/recipes/recipe'
-import { listRecipes } from '#/features/recipes/functions'
+import type { MealSlot, RecipeInput } from '#/features/recipes/recipe'
 import { useI18n } from '#/shared/i18n'
 import {
   getBrowserStorage,
@@ -59,16 +41,6 @@ import {
 } from '#/features/weekly-menu/planner-storage'
 
 type MainTabId = 'menu' | 'ingredients'
-type PlannerIdentity = { userId: string; weekStart: string }
-type PlannerData = PlannerIdentity &
-  (
-    | { status: 'loading' | 'error' }
-    | { status: 'ready'; week: LoadedMenuWeek; recipes: Recipe[] }
-  )
-type PlannerAction = PlannerIdentity & {
-  kind: 'generate' | 'save'
-  status: 'pending' | 'error' | 'success'
-}
 
 export function WeeklyMenuPlanner() {
   const { t, formatWeekRange } = useI18n()
@@ -84,36 +56,64 @@ export function WeeklyMenuPlanner() {
   const [legacyCustomRecipes, setLegacyCustomRecipes] = useState<RecipeInput[]>(
     [],
   )
-  const [data, setData] = useState<PlannerData | null>(null)
-  const [action, setAction] = useState<PlannerAction | null>(null)
   const [isRecipeMutationPending, setIsRecipeMutationPending] = useState(false)
-  const [loadAttempt, setLoadAttempt] = useState(0)
   const [guestGridOpen, setGuestGridOpen] = useState(false)
   const [isHydrated, setIsHydrated] = useState(false)
+  const [showDiscardConfirmation, setShowDiscardConfirmation] = useState(false)
+  const [discardWeekOffset, setDiscardWeekOffset] = useState<number | null>(
+    null,
+  )
   const hasLoadedRef = useRef(false)
-  const preferencesOpenRef = useRef(false)
-  const loadGenerationRef = useRef(0)
-  const writeInFlightRef = useRef<PlannerAction | null>(null)
+  const scheduleOpenerRef = useRef<HTMLElement | null>(null)
+  const scheduleHeaderButtonRef = useRef<HTMLButtonElement | null>(null)
   const { data: session, isPending: isSessionPending } = authClient.useSession()
   const userId = session?.user.id
-  const viewedWeek = viewWeekStart(new Date(), weekOffset)
-  const currentViewRef = useRef({ userId, viewedWeek, isSessionPending })
-  useLayoutEffect(() => {
-    currentViewRef.current = { userId, viewedWeek, isSessionPending }
-  }, [userId, viewedWeek, isSessionPending])
+  const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone
+  const onPreviewWeek = useCallback(
+    (target: string) => setWeekOffset(calendarWeekOffset(target)),
+    [],
+  )
+  const aiGeneration = useAiMenuGeneration({ userId, timeZone, onPreviewWeek })
+  const currentPreview =
+    aiGeneration.preview?.userId === userId ? aiGeneration.preview : null
+  const hasUnsavedPreview = aiGeneration.hasUnsavedPreview
+  const viewedWeek =
+    currentPreview?.menu.weekStart ?? viewWeekStart(new Date(), weekOffset)
+  const plannerWeek = usePlannerWeek({
+    userId,
+    weekStart: viewedWeek,
+    enabled: isHydrated && !isSessionPending,
+    preferencesOpen: isPreferencesOpen,
+  })
+  const { data, action } = plannerWeek
 
-  const currentData =
-    data?.userId === userId && data?.weekStart === viewedWeek ? data : null
+  const activeWeekStart = currentPreview?.menu.weekStart ?? viewedWeek
+  const currentData = data
   const readyData = currentData?.status === 'ready' ? currentData : null
-  const currentAction =
-    action?.userId === userId && action?.weekStart === viewedWeek
-      ? action
+  const currentAction = action?.weekStart === activeWeekStart ? action : null
+  const currentGeneration =
+    aiGeneration.state.phase === 'error' && aiGeneration.state.userId === userId
+      ? aiGeneration.state
       : null
-  const isGenerating =
-    currentAction?.kind === 'generate' && currentAction.status === 'pending'
+  const scheduleDialog =
+    aiGeneration.state.phase === 'confirming' ||
+    aiGeneration.state.phase === 'generating'
+      ? aiGeneration.state
+      : null
+  const scheduleDraft = scheduleDialog?.draft
+  const isPreparingSchedule = aiGeneration.isPreparing
+  const schedulePreparationError = currentGeneration?.reason === 'prepare'
+  const isGenerating = aiGeneration.isGenerating
   const isSavingPreferences =
     currentAction?.kind === 'save' && currentAction.status === 'pending'
-  const isWriting = isGenerating || isSavingPreferences
+  const isAcceptingPreview =
+    currentAction?.kind === 'accept' && currentAction.status === 'pending'
+  const isWriting =
+    isGenerating ||
+    isSavingPreferences ||
+    isAcceptingPreview ||
+    aiGeneration.isPreparing ||
+    aiGeneration.isSaving
   const isLoading =
     !isHydrated ||
     isSessionPending ||
@@ -129,21 +129,36 @@ export function WeeklyMenuPlanner() {
     () => (menuWeek ? scheduleFromMenu(menuWeek) : guestPreferences),
     [menuWeek, guestPreferences],
   )
-  const selectedWeekDate = new Date()
-  selectedWeekDate.setDate(selectedWeekDate.getDate() + weekOffset * 7)
+  const displayPreferences = currentPreview
+    ? scheduleFromMenu(currentPreview.menu)
+    : savedPreferences
+  const selectedWeekDate = currentPreview
+    ? dateFromWeekStart(currentPreview.menu.weekStart)
+    : new Date()
+  if (!currentPreview) {
+    selectedWeekDate.setDate(selectedWeekDate.getDate() + weekOffset * 7)
+  }
   const weekRange = formatWeekRange(selectedWeekDate)
-  const activePreferenceCount = getActivePreferencesBadgeCount(savedPreferences)
-  const visibleMenu = userId
-    ? readyData?.week.hasSavedMenu
-      ? readyData.week.menu
-      : null
-    : guestGridOpen
-      ? assignRecipesToWeek(
-          applySchedule(emptyMenu(viewedWeek), savedPreferences),
-          [],
-        )
-      : null
-  const shoppingEnabled = Boolean(userId && readyData?.week.hasSavedMenu)
+  const activePreferenceCount =
+    getActivePreferencesBadgeCount(displayPreferences)
+  const previewCatalogReady = Boolean(
+    currentPreview && readyData?.weekStart === currentPreview.menu.weekStart,
+  )
+  const visibleMenu = currentPreview
+    ? currentPreview.menu
+    : userId
+      ? readyData?.week.hasSavedMenu
+        ? readyData.week.menu
+        : null
+      : guestGridOpen
+        ? assignRecipesToWeek(
+            applySchedule(emptyMenu(viewedWeek), savedPreferences),
+            [],
+          )
+        : null
+  const shoppingEnabled = Boolean(
+    userId && !currentPreview && readyData?.week.hasSavedMenu,
+  )
   const lines =
     shoppingEnabled && readyData
       ? shoppingList(readyData.week.menu, readyData.recipes)
@@ -152,6 +167,22 @@ export function WeeklyMenuPlanner() {
     currentAction?.kind === 'save' && currentAction.status === 'error'
       ? t('planner.saveError')
       : null
+  const previewSaveError =
+    currentGeneration?.reason === 'save' ? t('planner.previewSaveError') : null
+  const routeBlocker = useBlocker({
+    shouldBlockFn: () => hasUnsavedPreview,
+    enableBeforeUnload: () => hasUnsavedPreview,
+    withResolver: true,
+  })
+  const isDiscardDialogOpen =
+    showDiscardConfirmation || routeBlocker.status === 'blocked'
+
+  useEffect(() => {
+    if (hasUnsavedPreview) return
+    setShowDiscardConfirmation(false)
+    setDiscardWeekOffset(null)
+    if (routeBlocker.status === 'blocked') routeBlocker.reset()
+  }, [hasUnsavedPreview, routeBlocker])
 
   useEffect(() => {
     if (hasLoadedRef.current) return
@@ -173,284 +204,210 @@ export function WeeklyMenuPlanner() {
   }, [isHydrated, legacyCustomRecipes, guestPreferences])
 
   useEffect(() => {
-    const generation = ++loadGenerationRef.current
-    setAction(null)
     setIsPreferencesOpen(false)
     setActiveTab('menu')
-    if (!userId || !isHydrated || isSessionPending) {
-      setData(null)
-      return
-    }
-
-    let cancelled = false
-    const identity = { userId, weekStart: viewedWeek }
-    setData({ ...identity, status: 'loading' })
-    void Promise.all([
-      loadWeeklyMenu({ data: { weekStart: viewedWeek } }),
-      listRecipes(),
-    ])
-      .then(([week, recipes]) => {
-        if (cancelled || generation !== loadGenerationRef.current) return
-        setData({ ...identity, status: 'ready', week, recipes })
-      })
-      .catch(() => {
-        if (cancelled || generation !== loadGenerationRef.current) return
-        setData({ ...identity, status: 'error' })
-      })
-
-    return () => {
-      cancelled = true
-      loadGenerationRef.current += 1
-    }
-  }, [isHydrated, isSessionPending, userId, viewedWeek, loadAttempt])
-
-  useEffect(() => {
-    const wasOpen = preferencesOpenRef.current
-    preferencesOpenRef.current = isPreferencesOpen
-    if (!userId || !wasOpen || isPreferencesOpen) return
-
-    let cancelled = false
-    const generation = loadGenerationRef.current
-    void listRecipes()
-      .then((recipes) => {
-        if (cancelled || generation !== loadGenerationRef.current) return
-        setData((current) =>
-          current?.status === 'ready' &&
-          current.userId === userId &&
-          current.weekStart === viewedWeek
-            ? { ...current, recipes }
-            : current,
-        )
-      })
-      .catch(() => {
-        if (cancelled || generation !== loadGenerationRef.current) return
-        setData({ userId, weekStart: viewedWeek, status: 'error' })
-      })
-
-    return () => {
-      cancelled = true
-    }
-  }, [isPreferencesOpen, userId, viewedWeek])
+  }, [userId, viewedWeek])
 
   function handleRetryLoad() {
-    if (isWriting) return
-    setData(null)
-    setLoadAttempt((attempt) => attempt + 1)
+    if (!isWriting) plannerWeek.retry()
   }
 
-  const handleRecipeMutation = useCallback(async () => {
-    const view = currentViewRef.current
-    if (!view.userId || view.isSessionPending) return
-
-    const identity = { userId: view.userId, weekStart: view.viewedWeek }
-    const generation = ++loadGenerationRef.current
-    const isCurrent = () => {
-      const currentView = currentViewRef.current
-      return (
-        generation === loadGenerationRef.current &&
-        currentView.userId === identity.userId &&
-        currentView.viewedWeek === identity.weekStart &&
-        !currentView.isSessionPending
-      )
-    }
-
-    setAction(null)
-
-    try {
-      const [week, recipes] = await Promise.all([
-        loadWeeklyMenu({ data: { weekStart: identity.weekStart } }),
-        listRecipes(),
-      ])
-      if (isCurrent()) {
-        setData({ ...identity, status: 'ready', week, recipes })
-      }
-    } catch {
-      if (isCurrent()) setData({ ...identity, status: 'error' })
-    }
-  }, [])
+  const handleRecipeMutation = plannerWeek.refreshAfterRecipeMutation
 
   function handleOpenPreferences() {
-    if (!canWrite || isWriting) return
-    setAction(null)
+    if (!canWrite || isWriting || currentPreview) return
+    plannerWeek.clearAction()
     setIsPreferencesOpen(true)
   }
 
-  async function writeMenu(
-    kind: PlannerAction['kind'],
-    preferences?: Preferences,
+  async function openGenerationSchedule(
+    initialPreferences?: Preferences,
+    mode: 'new' | 'edit' = 'new',
+    targetOverride?: string,
+    previewValue?: NonNullable<typeof currentPreview>,
+    focusReturnFallback?: HTMLElement | null,
   ) {
-    if (!canWrite || !readyData || !userId) return
-    const pending = writeInFlightRef.current
-    if (pending?.userId === userId && pending.weekStart === viewedWeek) return
-
-    const operation: PlannerAction = {
-      userId,
-      weekStart: viewedWeek,
-      kind,
-      status: 'pending',
-    }
-    const generation = ++loadGenerationRef.current
-    const isCurrent = () => {
-      const view = currentViewRef.current
-      return (
-        generation === loadGenerationRef.current &&
-        view.userId === operation.userId &&
-        view.viewedWeek === operation.weekStart &&
-        !view.isSessionPending
-      )
-    }
-    writeInFlightRef.current = operation
-    setAction(operation)
-
-    try {
-      let next = readyData.week.menu
-      let recipes = readyData.recipes
-      if (kind === 'generate') {
-        const [catalog, priorWeek] = await Promise.all([
-          listRecipes(),
-          loadWeeklyMenu({
-            data: { weekStart: shiftWeekStart(operation.weekStart, -1) },
-          }),
-        ])
-        if (!isCurrent()) return
-        recipes = catalog
-        next = assignRecipesToWeek(
-          next,
-          catalog.map((recipe) => ({ id: recipe.id, slot: recipe.slot })),
-          placedRecipeIds(priorWeek.menu),
-        )
-      } else if (preferences) {
-        next = applySchedule(next, preferences)
-      }
-
-      const week = await saveWeeklyMenu({ data: next })
-      if (!isCurrent()) return
-      setData({
-        userId: operation.userId,
-        weekStart: operation.weekStart,
-        status: 'ready',
-        week,
-        recipes,
-      })
-      setAction({ ...operation, status: 'success' })
-      if (kind === 'save') setIsPreferencesOpen(false)
-    } catch {
-      if (isCurrent()) setAction({ ...operation, status: 'error' })
-    } finally {
-      if (writeInFlightRef.current === operation)
-        writeInFlightRef.current = null
-    }
+    rememberScheduleOpener(focusReturnFallback)
+    await aiGeneration.openSchedule({
+      targetWeekStart: targetOverride,
+      mode,
+      preferences: initialPreferences,
+      preview: previewValue,
+    })
   }
 
   function handleGenerateMenu() {
-    if (!canWrite || isWriting) return
+    if (!canWrite || isWriting || currentPreview) return
     setActiveTab('menu')
+    plannerWeek.clearAction()
     if (!userId) {
       setGuestGridOpen(true)
       return
     }
-    void writeMenu('generate')
+    rememberScheduleOpener()
+    void aiGeneration.openSchedule()
+  }
+
+  function rememberScheduleOpener(fallback?: HTMLElement | null) {
+    const activeElement = document.activeElement
+    scheduleOpenerRef.current =
+      fallback ?? (activeElement instanceof HTMLElement ? activeElement : null)
+  }
+
+  function updateScheduleDayContext(day: Day, context: DayContext) {
+    aiGeneration.updateContext(day, context)
+  }
+
+  function updateSchedulePlanningScope(day: Day, scope: PlanningScope) {
+    aiGeneration.updateScope(day, scope)
+  }
+
+  function cancelScheduleConfirmation() {
+    aiGeneration.dismiss()
+  }
+
+  function confirmGenerationSchedule() {
+    plannerWeek.clearAction()
+    setActiveTab('menu')
+    void aiGeneration.confirm()
+  }
+
+  function handleRetryGeneration() {
+    rememberScheduleOpener(scheduleHeaderButtonRef.current)
+    void aiGeneration.retry()
+  }
+
+  async function acceptPreview() {
+    const current = currentPreview
+    const catalog = readyData
+    if (
+      !current ||
+      !userId ||
+      !catalog ||
+      catalog.weekStart !== current.weekStart ||
+      isWriting ||
+      plannerWeek.ownsAccept({ userId, weekStart: current.weekStart })
+    )
+      return
+    const accepted = await aiGeneration.accept((menu) =>
+      plannerWeek.acceptPreview(menu, catalog.recipes),
+    )
+    if (accepted) setWeekOffset(calendarWeekOffset(current.weekStart))
+  }
+
+  async function writeMenu(preferences?: Preferences) {
+    if (!canWrite || !readyData || !preferences) return
+    const saved = await plannerWeek.savePreferences(
+      preferences,
+      readyData.week.menu,
+    )
+    if (saved) setIsPreferencesOpen(false)
   }
 
   function handleSavePreferences(preferences: Preferences) {
-    if (!canWrite || isWriting) return
+    if (!canWrite || isWriting || currentPreview) return
     if (!userId) {
       setGuestPreferences(preferences)
       setIsPreferencesOpen(false)
       return
     }
-    void writeMenu('save', preferences)
+    void writeMenu(preferences)
+  }
+
+  function handlePreviewRecipeChange(
+    day: Day,
+    slot: MealSlot,
+    recipeId: string | null,
+  ) {
+    if (
+      userId &&
+      currentPreview &&
+      plannerWeek.ownsAccept({
+        userId,
+        weekStart: currentPreview.menu.weekStart,
+      })
+    )
+      return
+    aiGeneration.updateRecipe(day, slot, recipeId, readyData?.recipes ?? [])
+  }
+
+  function handleWeekNavigation(nextOffset: number) {
+    const clamped = Math.max(-1, Math.min(1, nextOffset))
+    if (currentPreview) {
+      setDiscardWeekOffset(clamped)
+      setShowDiscardConfirmation(true)
+      return
+    }
+    setWeekOffset(clamped)
+  }
+
+  function keepPreview() {
+    setShowDiscardConfirmation(false)
+    setDiscardWeekOffset(null)
+    if (routeBlocker.status === 'blocked') routeBlocker.reset()
+  }
+
+  function discardPreview() {
+    if (aiGeneration.isSaving || isAcceptingPreview) return
+    aiGeneration.discard()
+    setShowDiscardConfirmation(false)
+    const nextOffset = discardWeekOffset
+    setDiscardWeekOffset(null)
+    if (nextOffset !== null) setWeekOffset(nextOffset)
+    else if (routeBlocker.status !== 'blocked' && currentPreview) {
+      setWeekOffset(calendarWeekOffset(currentPreview.menu.weekStart))
+    }
+    if (routeBlocker.status === 'blocked') routeBlocker.proceed()
   }
 
   const handleLegacyRecipesMigrated = useCallback(() => {
     setLegacyCustomRecipes([])
   }, [])
 
+  const targetWeekRange = scheduleDialog
+    ? formatWeekRange(dateFromWeekStart(scheduleDialog.targetWeekStart))
+    : { start: '', end: '' }
+  const canAcceptPreview = Boolean(
+    userId &&
+    currentPreview &&
+    previewCatalogReady &&
+    !isSessionPending &&
+    isHydrated &&
+    !isRecipeMutationPending &&
+    !isWriting,
+  )
+  const generationErrorMessage =
+    currentGeneration?.reason === 'stale-week'
+      ? t('planner.aiStaleWeekError')
+      : currentGeneration?.reason === 'rate-limited'
+        ? t('planner.aiRateLimitError')
+        : currentGeneration?.reason === 'in-progress'
+          ? t('planner.aiInProgressError')
+          : currentGeneration?.reason === 'generate'
+            ? t('planner.aiGenerateError')
+            : null
+
   return (
     <main className="planner-page" id="main">
       <section className="planner-shell" aria-labelledby="planner-title">
-        <div className="planner-hero">
-          <div className="planner-card-meta">
-            <div
-              className="planner-week-nav"
-              aria-label={t('planner.weekNavigationLabel')}
-            >
-              <button
-                className="planner-week-nav-btn"
-                type="button"
-                aria-label={t('planner.previousWeek')}
-                disabled={weekOffset <= -1 || isWriting}
-                onClick={() =>
-                  setWeekOffset((offset) => Math.max(offset - 1, -1))
-                }
-              >
-                <ChevronLeftIcon aria-hidden="true" />
-              </button>
-              <p className="planner-week-pill" aria-live="polite">
-                {t('planner.weekKicker', {
-                  week: getWeekNumber(selectedWeekDate),
-                  start: weekRange.start,
-                  end: weekRange.end,
-                })}
-              </p>
-              {weekOffset === 0 && (
-                <span className="planner-current-week-label">
-                  {t('planner.currentWeek')}
-                </span>
-              )}
-              <button
-                className="planner-week-nav-btn"
-                type="button"
-                aria-label={t('planner.nextWeek')}
-                disabled={weekOffset >= 1 || isWriting}
-                onClick={() =>
-                  setWeekOffset((offset) => Math.min(offset + 1, 1))
-                }
-              >
-                <ChevronRightIcon aria-hidden="true" />
-              </button>
-            </div>
-          </div>
-
-          <div
-            className="planner-actions"
-            aria-label={t('planner.actionsLabel')}
-          >
-            <button
-              className="planner-secondary-btn"
-              type="button"
-              onClick={handleOpenPreferences}
-              disabled={!canWrite || isWriting}
-            >
-              <SettingsIcon aria-hidden="true" />
-              {t('planner.preferences')}
-              {activePreferenceCount > 0 && (
-                <span className="planner-btn-badge">
-                  {activePreferenceCount}
-                </span>
-              )}
-            </button>
-            <button
-              className="planner-primary-btn"
-              type="button"
-              onClick={handleGenerateMenu}
-              disabled={!canWrite || isWriting}
-            >
-              {isGenerating ? (
-                <>
-                  {t('planner.generating')} <LoadingDots />
-                </>
-              ) : (
-                <>
-                  <SparkleIcon aria-hidden="true" />
-                  {visibleMenu
-                    ? t('planner.regenerateMenu')
-                    : t('planner.generateMenu')}
-                </>
-              )}
-            </button>
-          </div>
-        </div>
+        <PlannerHeader
+          weekDate={selectedWeekDate}
+          weekRange={weekRange}
+          weekOffset={weekOffset}
+          isWriting={isWriting}
+          canWrite={canWrite}
+          hasPreview={Boolean(currentPreview)}
+          preferenceCount={activePreferenceCount}
+          isGenerating={isGenerating}
+          isPreparingSchedule={isPreparingSchedule}
+          hasMenu={Boolean(visibleMenu)}
+          onNavigate={handleWeekNavigation}
+          onOpenPreferences={handleOpenPreferences}
+          onGenerateMenu={handleGenerateMenu}
+          onGenerateButtonRef={(button) => {
+            scheduleHeaderButtonRef.current = button
+          }}
+        />
 
         <div className="planner-divider" />
 
@@ -463,20 +420,61 @@ export function WeeklyMenuPlanner() {
           />
         </div>
 
-        {currentAction?.kind === 'generate' &&
-          currentAction.status === 'error' && (
-            <div className="planner-feedback" role="alert">
-              <p>{t('planner.generateError')}</p>
+        {schedulePreparationError && (
+          <div className="planner-feedback" role="alert">
+            <p>{t('planner.aiScheduleLoadError')}</p>
+            <button
+              className="planner-secondary-btn"
+              type="button"
+              onClick={() => {
+                void openGenerationSchedule(
+                  undefined,
+                  'new',
+                  currentGeneration.targetWeekStart,
+                  undefined,
+                  scheduleHeaderButtonRef.current,
+                )
+              }}
+            >
+              {t('planner.aiRetryScheduleLoad')}
+            </button>
+          </div>
+        )}
+
+        {generationErrorMessage && (
+          <div className="planner-feedback" role="alert">
+            <p>{generationErrorMessage}</p>
+            {currentGeneration?.reason !== 'rate-limited' && (
               <button
                 className="planner-secondary-btn"
                 type="button"
-                onClick={handleGenerateMenu}
+                onClick={handleRetryGeneration}
                 disabled={!canWrite || isWriting}
               >
-                {t('planner.retryGenerate')}
+                {t(
+                  currentGeneration?.reason === 'stale-week'
+                    ? 'planner.aiReconfirmSchedule'
+                    : 'planner.retryGenerate',
+                )}
               </button>
-            </div>
-          )}
+            )}
+          </div>
+        )}
+
+        {previewSaveError && (
+          <div className="planner-feedback" role="alert">
+            <p>{previewSaveError}</p>
+            <button
+              className="planner-secondary-btn"
+              type="button"
+              onClick={() => void acceptPreview()}
+              disabled={!canAcceptPreview}
+            >
+              {t('planner.retryPreviewSave')}
+            </button>
+          </div>
+        )}
+
         {currentAction?.status === 'success' && (
           <p className="planner-feedback" role="status">
             {t(
@@ -487,11 +485,11 @@ export function WeeklyMenuPlanner() {
           </p>
         )}
 
-        {isLoading ? (
+        {isLoading && !currentPreview ? (
           <div className="planner-empty-state" role="status">
             <p>{t('planner.loadingWeek')}</p>
           </div>
-        ) : loadFailed ? (
+        ) : loadFailed && !currentPreview ? (
           <div className="planner-empty-state" role="alert">
             <h2>{t('planner.loadErrorTitle')}</h2>
             <p>{t('planner.loadErrorBody')}</p>
@@ -504,12 +502,42 @@ export function WeeklyMenuPlanner() {
             </button>
           </div>
         ) : activeTab === 'menu' ? (
-          <MenuTab
-            isGenerating={isGenerating}
-            menu={visibleMenu}
-            onGenerateMenu={handleGenerateMenu}
-            recipeNames={readyData?.week.recipeNames ?? {}}
-          />
+          currentPreview ? (
+            <AiMenuPreview
+              menu={currentPreview.menu}
+              recipeNames={currentPreview.recipeNames}
+              unavailableSlots={currentPreview.unavailableSlots}
+              recipes={readyData?.recipes}
+              isCatalogReady={previewCatalogReady}
+              hasCatalogLoadFailed={loadFailed}
+              isWriting={isWriting}
+              isAccepting={isAcceptingPreview}
+              isSaveUnconfirmed={Boolean(previewSaveError)}
+              canAccept={canAcceptPreview}
+              isSignedIn={Boolean(userId)}
+              onEditSchedule={() =>
+                void openGenerationSchedule(
+                  undefined,
+                  'edit',
+                  currentPreview.menu.weekStart,
+                  currentPreview,
+                )
+              }
+              onDiscard={() => setShowDiscardConfirmation(true)}
+              onAccept={() => void acceptPreview()}
+              onRetryCatalog={handleRetryLoad}
+              onGenerateMenu={handleGenerateMenu}
+              onUpdateRecipe={handlePreviewRecipeChange}
+            />
+          ) : (
+            <MenuTab
+              isGenerating={isGenerating}
+              menu={visibleMenu}
+              onGenerateMenu={handleGenerateMenu}
+              recipeNames={readyData?.week.recipeNames ?? {}}
+              isSignedIn={Boolean(userId)}
+            />
+          )
         ) : shoppingEnabled ? (
           <ShoppingTab
             lines={lines}
@@ -527,13 +555,35 @@ export function WeeklyMenuPlanner() {
         ) : null}
       </section>
 
+      {scheduleDialog && scheduleDraft && (
+        <AiGenerationScheduleDialog
+          isPending={isGenerating}
+          preferences={scheduleDraft}
+          targetWeekRange={targetWeekRange}
+          returnFocusTo={scheduleOpenerRef.current}
+          onCancel={cancelScheduleConfirmation}
+          onConfirm={() => void confirmGenerationSchedule()}
+          onUpdateDayContext={updateScheduleDayContext}
+          onUpdatePlanningScope={updateSchedulePlanningScope}
+        />
+      )}
+
+      {isDiscardDialogOpen && hasUnsavedPreview && (
+        <DiscardPreviewDialog
+          onKeep={keepPreview}
+          onDiscard={discardPreview}
+          isSaving={aiGeneration.isSaving || isAcceptingPreview}
+          isSaveUnconfirmed={Boolean(previewSaveError)}
+        />
+      )}
+
       <PreferencesPanel
         isOpen={isPreferencesOpen}
         isSaving={isSavingPreferences}
         isRecipeMutationPending={isRecipeMutationPending}
         onRecipeMutation={handleRecipeMutation}
         onRecipeMutationPendingChange={setIsRecipeMutationPending}
-        saveDisabled={!canWrite || isWriting}
+        saveDisabled={!canWrite || isWriting || Boolean(currentPreview)}
         saveError={saveError}
         legacyCustomRecipes={legacyCustomRecipes}
         onClose={() => {
@@ -547,71 +597,20 @@ export function WeeklyMenuPlanner() {
   )
 }
 
-interface MenuTabProps {
-  isGenerating: boolean
-  menu: CalendarWeekMenu | null
-  onGenerateMenu: () => void
-  recipeNames: Record<string, string>
+function dateFromWeekStart(weekStart: string): Date {
+  const [year, month, day] = weekStart.split('-').map(Number)
+  return new Date(year, month - 1, day, 12)
 }
 
-function MenuTab({
-  isGenerating,
-  menu,
-  onGenerateMenu,
-  recipeNames,
-}: MenuTabProps) {
-  const { t } = useI18n()
-
-  if (isGenerating) {
-    return (
-      <div className="planner-empty-state" role="status" aria-live="polite">
-        <SparkleIcon aria-hidden="true" />
-        <h2>{t('planner.buildingTitle')}</h2>
-        <p>{t('planner.buildingBody')}</p>
-      </div>
-    )
+function calendarWeekOffset(targetWeekStart: string): number {
+  const currentWeekStart = weekStartFromDate(new Date())
+  const dateNumber = (value: string) => {
+    const [year, month, day] = value.split('-').map(Number)
+    return Date.UTC(year, month - 1, day)
   }
-
-  if (!menu) {
-    return (
-      <div className="planner-empty-state">
-        <SparkleIcon aria-hidden="true" />
-        <h2>{t('planner.emptyTitle')}</h2>
-        <p>{t('planner.emptyBody')}</p>
-        <button
-          className="planner-primary-btn"
-          type="button"
-          onClick={onGenerateMenu}
-        >
-          <SparkleIcon aria-hidden="true" />
-          {t('planner.generateMenu')}
-        </button>
-      </div>
-    )
-  }
-
-  return (
-    <div className="planner-menu-tab">
-      <div className="planner-section-heading"></div>
-
-      <div className="planner-day-grid">
-        {DAYS.map((day, index) => {
-          const shown = showMenuDay(menu.days[day], recipeNames)
-
-          return (
-            <div className={`delay-${index + 1}`} key={day}>
-              <DayCard
-                day={day}
-                dayContext={shown.context}
-                dinner={shown.dinner}
-                isWeekend={isWeekend(day)}
-                lunch={shown.lunch}
-              />
-            </div>
-          )
-        })}
-      </div>
-    </div>
+  return Math.round(
+    (dateNumber(targetWeekStart) - dateNumber(currentWeekStart)) /
+      (7 * 24 * 60 * 60 * 1000),
   )
 }
 

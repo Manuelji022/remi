@@ -45,4 +45,15 @@
   .meal-slot.unplanned .meal-name {
     color: var(--text-secondary);
   }
+
+  .meal-recipe-editor {
+    display: grid;
+    gap: var(--gap-stack-xs);
+    margin-block-start: var(--gap-stack-sm);
+  }
+
+  .meal-recipe-editor select {
+    min-inline-size: 0;
+    inline-size: 100%;
+  }
 }

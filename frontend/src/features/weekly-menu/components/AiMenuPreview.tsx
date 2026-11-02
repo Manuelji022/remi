@@ -1,0 +1,134 @@
+import { MenuTab } from './MenuTab'
+import type { Day } from '../constants'
+import type { CalendarWeekMenu } from '../week'
+import type { MealSlot, Recipe } from '#/features/recipes/recipe'
+import { useI18n } from '#/shared/i18n'
+
+interface AiMenuPreviewProps {
+  menu: CalendarWeekMenu
+  recipeNames: Record<string, string>
+  unavailableSlots: readonly MealSlot[]
+  recipes?: readonly Recipe[]
+  isCatalogReady: boolean
+  hasCatalogLoadFailed: boolean
+  isWriting: boolean
+  isAccepting: boolean
+  isSaveUnconfirmed: boolean
+  canAccept: boolean
+  isSignedIn: boolean
+  onEditSchedule: () => void
+  onDiscard: () => void
+  onAccept: () => void
+  onRetryCatalog: () => void
+  onGenerateMenu: () => void
+  onUpdateRecipe: (day: Day, slot: MealSlot, recipeId: string | null) => void
+}
+
+export function AiMenuPreview({
+  menu,
+  recipeNames,
+  unavailableSlots,
+  recipes,
+  isCatalogReady,
+  hasCatalogLoadFailed,
+  isWriting,
+  isAccepting,
+  isSaveUnconfirmed,
+  canAccept,
+  isSignedIn,
+  onEditSchedule,
+  onDiscard,
+  onAccept,
+  onRetryCatalog,
+  onGenerateMenu,
+  onUpdateRecipe,
+}: AiMenuPreviewProps) {
+  const { t } = useI18n()
+
+  return (
+    <div className="planner-ai-preview">
+      <div className="planner-ai-preview-banner" aria-live="polite">
+        <div>
+          <p className="planner-ai-preview-kicker">
+            {t('planner.aiPreviewLabel')}
+          </p>
+          <p>
+            {t(
+              isSaveUnconfirmed
+                ? 'planner.aiPreviewSaveUnconfirmed'
+                : 'planner.aiPreviewBody',
+            )}
+          </p>
+        </div>
+        <div className="planner-ai-preview-actions">
+          <button
+            className="planner-secondary-btn"
+            type="button"
+            onClick={onEditSchedule}
+            disabled={isWriting}
+          >
+            {t('planner.aiEditSchedule')}
+          </button>
+          <button
+            className="planner-secondary-btn"
+            type="button"
+            onClick={onDiscard}
+            disabled={isWriting}
+          >
+            {t('planner.aiDiscardPreview')}
+          </button>
+          <button
+            className="planner-primary-btn"
+            type="button"
+            onClick={onAccept}
+            disabled={!canAccept}
+          >
+            {t(
+              isAccepting
+                ? 'planner.aiSavingPreview'
+                : 'planner.aiAcceptPreview',
+            )}
+          </button>
+        </div>
+      </div>
+      {unavailableSlots.map((slot) => (
+        <p className="planner-ai-shortage" key={slot} role="status">
+          {t(
+            slot === 'lunch'
+              ? 'planner.aiNoLunchRecipes'
+              : 'planner.aiNoDinnerRecipes',
+          )}
+        </p>
+      ))}
+      {!isCatalogReady && hasCatalogLoadFailed && (
+        <div className="planner-feedback" role="alert">
+          <p>{t('planner.loadErrorBody')}</p>
+          <button
+            className="planner-secondary-btn"
+            type="button"
+            onClick={onRetryCatalog}
+          >
+            {t('planner.retryLoad')}
+          </button>
+        </div>
+      )}
+      {!isCatalogReady && !hasCatalogLoadFailed && (
+        <p className="planner-feedback" role="status">
+          {t('planner.loadingWeek')}
+        </p>
+      )}
+      <div className="planner-ai-preview-menu">
+        <MenuTab
+          editableRecipes={isCatalogReady ? recipes : undefined}
+          isGenerating={false}
+          menu={menu}
+          onGenerateMenu={onGenerateMenu}
+          onUpdateRecipe={onUpdateRecipe}
+          areRecipeEditsDisabled={isAccepting}
+          recipeNames={recipeNames}
+          isSignedIn={isSignedIn}
+        />
+      </div>
+    </div>
+  )
+}

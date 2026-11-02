@@ -129,6 +129,53 @@ export const messages = {
       'Could not confirm your preferences were saved. Your draft is still here. Retry saving, or reload to check the saved week.',
     'planner.preferencesSaved': 'Preferences saved.',
     'planner.menuSaved': 'Weekly Menu saved.',
+    'planner.aiPreparingSchedule': 'Loading next week’s schedule',
+    'planner.aiScheduleLoadError':
+      'Could not load next week’s saved schedule. Retry before generating.',
+    'planner.aiRetryScheduleLoad': 'Retry schedule loading',
+    'planner.aiScheduleKicker': 'AI Weekly Menu',
+    'planner.aiScheduleTitle': 'Review next week’s schedule',
+    'planner.aiScheduleBody':
+      'Review all seven days and confirm which meals still need planning at home. Generating creates a preview; your saved menu stays unchanged until you accept it.',
+    'planner.aiConfirmSchedule': 'Confirm schedule and generate',
+    'planner.aiGenerateError':
+      'Could not generate next week’s menu. Your saved menu is unchanged. Review and confirm the schedule to retry.',
+    'planner.aiStaleWeekError':
+      'The Calendar Week changed. Review and confirm the new schedule before generating.',
+    'planner.aiRateLimitError':
+      'You have reached the AI menu request limit. Try again after the rolling-hour limit resets.',
+    'planner.aiInProgressError':
+      'An AI menu is already being generated for your account. Wait for it to finish before retrying.',
+    'planner.aiReconfirmSchedule': 'Review schedule and retry',
+    'planner.aiPreviewLabel': 'AI Weekly Menu preview',
+    'planner.aiPreviewBody':
+      'This is a fresh full-week replacement preview. Your saved menu has not changed.',
+    'planner.aiPreviewSaveUnconfirmed':
+      'This is a fresh full-week replacement preview. The save result is unconfirmed, so your saved menu may have changed. Reload to check before retrying.',
+    'planner.aiPreviewRecipeSelect': 'Choose a saved {slot} recipe',
+    'planner.aiPreviewNoRecipe': 'No recipe',
+    'planner.aiEditSchedule': 'Edit target schedule',
+    'planner.aiDiscardPreview': 'Discard preview',
+    'planner.aiAcceptPreview': 'Accept and save menu',
+    'planner.aiSavingPreview': 'Saving menu...',
+    'planner.aiDiscardTitle': 'Discard this generated preview?',
+    'planner.aiDiscardBody':
+      'Your saved menu has not changed. Discarding or leaving this page will remove this preview.',
+    'planner.aiDiscardSaveUnconfirmed':
+      'The save result is unconfirmed. Your saved menu may have changed. Reload to check before discarding this preview.',
+    'planner.aiDiscardSaving':
+      'Wait for saving to finish before leaving or discarding this preview.',
+    'planner.aiKeepPreview': 'Keep preview',
+    'planner.aiConfirmDiscardPreview': 'Discard generated preview',
+    'planner.previewSaveError':
+      'Could not confirm the preview was saved. The preview is still here. Reload to check the saved menu before retrying.',
+    'planner.retryPreviewSave': 'Retry saving menu',
+    'planner.aiNoLunchRecipes':
+      'No saved lunch recipes are available. Required lunch slots stay empty until a lunch recipe is saved.',
+    'planner.aiNoDinnerRecipes':
+      'No saved dinner recipes are available. Required dinner slots stay empty until a dinner recipe is saved.',
+    'planner.aiSignInRequired':
+      'Sign in to use AI generation. Guest planning stays available here.',
     'planner.generateMenu': 'Generate menu',
     'planner.regenerateMenu': 'Regenerate menu',
     'planner.buildingTitle': 'Building your Weekly Menu',
@@ -323,6 +370,53 @@ export const messages = {
       'No se pudo confirmar el guardado de tus preferencias. Tu borrador sigue aquí. Reintenta guardarlo o recarga para comprobar la semana guardada.',
     'planner.preferencesSaved': 'Preferencias guardadas.',
     'planner.menuSaved': 'Menú Semanal guardado.',
+    'planner.aiPreparingSchedule': 'Cargando la agenda de la próxima semana',
+    'planner.aiScheduleLoadError':
+      'No se pudo cargar la agenda guardada de la próxima semana. Vuelve a intentarlo antes de generar.',
+    'planner.aiRetryScheduleLoad': 'Volver a cargar la agenda',
+    'planner.aiScheduleKicker': 'Menú Semanal con IA',
+    'planner.aiScheduleTitle': 'Revisa la agenda de la próxima semana',
+    'planner.aiScheduleBody':
+      'Revisa los siete días y confirma qué comidas todavía necesitan planificación en casa. La generación crea una vista previa; el menú guardado no cambia hasta que la aceptes.',
+    'planner.aiConfirmSchedule': 'Confirmar agenda y generar',
+    'planner.aiGenerateError':
+      'No se pudo generar el menú de la próxima semana. El menú guardado no ha cambiado. Revisa y confirma la agenda para volver a intentarlo.',
+    'planner.aiStaleWeekError':
+      'La Semana Calendario ha cambiado. Revisa y confirma la nueva agenda antes de generar.',
+    'planner.aiRateLimitError':
+      'Has alcanzado el límite de solicitudes de menús con IA. Vuelve a intentarlo cuando se reinicie el límite de la última hora.',
+    'planner.aiInProgressError':
+      'Ya se está generando un menú con IA para tu cuenta. Espera a que termine antes de volver a intentarlo.',
+    'planner.aiReconfirmSchedule': 'Revisar agenda y reintentar',
+    'planner.aiPreviewLabel': 'Vista previa del Menú Semanal con IA',
+    'planner.aiPreviewBody':
+      'Esta es una vista previa nueva que reemplaza toda la semana. El menú guardado no ha cambiado.',
+    'planner.aiPreviewSaveUnconfirmed':
+      'Esta es una vista previa nueva que reemplaza toda la semana. No se pudo confirmar el resultado del guardado, así que el menú guardado podría haber cambiado. Recarga para comprobarlo antes de volver a intentarlo.',
+    'planner.aiPreviewRecipeSelect': 'Elige una receta guardada para {slot}',
+    'planner.aiPreviewNoRecipe': 'Sin receta',
+    'planner.aiEditSchedule': 'Editar agenda de destino',
+    'planner.aiDiscardPreview': 'Descartar vista previa',
+    'planner.aiAcceptPreview': 'Aceptar y guardar menú',
+    'planner.aiSavingPreview': 'Guardando menú...',
+    'planner.aiDiscardTitle': '¿Descartar esta vista previa generada?',
+    'planner.aiDiscardBody':
+      'El menú guardado no ha cambiado. Si descartas la vista previa o sales de esta página, se eliminará.',
+    'planner.aiDiscardSaveUnconfirmed':
+      'No se pudo confirmar el resultado del guardado. El menú guardado podría haber cambiado. Recarga para comprobarlo antes de descartar esta vista previa.',
+    'planner.aiDiscardSaving':
+      'Espera a que termine el guardado antes de salir o descartar esta vista previa.',
+    'planner.aiKeepPreview': 'Conservar vista previa',
+    'planner.aiConfirmDiscardPreview': 'Descartar la vista previa generada',
+    'planner.previewSaveError':
+      'No se pudo confirmar el guardado de la vista previa. La vista previa sigue aquí. Recarga para comprobar el menú guardado antes de reintentar.',
+    'planner.retryPreviewSave': 'Reintentar el guardado',
+    'planner.aiNoLunchRecipes':
+      'No hay recetas de comida guardadas. Los espacios de comida requeridos quedarán vacíos hasta que guardes una receta de comida.',
+    'planner.aiNoDinnerRecipes':
+      'No hay recetas de cena guardadas. Los espacios de cena requeridos quedarán vacíos hasta que guardes una receta de cena.',
+    'planner.aiSignInRequired':
+      'Inicia sesión para usar la generación con IA. Aquí puedes seguir planificando como invitado.',
     'planner.generateMenu': 'Generar menú',
     'planner.regenerateMenu': 'Regenerar menú',
     'planner.buildingTitle': 'Construyendo tu Menú Semanal',

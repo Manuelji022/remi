@@ -7,6 +7,21 @@ import {
   saveMenuWeekForUser,
 } from '#/features/weekly-menu/store'
 import { parseCalendarWeek, weekStartSchema } from '#/features/weekly-menu/week'
+import {
+  AiGenerationInProgressError,
+  AiGenerationLimitError,
+  runAiGenerationWithGuard,
+} from '#/features/weekly-menu/ai-generation-guard'
+import { generateAiMenu } from '#/features/weekly-menu/ai-generator'
+import {
+  AiGenerationStaleWeekError,
+  loadAiMenuContextForUser,
+} from '#/features/weekly-menu/ai-generation-store'
+import {
+  calendarTimeZoneSchema,
+  getStaleTargetWeekStart,
+  targetWeekScheduleSchema,
+} from '#/features/weekly-menu/ai-schedule'
 
 export const loadWeeklyMenu = createServerFn({ method: 'GET' })
   .validator(z.object({ weekStart: weekStartSchema }))
@@ -20,6 +35,59 @@ export const saveWeeklyMenu = createServerFn({ method: 'POST' })
   .handler(async ({ data }) => {
     const userId = await requireUserId()
     return saveMenuWeekForUser(userId, data)
+  })
+
+export const generateNextWeeklyMenu = createServerFn({ method: 'POST' })
+  .validator(
+    z.object({
+      targetWeekStart: weekStartSchema,
+      timeZone: calendarTimeZoneSchema,
+      schedule: targetWeekScheduleSchema,
+    }),
+  )
+  .handler(async ({ data }) => {
+    const userId = await requireUserId()
+    try {
+      const staleTargetWeekStart = getStaleTargetWeekStart(
+        data.targetWeekStart,
+        data.timeZone,
+      )
+      if (staleTargetWeekStart) {
+        throw new AiGenerationStaleWeekError(staleTargetWeekStart)
+      }
+
+      const generated = await runAiGenerationWithGuard(userId, async () => {
+        const context = await loadAiMenuContextForUser(
+          userId,
+          data.targetWeekStart,
+          data.schedule,
+        )
+        return generateAiMenu(context)
+      })
+      const staleAfterGeneration = getStaleTargetWeekStart(
+        data.targetWeekStart,
+        data.timeZone,
+      )
+      if (staleAfterGeneration) {
+        throw new AiGenerationStaleWeekError(staleAfterGeneration)
+      }
+      return { ok: true as const, ...generated }
+    } catch (error) {
+      if (error instanceof AiGenerationLimitError) {
+        return { ok: false as const, reason: 'rate-limited' as const }
+      }
+      if (error instanceof AiGenerationInProgressError) {
+        return { ok: false as const, reason: 'in-progress' as const }
+      }
+      if (error instanceof AiGenerationStaleWeekError) {
+        return {
+          ok: false as const,
+          reason: 'stale-week' as const,
+          expectedTargetWeekStart: error.expectedTargetWeekStart,
+        }
+      }
+      throw error
+    }
   })
 
 async function requireUserId(): Promise<string> {
