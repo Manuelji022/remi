@@ -307,7 +307,6 @@ async function runSingleConnectionCheck() {
   const context = await loadAiMenuContextForUser(
     userId,
     targetWeekStart,
-    'UTC',
     schedule,
   )
   assert(
