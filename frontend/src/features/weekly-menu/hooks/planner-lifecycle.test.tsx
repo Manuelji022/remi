@@ -211,7 +211,7 @@ describe('unchanged AI schedule regeneration', () => {
       ).toBe('office')
     },
   )
-  it('continues discarding a preview after an actual schedule change', async () => {
+  it('restores the original preview and manual swaps when canceling schedule edits', async () => {
     const target = nextCalendarWeekStart(new Date(), 'UTC')
     const preview: AiPreview = {
       userId: 'one',
@@ -220,7 +220,7 @@ describe('unchanged AI schedule regeneration', () => {
       recipeNames: {},
       unavailableSlots: [],
     }
-    api.generate.mockRejectedValue(new Error('provider'))
+    preview.menu.days.Monday.dinnerRecipeId = 'manual-edit'
     const view = mount(() =>
       useAiMenuGeneration({
         userId: 'one',
@@ -237,9 +237,9 @@ describe('unchanged AI schedule regeneration', () => {
       })
     })
     await act(() => view.current.updateContext('Monday', 'office'))
-    await act(async () => {
-      await view.current.confirm()
-    })
-    expect(view.current.preview).toBeUndefined()
+    await act(() => view.current.dismiss())
+
+    expect(view.current.preview).toEqual(preview)
+    expect(view.current.state.phase).toBe('preview')
   })
 })

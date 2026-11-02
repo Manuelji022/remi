@@ -2,7 +2,6 @@ import { shiftWeekStart } from '#/features/weekly-menu/week'
 import type { AiMenuContext } from '#/features/weekly-menu/ai-generator'
 import { listRecipesForUser } from '#/features/recipes/store'
 import { loadMenuWeekForUser } from '#/features/weekly-menu/store'
-import { nextCalendarWeekStart } from '#/features/weekly-menu/ai-schedule'
 import type { TargetWeekSchedule } from '#/features/weekly-menu/ai-schedule'
 
 export class AiGenerationStaleWeekError extends Error {
@@ -15,14 +14,8 @@ export class AiGenerationStaleWeekError extends Error {
 export async function loadAiMenuContextForUser(
   userId: string,
   targetWeekStart: string,
-  timeZone: string,
   schedule: TargetWeekSchedule,
 ): Promise<AiMenuContext> {
-  const expectedTarget = nextCalendarWeekStart(new Date(), timeZone)
-  if (targetWeekStart !== expectedTarget) {
-    throw new AiGenerationStaleWeekError(expectedTarget)
-  }
-
   const currentWeekStart = shiftWeekStart(targetWeekStart, -1)
   const previousWeekStart = shiftWeekStart(currentWeekStart, -1)
   const [recipes, currentWeek, previousWeek] = await Promise.all([

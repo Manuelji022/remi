@@ -6,7 +6,7 @@ const MAX_REQUESTS_PER_HOUR = 5
 // callback must settle within that bound: expiry recovers crashed workers, not
 // arbitrary callbacks that ignore cancellation. Allow 40s of scheduling margin.
 const LEASE_SECONDS = 60
-const { aiMenuGenerationRequest, aiMenuGenerationLease, user } = schema
+const { aiMenuGenerationRequest, aiMenuGenerationLease } = schema
 
 export class AiGenerationLimitError extends Error {
   constructor() {
@@ -28,17 +28,6 @@ export async function runAiGenerationWithGuard<T>(
 ): Promise<T> {
   const token = crypto.randomUUID()
   await db.transaction(async (tx) => {
-    try {
-      await tx
-        .select({ id: user.id })
-        .from(user)
-        .where(eq(user.id, userId))
-        .for('update', { noWait: true })
-    } catch (error) {
-      if (isLockNotAvailable(error)) throw new AiGenerationInProgressError()
-      throw error
-    }
-
     const acquired = await tx
       .insert(aiMenuGenerationLease)
       .values({
@@ -94,27 +83,17 @@ export async function runAiGenerationWithGuard<T>(
   try {
     return await generate()
   } finally {
-    await db
-      .delete(aiMenuGenerationLease)
-      .where(
-        and(
-          eq(aiMenuGenerationLease.userId, userId),
-          eq(aiMenuGenerationLease.token, token),
-        ),
-      )
+    try {
+      await db
+        .delete(aiMenuGenerationLease)
+        .where(
+          and(
+            eq(aiMenuGenerationLease.userId, userId),
+            eq(aiMenuGenerationLease.token, token),
+          ),
+        )
+    } catch (error) {
+      console.error('Failed to release AI Weekly Menu generation lease', error)
+    }
   }
-}
-
-function isLockNotAvailable(error: unknown): boolean {
-  const seen = new Set<object>()
-  let cause: unknown = error
-
-  for (let depth = 0; depth < 5; depth += 1) {
-    if (!cause || typeof cause !== 'object' || seen.has(cause)) return false
-    seen.add(cause)
-    if ('code' in cause && cause.code === '55P03') return true
-    cause = 'cause' in cause ? cause.cause : undefined
-  }
-
-  return false
 }

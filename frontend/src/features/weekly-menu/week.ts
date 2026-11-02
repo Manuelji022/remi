@@ -152,7 +152,9 @@ export function assignRecipesToWeek(
   return { weekStart: menu.weekStart, days }
 }
 
-export function scheduleFromMenu(menu: CalendarWeekMenu): Preferences {
+export function scheduleFromMenu(menu: {
+  days: Record<Day, Pick<DayPlan, 'context' | 'scope'>>
+}): Preferences {
   const dayContexts: Preferences['dayContexts'] = {}
   const planningScopes: Preferences['planningScopes'] = {}
 

@@ -19,6 +19,7 @@ const waitPreviewAcceptable = () =>
 // overflow its object graph. Harness steps are side effects/assertions, so return
 // a JSON-safe scalar while allowing thrown assertion errors to propagate.
 const evaluate = (source) => ['eval', `(() => { ${source}; return true })()`]
+const evaluateAsync = (source) => ['eval', `(async () => { ${source}; return true })()`]
 const open = (fixtureScenario, locale = '') => [
   'open',
   `${base}${locale}/weekly-menu-planner?scenario=${fixtureScenario}`,
@@ -30,25 +31,38 @@ const assert = (condition, message) =>
   })()`)
 
 async function scenario(name, steps) {
-  const commands = steps.flatMap((step) => {
-    if (step[0] === 'find' && step.includes('Confirm schedule and generate')) {
-      return [['wait', '--text', 'Review next week’s schedule'], step]
+  const segments = Array.isArray(steps[0]?.[0]) ? steps : [steps]
+  const run = async (args, stdin) => {
+    const result = await browser({ args, stdin, timeoutMs: 60000 })
+    if (!result.success) {
+      emit({ scenario: name, verdict: 'FAIL', error: result.error, data: result.data })
+      throw new Error(name)
     }
-    if (['click', 'select'].includes(step[0])) {
-      return [['scrollintoview', step[1]], step]
+  }
+  for (const segment of segments) {
+    let commands = []
+    const flush = async () => {
+      if (commands.length === 0) return
+      await run(['batch', '--bail'], JSON.stringify(commands))
+      commands = []
     }
-    return ['eval', 'open'].includes(step[0])
-      ? [step, ['get', 'url']]
-      : [step]
-  })
-  const result = await browser({
-    args: ['batch', '--bail'],
-    stdin: JSON.stringify(commands),
-    timeoutMs: 60000,
-  })
-  if (!result.success) {
-    emit({ scenario: name, verdict: 'FAIL', error: result.error, data: result.data })
-    throw new Error(name)
+    for (const step of segment) {
+      if (step[0] === 'back') {
+        await flush()
+        await run(['back'])
+        await run(['get', 'url'])
+        await run(['snapshot', '-i'])
+        continue
+      }
+      if (step[0] === 'find' && step.includes('Confirm schedule and generate')) {
+        commands.push(['wait', '--text', 'Review next week’s schedule'], step)
+      } else if (['click', 'select'].includes(step[0])) {
+        commands.push(['scrollintoview', step[1]], step)
+      } else {
+        commands.push(...(['eval', 'open'].includes(step[0]) ? [step, ['get', 'url']] : [step]))
+      }
+    }
+    await flush()
   }
   emit({ scenario: name, verdict: 'PASS' })
 }
@@ -203,15 +217,89 @@ await scenario('discard and edit schedule guard the fresh preview', [
   text('Discard this generated preview?'),
   assert(`${preview} !== null && ${saveCount}===0`, 'discard warning keeps preview and saved menu'),
   click('Keep preview'),
+  waitPreviewAcceptable(),
+  ['select', firstDayDinnerSelector, 'saved-dinner-alternative'],
+  assert(
+    `${preview}.querySelector(${JSON.stringify(firstDayDinnerSelector)}).value==='saved-dinner-alternative'`,
+    'manual recipe swap is in place before schedule edits',
+  ),
+  click('Edit target schedule'),
+  text("Review next week’s schedule"),
+  ['click', `${dialogSelector} .panel-day-card:first-child .panel-context-pill:first-child`],
+  assert(`${preview}===null && ${generationCount}===1 && ${saveCount}===0`, 'changing the schedule hides the stale preview without saving'),
+  click('Cancel'),
+  assert(
+    `${preview}!==null && ${preview}.querySelector(${JSON.stringify(firstDayDinnerSelector)}).value==='saved-dinner-alternative' && ${saveCount}===0`,
+    'cancel restores the preview with its manual recipe swap and does not save',
+  ),
   click('Edit target schedule'),
   text("Review next week’s schedule"),
   ['click', `${dialogSelector} .panel-day-card:first-child .panel-context-pill:first-child`],
   assert(`${preview}===null && ${generationCount}===1 && ${saveCount}===0`, 'schedule edit invalidates stale preview without saving'),
+  evaluate(`${fixture}.failGeneration=true`),
   click('Confirm schedule and generate'),
-  wait(`${preview} !== null && ${generationCount}===2`),
+  text('Could not generate next week’s menu'),
+  assert(`${preview}===null && ${generationCount}===2 && ${saveCount}===0`, 'failed changed-schedule regeneration never restores the stale preview'),
+  evaluate(`${fixture}.failGeneration=false`),
+  click('Retry generation'),
+  text("Review next week’s schedule"),
+  click('Confirm schedule and generate'),
+  wait(`${preview} !== null && ${generationCount}===3`),
   click('Discard preview'),
   click('Discard generated preview'),
   assert(`${preview}===null && ${saveCount}===0`, 'confirmed discard removes preview without persistence'),
+])
+
+await scenario('route navigation protects a preview stashed by schedule editing', [
+  open('target-saved'),
+  wait(`${shell}.innerText.includes('Saved dinner')`),
+  evaluateAsync(`
+    const waitFor = (label, predicate) => new Promise((resolve, reject) => {
+      const started = Date.now()
+      const poll = () => {
+        if (predicate()) resolve()
+        else if (Date.now() - started > 12000) reject(new Error('timed out waiting for ' + label))
+        else setTimeout(poll, 25)
+      }
+      poll()
+    })
+    const button = (name) => {
+      const node = [...document.querySelectorAll('button')].find((item) => item.textContent.trim() === name)
+      if (!node) throw new Error('missing button ' + name)
+      node.click()
+    }
+    const link = (name) => {
+      const node = name === 'Remi home'
+        ? document.querySelector('a[aria-label="Remi home"]')
+        : [...document.querySelectorAll('a')].find((item) => item.textContent.trim() === name)
+      if (!node) throw new Error('missing link ' + name)
+      node.click()
+    }
+    await waitFor('saved menu', () => ${shell}?.innerText.includes('Saved dinner'))
+    button('Regenerate menu')
+    await waitFor('schedule dialog', () => ${dialog}?.open)
+    button('Confirm schedule and generate')
+    await waitFor('preview', () => Boolean(${preview}))
+    const dinner = ${preview}?.querySelector(${JSON.stringify(firstDayDinnerSelector)})
+    if (!dinner) throw new Error('missing dinner selector')
+    Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set.call(dinner, 'saved-dinner-alternative')
+    dinner.dispatchEvent(new Event('change', { bubbles: true }))
+    button('Edit target schedule')
+    await waitFor('edit schedule dialog', () => ${dialog}?.open)
+    const context = ${dialog}?.querySelector('.panel-day-card:first-child .panel-context-pill:first-child')
+    if (!context) throw new Error('missing schedule context')
+    context.click()
+    await waitFor('preview invalidation', () => !${preview})
+    link('Remi home')
+    await waitFor('discard confirmation', () => document.querySelector('dialog[aria-labelledby="ai-preview-discard-title"]')?.open)
+    if (!${dialog} || ${preview}) throw new Error('schedule edit state was not preserved')
+    button('Discard generated preview')
+    await waitFor('home route', () => location.pathname === '/')
+    link('Weekly menu')
+    await waitFor('planner route', () => location.pathname.endsWith('/weekly-menu-planner'))
+    await waitFor('clean state', () => !${preview} && !${dialog} && !document.querySelector('dialog[aria-labelledby="ai-preview-discard-title"]'))
+  `),
+  ['snapshot', '-i'],
 ])
 
 await scenario('unchanged selected scope and failed regeneration preserve manual edits', [

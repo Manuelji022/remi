@@ -6,7 +6,7 @@ cd "$(dirname "$0")/.."
 container_name="remi-ai-generation-guard-test-$$"
 container_id=''
 temp_dir="$(mktemp -d)"
-artifact="${AI_GUARD_ARTIFACT:-/tmp/remi-ai-componentization-review/ai-generation-guard-postgres.json}"
+artifact="${AI_GUARD_ARTIFACT:-e2e/artifacts/ai-generation-guard-postgres.json}"
 image="${POSTGRES_TEST_IMAGE:-postgres:18}"
 
 cleanup() {

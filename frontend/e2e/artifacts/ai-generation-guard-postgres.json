@@ -2,25 +2,29 @@
   "suite": "AI Weekly Menu PostgreSQL generation guard",
   "verdict": "PASS",
   "isolatedContainerImage": "postgres:18",
-  "binding": "127.0.0.1:32771",
-  "migrations": "pnpm db:migrate applied the repository Drizzle migrations including 0006",
+  "binding": "127.0.0.1:32778",
+  "migrations": "pnpm db:migrate applied the repository Drizzle migrations including 0006 and 0007",
   "cleanup": "synthetic rows deleted; disposable container removed before artifact creation",
   "runs": [
     {
       "mode": "multi",
       "pgmax": "3",
       "checks": [
-        "postgres-js/Drizzle wrapped SQLSTATE 55P03 maps to AiGenerationInProgressError",
+        "same-account contention rejects with AiGenerationInProgressError",
         "contending request never invokes provider callback",
         "first guarded provider callback completes",
         "different users may hold independent generation guards concurrently",
         "five accepted calls in one hour are counted and the sixth is rejected before provider work",
         "calls older than the rolling-hour cutoff are removed before accepting a new call",
+        "a skewed application clock cannot place accepted attempts outside the database rolling-hour window",
         "mock provider failure is returned after its accepted attempt is committed",
         "a provider failure counts as one of five accepted calls in the rolling hour",
         "a separate user is not affected by other users’ request counts or locks",
         "mocked provider work crossing Sunday-to-Monday is rejected by the production post-provider target check",
-        "accepted requests, including the failure, are recorded durably"
+        "accepted requests, including the failure, are recorded durably",
+        "expired crashed-owner lease is reclaimable",
+        "old owner finally cannot release a replacement lease",
+        "successful replacement releases its own lease"
       ]
     },
     {
@@ -29,7 +33,13 @@
       "checks": [
         "application postgres-js pool is configured with max=1",
         "real owned catalog and current/previous history load with a single DB connection",
-        "guarded mocked provider callback completes after context reads using PGMAX=1"
+        "PGMAX=1 unrelated DB read completes while provider is held",
+        "PGMAX=1 same-user contention rejects while provider is held",
+        "PGMAX=1 independent user completes while first provider is held",
+        "guarded mocked provider callback completes after context reads using PGMAX=1",
+        "expired crashed-owner lease is reclaimable",
+        "old owner finally cannot release a replacement lease",
+        "successful replacement releases its own lease"
       ]
     }
   ]

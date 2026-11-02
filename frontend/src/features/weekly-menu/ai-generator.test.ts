@@ -116,22 +116,20 @@ describe('AI Weekly Menu assignment validation', () => {
     expect(result.menu.days.Sunday.dinnerRecipeId).toBe('dinner-one')
   })
 
-  it('rejects wrong target dates, unowned IDs, wrong meal classification, and missing eligible slots', () => {
+  it('rejects wrong target dates and repairs invalid or missing eligible assignments', () => {
     expect(() =>
       validateAiMenuAssignments(context, assignments('2026-10-12')),
-    ).toThrow()
+    ).toThrow('AI returned the wrong Calendar Week')
 
-    const unknown = assignments()
-    unknown.days.Monday.dinnerRecipeId = 'another-users-recipe'
-    expect(() => validateAiMenuAssignments(context, unknown)).toThrow()
+    const invalid = assignments()
+    invalid.days.Monday.dinnerRecipeId = 'another-users-recipe'
+    invalid.days.Tuesday.lunchRecipeId = 'dinner-one'
+    invalid.days.Wednesday.dinnerRecipeId = null
 
-    const wrongSlot = assignments()
-    wrongSlot.days.Monday.lunchRecipeId = 'dinner-one'
-    expect(() => validateAiMenuAssignments(context, wrongSlot)).toThrow()
-
-    const incomplete = assignments()
-    incomplete.days.Monday.dinnerRecipeId = null
-    expect(() => validateAiMenuAssignments(context, incomplete)).toThrow()
+    const result = validateAiMenuAssignments(context, invalid)
+    expect(result.menu.days.Monday.dinnerRecipeId).toBe('dinner-one')
+    expect(result.menu.days.Tuesday.lunchRecipeId).toBe('lunch-one')
+    expect(result.menu.days.Wednesday.dinnerRecipeId).toBe('dinner-one')
   })
 
   it('leaves unavailable types empty and reports the exact shortage types', () => {

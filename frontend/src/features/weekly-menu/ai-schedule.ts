@@ -4,7 +4,12 @@ import type { Day } from '#/features/weekly-menu/constants'
 import { dayContextSchema, planningScopeSchema } from './types'
 import type { Preferences } from './types'
 import type { CalendarWeekMenu } from './week'
-import { applySchedule, emptyMenu, shiftWeekStart } from './week'
+import {
+  applySchedule,
+  emptyMenu,
+  scheduleFromMenu,
+  shiftWeekStart,
+} from './week'
 
 const dayScheduleSchema = z.object({
   context: dayContextSchema.nullable(),
@@ -32,17 +37,6 @@ export const calendarTimeZoneSchema = z
     }
   })
 
-export function targetScheduleFromMenu(
-  menu: CalendarWeekMenu,
-): TargetWeekSchedule {
-  return Object.fromEntries(
-    DAYS.map((day) => [
-      day,
-      { context: menu.days[day].context, scope: menu.days[day].scope },
-    ]),
-  ) as TargetWeekSchedule
-}
-
 export function targetScheduleFromPreferences(
   preferences: Preferences,
 ): TargetWeekSchedule {
@@ -60,16 +54,7 @@ export function targetScheduleFromPreferences(
 export function preferencesFromTargetSchedule(
   schedule: TargetWeekSchedule,
 ): Preferences {
-  const dayContexts: Preferences['dayContexts'] = {}
-  const planningScopes: Preferences['planningScopes'] = {}
-
-  for (const day of DAYS) {
-    const { context, scope } = schedule[day]
-    if (context) dayContexts[day] = context
-    if (scope !== 'both') planningScopes[day] = scope
-  }
-
-  return { dayContexts, planningScopes }
+  return scheduleFromMenu({ days: schedule })
 }
 
 export function getStaleTargetWeekStart(

@@ -47,32 +47,30 @@ export const generateNextWeeklyMenu = createServerFn({ method: 'POST' })
   )
   .handler(async ({ data }) => {
     const userId = await requireUserId()
-    const staleTargetWeekStart = getStaleTargetWeekStart(
-      data.targetWeekStart,
-      data.timeZone,
-    )
-    if (staleTargetWeekStart) return staleWeekResponse(staleTargetWeekStart)
-
     try {
-      const context = await loadAiMenuContextForUser(
-        userId,
+      const staleTargetWeekStart = getStaleTargetWeekStart(
         data.targetWeekStart,
         data.timeZone,
-        data.schedule,
       )
+      if (staleTargetWeekStart) {
+        throw new AiGenerationStaleWeekError(staleTargetWeekStart)
+      }
+
       const generated = await runAiGenerationWithGuard(userId, async () => {
-        const staleTarget = getStaleTargetWeekStart(
+        const context = await loadAiMenuContextForUser(
+          userId,
           data.targetWeekStart,
-          data.timeZone,
+          data.schedule,
         )
-        if (staleTarget) throw new AiGenerationStaleWeekError(staleTarget)
         return generateAiMenu(context)
       })
       const staleAfterGeneration = getStaleTargetWeekStart(
         data.targetWeekStart,
         data.timeZone,
       )
-      if (staleAfterGeneration) return staleWeekResponse(staleAfterGeneration)
+      if (staleAfterGeneration) {
+        throw new AiGenerationStaleWeekError(staleAfterGeneration)
+      }
       return { ok: true as const, ...generated }
     } catch (error) {
       if (error instanceof AiGenerationLimitError) {
@@ -91,14 +89,6 @@ export const generateNextWeeklyMenu = createServerFn({ method: 'POST' })
       throw error
     }
   })
-
-function staleWeekResponse(expectedTargetWeekStart: string) {
-  return {
-    ok: false as const,
-    reason: 'stale-week' as const,
-    expectedTargetWeekStart,
-  }
-}
 
 async function requireUserId(): Promise<string> {
   const session = await auth.api.getSession({

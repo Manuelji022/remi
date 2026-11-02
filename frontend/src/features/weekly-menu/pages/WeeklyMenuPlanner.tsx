@@ -28,7 +28,7 @@ import {
   assignRecipesToWeek,
   emptyMenu,
   scheduleFromMenu,
-  shiftWeekStart,
+  viewWeekStart,
   weekStartFromDate,
 } from '#/features/weekly-menu/week'
 import type { MealSlot, RecipeInput } from '#/features/recipes/recipe'
@@ -72,8 +72,9 @@ export function WeeklyMenuPlanner() {
   const aiGeneration = useAiMenuGeneration({ userId, timeZone, onPreviewWeek })
   const currentPreview =
     aiGeneration.preview?.userId === userId ? aiGeneration.preview : null
+  const hasUnsavedPreview = aiGeneration.hasUnsavedPreview
   const viewedWeek =
-    currentPreview?.menu.weekStart ?? weekAtOffset(new Date(), weekOffset)
+    currentPreview?.menu.weekStart ?? viewWeekStart(new Date(), weekOffset)
   const plannerWeek = usePlannerWeek({
     userId,
     weekStart: viewedWeek,
@@ -91,7 +92,10 @@ export function WeeklyMenuPlanner() {
       ? aiGeneration.state
       : null
   const scheduleDialog =
-    aiGeneration.state.phase === 'confirming' ? aiGeneration.state : null
+    aiGeneration.state.phase === 'confirming' ||
+    aiGeneration.state.phase === 'generating'
+      ? aiGeneration.state
+      : null
   const scheduleDraft = scheduleDialog?.draft
   const isPreparingSchedule = aiGeneration.isPreparing
   const schedulePreparationError = currentGeneration?.reason === 'prepare'
@@ -162,19 +166,19 @@ export function WeeklyMenuPlanner() {
   const previewSaveError =
     currentGeneration?.reason === 'save' ? t('planner.previewSaveError') : null
   const routeBlocker = useBlocker({
-    shouldBlockFn: () => Boolean(currentPreview),
-    enableBeforeUnload: () => Boolean(currentPreview),
+    shouldBlockFn: () => hasUnsavedPreview,
+    enableBeforeUnload: () => hasUnsavedPreview,
     withResolver: true,
   })
   const isDiscardDialogOpen =
     showDiscardConfirmation || routeBlocker.status === 'blocked'
 
   useEffect(() => {
-    if (currentPreview) return
+    if (hasUnsavedPreview) return
     setShowDiscardConfirmation(false)
     setDiscardWeekOffset(null)
     if (routeBlocker.status === 'blocked') routeBlocker.reset()
-  }, [currentPreview, routeBlocker])
+  }, [hasUnsavedPreview, routeBlocker])
 
   useEffect(() => {
     if (hasLoadedRef.current) return
@@ -341,7 +345,7 @@ export function WeeklyMenuPlanner() {
 
   function discardPreview() {
     if (aiGeneration.isSaving || isAcceptingPreview) return
-    aiGeneration.dismiss()
+    aiGeneration.discard()
     setShowDiscardConfirmation(false)
     const nextOffset = discardWeekOffset
     setDiscardWeekOffset(null)
@@ -548,7 +552,7 @@ export function WeeklyMenuPlanner() {
         />
       )}
 
-      {isDiscardDialogOpen && currentPreview && (
+      {isDiscardDialogOpen && hasUnsavedPreview && (
         <DiscardPreviewDialog
           onKeep={keepPreview}
           onDiscard={discardPreview}
@@ -580,15 +584,6 @@ export function WeeklyMenuPlanner() {
 function dateFromWeekStart(weekStart: string): Date {
   const [year, month, day] = weekStart.split('-').map(Number)
   return new Date(year, month - 1, day, 12)
-}
-
-function weekAtOffset(today: Date, offset: number): string {
-  let weekStart = weekStartFromDate(today)
-  const direction = offset < 0 ? -1 : 1
-  for (let count = 0; count < Math.abs(offset); count += 1) {
-    weekStart = shiftWeekStart(weekStart, direction)
-  }
-  return weekStart
 }
 
 function calendarWeekOffset(targetWeekStart: string): number {

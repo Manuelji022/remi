@@ -37,6 +37,7 @@ export type AiGenerationState =
       mode: 'new' | 'edit'
       draft: Preferences
       preview?: AiPreview
+      originalPreview?: AiPreview
     }
   | {
       phase: 'generating'
@@ -118,7 +119,12 @@ function reducer(state: AiGenerationState, action: Action): AiGenerationState {
         ? {
             ...state,
             draft: action.draft,
-            ...(action.invalidatePreview ? { preview: undefined } : {}),
+            ...(action.invalidatePreview
+              ? {
+                  preview: undefined,
+                  originalPreview: state.originalPreview ?? state.preview,
+                }
+              : {}),
           }
         : state
     case 'generating':
@@ -170,6 +176,13 @@ export function useAiMenuGeneration({
         : state.phase === 'confirming'
           ? state.preview
           : null
+  const hasUnsavedPreview = Boolean(
+    userId &&
+    (preview?.userId === userId ||
+      (state.phase === 'confirming' &&
+        state.userId === userId &&
+        state.originalPreview?.userId === userId)),
+  )
   const openSchedule = useCallback(
     async (
       options: {
@@ -463,9 +476,18 @@ export function useAiMenuGeneration({
     [state],
   )
 
+  const discard = useCallback(() => {
+    if (state.phase === 'generating' || state.phase === 'saving') return
+    dispatch({ type: 'reset' })
+  }, [state.phase])
+
   const dismiss = useCallback(() => {
-    if (state.phase === 'confirming' && state.preview) {
-      dispatch({ type: 'restore-preview', preview: state.preview })
+    const originalPreview =
+      state.phase === 'confirming'
+        ? (state.originalPreview ?? state.preview)
+        : undefined
+    if (originalPreview) {
+      dispatch({ type: 'restore-preview', preview: originalPreview })
     } else if (state.phase !== 'generating' && state.phase !== 'saving') {
       dispatch({ type: 'reset' })
     }
@@ -473,6 +495,7 @@ export function useAiMenuGeneration({
   return {
     state,
     preview,
+    hasUnsavedPreview,
     openSchedule,
     updateContext,
     updateScope,
@@ -480,6 +503,7 @@ export function useAiMenuGeneration({
     retry,
     updateRecipe,
     accept,
+    discard,
     dismiss,
     isPreparing: state.phase === 'preparing',
     isGenerating: state.phase === 'generating',

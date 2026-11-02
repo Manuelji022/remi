@@ -1,71 +1,107 @@
-{
-  "suite": "AI Weekly Menu browser checks",
-  "source": "frontend/e2e/ai-weekly-menu.browser.js",
-  "verdict": "PASS",
-  "scenarioCount": 15,
-  "results": [
-    {
-      "verdict": "PASS",
-      "scenario": "schedule confirmation is required; accept alone persists next week"
-    },
-    {
-      "verdict": "PASS",
-      "scenario": "accept waits for the saved target menu and owned recipe catalog"
-    },
-    {
-      "verdict": "PASS",
-      "scenario": "an unsaved target schedule starts all-at-home, not from current week"
-    },
-    {
-      "verdict": "PASS",
-      "scenario": "saved target-week schedule is prefilled for all seven-day confirmation"
-    },
-    {
-      "verdict": "PASS",
-      "scenario": "discard and edit schedule guard the fresh preview"
-    },
-    {
-      "verdict": "PASS",
-      "scenario": "same-target retry retains the confirmed draft schedule after provider failure"
-    },
-    {
-      "verdict": "PASS",
-      "scenario": "retry after a failed generation across Monday loads the new target schedule"
-    },
-    {
-      "verdict": "PASS",
-      "scenario": "recipe edits are disabled and ignored while acceptance save is pending"
-    },
-    {
-      "verdict": "PASS",
-      "scenario": "a successful Sunday preview remains editable and acceptable after Monday"
-    },
-    {
-      "verdict": "PASS",
-      "scenario": "provider completion after Monday returns stale-week instead of preview success"
-    },
-    {
-      "verdict": "PASS",
-      "scenario": "a week rollover returns an explicit reconfirmation target"
-    },
-    {
-      "verdict": "PASS",
-      "scenario": "failed acceptance keeps the preview and saved target menu retryable"
-    },
-    {
-      "verdict": "PASS",
-      "scenario": "empty catalog leaves required meal types empty with a clear warning"
-    },
-    {
-      "verdict": "PASS",
-      "scenario": "AI schedule and preview feedback are localized in Spanish"
-    },
-    {
-      "verdict": "PASS",
-      "scenario": "guest generation remains local and never calls the AI server function"
-    },
-    {
-      "evidence": {
+[
+  {
+    "scenario": "schedule dialog contains keyboard focus and Escape restores its opener",
+    "verdict": "PASS"
+  },
+  {
+    "scenario": "schedule preparation retains the opener for Escape focus restoration",
+    "verdict": "PASS"
+  },
+  {
+    "scenario": "generation retry restores Escape focus to the stable schedule header trigger",
+    "verdict": "PASS"
+  },
+  {
+    "scenario": "schedule confirmation is required; accept alone persists next week",
+    "verdict": "PASS"
+  },
+  {
+    "scenario": "accept waits for the saved target menu and owned recipe catalog",
+    "verdict": "PASS"
+  },
+  {
+    "scenario": "an unsaved target schedule starts all-at-home, not from current week",
+    "verdict": "PASS"
+  },
+  {
+    "scenario": "saved target-week schedule is prefilled for all seven-day confirmation",
+    "verdict": "PASS"
+  },
+  {
+    "scenario": "discard and edit schedule guard the fresh preview",
+    "verdict": "PASS"
+  },
+  {
+    "scenario": "route navigation protects a preview stashed by schedule editing",
+    "verdict": "PASS"
+  },
+  {
+    "scenario": "unchanged selected scope and failed regeneration preserve manual edits",
+    "verdict": "PASS"
+  },
+  {
+    "scenario": "route discard is blocked while acceptance settles (failure=false)",
+    "verdict": "PASS"
+  },
+  {
+    "scenario": "route discard is blocked while acceptance settles (failure=true)",
+    "verdict": "PASS"
+  },
+  {
+    "scenario": "same-target retry retains the confirmed draft schedule after provider failure",
+    "verdict": "PASS"
+  },
+  {
+    "scenario": "in-progress retry keeps the confirmed schedule draft",
+    "verdict": "PASS"
+  },
+  {
+    "scenario": "retry after a failed generation across Monday loads the new target schedule",
+    "verdict": "PASS"
+  },
+  {
+    "scenario": "recipe edits are disabled and ignored while acceptance save is pending",
+    "verdict": "PASS"
+  },
+  {
+    "scenario": "a successful Sunday preview remains editable and acceptable after Monday",
+    "verdict": "PASS"
+  },
+  {
+    "scenario": "editing a Sunday preview after Monday preserves its absolute target week",
+    "verdict": "PASS"
+  },
+  {
+    "scenario": "provider completion after Monday returns stale-week instead of preview success",
+    "verdict": "PASS"
+  },
+  {
+    "scenario": "a week rollover returns an explicit reconfirmation target",
+    "verdict": "PASS"
+  },
+  {
+    "scenario": "failed acceptance keeps the preview and saved target menu retryable",
+    "verdict": "PASS"
+  },
+  {
+    "scenario": "empty catalog leaves required meal types empty with a clear warning",
+    "verdict": "PASS"
+  },
+  {
+    "scenario": "AI schedule and preview feedback are localized in Spanish",
+    "verdict": "PASS"
+  },
+  {
+    "scenario": "guest generation remains local and never calls the AI server function",
+    "verdict": "PASS"
+  },
+  {
+    "suite": "AI Weekly Menu browser checks",
+    "verdict": "PASS",
+    "evidence": {
+      "success": true,
+      "resultCategory": "success",
+      "data": {
         "origin": "http://127.0.0.1:3101/weekly-menu-planner?scenario=guest",
         "result": {
           "fixture": "guest",
@@ -73,7 +109,30 @@
           "saveRequests": 0,
           "targetWeekStart": "2026-11-02"
         }
-      }
+      },
+      "error": null,
+      "summary": "Eval result: {",
+      "successCategory": "completed",
+      "nextActions": [
+        {
+          "id": "inspect-after-mutation",
+          "params": {
+            "args": [
+              "--namespace",
+              "",
+              "--session",
+              "piab-logperch-ccbfdc6a2834-b540bf0d-fresh-d13881aa93",
+              "snapshot",
+              "-i"
+            ]
+          },
+          "reason": "Refresh interactive refs after a browser mutation, navigation, scroll, or rerender.",
+          "safety": "Do not reuse prior @refs until a fresh snapshot confirms they still exist.",
+          "tool": "agent_browser"
+        }
+      ],
+      "sessionName": "piab-logperch-ccbfdc6a2834-b540bf0d-fresh-d13881aa93",
+      "namespace": ""
     }
-  ]
-}
+  }
+]

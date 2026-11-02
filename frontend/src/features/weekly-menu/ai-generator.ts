@@ -4,6 +4,10 @@ import { DAYS } from '#/features/weekly-menu/constants'
 import type { Day } from '#/features/weekly-menu/constants'
 import type { Recipe, MealSlot } from '#/features/recipes/recipe'
 import { mealSlotSchema } from '#/features/recipes/recipe'
+import {
+  assignRecipesToWeek,
+  placedRecipeIds,
+} from '#/features/weekly-menu/week'
 import type { CalendarWeekMenu } from '#/features/weekly-menu/week'
 import type { TargetWeekSchedule } from '#/features/weekly-menu/ai-schedule'
 import { menuForTargetSchedule } from '#/features/weekly-menu/ai-schedule'
@@ -48,11 +52,29 @@ export type AiProviderOptions = {
 
 const DEFAULT_MODEL = 'openai/gpt-4o-mini'
 const GENERATION_TIMEOUT_MS = 20_000
+const MOCK_GENERATION_DELAY_MS = 1_500
 
 export async function generateAiMenu(
   context: AiMenuContext,
   options: AiProviderOptions = {},
 ): Promise<AiMenuResult> {
+  // Local UX exploration without spending tokens: empty assignments make
+  // validation fill every home-planned slot with the deterministic fallback.
+  if (
+    process.env.AI_WEEKLY_MENU_MOCK === 'true' &&
+    process.env.NODE_ENV !== 'production'
+  ) {
+    await new Promise((resolve) =>
+      setTimeout(resolve, MOCK_GENERATION_DELAY_MS),
+    )
+    return validateAiMenuAssignments(context, {
+      weekStart: context.targetWeekStart,
+      days: Object.fromEntries(
+        DAYS.map((day) => [day, { lunchRecipeId: null, dinnerRecipeId: null }]),
+      ),
+    })
+  }
+
   const modelName =
     options.model ?? process.env.AI_WEEKLY_MENU_MODEL ?? DEFAULT_MODEL
   const model = createGateway({
@@ -105,31 +127,48 @@ export function validateAiMenuAssignments(
     throw new Error('AI returned the wrong Calendar Week')
   }
 
-  const recipes = new Map(context.recipes.map((recipe) => [recipe.id, recipe]))
+  const orderedRecipes = context.recipes
+    .slice()
+    .sort((left, right) =>
+      left.id < right.id ? -1 : left.id > right.id ? 1 : 0,
+    )
   const candidates = {
-    lunch: context.recipes.filter((recipe) => recipe.slot === 'lunch'),
-    dinner: context.recipes.filter((recipe) => recipe.slot === 'dinner'),
+    lunch: orderedRecipes.filter((recipe) => recipe.slot === 'lunch'),
+    dinner: orderedRecipes.filter((recipe) => recipe.slot === 'dinner'),
   }
   const menu = menuForTargetSchedule(context.targetWeekStart, context.schedule)
+  const priorRecipeIds = new Set([
+    ...placedRecipeIds(context.currentWeek),
+    ...placedRecipeIds(context.previousWeek),
+  ])
+  const fallbackMenu = assignRecipesToWeek(
+    menu,
+    orderedRecipes.map(({ id, slot }) => ({ id, slot })),
+    priorRecipeIds,
+  )
+  const repairCounts: Record<MealSlot, number> = { lunch: 0, dinner: 0 }
   const unavailableSlots: MealSlot[] = []
 
   for (const day of DAYS) {
     const plan = menu.days[day]
+    const fallback = fallbackMenu.days[day]
     const assignment = parsed.data.days[day]
     const lunchRecipeId = checkedRecipeId(
-      'lunch',
       assignment.lunchRecipeId,
       plan.scope === 'both' || plan.scope === 'lunch',
-      candidates.lunch.length,
-      recipes,
+      candidates.lunch,
+      fallback.lunchRecipeId,
+      repairCounts.lunch,
     )
+    if (lunchRecipeId !== assignment.lunchRecipeId) repairCounts.lunch += 1
     const dinnerRecipeId = checkedRecipeId(
-      'dinner',
       assignment.dinnerRecipeId,
       plan.scope === 'both' || plan.scope === 'dinner',
-      candidates.dinner.length,
-      recipes,
+      candidates.dinner,
+      fallback.dinnerRecipeId,
+      repairCounts.dinner,
     )
+    if (dinnerRecipeId !== assignment.dinnerRecipeId) repairCounts.dinner += 1
 
     menu.days[day] = {
       ...plan,
@@ -172,26 +211,24 @@ function assignmentContext(menu: CalendarWeekMenu) {
 }
 
 function checkedRecipeId(
-  slot: MealSlot,
   recipeId: string | null,
   isHomePlanned: boolean,
-  candidateCount: number,
-  recipes: ReadonlyMap<string, Recipe>,
+  candidates: readonly Recipe[],
+  fallbackRecipeId: string | null,
+  fallbackIndex: number,
 ): string | null {
   if (!isHomePlanned) {
     if (recipeId !== null) throw new Error('AI assigned a covered Meal Slot')
     return null
   }
-  if (candidateCount === 0) {
+  if (candidates.length === 0) {
     if (recipeId !== null)
       throw new Error('AI assigned an unavailable Meal Slot')
     return null
   }
-  if (recipeId === null) throw new Error('AI left an eligible Meal Slot empty')
 
-  const recipe = recipes.get(recipeId)
-  if (!recipe) throw new Error('AI assigned a recipe not owned by the user')
-  if (recipe.slot !== slot)
-    throw new Error('AI assigned a recipe to the wrong Meal Slot')
-  return recipe.id
+  const recipe = candidates.find((candidate) => candidate.id === recipeId)
+  if (recipe) return recipe.id
+
+  return fallbackRecipeId ?? candidates[fallbackIndex % candidates.length].id
 }
