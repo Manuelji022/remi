@@ -1,0 +1,190 @@
+# Menú semanal con IA: flujo y experiencia de usuario
+
+Estado: **borrador v1**, definido en entrevista el 2026-11-04. Este documento manda sobre la implementación de la PR sin commit; las diferencias están en [Diferencias con la PR actual](#diferencias-con-la-pr-actual).
+
+## 1. Propósito
+
+La IA existe para **ahorrar el trabajo de planificar**: la persona obtiene una semana completa casi lista y solo toca lo que no le guste. No es una herramienta de descubrimiento ni de variedad culinaria.
+
+Principios:
+
+- **Control antes que automatismo.** Nada se guarda sin que la persona lo acepte.
+- **Solo recetas propias.** La IA elige entre recetas ya guardadas; nunca inventa.
+- **Los datos guardados son sagrados.** Un fallo de la IA jamás altera el menú existente.
+- **Sin jerga de IA.** Textos cercanos y breves.
+
+## 2. Alcance de la v1
+
+Dentro:
+
+- Generar el menú de la **semana siguiente** (lunes a domingo próximos) con un botón explícito.
+- Confirmar el horario de 7 días antes de generar.
+- Vista previa editable y aceptación explícita.
+- Cambiar una comida de la vista previa sin llamar a la IA.
+- Generar otra propuesta completa desde la vista previa (cuenta como intento).
+- Tour de primera vez.
+- Bloqueo de semanas actual y pasadas con gesto de mantener pulsado.
+
+Fuera (explícitamente):
+
+- Recetas nuevas creadas por la IA.
+- Preferencias, restricciones dietéticas o indicaciones en texto libre.
+- Explicar por qué se eligió cada receta.
+- Generar semanas distintas a la siguiente.
+- Candado por comida individual.
+- Uso por invitados (siguen con el planner local, sin IA).
+- Sugerencias proactivas o automáticas de generación.
+
+## 3. Actores y acceso
+
+- **Cuenta con sesión:** acceso a la IA.
+- **Invitado:** planner local como hasta ahora. No se muestra la función de IA.
+
+## 4. Qué sabe la IA
+
+Entradas: recetas propias (nombre, ingredientes, tipo comida/cena), asignaciones de la **semana actual (los 7 días)** y de la **semana anterior**, y el horario confirmado de la semana objetivo. Nada más. No se envía identidad de la cuenta.
+
+## 5. Flujo principal
+
+```
+Planner (cualquier vista)
+   │  pulsa "Generar con IA"
+   ▼
+[Comprobación de recetas] ── faltan recetas ──► Aviso + enlace a añadir recetas (no se gasta intento)
+   │ ok
+   ▼
+Diálogo de horario (7 días, obligatorio)
+   │  Confirmar
+   ▼
+Vista previa en esqueleto (generando, hasta ~20 s)
+   ├─ error ──► Mensaje claro + Reintentar (datos intactos)
+   ▼
+Vista previa editable
+   ├─ Aceptar ──► Se guarda y el planner muestra la semana siguiente
+   └─ Descartar / salir ──► Aviso; si confirma, se pierde la propuesta
+```
+
+### 5.1 Punto de entrada
+
+- El botón **Generar con IA** está disponible **en cualquier vista del planner** y siempre actúa sobre la semana siguiente, aunque la persona esté mirando otra semana.
+- Solo existe para cuentas con sesión.
+
+### 5.2 Comprobación previa de recetas
+
+Antes de abrir el diálogo de horario se comprueba que exista **al menos una receta de cada tipo necesario** (comida y/o cena, según el horario de la semana). No hay mínimo cuantitativo. Si falta un tipo entero, se muestra un aviso que dice qué tipo falta (comida o cena) con un enlace para añadir recetas. **No se consume intento.**
+
+### 5.3 Diálogo de horario (siempre obligatorio)
+
+- Se muestran siempre los **7 días de la semana siguiente**, editables, aunque todos estén en casa.
+- Cada día indica dónde se come: en casa, oficina o comer fuera.
+  - **Oficina:** cubre la comida; la cena se planifica en casa.
+  - **Comer fuera:** la persona elige si cubre comida, cena o ambas.
+- Valores iniciales: si la semana siguiente ya tiene horario guardado, se precarga; si no, **todo en casa** (no se copia el horario de la semana actual).
+- Hay una acción explícita de confirmar. Antes de confirmar no hay llamada a la IA ni guardado.
+- Si ya existe un menú guardado para la semana siguiente, el diálogo avisa de que **aceptar reemplazará todo el menú**.
+
+### 5.4 Generación
+
+- Se abre ya la **vista previa en esqueleto**, con los huecos rellenándose al llegar el resultado.
+- Duración máxima aproximada de 20 s.
+
+### 5.5 Vista previa editable
+
+- Muestra los 7 días con sus comidas y cenas.
+- Las comidas **cubiertas fuera de casa** se ven **bloqueadas y etiquetadas** (p. ej. "Oficina", "Fuera"); no admiten receta y nunca cuentan como táper.
+- En cada hueco planificado en casa, la persona puede **cambiar la receta** por otra de sus recetas del tipo correspondiente (comida o cena). Este cambio es **local, sin IA y sin consumir cuota**.
+- Las alternativas se ofrecen en **orden alfabético**.
+- **Generar otra:** acción disponible en la vista previa que pide una propuesta completa nueva reutilizando el horario ya confirmado. Cuenta como **un intento** de los 5 por hora. Si la persona hizo cambios manuales, se avisa antes de que se perderán. Durante la espera se muestra de nuevo el esqueleto y, si falla, se conserva la propuesta anterior con su mensaje de error y Reintentar.
+- No hay explicaciones de por qué se eligió cada receta.
+- Las recetas pueden repetirse en huecos distintos.
+- Si no hay recetas de un tipo, esos huecos quedan vacíos con la explicación de qué falta.
+- Editar el horario desde la vista previa **invalida** la propuesta: hay que confirmar y generar de nuevo. Cancelar ese cambio restaura la propuesta original, incluidos los cambios manuales.
+- Mientras se guarda, los selectores quedan deshabilitados.
+- **Aceptar** permanece deshabilitado hasta que la semana objetivo y el catálogo de recetas estén cargados.
+
+### 5.6 Aceptar
+
+- Guarda exactamente lo que se ve en la vista previa y **reemplaza toda la semana siguiente**.
+- Tras guardar, el planner **navega a la semana siguiente** con el menú aplicado.
+- Si el guardado falla, la vista previa se conserva intacta y se puede reintentar.
+
+### 5.7 Descartar
+
+- Cerrar, cambiar de ruta, recargar o cancelar con cambios pendientes muestra un **aviso de confirmación**.
+- Si la persona confirma, la propuesta **se pierde** (no se guarda como borrador).
+
+## 6. Errores y límites
+
+| Situación                                                              | Comportamiento                                                                                                |
+| ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| Fallo, timeout o respuesta inválida                                    | Mensaje claro y botón **Reintentar**. Datos guardados intactos. No hay relleno aleatorio.                     |
+| Respuesta con recetas inválidas en huecos elegibles                    | Se reparan en silencio con candidatas del mismo hueco.                                                        |
+| Respuesta de otra semana, huecos cubiertos asignados o días duplicados | Se rechaza; se trata como fallo.                                                                              |
+| Límite de 5 generaciones por hora                                      | Se comunica **solo al alcanzarlo**, indicando cuándo se podrá volver a generar. Las fallidas también cuentan. |
+| Dos generaciones simultáneas de la misma cuenta                        | Solo se procesa una; la otra se rechaza con mensaje.                                                          |
+| Cambio de semana (domingo → lunes) durante el flujo                    | Ver sección 8.                                                                                                |
+
+Los reintentos del servidor son cero; el único reintento es el que pulsa la persona.
+
+## 7. Bloqueo de semanas
+
+### 7.1 Modelo
+
+- **Semanas futuras (incluida la siguiente):** siempre editables y generables.
+- **Semana actual y semanas pasadas:** **bloqueadas**. Esto aplica a cualquier menú, generado por IA o hecho a mano. La semana siguiente se bloquea sola cuando pasa a ser la actual.
+- El estado depende de la fecha, no de haber aceptado una propuesta.
+
+### 7.2 Botón de bloqueo
+
+- Aparece **centrado sobre el menú** de la semana que se está viendo, solo en semanas actual y pasadas.
+- Estado cerrado por defecto. Para desbloquear hay que **mantener pulsado ~1 s**, con un **anillo de progreso** que se llena; soltar antes cancela.
+- **Accesibilidad:** mantener **Enter o Espacio** produce el mismo anillo y el mismo resultado, con anuncio para lectores de pantalla.
+- Mientras una semana está bloqueada, sus comidas no se pueden editar.
+
+### 7.3 Re-bloqueo
+
+El desbloqueo es temporal: la semana vuelve a bloquearse **al salir de ella o al recargar**.
+
+## 8. Cambio de semana durante la vista previa
+
+Si la vista previa se abre un domingo y llega el lunes, **la propuesta sigue ligada a su semana original**. Se puede aceptar y editar con normalidad; al guardarse, esa semana ya es la actual y, por tanto, queda bloqueada (sección 7).
+
+Si la respuesta de la IA llega ya pasado el lunes para una semana objetivo antigua, el servidor la rechaza como obsoleta, no se muestra vista previa y se ofrece reconfirmar el horario para la nueva semana siguiente. En un reintento tras fallo ordinario, si la semana objetivo cambió, se cargan el horario y los valores iniciales de la nueva semana, no los del borrador anterior.
+
+Los límites de semana se calculan con la zona horaria IANA del navegador validada en servidor; el lunes civil no se calcula con intervalos de 24 h.
+
+## 8bis. Primera vez
+
+La primera vez que una cuenta usa **Generar con IA** se muestra un **tour de 2 o 3 pasos**: (1) confirmar el horario, (2) revisar y cambiar la propuesta, (3) aceptar; nada se guarda hasta ese momento. Se puede saltar y no vuelve a aparecer una vez completado o saltado.
+
+## 9. Idioma y tono
+
+- **Bilingüe:** español e inglés, según el idioma de la interfaz.
+- Español: cercano, tuteo, frases cortas, sin jerga técnica de IA.
+
+## 10. Privacidad y costes
+
+- El prompt no se persiste.
+- El texto de las recetas se trata como datos, no como instrucciones.
+- Solo se envía lo listado en la sección 4.
+
+## 11. Puntos abiertos
+
+Resueltos en la segunda ronda: "Generar otra" (sí, cuenta como intento), orden alfabético de alternativas, sin mínimo cuantitativo de recetas, y tour de primera vez.
+
+1. **Desbloqueo temporal:** al bloquearse por fecha no hace falta persistir un estado, pero conviene confirmar si el desbloqueo necesita algo en servidor (hoy se asume solo cliente).
+2. **Textos finales** en ambos idiomas, y diseño visual del anillo, del candado y del tour.
+
+## Diferencias con la PR actual
+
+| Tema                                                                                                                           | Este documento                                    | PR sin commit                                        |
+| ------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------- | ---------------------------------------------------- |
+| Bloqueo de semanas actual y pasadas con mantener pulsado                                                                       | Incluido                                          | No existe                                            |
+| Cambio de hueco en vista previa sin IA                                                                                         | Local, sin cuota                                  | Selector local (ya compatible)                       |
+| Aviso de faltantes antes de generar                                                                                            | Previo, con enlace a recetas y sin gastar intento | Se genera y los huecos quedan vacíos con explicación |
+| Límite de uso                                                                                                                  | Solo al alcanzarlo                                | A confirmar en la UI                                 |
+| Idioma                                                                                                                         | Español e inglés                                  | A revisar                                            |
+| Cambio de semana en vista previa                                                                                               | La propuesta sigue ligada a su semana             | Coincide en lo esencial                              |
+| Horario siempre confirmado, vista previa editable, descarte con aviso, reemplazo total, solo recetas propias, invitados sin IA | Igual                                             | Ya implementado                                      |
+
+Notas para la implementación: según `AGENTS.md`, lo nuevo (bloqueo y comprobación previa) se verifica con E2E y deja artefacto repetible, y no se escriben tests unitarios después del código.
