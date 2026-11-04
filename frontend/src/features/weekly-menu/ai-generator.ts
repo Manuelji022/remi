@@ -1,5 +1,7 @@
 import { createGateway, Output, generateText } from 'ai'
 import { z } from 'zod'
+import { isAiMockEnabled } from '#/features/weekly-menu/ai-mock'
+import type { aiMockScenarioSchema } from '#/features/weekly-menu/ai-mock'
 import { DAYS } from '#/features/weekly-menu/constants'
 import type { Day } from '#/features/weekly-menu/constants'
 import type { Recipe, MealSlot } from '#/features/recipes/recipe'
@@ -45,6 +47,7 @@ export type AiMenuResult = {
 }
 
 export type AiProviderOptions = {
+  mockScenario?: z.infer<typeof aiMockScenarioSchema>
   apiKey?: string
   model?: string
   fetch?: typeof fetch
@@ -60,13 +63,22 @@ export async function generateAiMenu(
 ): Promise<AiMenuResult> {
   // Local UX exploration without spending tokens: empty assignments make
   // validation fill every home-planned slot with the deterministic fallback.
-  if (
-    process.env.AI_WEEKLY_MENU_MOCK === 'true' &&
-    process.env.NODE_ENV !== 'production'
-  ) {
+  if (isAiMockEnabled()) {
     await new Promise((resolve) =>
-      setTimeout(resolve, MOCK_GENERATION_DELAY_MS),
+      setTimeout(
+        resolve,
+        options.mockScenario === 'slow' ? 8_000 : MOCK_GENERATION_DELAY_MS,
+      ),
     )
+    if (options.mockScenario === 'empty') {
+      return {
+        menu: menuForTargetSchedule(context.targetWeekStart, context.schedule),
+        recipeNames: Object.fromEntries(
+          context.recipes.map((recipe) => [recipe.id, recipe.name]),
+        ),
+        unavailableSlots: ['lunch', 'dinner'],
+      }
+    }
     return validateAiMenuAssignments(context, {
       weekStart: context.targetWeekStart,
       days: Object.fromEntries(

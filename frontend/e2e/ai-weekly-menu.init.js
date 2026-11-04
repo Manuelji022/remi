@@ -349,6 +349,7 @@
     const log = { kind, payload, weekStart: requestWeek, userId: fixture.userId }
     if (kind === 'generation') {
       log.schedule = scheduleFromPayload(payload)
+      log.mockScenario = findValue(payload, ['mockScenario'])
       fixture.generationRequests.push(log)
     }
     else if (kind === 'save') fixture.saveRequests.push(log)
@@ -443,6 +444,7 @@
       if (scenario === 'preview-rollover' && new Date().getDay() === 1) {
         return json({ result: { ok: false, reason: 'stale-week', expectedTargetWeekStart: fixture.expectedAfterRollover } })
       }
+      if (log.mockScenario === 'error') throw new TypeError('Synthetic URL-selected provider failure')
       if (fixture.failGeneration) throw new TypeError('Synthetic provider transport failure')
       if (!requestWeek || !/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(requestWeek)) {
         throw new Error('Fixture refused generation: decoded request has no Calendar Week target')

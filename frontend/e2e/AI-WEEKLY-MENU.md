@@ -54,3 +54,67 @@ Lease acquisition and rolling-window attempt accounting commit in a short transa
 **Lifetime constraint:** the durable lease lasts 60 seconds. The only production caller, `generateAiMenu`, uses a single AI SDK request with `AbortSignal.timeout(20_000)` and `maxRetries: 0`. Exclusion assumes that callback/provider transport honors cancellation and settles within 60 seconds (40 seconds of margin). This is not a general-purpose guard for unbounded callbacks, and cannot guarantee non-overlap after a suspended worker or cancellation-ignoring provider exceeds the TTL. A timer race alone would not stop such work. The forced-expiry ownership test deliberately bypasses this bound to model handoff and proves token-safe release, not cancellation of an old provider. No live provider lifetime/cancellation behavior was tested. Concurrent callbacks use separate transactions/connections against the real server; the harness does not run two contending OS workers simultaneously.
 
 This database test does not exercise browser authentication, the authenticated server-function transport, or a live AI Gateway provider. It uses a callback in place of provider work and a controlled Sunday/Monday clock to verify the production post-provider stale-target helper; it must never require a provider key.
+
+## Mock scenarios failure cases
+
+1. A URL mock parameter changes generation when `AI_WEEKLY_MENU_MOCK` is absent, false, or any value other than the exact string `true`.
+2. Mock generation is honored in production even when the environment flag is `true`.
+3. An invalid or absent `mock` parameter crashes the client, fails server validation, or sends a `mockScenario` field instead of omitting it.
+4. Valid scenario values are lost in the serialized generation request, including on Retry, or are read only once and become stale after URL changes.
+5. Guest generation sends a mock parameter or invokes the authenticated AI server function.
+6. Error, rate-limited, in-progress, or stale scenarios acquire a DB lease, load menu context, consume rate-limit attempts, or bypass authentication.
+7. The stale scenario returns the request's claimed week, a fixed date, or the server's timezone week instead of the real next Monday in the validated request timezone, including Sunday/Monday and DST boundaries.
+8. Default/ok no longer waits about 1.5 seconds or changes deterministic fallback assignments; slow does not wait about 8 seconds or changes the resulting menu.
+9. Error does not throw after about 1 second, changes saved data, or fails to show the existing error and Retry path; rejection scenarios return the wrong discriminant.
+10. Empty repairs null assignments with available recipes, drops the confirmed schedule, or omits either lunch/dinner from unavailableSlots.
+11. Successful mock scenarios bypass the existing guard or the before/after generation stale-week checks.
+12. Importing the shared scenario schema evaluates server environment access in the browser, or non-mock provider options change Gateway behavior.
+
+The browser harness verifies URL serialization, invalid-value omission, retry, and guest isolation at the mocked HTTP boundary; it does not prove server environment gates, mock timing, or DB guard accounting.
+
+### CLI-only harness runner
+
+When `agent_browser_code` is unavailable, run the same harness through the native CLI adapter below from `frontend/`, with the production server from step 1 already running. Use a fresh named session, register the init script before navigation, and set a 1440 × 1200 viewport (the shorter default viewport can place an action behind the sticky header).
+
+```bash
+agent-browser --session remi-ai-mock-scenarios --args '--no-sandbox' --init-script "$PWD/e2e/ai-weekly-menu.init.js" open 'http://127.0.0.1:3101/weekly-menu-planner?scenario=ready'
+agent-browser --session remi-ai-mock-scenarios set viewport 1440 1200
+node --input-type=module <<'JS'
+import { readFile, writeFile } from 'node:fs/promises'
+import { spawn } from 'node:child_process'
+const results = []
+const browser = ({ args, stdin }) => new Promise((resolve, reject) => {
+  const child = spawn('agent-browser', ['--session', 'remi-ai-mock-scenarios', '--json', ...args])
+  let output = '', error = ''
+  child.stdout.on('data', chunk => { output += chunk })
+  child.stderr.on('data', chunk => { error += chunk })
+  child.on('error', reject)
+  child.stdin.end(stdin)
+  child.on('close', () => {
+    try {
+      const parsed = JSON.parse(output)
+      resolve(Array.isArray(parsed)
+        ? { success: parsed.every(item => item.success), data: parsed, error: parsed.find(item => !item.success)?.error }
+        : parsed)
+    } catch { reject(new Error(error || output)) }
+  })
+})
+const emit = result => { results.push(result); console.log(JSON.stringify(result)) }
+try {
+  const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor
+  await new AsyncFunction('browser', 'emit', await readFile('e2e/ai-weekly-menu.browser.js', 'utf8'))(browser, emit)
+} finally {
+  await writeFile('e2e/artifacts/ai-weekly-menu-results.json', JSON.stringify(results, null, 2) + '\n')
+}
+JS
+agent-browser --session remi-ai-mock-scenarios close
+```
+
+### Mock scenario verification (2026-11-04)
+
+- `pnpm lint`, `pnpm check`, `pnpm typecheck`, `pnpm test` (62 passed, 1 skipped), and `pnpm build` passed.
+- All 27 scenarios in the complete browser harness passed against the production build at `127.0.0.1:3101` through the CLI runner, at 1440 × 1200; refreshed evidence is in `artifacts/ai-weekly-menu-results.json`.
+- New checks passed: `?mock=error` is present in decoded generation and retry requests and reaches existing error feedback, `?mock=nope` omits `mockScenario`, and guests with `?mock=error` never invoke generation or save.
+- A direct module smoke check covered development/production crossed with absent/false/true/uppercase-TRUE flag values; only development plus exact `true` enabled mocks, and the schema rejected `nope`.
+- Initial runner setup failed on batch-response normalization and the default viewport's sticky-header obstruction; the documented adapter and viewport resolved both before the complete passing run.
+- Not verified live: authenticated server mock delays/results, timezone rollover for the new stale short circuit, or DB lease/attempt accounting for short circuits. Browser fixtures intercept HTTP; gate smoke checks cover the shared function only.

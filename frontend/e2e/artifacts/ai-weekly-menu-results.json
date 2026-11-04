@@ -92,6 +92,18 @@
     "verdict": "PASS"
   },
   {
+    "scenario": "URL mock error is serialized on generation and retry",
+    "verdict": "PASS"
+  },
+  {
+    "scenario": "invalid URL mock value is omitted from generation",
+    "verdict": "PASS"
+  },
+  {
+    "scenario": "guest URL mock never calls generation",
+    "verdict": "PASS"
+  },
+  {
     "scenario": "guest generation remains local and never calls the AI server function",
     "verdict": "PASS"
   },
@@ -100,39 +112,29 @@
     "verdict": "PASS",
     "evidence": {
       "success": true,
-      "resultCategory": "success",
       "data": {
+        "lifecycle": {
+          "effectiveLaunch": {
+            "browserLaunched": true,
+            "engine": "chrome",
+            "launchHash": 3267251482748820500
+          },
+          "launched": false,
+          "relaunchedBrowser": false,
+          "restartedBackground": false,
+          "restoreStatus": "not_configured",
+          "reused": true,
+          "saveStatus": "not_attempted"
+        },
         "origin": "http://127.0.0.1:3101/weekly-menu-planner?scenario=guest",
         "result": {
           "fixture": "guest",
           "generationRequests": 0,
           "saveRequests": 0,
-          "targetWeekStart": "2026-11-02"
+          "targetWeekStart": "2026-11-09"
         }
       },
-      "error": null,
-      "summary": "Eval result: {",
-      "successCategory": "completed",
-      "nextActions": [
-        {
-          "id": "inspect-after-mutation",
-          "params": {
-            "args": [
-              "--namespace",
-              "",
-              "--session",
-              "piab-logperch-ccbfdc6a2834-b540bf0d-fresh-d13881aa93",
-              "snapshot",
-              "-i"
-            ]
-          },
-          "reason": "Refresh interactive refs after a browser mutation, navigation, scroll, or rerender.",
-          "safety": "Do not reuse prior @refs until a fresh snapshot confirms they still exist.",
-          "tool": "agent_browser"
-        }
-      ],
-      "sessionName": "piab-logperch-ccbfdc6a2834-b540bf0d-fresh-d13881aa93",
-      "namespace": ""
+      "error": null
     }
   }
 ]
