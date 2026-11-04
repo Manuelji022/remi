@@ -1,10 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { listRecipes } from '#/features/recipes/functions'
 import type { Recipe } from '#/features/recipes/recipe'
 import {
@@ -33,12 +27,10 @@ export function usePlannerWeek({
   userId,
   weekStart,
   enabled,
-  preferencesOpen,
 }: {
   userId?: string
   weekStart: string
   enabled: boolean
-  preferencesOpen: boolean
 }) {
   const [data, setData] = useState<PlannerWeekData | null>(null)
   const [action, setAction] = useState<PlannerAction | null>(null)
@@ -46,13 +38,18 @@ export function usePlannerWeek({
   const generationRef = useRef(0)
   const writeScopeRef = useRef(0)
   const identityRef = useRef({ userId, weekStart, enabled })
-  const previousPreferencesOpen = useRef(preferencesOpen)
   const writeInFlightRef = useRef<PlannerAction | null>(null)
-  useLayoutEffect(() => {
+
+  // Reset action at render-time when identity changes (no passive effect)
+  if (
+    identityRef.current.userId !== userId ||
+    identityRef.current.weekStart !== weekStart ||
+    identityRef.current.enabled !== enabled
+  ) {
     identityRef.current = { userId, weekStart, enabled }
     ++writeScopeRef.current
     setAction(null)
-  }, [userId, weekStart, enabled])
+  }
 
   const load = useCallback(async (setLoading: boolean) => {
     const identity = identityRef.current
@@ -107,27 +104,6 @@ export function usePlannerWeek({
       ++generationRef.current
     }
   }, [userId, weekStart, enabled, loadAttempt, load])
-  useEffect(() => {
-    const wasOpen = previousPreferencesOpen.current
-    previousPreferencesOpen.current = preferencesOpen
-    if (!wasOpen || preferencesOpen || !userId || !enabled) return
-    const generation = generationRef.current
-    void listRecipes()
-      .then((recipes) => {
-        if (generation !== generationRef.current) return
-        setData((current) =>
-          current?.status === 'ready' &&
-          current.userId === userId &&
-          current.weekStart === weekStart
-            ? { ...current, recipes }
-            : current,
-        )
-      })
-      .catch(() => {
-        if (generation === generationRef.current)
-          setData({ userId, weekStart, status: 'error' })
-      })
-  }, [preferencesOpen, userId, weekStart, enabled])
 
   const retry = useCallback(() => {
     setData(null)
@@ -138,6 +114,36 @@ export function usePlannerWeek({
     setAction(null)
     await load(true)
   }, [load])
+  const refreshRecipes = useCallback(async () => {
+    const identity = identityRef.current
+    if (!identity.userId || !identity.enabled) return
+    const generation = generationRef.current
+    const identityUserId = identity.userId
+    try {
+      const recipes = await listRecipes()
+      if (generation === generationRef.current)
+        setData((current) =>
+          current?.status === 'ready' &&
+          current.userId === identityUserId &&
+          current.weekStart === identity.weekStart
+            ? { ...current, recipes }
+            : current,
+        )
+    } catch {
+      // Only set error if the week is not ready (i.e., still loading or already errored)
+      if (generation === generationRef.current)
+        setData((current) => {
+          if (current?.status !== 'ready') {
+            return {
+              userId: identityUserId,
+              weekStart: identity.weekStart,
+              status: 'error' as const,
+            }
+          }
+          return current
+        })
+    }
+  }, [])
   const ownsAccept = useCallback((identity: PlannerWeekIdentity) => {
     const pending = writeInFlightRef.current
     return (
@@ -226,6 +232,7 @@ export function usePlannerWeek({
     action: actionForView,
     retry,
     refreshAfterRecipeMutation,
+    refreshRecipes,
     savePreferences,
     acceptPreview,
     ownsAccept,
