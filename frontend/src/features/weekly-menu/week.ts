@@ -198,9 +198,7 @@ export function showMenuDay(
   }
 }
 
-export function slotField(
-  slot: MealSlot,
-): 'lunchRecipeId' | 'dinnerRecipeId' {
+export function slotField(slot: MealSlot): 'lunchRecipeId' | 'dinnerRecipeId' {
   return slot === 'lunch' ? 'lunchRecipeId' : 'dinnerRecipeId'
 }
 

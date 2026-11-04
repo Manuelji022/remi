@@ -234,8 +234,7 @@ export function validateAiMenuAssignments(
   const reserved = { lunch: new Set<string>(), dinner: new Set<string>() }
   for (const day of DAYS) {
     for (const slot of mealSlotSchema.options) {
-      if (!isSlotPlanned(menu.days[day].scope, slot))
-        continue
+      if (!isSlotPlanned(menu.days[day].scope, slot)) continue
       const id =
         parsed.data.days[day][
           slot === 'lunch' ? 'lunchRecipeId' : 'dinnerRecipeId'
