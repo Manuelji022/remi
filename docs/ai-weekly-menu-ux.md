@@ -42,7 +42,7 @@ Fuera (explícitamente):
 
 ## 4. Qué sabe la IA
 
-Entradas: recetas propias (nombre, ingredientes, tipo comida/cena), asignaciones de la **semana actual (los 7 días)** y de la **semana anterior**, y el horario confirmado de la semana objetivo. Nada más. No se envía identidad de la cuenta.
+Entradas: recetas propias (nombre, ingredientes, tipo comida/cena), asignaciones de la **semana actual (los 7 días)** y de la **semana anterior**, y el horario confirmado de la semana objetivo normalizado a franjas en casa (comida/cena por día), con el número de recetas guardadas de cada tipo. Para regenerar se incluyen solo los IDs por día y franja de la propuesta anterior. Nada más. No se envía identidad de la cuenta.
 
 ## 5. Flujo principal
 
