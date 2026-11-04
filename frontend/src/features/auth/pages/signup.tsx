@@ -1,14 +1,20 @@
 import { Link, useNavigate } from '@tanstack/react-router'
 import '../auth.css'
-import type { ComponentProps } from 'react'
 import { useState } from 'react'
 import { getLocalizedPath, useI18n } from '#/shared/i18n'
+import { AUTH_STORAGE_KEYS } from '#/features/auth/storage-keys'
+import { useAuthForm } from '#/features/auth/useAuthForm'
+import type { FormSubmitEvent } from '#/features/auth/useAuthForm'
 import { authClient } from '#/features/auth/auth-client'
 
-type FormSubmitEvent = Parameters<
-  NonNullable<ComponentProps<'form'>['onSubmit']>
->[0]
 type SignInData = { twoFactorRedirect?: boolean } | null
+
+const ERROR_MAPPING = {
+  INVALID_EMAIL: 'auth.errors.invalidEmail',
+  INVALID_PASSWORD: 'auth.errors.invalidPassword',
+  USER_EXISTS: 'auth.errors.userExists',
+  INVALID_CREDENTIALS: 'auth.errors.invalidCredentials',
+}
 
 export function SignupPage() {
   const navigate = useNavigate()
@@ -16,8 +22,8 @@ export function SignupPage() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState<string | null>(null)
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const { error, isSubmitting, setError, setIsSubmitting, handleApiError } =
+    useAuthForm()
 
   async function handleSubmit(event: FormSubmitEvent) {
     event.preventDefault()
@@ -32,7 +38,7 @@ export function SignupPage() {
 
     if (result.error) {
       setIsSubmitting(false)
-      setError(result.error.message ?? t('auth.signupError'))
+      handleApiError(result.error, ERROR_MAPPING, 'auth.signupError', t)
       return
     }
 
@@ -42,14 +48,19 @@ export function SignupPage() {
 
     if (loginResult.error) {
       setIsSubmitting(false)
-      setError(loginResult.error.message ?? t('auth.signupOtpStartError'))
+      handleApiError(
+        loginResult.error,
+        ERROR_MAPPING,
+        'auth.signupOtpStartError',
+        t,
+      )
       return
     }
 
     const data = loginResult.data as SignInData
 
     if (data?.twoFactorRedirect) {
-      window.sessionStorage.setItem('remi:signupOtpPending', 'true')
+      window.sessionStorage.setItem(AUTH_STORAGE_KEYS.signup.otpPending, 'true')
       setIsSubmitting(false)
       await navigate({ to: getLocalizedPath('/two-factor', locale) })
       return

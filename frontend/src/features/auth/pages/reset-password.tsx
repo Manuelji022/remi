@@ -1,13 +1,16 @@
 import { useNavigate, useSearch } from '@tanstack/react-router'
+import type { FormSubmitEvent } from '#/features/auth/useAuthForm'
 import '../auth.css'
-import type { ComponentProps } from 'react'
 import { useState } from 'react'
 import { getLocalizedPath, useI18n } from '#/shared/i18n'
+import { useAuthForm } from '#/features/auth/useAuthForm'
 import { authClient } from '#/features/auth/auth-client'
 
-type FormSubmitEvent = Parameters<
-  NonNullable<ComponentProps<'form'>['onSubmit']>
->[0]
+const ERROR_MAPPING = {
+  INVALID_TOKEN: 'auth.errors.resetPasswordInvalidToken',
+  EXPIRED_TOKEN: 'auth.errors.resetPasswordExpiredToken',
+  INVALID_PASSWORD: 'auth.errors.invalidPassword',
+}
 
 export function ResetPasswordPage() {
   const navigate = useNavigate()
@@ -16,8 +19,8 @@ export function ResetPasswordPage() {
     from: '/{-$locale}/reset-password',
   })
   const [password, setPassword] = useState('')
-  const [error, setError] = useState<string | null>(null)
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const { error, isSubmitting, setError, setIsSubmitting, handleApiError } =
+    useAuthForm()
   const [done, setDone] = useState(false)
 
   const token = search.token
@@ -40,7 +43,7 @@ export function ResetPasswordPage() {
 
     if (result.error) {
       setIsSubmitting(false)
-      setError(result.error.message ?? t('auth.resetPasswordError'))
+      handleApiError(result.error, ERROR_MAPPING, 'auth.resetPasswordError', t)
       return
     }
 
