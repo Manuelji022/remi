@@ -1,6 +1,6 @@
 # Menú semanal con IA: flujo y experiencia de usuario
 
-Estado: **borrador v1**, definido en entrevista el 2026-11-04. Este documento manda sobre la implementación de la PR sin commit; las diferencias están en [Diferencias con la PR actual](#diferencias-con-la-pr-actual).
+Estado: **v1 implementada**, definida en entrevista el 2026-11-04. Este documento manda sobre la implementación; los puntos pendientes están en la sección 11.
 
 ## 1. Propósito
 
@@ -198,18 +198,6 @@ Resueltos: "Generar otra" (cuenta como un intento; confirmación solo con cambio
 
 1. **Resuelto para v1 — desbloqueo temporal solo cliente:** el bloqueo es una protección de la experiencia de usuario, no un permiso de servidor. Las llamadas directas a la API no están bloqueadas; no hay estado persistido ni cambio de esquema.
 2. **Tour resuelto para v1:** tres tarjetas en el flujo, textos EN/ES, finalización por cuenta y navegador, reinicio al cancelar o descartar.
-3. **Textos finales** y diseño visual del anillo y del candado.
-
-## Diferencias con la PR actual
-
-| Tema                                                                                                                           | Este documento                                    | PR sin commit                                        |
-| ------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------- | ---------------------------------------------------- |
-| Bloqueo de semanas actual y pasadas con mantener pulsado                                                                       | Incluido                                          | No existe                                            |
-| Cambio de hueco en vista previa sin IA                                                                                         | Local, sin cuota                                  | Selector local (ya compatible)                       |
-| Aviso de faltantes antes de generar                                                                                            | Previo, con enlace a recetas y sin gastar intento | Se genera y los huecos quedan vacíos con explicación |
-| Límite de uso                                                                                                                  | Solo al alcanzarlo                                | A confirmar en la UI                                 |
-| Idioma                                                                                                                         | Español e inglés                                  | A revisar                                            |
-| Cambio de semana en vista previa                                                                                               | La propuesta sigue ligada a su semana             | Coincide en lo esencial                              |
-| Horario siempre confirmado, vista previa editable, descarte con aviso, reemplazo total, solo recetas propias, invitados sin IA | Igual                                             | Ya implementado                                      |
+3. **Pendiente de diseño:** textos finales y diseño visual del anillo y del candado.
 
 Notas para la implementación: según `AGENTS.md`, lo nuevo (bloqueo y comprobación previa) se verifica con E2E y deja artefacto repetible, y no se escriben tests unitarios después del código.
