@@ -1,3 +1,5 @@
+import { TourCallout } from './TourCallout'
+import type { useFirstRunTour } from '../hooks/useFirstRunTour'
 import { useEffect, useRef } from 'react'
 import { MenuTab } from './MenuTab'
 import type { Day } from '../constants'
@@ -6,6 +8,7 @@ import type { MealSlot, Recipe } from '#/features/recipes/recipe'
 import { useI18n } from '#/shared/i18n'
 
 interface AiMenuPreviewProps {
+  tour: ReturnType<typeof useFirstRunTour>
   menu: CalendarWeekMenu
   recipeNames: Record<string, string>
   unavailableSlots: readonly MealSlot[]
@@ -29,6 +32,7 @@ interface AiMenuPreviewProps {
 }
 
 export function AiMenuPreview({
+  tour,
   menu,
   recipeNames,
   unavailableSlots,
@@ -58,8 +62,8 @@ export function AiMenuPreview({
 
   return (
     <div className="planner-ai-preview">
-      <div className="planner-ai-preview-banner" aria-live="polite">
-        <div>
+      <div className="planner-ai-preview-banner">
+        <div aria-live="polite">
           <p
             className="planner-ai-preview-kicker"
             ref={headingRef}
@@ -82,6 +86,16 @@ export function AiMenuPreview({
             </p>
           )}
         </div>
+        {tour.step === 2 && (
+          <TourCallout
+            step={2}
+            title={t('planner.tourReviewTitle')}
+            body={t('planner.tourReviewBody')}
+            isLast={false}
+            onNext={tour.next}
+            onSkip={tour.skip}
+          />
+        )}
         <div className="planner-ai-preview-actions">
           <button
             className="planner-secondary-btn"
@@ -107,6 +121,16 @@ export function AiMenuPreview({
           >
             {t('planner.aiDiscardPreview')}
           </button>
+          {tour.step === 3 && (
+            <TourCallout
+              step={3}
+              title={t('planner.tourAcceptTitle')}
+              body={t('planner.tourAcceptBody')}
+              isLast
+              onNext={tour.next}
+              onSkip={tour.skip}
+            />
+          )}
           <button
             className="planner-primary-btn"
             type="button"

@@ -1,3 +1,5 @@
+import { TourCallout } from './TourCallout'
+import type { useFirstRunTour } from '../hooks/useFirstRunTour'
 import { Dialog } from '#/components/primitives/Dialog'
 import type { Preferences } from '#/features/weekly-menu/types'
 import type {
@@ -9,6 +11,7 @@ import { useI18n } from '#/shared/i18n'
 import { ScheduleEditor } from './ScheduleEditor'
 
 interface AiGenerationScheduleDialogProps {
+  tour: ReturnType<typeof useFirstRunTour>
   isPending: boolean
   preferences: Preferences
   targetWeekRange: { start: string; end: string }
@@ -23,6 +26,7 @@ interface AiGenerationScheduleDialogProps {
 }
 
 export function AiGenerationScheduleDialog({
+  tour,
   isPending,
   preferences,
   targetWeekRange,
@@ -67,6 +71,16 @@ export function AiGenerationScheduleDialog({
           onUpdatePlanningScope={onUpdatePlanningScope}
         />
       </fieldset>
+      {tour.step === 1 && (
+        <TourCallout
+          step={1}
+          title={t('planner.tourScheduleTitle')}
+          body={t('planner.tourScheduleBody')}
+          isLast={false}
+          onNext={tour.next}
+          onSkip={tour.skip}
+        />
+      )}
       {missingRecipeSlots.length > 0 && (
         <div className="planner-feedback" role="alert">
           <p>

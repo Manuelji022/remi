@@ -977,6 +977,96 @@ await scenario('Spanish selectors use the Spanish collation', [
   ),
 ])
 
+const tour = `document.querySelector('.planner-tour')`
+const tourKey = 'remi:ai-tour:v1:ai-menu-test-user'
+const tourOpen = (mode = 'first') => open(`ready&tour=${mode}`)
+const tourStart = [wait(`${shell}.innerText.includes('Saved dinner')`), click('Regenerate menu'), text('Confirm your week’s schedule')]
+const tourReset = evaluate(`localStorage.removeItem('${tourKey}'); localStorage.removeItem('remi:ai-tour:v1:ai-menu-second-user')`)
+
+await scenario('first-run tour follows generation through Done without blocking controls', [
+  tourReset,
+  tourOpen(),
+  ...tourStart,
+  assert(`${tour}?.textContent.includes('Step 1 of 3') && !${tour}.contains(document.activeElement) && ${generationCount}===0`, 'step 1 is a named note and does not take initial dialog focus'),
+  assert(`${tour}.getAttribute('role')==='note' && ${tour}.getAttribute('aria-labelledby') && !${tour}.closest('[aria-live]') && document.querySelectorAll('.planner-tour').length===1`, 'one accessible note without a live region'),
+  click('Next'),
+  assert(`!${tour} && ${dialog}.open && !${dialog}.querySelector('fieldset').disabled && !${dialog}.querySelector('.panel-primary-btn').disabled`, 'Next leaves schedule controls usable and step 2 waits for a preview'),
+  evaluate(`${fixture}.holdGeneration=true`),
+  click('Confirm schedule and generate'),
+  wait(`${fixture}.pendingGeneration`),
+  assert(`!${tour} && !${preview}`, 'pending generation has no premature step 2'),
+  evaluate(`${fixture}.releaseGeneration()`),
+  text('Review and tweak'),
+  assert(`${tour}?.textContent.includes('Step 2 of 3') && ${tour}.closest('.planner-ai-preview-banner') && !${tour}.contains(document.activeElement) && !${tour}.closest('[aria-live]')`, 'step 2 accompanies the preview without moving focus or duplicate announcements'),
+  waitPreviewAcceptable(),
+  ['select', firstDayDinnerSelector, 'saved-dinner-alternative'],
+  click('Next'),
+  text('Accept when you like it'),
+  assert(`${tour}?.textContent.includes('Step 3 of 3') && ${tour}.nextElementSibling.textContent.includes('Accept and save menu') && !${tour}.nextElementSibling.disabled`, 'step 3 is adjacent to usable Accept'),
+  ['screenshot', 'e2e/artifacts/ai-first-run-tour-step-3.png'],
+  click('Done'),
+  assert(`!${tour} && localStorage.getItem('${tourKey}')==='done' && ${saveCount}===0`, 'Done persists completion without saving a menu'),
+  click('Accept and save menu'),
+  text('Weekly Menu saved.'),
+  assert(`${saveCount}===1`, 'tour leaves acceptance usable'),
+  ['reload'],
+  wait(`${shell}.innerText.includes('Saved dinner')`),
+  click('Regenerate menu'),
+  text('Review next week’s schedule'),
+  assert(`!${tour}`, 'Done completion survives reload'),
+])
+
+await scenario('Skip at step 1 persists completion across reload', [
+  tourReset, tourOpen(), ...tourStart,
+  click('Skip tour'),
+  assert(`!${tour} && localStorage.getItem('${tourKey}')==='done' && ${dialog}.open`, 'Skip ends the tour without closing the schedule'),
+  click('Cancel'), ['reload'],
+  wait(`${shell}.innerText.includes('Saved dinner')`), click('Regenerate menu'), text('Review next week’s schedule'),
+  assert(`!${tour}`, 'Skip completion survives reload'),
+])
+
+await scenario('a second account has its own first-run tour', [
+  tourOpen('second'), ...tourStart,
+  assert(`localStorage.getItem('${tourKey}')==='done' && !localStorage.getItem('remi:ai-tour:v1:ai-menu-second-user') && ${tour}`, 'first account completion does not complete the second account'),
+  click('Skip tour'),
+])
+
+await scenario('cancel and discard restart the incomplete tour', [
+  tourReset, tourOpen(), ...tourStart, click('Next'), click('Cancel'),
+  click('Regenerate menu'), text('Confirm your week’s schedule'),
+  assert(`!localStorage.getItem('${tourKey}') && ${tour}.textContent.includes('Step 1 of 3')`, 'cancel after Next restarts at step 1'),
+  click('Confirm schedule and generate'), text('Review and tweak'),
+  click('Next'), text('Accept when you like it'),
+  click('Discard preview'), click('Discard generated preview'),
+  wait(`!${preview}`), click('Generate menu'), text('Confirm your week’s schedule'),
+  assert(`!localStorage.getItem('${tourKey}') && ${tour}.textContent.includes('Step 1 of 3')`, 'discard after step 3 restarts at step 1'),
+])
+
+await scenario('reload midway restarts at step 1 without completing', [
+  tourReset, tourOpen(), ...tourStart, click('Next'),
+  click('Confirm schedule and generate'), text('Review and tweak'), ['reload'],
+  ...tourStart,
+  assert(`!localStorage.getItem('${tourKey}') && ${tour}.textContent.includes('Step 1 of 3')`, 'reload forgets in-memory progress'),
+])
+
+for (const mode of ['blocked', 'write-blocked']) {
+  await scenario(`storage ${mode} still allows generation and session completion`, [
+    tourReset, tourOpen(mode), ...tourStart,
+    click('Skip tour'), click('Confirm schedule and generate'), waitPreviewAcceptable(),
+    assert(`!${tour}`, 'failed completion write still ends the tour for the session'),
+    click('Accept and save menu'), text('Weekly Menu saved.'),
+    click('Regenerate menu'), text('Review next week’s schedule'),
+    assert(`!${tour} && ${saveCount}===1`, 'storage failure never breaks generation or acceptance'),
+    // Leave the throwing-storage document before resetting the next scenario.
+    tourOpen(), wait(`${shell}.innerText.includes('Saved dinner')`),
+  ])
+}
+
+await scenario('guests never see the first-run tour', [
+  open('guest&tour=first'), text('Sign in'),
+  assert(`!${tour} && ${generationCount}===0 && ${saveCount}===0`, 'guest has neither tour nor AI requests'),
+])
+
 emit({
   suite: 'AI Weekly Menu browser checks',
   verdict: 'PASS',

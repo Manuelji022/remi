@@ -140,6 +140,19 @@ export const messages = {
     'planner.aiScheduleLoadError':
       'Could not load next week’s saved schedule. Retry before generating.',
     'planner.aiRetryScheduleLoad': 'Retry schedule loading',
+    'planner.tourStep': 'Step {step} of 3',
+    'planner.tourNext': 'Next',
+    'planner.tourDone': 'Done',
+    'planner.tourSkip': 'Skip tour',
+    'planner.tourScheduleTitle': 'Confirm your week’s schedule',
+    'planner.tourScheduleBody':
+      'The AI plans around where you eat. Nothing is saved until you accept the menu.',
+    'planner.tourReviewTitle': 'Review and tweak',
+    'planner.tourReviewBody':
+      'Use the recipe selectors to swap meals, or Generate another to try a new proposal.',
+    'planner.tourAcceptTitle': 'Accept when you like it',
+    'planner.tourAcceptBody':
+      'Accepting saves the week and replaces its previous menu, if there was one.',
     'planner.aiScheduleKicker': 'AI Weekly Menu',
     'planner.aiScheduleTitle': 'Review next week’s schedule',
     'planner.aiScheduleBody':
@@ -407,6 +420,19 @@ export const messages = {
     'planner.aiScheduleLoadError':
       'No se pudo cargar la agenda guardada de la próxima semana. Vuelve a intentarlo antes de generar.',
     'planner.aiRetryScheduleLoad': 'Volver a cargar la agenda',
+    'planner.tourStep': 'Paso {step} de 3',
+    'planner.tourNext': 'Siguiente',
+    'planner.tourDone': 'Listo',
+    'planner.tourSkip': 'Saltar guía',
+    'planner.tourScheduleTitle': 'Confirma la agenda de tu semana',
+    'planner.tourScheduleBody':
+      'El menú se adapta a dónde comes. No se guarda nada hasta que lo aceptes.',
+    'planner.tourReviewTitle': 'Revisa y ajusta',
+    'planner.tourReviewBody':
+      'Cambia platos con los selectores de recetas o pulsa Generar otra para probar otra propuesta.',
+    'planner.tourAcceptTitle': 'Acepta cuando te guste',
+    'planner.tourAcceptBody':
+      'Al aceptar, guardas la semana y sustituyes el menú anterior, si lo había.',
     'planner.aiScheduleKicker': 'Menú Semanal con IA',
     'planner.aiScheduleTitle': 'Revisa la agenda de la próxima semana',
     'planner.aiScheduleBody':

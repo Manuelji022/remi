@@ -3,6 +3,14 @@
   const nativeFetch = window.fetch.bind(window)
   const NativeDate = window.Date
   const scenario = new URLSearchParams(window.location.search).get('scenario') ?? 'ready'
+  const tourScenario = new URLSearchParams(window.location.search).get('tour')
+  const tourUserId = tourScenario === 'second' ? 'ai-menu-second-user' : 'ai-menu-test-user'
+  if (!tourScenario) localStorage.setItem(`remi:ai-tour:v1:${tourUserId}`, 'done')
+  if (tourScenario === 'blocked' || tourScenario === 'write-blocked') {
+    const fail = () => { throw new DOMException('Storage blocked', 'SecurityError') }
+    if (tourScenario === 'blocked') Storage.prototype.getItem = fail
+    Storage.prototype.setItem = fail
+  }
   let clockOffset = 0
 
   if (
@@ -65,7 +73,7 @@
   expectedAfterRollover.setDate(expectedAfterRollover.getDate() + 7)
   const fixture = {
     scenario,
-    userId: scenario === 'guest' ? null : 'ai-menu-test-user',
+    userId: scenario === 'guest' ? null : tourUserId,
     currentWeekStart,
     targetWeekStart,
     expectedAfterRollover: isoDate(expectedAfterRollover),

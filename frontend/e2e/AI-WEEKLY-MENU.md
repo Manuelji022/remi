@@ -51,7 +51,7 @@ From `frontend/`, run `timeout 120 ./e2e/run-ai-generation-guard-postgres.sh`. I
 
 Lease acquisition and rolling-window attempt accounting commit in a short transaction before provider work; provider work does not hold a transaction or row lock. A failed accepted call still consumes an attempt, a rejected contender does not, and lease expiration uses the database clock.
 
-**Lifetime constraint:** the durable lease lasts 60 seconds. The only production caller, `generateAiMenu`, uses a single AI SDK request with `AbortSignal.timeout(20_000)` and `maxRetries: 0`. Exclusion assumes that callback/provider transport honors cancellation and settles within 60 seconds (40 seconds of margin). This is not a general-purpose guard for unbounded callbacks, and cannot guarantee non-overlap after a suspended worker or cancellation-ignoring provider exceeds the TTL. A timer race alone would not stop such work. The forced-expiry ownership test deliberately bypasses this bound to model handoff and proves token-safe release, not cancellation of an old provider. No live provider lifetime/cancellation behavior was tested. Concurrent callbacks use separate transactions/connections against the real server; the harness does not run two contending OS workers simultaneously.
+**Lifetime constraint:** the durable lease lasts 60 seconds. The only production caller, `generateAiMenu`, uses a single AI SDK request with `AbortSignal.timeout(20_000)` and `maxRetries: 0`. Only that provider call runs inside the lease: `generateNextWeeklyMenu` loads the menu context (recipes, current and previous week) and attaches `previousMenu` before acquiring it, so database reads cannot consume the lease lifetime. The trade-off is that a rate-limited or in-progress request performs those cheap, authenticated reads before it is rejected. Exclusion assumes that callback/provider transport honors cancellation and settles within 60 seconds (40 seconds of margin). This is not a general-purpose guard for unbounded callbacks, and cannot guarantee non-overlap after a suspended worker or cancellation-ignoring provider exceeds the TTL. A timer race alone would not stop such work. The forced-expiry ownership test deliberately bypasses this bound to model handoff and proves token-safe release, not cancellation of an old provider. No live provider lifetime/cancellation behavior was tested. Concurrent callbacks use separate transactions/connections against the real server; the harness does not run two contending OS workers simultaneously.
 
 This database test does not exercise browser authentication, the authenticated server-function transport, or a live AI Gateway provider. It uses a callback in place of provider work and a controlled Sunday/Monday clock to verify the production post-provider stale-target helper; it must never require a provider key.
 
@@ -221,3 +221,46 @@ Repair recency follow-up (documented before the fix):
 11. A repaired slot picks a recipe used in the current or previous week although an unreserved fallback or candidate not used in those weeks exists; the history-aware `fallbackRecipeId` must win while it is unreserved.
 12. The history-aware fallback is already reserved by a valid model choice, and repair repeats it instead of taking the first unreserved candidate outside the prior weeks.
 13. Every candidate is reserved by valid model choices, and repair leaves a hole, throws, or becomes nondeterministic instead of allowing a repeat through the existing fallback chain.
+
+## First-run tour failure cases
+
+Documented before implementation.
+
+1. Guests see the tour or gain access to AI generation.
+2. Done or Skip allows the tour to reappear after reopening or reloading.
+3. Cancel or Discard marks the tour completed instead of restarting at step 1 next time.
+4. A callout blocks Accept, Cancel, recipe selectors or schedule controls, or steals focus.
+5. Throwing/blocked storage crashes the planner or interrupts generation; failed writes do not end the tour for the session.
+6. Two accounts share a completion flag instead of using separate account keys.
+7. Step 2 appears before a preview exists, including while generation is pending.
+8. Step 3 is separated from the Accept button.
+9. Callouts introduce duplicate live announcements or modal semantics.
+10. Next on step 1 closes or disables the schedule dialog instead of leaving it usable.
+11. Reload midway persists progress/completion instead of restarting at step 1.
+
+### First-run tour verification (2026-11-04)
+
+- Full harness: 54 scenarios (55 result entries including the summary), all PASS against the production build at `127.0.0.1:3101` through the CLI runner at 1440 × 1200. Evidence: `artifacts/ai-weekly-menu-results.json`; screenshot of the preview with step 3: [`artifacts/ai-first-run-tour-step-3.png`](artifacts/ai-first-run-tour-step-3.png).
+- Eight new scenarios cover failure cases 1–11: guest, full 1→2→3→Done through a mocked generation, Done/Skip persistence across reload, second account, cancel/discard restart, reload midway, and blocked reads/writes of storage. The init script presets the completed flag unless the URL has `tour=…`, so older scenarios are undisturbed.
+- Not verified: real authentication (the account id is a fixture) and non-Chrome browsers.
+
+## Lease scope failure cases
+
+Documented before moving context loading out of the generation lease.
+
+1. Context reads (recipes, current and previous week) still run inside the 60-second lease, so stalled reads count against the lifetime constraint.
+2. A failing context read leaves a lease row behind or consumes a rolling-window attempt.
+3. A context read stalling past 60 seconds lets the lease expire, so a second request acquires it and two provider calls run for one user.
+4. Rate-limited or in-progress users bypass the guard because the context is read first, or their rejection changes from `rate-limited`/`in-progress` to a generic error.
+5. The pre-generation stale-week check moves after context loading or after lease acquisition, so a stale request reads the database or takes an attempt.
+6. `previousMenu` is no longer attached as `previousProposal` when its week matches the target, or is attached for a different week.
+7. Mock `error`, `rate-limited`, `in-progress` or `stale` scenarios start loading context, acquiring a lease or consuming attempts.
+8. The post-generation stale-week check is skipped or runs before the provider result is available.
+9. The lease is not released on success, provider failure or stale-after-generation paths.
+10. An accepted call is counted twice (once for context, once for provider) or not at all; a rejected contender is counted.
+
+### Lease scope verification (2026-11-04)
+
+- `pnpm e2e:real-stack e2e/real-stack/ai-weekly-menu.scenario.js` passes all existing assertions plus one new one: with the `recipe` table renamed in the disposable database, an `ok` generation shows the generic error and leaves `{ attempts: 1, leases: 0 }` (no attempt, no lease). Against the previous `functions.ts` the same assertion fails with `attempts: 2`, so it proves context loading now happens before the lease. Evidence: `artifacts/real-stack-ai-weekly-menu-results.json`.
+- `timeout 120 ./e2e/run-ai-generation-guard-postgres.sh` passes (`artifacts/ai-generation-guard-postgres.json`).
+- Not reproduced: a context read stalling past 60 seconds with two concurrent requests (case 3); the fix is reasoned from code order. Cases 4, 6 and 8 rely on unchanged code paths and existing coverage, not new tests.
