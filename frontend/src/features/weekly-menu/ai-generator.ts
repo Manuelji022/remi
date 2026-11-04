@@ -8,6 +8,7 @@ import type { Recipe, MealSlot } from '#/features/recipes/recipe'
 import { mealSlotSchema } from '#/features/recipes/recipe'
 import {
   assignRecipesToWeek,
+  isSlotPlanned,
   placedRecipeIds,
 } from '#/features/weekly-menu/week'
 import type { CalendarWeekMenu } from '#/features/weekly-menu/week'
@@ -103,7 +104,7 @@ export async function generateAiMenu(
           if (context.previousProposal) {
             for (const slot of mealSlotSchema.options) {
               const plan = menu.days[day]
-              if (plan.scope !== 'both' && plan.scope !== slot) continue
+              if (!isSlotPlanned(plan.scope, slot)) continue
               const candidates = orderedRecipes.filter(
                 (recipe) => recipe.slot === slot,
               )
@@ -138,8 +139,8 @@ export async function generateAiMenu(
       ).map(([day, plan]) => [
         day,
         {
-          lunch: plan.scope === 'both' || plan.scope === 'lunch',
-          dinner: plan.scope === 'both' || plan.scope === 'dinner',
+          lunch: isSlotPlanned(plan.scope, 'lunch'),
+          dinner: isSlotPlanned(plan.scope, 'dinner'),
         },
       ]),
     ),
@@ -233,7 +234,7 @@ export function validateAiMenuAssignments(
   const reserved = { lunch: new Set<string>(), dinner: new Set<string>() }
   for (const day of DAYS) {
     for (const slot of mealSlotSchema.options) {
-      if (menu.days[day].scope !== 'both' && menu.days[day].scope !== slot)
+      if (!isSlotPlanned(menu.days[day].scope, slot))
         continue
       const id =
         parsed.data.days[day][
@@ -250,7 +251,7 @@ export function validateAiMenuAssignments(
     const assignment = parsed.data.days[day]
     const lunchRecipeId = checkedRecipeId(
       assignment.lunchRecipeId,
-      plan.scope === 'both' || plan.scope === 'lunch',
+      isSlotPlanned(plan.scope, 'lunch'),
       candidates.lunch,
       fallback.lunchRecipeId,
       repairCounts.lunch,
@@ -260,7 +261,7 @@ export function validateAiMenuAssignments(
     if (lunchRecipeId !== assignment.lunchRecipeId) repairCounts.lunch += 1
     const dinnerRecipeId = checkedRecipeId(
       assignment.dinnerRecipeId,
-      plan.scope === 'both' || plan.scope === 'dinner',
+      isSlotPlanned(plan.scope, 'dinner'),
       candidates.dinner,
       fallback.dinnerRecipeId,
       repairCounts.dinner,
@@ -281,7 +282,7 @@ export function validateAiMenuAssignments(
     if (
       DAYS.some((day) => {
         const plan = menu.days[day]
-        return plan.scope === 'both' || plan.scope === slot
+        return isSlotPlanned(plan.scope, slot)
       })
     ) {
       unavailableSlots.push(slot)

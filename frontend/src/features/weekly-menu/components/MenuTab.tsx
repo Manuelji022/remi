@@ -3,7 +3,7 @@ import { DayCard } from './DayCard'
 import { SparkleIcon } from '#/components/primitives'
 import { DAYS, isWeekend } from '#/features/weekly-menu/constants'
 import type { Day } from '#/features/weekly-menu/constants'
-import { showMenuDay } from '#/features/weekly-menu/week'
+import { isSlotPlanned, showMenuDay } from '#/features/weekly-menu/week'
 import type { CalendarWeekMenu } from '#/features/weekly-menu/week'
 import type { MealSlot, Recipe } from '#/features/recipes/recipe'
 import { useI18n } from '#/shared/i18n'
@@ -84,7 +84,7 @@ export function MenuTab({
           const editableMeals =
             recipesBySlot && onUpdateRecipe
               ? {
-                  ...(plan.scope === 'both' || plan.scope === 'lunch'
+                  ...(isSlotPlanned(plan.scope, 'lunch')
                     ? {
                         lunch: {
                           recipeId: plan.lunchRecipeId,
@@ -95,7 +95,7 @@ export function MenuTab({
                         },
                       }
                     : {}),
-                  ...(plan.scope === 'both' || plan.scope === 'dinner'
+                  ...(isSlotPlanned(plan.scope, 'dinner')
                     ? {
                         dinner: {
                           recipeId: plan.dinnerRecipeId,

@@ -7,6 +7,7 @@ import {
   emptyMenu,
   parseCalendarWeek,
   parseWeekStart,
+  placedRecipeIds,
   readStoredDay,
 } from '#/features/weekly-menu/week'
 import type {
@@ -97,7 +98,7 @@ async function recipeNamesFor(
   userId: string,
   menu: CalendarWeekMenu,
 ): Promise<Record<string, string>> {
-  const ids = recipeIds(menu)
+  const ids = [...placedRecipeIds(menu)]
   if (ids.length === 0) return {}
 
   const rows = await db
@@ -149,18 +150,6 @@ function placements(
   }
 
   return placed
-}
-
-function recipeIds(menu: CalendarWeekMenu): string[] {
-  const ids = new Set<string>()
-
-  for (const day of DAYS) {
-    const plan = menu.days[day]
-    if (plan.lunchRecipeId) ids.add(plan.lunchRecipeId)
-    if (plan.dinnerRecipeId) ids.add(plan.dinnerRecipeId)
-  }
-
-  return [...ids]
 }
 
 function dayRow(weeklyMenuId: string, userId: string, day: Day, plan: DayPlan) {

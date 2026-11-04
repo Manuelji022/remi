@@ -1,5 +1,5 @@
 import { useId, useRef, useState } from 'react'
-import { CheckIcon, PlusIcon, TrashIcon } from '#/components/primitives'
+import { PlusIcon, TogglePill, TrashIcon } from '#/components/primitives'
 import { useI18n } from '#/shared/i18n'
 import {
   INGREDIENT_UNITS,
@@ -108,18 +108,13 @@ export function RecipeForm({ isAddingRecipe, onAddRecipe }: RecipeFormProps) {
           role="group"
         >
           {MEAL_SLOTS.map((slot) => (
-            <button
-              aria-pressed={recipeSlot === slot}
-              className={`panel-scope-pill ${recipeSlot === slot ? 'selected' : ''}`}
+            <TogglePill
+              isDisabled={false}
+              isSelected={recipeSlot === slot}
               key={slot}
-              type="button"
+              label={t(`slots.${slot}`)}
               onClick={() => setRecipeSlot(slot)}
-            >
-              {recipeSlot === slot ? (
-                <CheckIcon aria-hidden="true" className="panel-pill-check" />
-              ) : null}
-              {t(`slots.${slot}`)}
-            </button>
+            />
           ))}
         </div>
       </div>

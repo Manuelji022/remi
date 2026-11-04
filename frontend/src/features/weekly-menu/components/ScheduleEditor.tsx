@@ -1,12 +1,13 @@
 import { DAYS, isWeekend } from '#/features/weekly-menu/constants'
 import type { Preferences } from '#/features/weekly-menu/types'
+import { TogglePill } from '#/components/primitives'
 import { useI18n } from '#/shared/i18n'
 import type {
   ScheduleDayContextChange,
   SchedulePlanningScopeChange,
 } from '../schedule-domain'
 import { getBlockedPlanningScopes } from '../schedule-domain'
-import { DayContextPill, PlanningScopePill } from './preferences-panel/Pills'
+import { DayContextPill } from './preferences-panel/Pills'
 import { PLANNING_SCOPE_OPTIONS } from './preferences-panel/types'
 
 interface ScheduleEditorProps {
@@ -72,7 +73,7 @@ export function ScheduleEditor({
               </span>
               <div className="panel-pill-row">
                 {PLANNING_SCOPE_OPTIONS.map((scope) => (
-                  <PlanningScopePill
+                  <TogglePill
                     isDisabled={blockedScopes.includes(scope)}
                     isSelected={planningScope === scope}
                     key={scope}
