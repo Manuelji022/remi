@@ -190,9 +190,13 @@ Documented before implementation (generate another).
 8. **Accepting during regeneration.** Accept, Discard and Edit schedule must not exist during the skeleton; the previous proposal is hidden, not saveable.
 9. **Confirm path now sends previousMenu.** The first generation (and retry after a failed first generation) must carry no `previousMenu`.
 10. **Hook change breaks pinned-week preview.** The Sunday preview stays pinned after Monday; epoch, identity and in-flight guards behave as before.
-11. **Precheck skipped on regenerate.** If the user deleted every recipe of a needed type in between, the notice shows and no request is sent.
+11. **Retry loses the retained proposal.** After generate/in-progress failure with a preview, Retry must regenerate directly with that edited proposal and its full day context/scope; another failure and Escape must retain it without opening a new schedule dialog.
 12. **Generated menu overwritten by manual edits.** `generatedMenu` must not change on recipe edits, otherwise edit detection breaks.
+
+13. **Focus falls to BODY after generation.** When the skeleton removes the opener, the settled preview heading receives focus; a still-valid focus target is not stolen.
 
 ### Generate-another verification
 
-The repeatable browser harness covers all 42 scenarios on this branch; sorting is verified independently in feat/ai-sorted-alternatives. Results and screenshots are refreshed from the production build. No live Gateway/authenticated transport is exercised.
+From `frontend/`, run `pnpm lint`, `pnpm check`, `pnpm typecheck`, `pnpm test`, and `pnpm build`, then use the production server and CLI runner documented in “Repeatable browser harness” and “CLI-only harness runner” above. This branch's harness has 44 scenarios (45 result entries including the summary), including retry after both provider error and in-progress rejection, manual-edit retention through repeated failure/Escape, full seven-day schedule preservation, and focus after confirmation/regeneration. Evidence is in `artifacts/ai-weekly-menu-results.json`; screenshots are `artifacts/ai-preview-actions-banner.png` and `artifacts/ai-preview-actions-confirm.png`.
+
+Regeneration uses the already-loaded catalog and the visible menu's context/scope, without another recipe precheck or notice flow. Browser responses are synthetic; live authenticated transport, database/provider behavior, and non-Chrome focus remain unverified.

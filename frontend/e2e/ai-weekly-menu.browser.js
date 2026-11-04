@@ -874,6 +874,32 @@ await scenario('failed Generate another keeps the previous edited proposal and A
   assert(`${saveCount}===1 && JSON.stringify(${fixture}.saveRequests[0].payload).includes('saved-dinner-alternative')`, 'Accept saves the previous proposal'),
 ])
 
+for (const reason of ['generate', 'in-progress']) {
+  await scenario(`Retry after ${reason} preserves the edited proposal and confirmed schedule`, [
+    open('target-saved'),
+    ...generateFromReady,
+    wait(`${preview}.contains(document.activeElement)`),
+    assert(`document.activeElement.getAttribute('role')==='heading'`, 'confirmation settles focus on the preview heading'),
+    ['select', firstDayDinnerSelector, 'saved-dinner-alternative'],
+    evaluate(`${fixture}.failGeneration=${reason === 'generate'}; ${fixture}.generationRejection=${JSON.stringify(reason === 'in-progress' ? reason : null)}; ${generateAnotherButton}.click()`),
+    wait(`${generateAnotherDialog} !== null`),
+    evaluate(`[...${generateAnotherDialog}.querySelectorAll('button')].find(button => button.textContent.trim()==='Generate another').click()`),
+    wait(`${shell}.querySelector('[role="alert"]') !== null && ${preview} !== null`),
+    waitPreviewAcceptable(),
+    assert(`!${generateAnotherButton}.disabled`, 'Generate another is available after a retryable failure'),
+    click('Retry generation'),
+    wait(`${generationCount}===3 && ${preview} !== null && ${shell}.querySelector('[role="alert"]') !== null`),
+    assert(`!${dialog} && ${preview}.querySelector(${JSON.stringify(firstDayDinnerSelector)}).value==='saved-dinner-alternative'`, 'Retry never opens a fresh schedule flow and another failure keeps the manual edit'),
+    ['press', 'Escape'],
+    assert(`${preview} !== null && ${saveCount}===0 && ${preview}.querySelector(${JSON.stringify(firstDayDinnerSelector)}).value==='saved-dinner-alternative'`, 'Escape cannot silently discard the retained proposal'),
+    evaluate(`${fixture}.failGeneration=false; ${fixture}.generationRejection=null`),
+    click('Retry generation'),
+    wait(`${generationCount}===4 && ${preview} !== null && !${shell}.querySelector('[role="alert"]')`),
+    wait(`${preview}.contains(document.activeElement)`),
+    assert(`document.activeElement.getAttribute('role')==='heading' && ${lastRequest}.previousMenu.days.Monday.dinnerRecipeId==='saved-dinner-alternative' && JSON.stringify(${lastRequest}.schedule)===JSON.stringify(${fixture}.generationRequests[0].schedule) && ${lastRequest}.schedule.Monday.context==='office' && ${lastRequest}.schedule.Monday.scope==='dinner' && ${lastRequest}.schedule.Tuesday.context==='eatOut' && ${lastRequest}.schedule.Tuesday.scope==='lunch' && ${saveCount}===0`, 'retry sends the edited proposal with all original day contexts/scopes and focuses the settled preview'),
+  ])
+}
+
 await scenario('rate-limited Generate another keeps the proposal; retry after a failed first generation has no previousMenu', [
   open('ready'),
   wait(`${shell}.innerText.includes('Saved dinner')`),

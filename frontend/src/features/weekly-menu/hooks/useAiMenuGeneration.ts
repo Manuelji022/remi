@@ -431,31 +431,45 @@ export function useAiMenuGeneration({
     })
   }, [state, runGeneration])
 
-  // A brand-new full proposal for the same confirmed schedule, varied against
-  // the proposal on screen. Only allowed from a settled preview.
+  const canRegenerate =
+    state.phase === 'preview' ||
+    (state.phase === 'error' &&
+      Boolean(state.preview) &&
+      (state.reason === 'generate' || state.reason === 'in-progress'))
+
+  // Regeneration and its retry retain the proposal until another succeeds.
   const regenerate = useCallback(async () => {
+    const previousPreview =
+      state.phase === 'preview' || state.phase === 'error'
+        ? state.preview
+        : undefined
     if (
-      state.phase !== 'preview' ||
+      !canRegenerate ||
+      !previousPreview ||
       !identityRef.current ||
-      state.preview.userId !== identityRef.current ||
+      previousPreview.userId !== identityRef.current ||
       generationInFlightRef.current
     )
       return
-    const previousPreview = state.preview
     await runGeneration({
       requester: previousPreview.userId,
       target: previousPreview.weekStart,
-      // After Edit schedule -> Cancel the retry info is gone; the schedule is
-      // still fully described by the menu itself.
-      draft: state.retry?.draft ?? scheduleFromMenu(previousPreview.menu),
+      draft: scheduleFromMenu(previousPreview.menu),
       replacesSavedMenu: previousPreview.replacesSavedMenu,
       previousPreview,
       previousMenu: previousPreview.menu,
     })
-  }, [state, runGeneration])
+  }, [state, canRegenerate, runGeneration])
 
   const retry = useCallback(async () => {
     if (state.phase !== 'error') return
+    if (
+      state.preview &&
+      (state.reason === 'generate' || state.reason === 'in-progress')
+    ) {
+      await regenerate()
+      return
+    }
     if (state.reason === 'stale-week' && state.expectedTargetWeekStart) {
       await openSchedule({
         targetWeekStart: state.expectedTargetWeekStart,
@@ -478,7 +492,7 @@ export function useAiMenuGeneration({
       mode: 'new',
       preferences: savedDraft,
     })
-  }, [state, openSchedule, timeZone])
+  }, [state, openSchedule, timeZone, regenerate])
 
   const updateRecipe = useCallback(
     (
@@ -586,7 +600,7 @@ export function useAiMenuGeneration({
     updateScope,
     confirm,
     regenerate,
-    canRegenerate: state.phase === 'preview',
+    canRegenerate,
     retry,
     updateRecipe,
     accept,

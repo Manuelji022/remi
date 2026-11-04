@@ -78,8 +78,6 @@ export function WeeklyMenuPlanner() {
   const [preferencesTab, setPreferencesTab] =
     useState<PreferencesPanelTab>('schedule')
   const [showRecipesNotice, setShowRecipesNotice] = useState(false)
-  const [recipesNoticeKeepsPreview, setRecipesNoticeKeepsPreview] =
-    useState(false)
   const [missingRecipeSlots, setMissingRecipeSlots] = useState<MealSlot[]>([])
   const [showGenerateAnother, setShowGenerateAnother] = useState(false)
   const precheckPendingRef = useRef(false)
@@ -277,9 +275,7 @@ export function WeeklyMenuPlanner() {
   function openRecipes() {
     setShowRecipesNotice(false)
     setMissingRecipeSlots([])
-    // Opened from a preview's Generate another: the proposal must survive.
-    if (!recipesNoticeKeepsPreview) aiGeneration.dismiss()
-    setRecipesNoticeKeepsPreview(false)
+    aiGeneration.dismiss()
     setPreferencesTab('recipes')
     setIsPreferencesOpen(true)
   }
@@ -375,29 +371,12 @@ export function WeeklyMenuPlanner() {
 
   function startGenerateAnother() {
     setShowGenerateAnother(false)
-    const current = currentPreview
-    if (!current || !readyData || readyData.weekStart !== current.weekStart)
-      return
-    const missing = homePlannedSlotTypes(current.menu).filter(
-      (slot) => !readyData.recipes.some((recipe) => recipe.slot === slot),
-    )
-    if (missing.length > 0) {
-      setRecipesNoticeKeepsPreview(true)
-      setShowRecipesNotice(true)
-      return
-    }
     plannerWeek.clearAction()
     void aiGeneration.regenerate()
   }
 
   function handleGenerateAnother(opener: HTMLElement) {
-    if (
-      !currentPreview ||
-      !canGenerateAnother ||
-      showGenerateAnother ||
-      !hasUnsavedPreview
-    )
-      return
+    if (!currentPreview || !canGenerateAnother || showGenerateAnother) return
     generateAnotherOpenerRef.current = opener
     if (hasManualEdits(currentPreview)) setShowGenerateAnother(true)
     else startGenerateAnother()
@@ -516,7 +495,7 @@ export function WeeklyMenuPlanner() {
     !isWriting,
   )
   const canGenerateAnother = Boolean(
-    canAcceptPreview && aiGeneration.canRegenerate && !isWriting,
+    canAcceptPreview && aiGeneration.canRegenerate,
   )
   const generationErrorMessage =
     currentGeneration?.reason === 'stale-week'
@@ -738,10 +717,7 @@ export function WeeklyMenuPlanner() {
         <RecipesNeededDialog
           returnFocusTo={scheduleOpenerRef.current}
           onAddRecipes={openRecipes}
-          onClose={() => {
-            setShowRecipesNotice(false)
-            setRecipesNoticeKeepsPreview(false)
-          }}
+          onClose={() => setShowRecipesNotice(false)}
         />
       )}
 

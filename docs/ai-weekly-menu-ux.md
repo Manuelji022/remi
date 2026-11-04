@@ -106,9 +106,9 @@ Los avisos de escasez de la vista previa (`unavailableSlots`) siguen igual.
   - Cuenta como **un intento** de los 5 por hora: es la misma llamada al servidor y no hay ningún aviso de cuota hasta que se alcanza el límite.
   - Solo pide confirmación si la persona hizo **cambios manuales** («¿Generar otra? Perderás los cambios que hiciste a mano en esta propuesta.»). Sin cambios (o si los revirtió), genera directamente.
   - El servidor recibe solo los **IDs de receta** de la propuesta actual por día y hueco, para variar; nunca nombres, ingredientes ni identidad. Si la propuesta es de otra semana, lo ignora.
-  - Se repite la comprobación de recetas del horario; si falta un tipo necesario se muestra el aviso de recetas y no se llama al servidor.
-  - Durante la espera se muestra el esqueleto. Si falla (error, límite, otra generación en curso o semana obsoleta), **se conserva la propuesta anterior con sus cambios manuales** y el mensaje de error; no se guarda nada y «Aceptar» sigue funcionando. Mientras el error está visible, «Generar otra» queda desactivado.
-  - Está desactivado mientras se guarda, se genera o el catálogo de recetas no está cargado.
+  - Reutiliza el horario completo de la propuesta visible; no repite la comprobación de un catálogo que ya está cargado.
+  - Durante la espera se muestra el esqueleto. Si falla (error, límite, otra generación en curso o semana obsoleta), **se conserva la propuesta anterior con sus cambios manuales** y el mensaje de error; no se guarda nada y «Aceptar» sigue funcionando. Tras un error de generación u otra generación en curso, «Reintentar» y «Generar otra» reutilizan esa propuesta sin abrir de nuevo el diálogo de horario. Con límite o semana obsoleta, «Generar otra» sigue desactivado.
+  - Está desactivado mientras se guarda, se genera o el catálogo de recetas no está cargado. Al llegar la vista previa, el foco pasa a su encabezado si el botón que inició la generación ya no existe.
 - No hay explicaciones de por qué se eligió cada receta.
 - Las recetas pueden repetirse en huecos distintos.
 - Si no hay recetas de un tipo, esos huecos quedan vacíos con la explicación de qué falta.
