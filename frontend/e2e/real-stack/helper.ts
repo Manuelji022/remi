@@ -3,6 +3,7 @@ import { createHmac } from 'node:crypto'
 import { readFile, writeFile } from 'node:fs/promises'
 import { spawn } from 'node:child_process'
 import postgres from 'postgres'
+import { createConnection } from 'node:net'
 
 const url = process.env.DATABASE_URL!
 assert(['localhost', '127.0.0.1'].includes(new URL(url).hostname))
@@ -60,6 +61,8 @@ try {
   } else {
     const { cookie } = JSON.parse(await readFile(cookiePath, 'utf8'))
     const base = process.env.BETTER_AUTH_URL!
+    const browserBin = process.env.REAL_STACK_BROWSER_BIN
+    assert(browserBin)
     const session = await fetch(`${base}/api/auth/get-session`, {
       headers: { cookie },
     }).then((r) => r.json())
@@ -78,9 +81,9 @@ try {
     const browser = (args: string[]) =>
       new Promise<unknown>((resolve, reject) => {
         const child = spawn(
-          'agent-browser',
+          browserBin,
           ['--session', process.env.REAL_STACK_BROWSER!, '--json', ...args],
-          { timeout: 45000 },
+          { timeout: 45000, killSignal: 'SIGKILL' },
         )
         let out = '',
           error = ''
@@ -113,12 +116,32 @@ try {
     const wait = (condition: string) => browser(['wait', '--fn', condition])
     const click = (name: string) =>
       browser(['find', 'role', 'button', 'click', '--name', name, '--exact'])
-    let loaded = false
+    const browserState = { loaded: false }
     const open = async (mock: string) => {
       const pageUrl = `${base}/weekly-menu-planner?mock=${mock}`
-      if (!loaded) {
+      if (!browserState.loaded) {
+        await browser(['open', base])
+        for (const target of ['https://example.com', 'http://1.1.1.1']) {
+          assert.equal(
+            await evaluate(
+              `fetch(${JSON.stringify(target)}, {signal:AbortSignal.timeout(3000)}).then(()=>false,()=>true)`,
+            ),
+            true,
+          )
+        }
+        emit('browser rejects public hostname and public IP probes')
+        await browser([
+          'cookies',
+          'set',
+          cookie.split('=')[0],
+          cookie.slice(cookie.indexOf('=') + 1),
+          '--url',
+          base,
+          '--httpOnly',
+        ])
+        await browser(['set', 'viewport', '1440', '1200'])
         await browser(['open', pageUrl])
-        loaded = true
+        browserState.loaded = true
       } else {
         if (await evaluate("!!document.querySelector('.planner-ai-preview')")) {
           await click('Discard preview')
@@ -152,17 +175,26 @@ try {
       emit(
         'real server accepts signed post-2FA session and rejects tampered cookie',
       )
-      await browser(['--args', '--no-sandbox', 'open', base])
-      await browser([
-        'cookies',
-        'set',
-        cookie.split('=')[0],
-        cookie.slice(cookie.indexOf('=') + 1),
-        '--url',
-        base,
-        '--httpOnly',
-      ])
-      await browser(['set', 'viewport', '1440', '1200'])
+      assert.throws(
+        () => createConnection(443, 'ai-gateway.vercel.sh'),
+        /REAL_STACK_NONLOCAL/,
+      )
+      emit('Node runtime blocks non-local sockets, including AI Gateway')
+      await assert.rejects(
+        new Promise((resolve, reject) => {
+          const socket = createConnection(9, '127.0.0.1')
+          socket.setTimeout(1000, () => {
+            socket.destroy()
+            reject(new Error('Proxy port check timed out'))
+          })
+          socket.on('connect', () => {
+            socket.destroy()
+            resolve(true)
+          })
+          socket.on('error', reject)
+        }),
+        { code: 'ECONNREFUSED' },
+      )
       const scenarioPath = './selected.scenario.js'
       const scenario = await import(scenarioPath)
       await scenario.default({
@@ -177,17 +209,34 @@ try {
         emit,
         artifact,
       })
+      const traffic = (await browser(['network', 'requests'])) as {
+        requests: { url: string; status?: number }[]
+      }
+      const contacted = traffic.requests.filter(
+        (r) => r.status && r.status < 400,
+      )
+      assert(contacted.length > 0)
+      assert(
+        contacted.every((r) =>
+          ['localhost', '127.0.0.1'].includes(new URL(r.url).hostname),
+        ),
+      )
+      emit('all successful app-tab requests stay on loopback', {
+        count: contacted.length,
+        origins: [...new Set(contacted.map((r) => new URL(r.url).origin))],
+      })
     } catch (error) {
       results.push({ verdict: 'FAIL', error: String(error) })
-      await browser([
-        'screenshot',
-        artifact.replace(/\.json$/, '-failure.png'),
-      ]).catch(() => {})
+      if (browserState.loaded)
+        await browser([
+          'screenshot',
+          artifact.replace(/\.json$/, '-failure.png'),
+        ]).catch(() => {})
       throw error
     } finally {
       await writeFile(
         artifact,
-        JSON.stringify({ suite: 'real-stack', results }, null, 2) + '\n',
+        JSON.stringify({ suite: 'real-stack', results }) + '\n',
       )
     }
   }
