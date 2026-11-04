@@ -167,3 +167,33 @@ Documented before implementation; transport tests use fake fetch only, never a r
 - `keeps zero/one candidates, absent previous proposal, and empty scenario behavior`: cases 5, 7 (mock output), and 10 (empty scenario).
 - Cases 1, 3, and 4 were inspected at the server-function boundary: `calendarWeekSchema.optional()` validates input before the handler; only a matching target week reaches the generator; no save/log call was added and generation remains inside the existing guard. Short-circuit scenario branches are unchanged. These paths were not exercised through authenticated transport or a live database in this task.
 - Production request compatibility without a previous proposal is supported by the existing fake-Gateway transport tests and inspection of the conditional prompt fields/system sentence. No live Gateway call, browser UI, or model choice variability was verified.
+
+## Preview actions failure cases
+
+Documented before implementation (generate another, replace warning, alphabetical alternatives).
+
+1. **Regenerate wipes manual edits without asking.** With a manual recipe swap in the preview, Generate another must open a confirmation first; Cancel sends nothing and keeps the edit.
+2. **Regenerate asks when there were no edits.** With no manual change (or a change reverted to the generated recipe) it must regenerate directly with no dialog.
+3. **Failure of regenerate loses the previous proposal.** On a rejected, rate-limited, in-progress or stale-week answer, the previous proposal (with manual edits) stays visible with the error, nothing stale is saved, and Accept still saves the previous proposal.
+4. **Regenerate sends a previousMenu from another week.** The request must carry the shown proposal's menu for the preview's own week, never a saved/other week's menu.
+5. **Double click or double dispatch sends two requests.** Two rapid clicks (or click plus confirm-dialog confirm) must produce exactly one generation request.
+6. **Regenerate while saving.** The button is disabled/no-op while Accept is saving; a held save is never overtaken by a generation.
+7. **Regenerate after rollover targets the wrong week.** A Sunday preview opened and then Monday must regenerate for the preview's weekStart; a stale-week answer shows the existing stale error, not a preview.
+8. **Accepting during regeneration.** Accept, Discard and Edit schedule must not exist during the skeleton; the previous proposal is hidden, not saveable.
+9. **Replace note shown when the week is empty.** Neither the dialog nor the banner may show the note for a week without a saved menu (`ready`).
+10. **Replace note missing when the week has a menu.** For `target-saved` both the dialog and the preview banner must show it.
+11. **Replace note stale after the Edit schedule round trip.** After Edit schedule and Cancel (restore) or confirm, the banner note and dialog note still reflect the target week; it survives retry too.
+12. **Selector not alphabetical, locale wrong, or selected value lost.** Options of every home slot are sorted with the active locale (accented names sort with their base letter, numbers numerically); the selected recipe stays selected after sorting.
+13. **"No recipe" option moves.** It stays the first option.
+14. **Confirm path now sends previousMenu.** The first generation (and retry after a failed first generation) must carry no `previousMenu`.
+15. **Unnecessary re-sorting on each render.** Per-slot lists are memoized on the recipe list and locale only.
+16. **Hook change breaks pinned-week preview.** The Sunday preview stays pinned after Monday; epoch, identity and in-flight guards behave as before.
+17. **Precheck skipped on regenerate.** If the user deleted every recipe of a needed type in between, the notice shows and no request is sent.
+18. **Generated menu overwritten by manual edits.** `generatedMenu` must not change on recipe edits, otherwise edit detection breaks.
+
+### Preview actions verification (2026-11-04)
+
+- All 45 results (44 scenarios plus the suite summary: the 33 earlier scenarios and 11 new ones) passed in the browser harness against the production build at `127.0.0.1:3101` through the CLI runner at 1440 × 1200; evidence is in `artifacts/ai-weekly-menu-results.json`. The fixture now records `previousMenu`, rotates to alternative recipes when a previous proposal is sent, and has a `sorted-catalog` scenario (accented and numeric names inserted out of order).
+- Failure cases covered in the browser: 1, 2, 3, 5, 6, 7, 9, 10, 11, 12, 13, 14, 16 and 4 (previousMenu equals the shown proposal and its week) plus 8 (no Accept/Discard/Edit while the skeleton shows is covered by the earlier skeleton scenarios). Case 15 (memoized sort) and case 17 (precheck on regenerate) are verified by code reading only: the catalog cannot lose a recipe type in the fixture while a preview is open.
+- Screenshots: [`artifacts/ai-preview-actions-banner.png`](artifacts/ai-preview-actions-banner.png) (replace note and Generate another) and [`artifacts/ai-preview-actions-confirm.png`](artifacts/ai-preview-actions-confirm.png) (confirmation dialog).
+- Not verified: a live server/Gateway regenerate, and real focus-return on browsers other than Chrome.

@@ -86,7 +86,7 @@ Los avisos de escasez de la vista previa (`unavailableSlots`) siguen igual.
   - **Comer fuera:** la persona elige si cubre comida, cena o ambas.
 - Valores iniciales: si la semana siguiente ya tiene horario guardado, se precarga; si no, **todo en casa** (no se copia el horario de la semana actual).
 - Hay una acción explícita de confirmar. Antes de confirmar no hay llamada a la IA ni guardado.
-- Si ya existe un menú guardado para la semana siguiente, el diálogo avisa de que **aceptar reemplazará todo el menú**.
+- Si ya existe un menú guardado para la semana siguiente, el diálogo muestra, encima de los botones, una nota visible (no es una alerta): «La próxima semana ya tiene un menú. Si aceptas la nueva propuesta, lo reemplazará por completo.» Si la semana está vacía no se muestra nada.
 
 ### 5.4 Generación
 
@@ -100,8 +100,15 @@ Los avisos de escasez de la vista previa (`unavailableSlots`) siguen igual.
 - Muestra los 7 días con sus comidas y cenas.
 - Las comidas **cubiertas fuera de casa** se ven **bloqueadas y etiquetadas** (p. ej. "Oficina", "Fuera"); no admiten receta y nunca cuentan como táper.
 - En cada hueco planificado en casa, la persona puede **cambiar la receta** por otra de sus recetas del tipo correspondiente (comida o cena). Este cambio es **local, sin IA y sin consumir cuota**.
-- Las alternativas se ofrecen en **orden alfabético**.
-- **Generar otra:** acción disponible en la vista previa que pide una propuesta completa nueva reutilizando el horario ya confirmado. Cuenta como **un intento** de los 5 por hora. Si la persona hizo cambios manuales, se avisa antes de que se perderán. Durante la espera se muestra de nuevo el esqueleto y, si falla, se conserva la propuesta anterior con su mensaje de error y Reintentar.
+- Las alternativas se ofrecen en **orden alfabético** según el idioma de la interfaz (sin distinguir mayúsculas ni acentos, números en orden numérico). «Sin receta» va siempre primero y la receta elegida se mantiene seleccionada.
+- Si la semana ya tenía un menú guardado, el banner de la vista previa añade una línea junto a «Aceptar»: «Al aceptar, se reemplaza el menú que ya tienes guardado esta semana.»
+- **Generar otra:** botón secundario del banner, junto a «Editar agenda». Pide una propuesta completa nueva para el **mismo horario ya confirmado** y de la **misma semana de la vista previa** (aunque ya haya llegado el lunes).
+  - Cuenta como **un intento** de los 5 por hora: es la misma llamada al servidor y no hay ningún aviso de cuota hasta que se alcanza el límite.
+  - Solo pide confirmación si la persona hizo **cambios manuales** («¿Generar otra? Perderás los cambios que hiciste a mano en esta propuesta.»). Sin cambios (o si los revirtió), genera directamente.
+  - El servidor recibe solo los **IDs de receta** de la propuesta actual por día y hueco, para variar; nunca nombres, ingredientes ni identidad. Si la propuesta es de otra semana, lo ignora.
+  - Se repite la comprobación de recetas del horario; si falta un tipo necesario se muestra el aviso de recetas y no se llama al servidor.
+  - Durante la espera se muestra el esqueleto. Si falla (error, límite, otra generación en curso o semana obsoleta), **se conserva la propuesta anterior con sus cambios manuales** y el mensaje de error; no se guarda nada y «Aceptar» sigue funcionando. Mientras el error está visible, «Generar otra» queda desactivado.
+  - Está desactivado mientras se guarda, se genera o el catálogo de recetas no está cargado.
 - No hay explicaciones de por qué se eligió cada receta.
 - Las recetas pueden repetirse en huecos distintos.
 - Si no hay recetas de un tipo, esos huecos quedan vacíos con la explicación de qué falta.
@@ -111,7 +118,7 @@ Los avisos de escasez de la vista previa (`unavailableSlots`) siguen igual.
 
 ### 5.6 Aceptar
 
-- Guarda exactamente lo que se ve en la vista previa y **reemplaza toda la semana siguiente**.
+- Guarda exactamente lo que se ve en la vista previa y **reemplaza toda la semana siguiente**. Si esa semana ya tenía menú, el diálogo de horario y el banner lo avisan antes de aceptar (secciones 5.3 y 5.5).
 - Tras guardar, el planner **navega a la semana siguiente** con el menú aplicado.
 - Si el guardado falla, la vista previa se conserva intacta y se puede reintentar.
 
@@ -177,7 +184,7 @@ La primera vez que una cuenta usa **Generar con IA** se muestra un **tour de 2 o
 
 ## 11. Puntos abiertos
 
-Resueltos en la segunda ronda: "Generar otra" (sí, cuenta como intento), orden alfabético de alternativas, sin mínimo cuantitativo de recetas, y tour de primera vez.
+Resueltos: "Generar otra" (cuenta como un intento; confirmación solo con cambios manuales), orden alfabético de alternativas, aviso de reemplazo, sin mínimo cuantitativo de recetas, y tour de primera vez.
 
 1. **Desbloqueo temporal:** al bloquearse por fecha no hace falta persistir un estado, pero conviene confirmar si el desbloqueo necesita algo en servidor (hoy se asume solo cliente).
 2. **Textos finales** en ambos idiomas, y diseño visual del anillo, del candado y del tour.
