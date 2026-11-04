@@ -1,6 +1,5 @@
 import { createServerFn } from '@tanstack/react-start'
-import { getRequest } from '@tanstack/react-start/server'
-import { auth } from '#/features/auth/auth'
+import { requireUserId } from '#/features/auth/require-user'
 import {
   parseRecipeId,
   parseRecipeInput,
@@ -40,13 +39,3 @@ export const deleteRecipe = createServerFn({ method: 'POST' })
     const userId = await requireUserId()
     return deleteRecipeForUser(userId, data.id)
   })
-
-async function requireUserId(): Promise<string> {
-  const session = await auth.api.getSession({
-    headers: getRequest().headers,
-  })
-
-  if (!session?.user.id) throw new Error('Unauthorized')
-
-  return session.user.id
-}

@@ -1,19 +1,22 @@
 import { Link } from '@tanstack/react-router'
+import type { FormSubmitEvent } from '#/features/auth/useAuthForm'
 import '../auth.css'
-import type { ComponentProps } from 'react'
 import { useState } from 'react'
 import { getLocalizedPath, useI18n } from '#/shared/i18n'
+import { useAuthForm } from '#/features/auth/useAuthForm'
 import { authClient } from '#/features/auth/auth-client'
 
-type FormSubmitEvent = Parameters<
-  NonNullable<ComponentProps<'form'>['onSubmit']>
->[0]
+const ERROR_MAPPING = {
+  INVALID_EMAIL: 'auth.errors.invalidEmail',
+  USER_NOT_FOUND: 'auth.errors.userNotFound',
+  RATE_LIMIT: 'auth.errors.rateLimited',
+}
 
 export function ForgotPasswordPage() {
   const { locale, t } = useI18n()
   const [email, setEmail] = useState('')
-  const [error, setError] = useState<string | null>(null)
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const { error, isSubmitting, setError, setIsSubmitting, handleApiError } =
+    useAuthForm()
   const [sent, setSent] = useState(false)
 
   async function handleSubmit(event: FormSubmitEvent) {
@@ -34,7 +37,7 @@ export function ForgotPasswordPage() {
 
     if (result.error) {
       setIsSubmitting(false)
-      setError(result.error.message ?? t('auth.resetPasswordError'))
+      handleApiError(result.error, ERROR_MAPPING, 'auth.resetPasswordError', t)
       return
     }
 
