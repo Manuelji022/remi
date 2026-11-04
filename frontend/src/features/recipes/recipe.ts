@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import type { ReadResult } from '#/shared'
 
 export const MEAL_SLOTS = ['lunch', 'dinner'] as const
 export const INGREDIENT_UNITS = [
@@ -58,9 +59,6 @@ export type RecipeUpdate = RecipeInput & {
   id: string
 }
 
-export type ReadResult<T> =
-  { ok: true; value: T } | { ok: false; error: string }
-
 export class RecipeInputError extends Error {
   constructor(message: string) {
     super(message)
@@ -73,6 +71,14 @@ export class RecipeNotFoundError extends Error {
     super('Recipe not found')
     this.name = 'RecipeNotFoundError'
   }
+}
+
+function parseWith<T>(
+  result: ReadResult<T>,
+  ErrorClass: new (message: string) => Error,
+): T {
+  if (!result.ok) throw new ErrorClass(result.error)
+  return result.value
 }
 
 export function readRecipeInput(value: unknown): ReadResult<RecipeInput> {
@@ -94,21 +100,15 @@ export function readRecipeId(value: unknown): ReadResult<{ id: string }> {
 }
 
 export function parseRecipeInput(value: unknown): RecipeInput {
-  const parsed = readRecipeInput(value)
-  if (!parsed.ok) throw new RecipeInputError(parsed.error)
-  return parsed.value
+  return parseWith(readRecipeInput(value), RecipeInputError)
 }
 
 export function parseRecipeUpdate(value: unknown): RecipeUpdate {
-  const parsed = readRecipeUpdate(value)
-  if (!parsed.ok) throw new RecipeInputError(parsed.error)
-  return parsed.value
+  return parseWith(readRecipeUpdate(value), RecipeInputError)
 }
 
 export function parseRecipeId(value: unknown): { id: string } {
-  const parsed = readRecipeId(value)
-  if (!parsed.ok) throw new RecipeInputError(parsed.error)
-  return parsed.value
+  return parseWith(readRecipeId(value), RecipeInputError)
 }
 
 export function readStoredMealSlot(value: string): MealSlot {
