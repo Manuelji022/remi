@@ -598,6 +598,7 @@ export function WeeklyMenuPlanner() {
               isSaveUnconfirmed={Boolean(previewSaveError)}
               canAccept={canAcceptPreview}
               isSignedIn={Boolean(userId)}
+              replacesSavedMenu={currentPreview.replacesSavedMenu}
               onEditSchedule={() =>
                 void openGenerationSchedule(
                   undefined,
@@ -642,6 +643,7 @@ export function WeeklyMenuPlanner() {
         <AiGenerationScheduleDialog
           isPending={false}
           missingRecipeSlots={missingRecipeSlots}
+          replacesSavedMenu={scheduleDialog.replacesSavedMenu}
           onAddRecipes={openRecipes}
           preferences={scheduleDraft}
           targetWeekRange={targetWeekRange}

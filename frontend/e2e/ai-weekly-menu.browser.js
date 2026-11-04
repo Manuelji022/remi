@@ -754,6 +754,39 @@ await scenario('guest generation remains local and never calls the AI server fun
   assert(`${generationCount}===0 && ${saveCount}===0`, 'guest planner retains its local flow and makes no AI request'),
 ])
 
+await scenario('replace note is absent when the target week is empty (dialog and banner)', [
+  open('ready'),
+  wait(`${shell}.innerText.includes('Saved dinner')`),
+  click('Regenerate menu'),
+  text("Review next week’s schedule"),
+  assert(`!${dialog}.innerText.includes('already has a menu')`, 'no replace note in the dialog for an empty week'),
+  click('Confirm schedule and generate'),
+  wait(`${preview} !== null`),
+  assert(`!${preview}.innerText.includes('replaces the menu already saved')`, 'no replace note in the banner for an empty week'),
+])
+
+await scenario('replace note shows in dialog and banner for a saved target week and survives Edit schedule', [
+  open('target-saved'),
+  wait(`${shell}.innerText.includes('Saved dinner')`),
+  click('Regenerate menu'),
+  text("Review next week’s schedule"),
+  assert(
+    `${dialog}.innerText.includes('Next week already has a menu. Accepting the new proposal will replace all of it.') && ${dialog}.querySelector('.planner-ai-replace-note') && !${dialog}.querySelector('.planner-ai-replace-note').closest('[role="alert"]') && ${dialog}.querySelector('.planner-ai-replace-note').compareDocumentPosition(${dialog}.querySelector('footer')) & Node.DOCUMENT_POSITION_FOLLOWING`,
+    'dialog shows a non-alert replace note above the footer',
+  ),
+  click('Confirm schedule and generate'),
+  wait(`${preview} !== null`),
+  waitPreviewAcceptable(),
+  assert(`${preview}.querySelector('.planner-ai-preview-banner').innerText.includes('Accepting replaces the menu already saved for this week.')`, 'banner shows the replace note'),
+  ['screenshot', `${process.cwd()}/e2e/artifacts/ai-replace-warning.png`],
+  click('Edit target schedule'),
+  text("Review next week’s schedule"),
+  assert(`${dialog}.innerText.includes('Next week already has a menu')`, 'note still shows after the Edit schedule round trip'),
+  click('Cancel'),
+  wait(`${preview} !== null`),
+  assert(`${preview}.innerText.includes('replaces the menu already saved')`, 'note survives Cancel (restored preview)'),
+])
+
 const dinnerOptions = `[...${preview}.querySelector(${JSON.stringify(firstDayDinnerSelector)}).options].map(option => option.textContent)`
 const generateFromReady = [
   wait(`${shell}.innerText.includes('Saved dinner')`),

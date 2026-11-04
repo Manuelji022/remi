@@ -132,6 +132,14 @@
     "verdict": "PASS"
   },
   {
+    "scenario": "replace note is absent when the target week is empty (dialog and banner)",
+    "verdict": "PASS"
+  },
+  {
+    "scenario": "replace note shows in dialog and banner for a saved target week and survives Edit schedule",
+    "verdict": "PASS"
+  },
+  {
     "scenario": "preview alternatives are alphabetical per locale, with No recipe first and the selection kept",
     "verdict": "PASS"
   },
@@ -149,7 +157,7 @@
           "effectiveLaunch": {
             "browserLaunched": true,
             "engine": "chrome",
-            "launchHash": 6701229096119436000
+            "launchHash": 10648038973705824000
           },
           "launched": false,
           "relaunchedBrowser": false,
