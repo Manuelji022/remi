@@ -1,4 +1,4 @@
-export default async function scenario({ assert, browser, evaluate, wait, click, open, accounting, saved, emit, artifact }) {
+export default async function scenario({ assert, browser, evaluate, wait, click, open, accounting, saved, withRecipeTableHidden, emit, artifact }) {
   const preview = "document.querySelector('.planner-ai-preview')"
   const skeleton = "document.querySelector('.planner-ai-skeleton')"
   const dialog = "document.querySelector('dialog[aria-labelledby=\"ai-generation-title\"][open]')"
@@ -59,6 +59,17 @@ export default async function scenario({ assert, browser, evaluate, wait, click,
     assert.deepEqual(await saved(), baseline)
     emit(`${mock}: real server feedback, zero attempts, no lease, saved week unchanged`)
   }
+  await open('ok')
+  await browser(['click', '.planner-actions .planner-primary-btn'])
+  await wait(`${dialog} !== null`)
+  await withRecipeTableHidden(async () => {
+    await click('Confirm schedule and generate')
+    await browser(['wait', '--text', errors.error])
+    await wait(`${skeleton} === null`)
+  })
+  assert.deepEqual(await accounting(), { attempts: 1, leases: 0 })
+  assert.deepEqual(await saved(), baseline)
+  emit('ok whose context read fails: loaded before the lease, so zero attempts and no lease')
   for (let attempts = 2; attempts <= 5; attempts++) {
     await generate('ok')
     assert.deepEqual(await accounting(), { attempts, leases: 0 })

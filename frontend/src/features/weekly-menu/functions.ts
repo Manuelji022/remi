@@ -88,17 +88,19 @@ export const generateNextWeeklyMenu = createServerFn({ method: 'POST' })
         throw new AiGenerationStaleWeekError(staleTargetWeekStart)
       }
 
-      const generated = await runAiGenerationWithGuard(userId, async () => {
-        const context = await loadAiMenuContextForUser(
-          userId,
-          data.targetWeekStart,
-          data.schedule,
-        )
-        if (data.previousMenu?.weekStart === data.targetWeekStart) {
-          context.previousProposal = data.previousMenu
-        }
-        return generateAiMenu(context, { mockScenario })
-      })
+      // Context reads stay outside the 60-second lease: only the bounded
+      // provider call may run while it is held.
+      const context = await loadAiMenuContextForUser(
+        userId,
+        data.targetWeekStart,
+        data.schedule,
+      )
+      if (data.previousMenu?.weekStart === data.targetWeekStart) {
+        context.previousProposal = data.previousMenu
+      }
+      const generated = await runAiGenerationWithGuard(userId, () =>
+        generateAiMenu(context, { mockScenario }),
+      )
       const staleAfterGeneration = getStaleTargetWeekStart(
         data.targetWeekStart,
         data.timeZone,

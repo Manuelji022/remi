@@ -2,7 +2,7 @@
   "suite": "AI Weekly Menu PostgreSQL generation guard",
   "verdict": "PASS",
   "isolatedContainerImage": "postgres:18",
-  "binding": "127.0.0.1:32778",
+  "binding": "127.0.0.1:32807",
   "migrations": "pnpm db:migrate applied the repository Drizzle migrations including 0006 and 0007",
   "cleanup": "synthetic rows deleted; disposable container removed before artifact creation",
   "runs": [
