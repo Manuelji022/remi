@@ -145,13 +145,17 @@ Los reintentos del servidor son cero; el único reintento es el que pulsa la per
 ### 7.2 Botón de bloqueo
 
 - Aparece **centrado sobre el menú** de la semana que se está viendo, solo en semanas actual y pasadas.
-- Estado cerrado por defecto. Para desbloquear hay que **mantener pulsado ~1 s**, con un **anillo de progreso** que se llena; soltar antes cancela.
+- Estado cerrado por defecto. Para desbloquear hay que **mantener pulsado 1000 ms (1 s)**, con un **anillo de progreso** que se llena; soltar antes cancela.
 - **Accesibilidad:** mantener **Enter o Espacio** produce el mismo anillo y el mismo resultado, con anuncio para lectores de pantalla.
-- Mientras una semana está bloqueada, sus comidas no se pueden editar.
+- Solo aparece si hay un menú visible; no aparece en semanas vacías ni sobre una vista previa o su esqueleto.
+- Mientras una semana está bloqueada, Preferencias → Horario es de solo lectura, muestra una nota y no permite guardar. Cambiar el horario es la acción fuera del flujo de IA que modifica las asignaciones de comidas del menú guardado; las comidas guardadas no tienen otro editor directo.
+- Preferencias → Recetas sigue disponible: gestiona el catálogo de la cuenta, no el horario de la semana vista. Generar con IA sigue disponible desde una semana bloqueada porque apunta a la siguiente, y aceptar una vista previa fijada a una semana que ya es actual sigue permitido.
+- Los invitados también tienen el mismo bloqueo por fecha para los menús locales que pueden ver.
+- Con movimiento reducido se mantiene el gesto de 1000 ms y un indicador de pulsación estático, sin animar el anillo.
 
 ### 7.3 Re-bloqueo
 
-El desbloqueo es temporal: la semana vuelve a bloquearse **al salir de ella o al recargar**.
+El desbloqueo es temporal y solo del cliente: la semana vuelve a bloquearse **al salir de ella o al recargar**. No se persiste en almacenamiento, servidor ni base de datos.
 
 ## 8. Cambio de semana durante la vista previa
 
@@ -180,7 +184,7 @@ La primera vez que una cuenta usa **Generar con IA** se muestra un **tour de 2 o
 
 Resueltos en la segunda ronda: "Generar otra" (sí, cuenta como intento), orden alfabético de alternativas, sin mínimo cuantitativo de recetas, y tour de primera vez.
 
-1. **Desbloqueo temporal:** al bloquearse por fecha no hace falta persistir un estado, pero conviene confirmar si el desbloqueo necesita algo en servidor (hoy se asume solo cliente).
+1. **Resuelto para v1 — desbloqueo temporal solo cliente:** el bloqueo es una protección de la experiencia de usuario, no un permiso de servidor. Las llamadas directas a la API no están bloqueadas; no hay estado persistido ni cambio de esquema.
 2. **Textos finales** en ambos idiomas, y diseño visual del anillo, del candado y del tour.
 
 ## Diferencias con la PR actual

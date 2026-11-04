@@ -2,6 +2,7 @@ import './weekly-menu-planner.css'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useBlocker } from '@tanstack/react-router'
 import { AiMenuPreview } from '../components/AiMenuPreview'
+import { WeekLockButton } from '../components/WeekLockButton'
 import { MenuTab } from '../components/MenuTab'
 import { PlannerHeader } from '../components/PlannerHeader'
 import { MainTab } from '../components/MainTab'
@@ -33,6 +34,7 @@ import {
   assignRecipesToWeek,
   emptyMenu,
   homePlannedSlotTypes,
+  isWeekLocked,
   scheduleFromMenu,
   viewWeekStart,
   weekStartFromDate,
@@ -55,6 +57,7 @@ export function WeeklyMenuPlanner() {
   )
   const [isPreferencesOpen, setIsPreferencesOpen] = useState(false)
   const [weekOffset, setWeekOffset] = useState(0)
+  const [unlockedWeek, setUnlockedWeek] = useState<string | null>(null)
   const [guestPreferences, setGuestPreferences] = useState<Preferences>(() =>
     getDefaultPreferences(),
   )
@@ -79,10 +82,10 @@ export function WeeklyMenuPlanner() {
   const { data: session, isPending: isSessionPending } = authClient.useSession()
   const userId = session?.user.id
   const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone
-  const onPreviewWeek = useCallback(
-    (target: string) => setWeekOffset(calendarWeekOffset(target)),
-    [],
-  )
+  const onPreviewWeek = useCallback((target: string) => {
+    setUnlockedWeek(null)
+    setWeekOffset(calendarWeekOffset(target))
+  }, [])
   const aiGeneration = useAiMenuGeneration({ userId, timeZone, onPreviewWeek })
   const currentPreview =
     aiGeneration.preview?.userId === userId ? aiGeneration.preview : null
@@ -176,6 +179,13 @@ export function WeeklyMenuPlanner() {
             [],
           )
         : null
+  const isLocked = Boolean(
+    visibleMenu &&
+    !currentPreview &&
+    !generatingTargetWeek &&
+    isWeekLocked(viewedWeek, new Date()) &&
+    unlockedWeek !== viewedWeek,
+  )
   const shoppingEnabled = Boolean(
     userId && !currentPreview && readyData?.week.hasSavedMenu,
   )
@@ -387,6 +397,13 @@ export function WeeklyMenuPlanner() {
 
   function handleSavePreferences(preferences: Preferences) {
     if (!canWrite || isWriting || currentPreview) return
+    const targetWeek = readyData?.week.menu.weekStart ?? viewedWeek
+    if (
+      visibleMenu &&
+      isWeekLocked(targetWeek, new Date()) &&
+      unlockedWeek !== targetWeek
+    )
+      return
     if (!userId) {
       setGuestPreferences(preferences)
       setIsPreferencesOpen(false)
@@ -419,6 +436,7 @@ export function WeeklyMenuPlanner() {
       setShowDiscardConfirmation(true)
       return
     }
+    if (clamped !== weekOffset) setUnlockedWeek(null)
     setWeekOffset(clamped)
   }
 
@@ -614,13 +632,29 @@ export function WeeklyMenuPlanner() {
               onUpdateRecipe={handlePreviewRecipeChange}
             />
           ) : (
-            <MenuTab
-              isGenerating={isGenerating}
-              menu={visibleMenu}
-              onGenerateMenu={handleGenerateMenu}
-              recipeNames={readyData?.week.recipeNames ?? {}}
-              isSignedIn={Boolean(userId)}
-            />
+            <>
+              {visibleMenu && (
+                <WeekLockButton
+                  key={viewedWeek}
+                  isLocked={isLocked}
+                  onUnlock={() => {
+                    setUnlockedWeek(viewedWeek)
+                    document
+                      .querySelector<HTMLButtonElement>(
+                        '.planner-actions .planner-secondary-btn',
+                      )
+                      ?.focus()
+                  }}
+                />
+              )}
+              <MenuTab
+                isGenerating={isGenerating}
+                menu={visibleMenu}
+                onGenerateMenu={handleGenerateMenu}
+                recipeNames={readyData?.week.recipeNames ?? {}}
+                isSignedIn={Boolean(userId)}
+              />
+            </>
           )
         ) : shoppingEnabled ? (
           <ShoppingTab
@@ -679,7 +713,10 @@ export function WeeklyMenuPlanner() {
         isRecipeMutationPending={isRecipeMutationPending}
         onRecipeMutation={handleRecipeMutation}
         onRecipeMutationPendingChange={setIsRecipeMutationPending}
-        saveDisabled={!canWrite || isWriting || Boolean(currentPreview)}
+        scheduleLocked={isLocked}
+        saveDisabled={
+          isLocked || !canWrite || isWriting || Boolean(currentPreview)
+        }
         saveError={saveError}
         legacyCustomRecipes={legacyCustomRecipes}
         onClose={() => {
