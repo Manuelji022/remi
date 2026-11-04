@@ -514,4 +514,31 @@ describe('AI prompt and repair quality', () => {
       }
     },
   )
+
+  it.each([
+    ['an unreserved non-recent fallback exists', 'c', 'b'],
+    ['the fallback is reserved by a valid model choice', 'b', 'c'],
+    ['every candidate is reserved', null, 'b'],
+  ])('repairs without recent repeats when %s', (_case, fill, expected) => {
+    const pool = ['a', 'b', 'c'].map((id) => ({ ...recipes[0], id }))
+    const currentWeek = emptyMenu('2026-09-28')
+    currentWeek.days.Monday.lunchRecipeId = 'a'
+    const input = { ...context, recipes: pool, currentWeek }
+    const output = assignments(targetWeekStart, null, null)
+    Object.values(output.days).forEach((day, index) => {
+      day.lunchRecipeId = index === 0 ? null : (fill ?? 'abcccc'[index - 1])
+    })
+    const ids = Object.values(
+      validateAiMenuAssignments(input, output).menu.days,
+    ).map((day) => day.lunchRecipeId)
+    expect(ids).toEqual([
+      expected,
+      ...Object.values(output.days)
+        .slice(1)
+        .map((day) => day.lunchRecipeId),
+    ])
+    expect(validateAiMenuAssignments(input, output)).toEqual(
+      validateAiMenuAssignments(input, output),
+    )
+  })
 })

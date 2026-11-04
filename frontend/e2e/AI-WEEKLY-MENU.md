@@ -215,3 +215,9 @@ Documented before implementation; provider transport always uses fake `fetch`.
 8. previousProposal IDs are lost or gain metadata; recipe-name/ingredient prompt injection is no longer explicitly untrusted data.
 9. The larger input changes the 2,000 output-token budget or output shape; transport checks the cap and seven-day shape, but actual model token use remains unverified without a live call.
 10. Mock and fake-provider results diverge for identical missing assignments, normalized schedules, or zero/one/multiple candidates; empty mock behavior must remain unchanged.
+
+Repair recency follow-up (documented before the fix):
+
+11. A repaired slot picks a recipe used in the current or previous week although an unreserved fallback or candidate not used in those weeks exists; the history-aware `fallbackRecipeId` must win while it is unreserved.
+12. The history-aware fallback is already reserved by a valid model choice, and repair repeats it instead of taking the first unreserved candidate outside the prior weeks.
+13. Every candidate is reserved by valid model choices, and repair leaves a hole, throws, or becomes nondeterministic instead of allowing a repeat through the existing fallback chain.

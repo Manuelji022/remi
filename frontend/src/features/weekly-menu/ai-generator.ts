@@ -255,6 +255,7 @@ export function validateAiMenuAssignments(
       fallback.lunchRecipeId,
       repairCounts.lunch,
       reserved.lunch,
+      priorRecipeIds,
     )
     if (lunchRecipeId !== assignment.lunchRecipeId) repairCounts.lunch += 1
     const dinnerRecipeId = checkedRecipeId(
@@ -264,6 +265,7 @@ export function validateAiMenuAssignments(
       fallback.dinnerRecipeId,
       repairCounts.dinner,
       reserved.dinner,
+      priorRecipeIds,
     )
     if (dinnerRecipeId !== assignment.dinnerRecipeId) repairCounts.dinner += 1
 
@@ -314,6 +316,7 @@ function checkedRecipeId(
   fallbackRecipeId: string | null,
   fallbackIndex: number,
   reserved: Set<string>,
+  priorRecipeIds: ReadonlySet<string>,
 ): string | null {
   if (!isHomePlanned) {
     if (recipeId !== null) throw new Error('AI assigned a covered Meal Slot')
@@ -328,8 +331,21 @@ function checkedRecipeId(
   const recipe = candidates.find((candidate) => candidate.id === recipeId)
   if (recipe) return recipe.id
 
+  // Prefer unused this week, then not used in the current/previous week.
+  const unreserved = candidates.filter(
+    (candidate) => !reserved.has(candidate.id),
+  )
+  const freeFallback =
+    fallbackRecipeId !== null && !reserved.has(fallbackRecipeId)
+      ? fallbackRecipeId
+      : undefined
   const repairedId =
-    candidates.find((candidate) => !reserved.has(candidate.id))?.id ??
+    (freeFallback && !priorRecipeIds.has(freeFallback)
+      ? freeFallback
+      : undefined) ??
+    unreserved.find((candidate) => !priorRecipeIds.has(candidate.id))?.id ??
+    freeFallback ??
+    unreserved.at(0)?.id ??
     fallbackRecipeId ??
     candidates[fallbackIndex % candidates.length].id
   reserved.add(repairedId)
