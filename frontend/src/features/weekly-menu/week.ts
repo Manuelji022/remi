@@ -122,7 +122,7 @@ export function homePlannedSlotTypes(
   menu: CalendarWeekMenu,
 ): readonly MealSlot[] {
   return (['lunch', 'dinner'] as const).filter((slot) =>
-    DAYS.some((day) => scopeIncludes(menu.days[day].scope, slot)),
+    DAYS.some((day) => isSlotPlanned(menu.days[day].scope, slot)),
   )
 }
 
@@ -154,10 +154,10 @@ export function assignRecipesToWeek(
     days[day] = {
       context: planned.context,
       scope: planned.scope,
-      lunchRecipeId: scopeIncludes(planned.scope, 'lunch')
+      lunchRecipeId: isSlotPlanned(planned.scope, 'lunch')
         ? (queues.lunch.shift() ?? null)
         : null,
-      dinnerRecipeId: scopeIncludes(planned.scope, 'dinner')
+      dinnerRecipeId: isSlotPlanned(planned.scope, 'dinner')
         ? (queues.dinner.shift() ?? null)
         : null,
     }
@@ -196,6 +196,16 @@ export function showMenuDay(
     lunch: showSlot('lunch', plan, recipeNames),
     dinner: showSlot('dinner', plan, recipeNames),
   }
+}
+
+export function slotField(
+  slot: MealSlot,
+): 'lunchRecipeId' | 'dinnerRecipeId' {
+  return slot === 'lunch' ? 'lunchRecipeId' : 'dinnerRecipeId'
+}
+
+export function isSlotPlanned(scope: PlanningScope, slot: MealSlot): boolean {
+  return scope === 'both' || scope === slot
 }
 
 export function parseWeekStart(value: unknown): string {
@@ -280,7 +290,7 @@ function showSlot(
   plan: DayPlan,
   recipeNames: Readonly<Record<string, string>>,
 ): ShownMeal {
-  if (!scopeIncludes(plan.scope, slot)) {
+  if (!isSlotPlanned(plan.scope, slot)) {
     return plan.context
       ? { kind: 'covered', context: plan.context }
       : { kind: 'outside' }
@@ -315,10 +325,6 @@ function recipeQueues(
     lunch: [...fresh.lunch, ...usedLastWeek.lunch],
     dinner: [...fresh.dinner, ...usedLastWeek.dinner],
   }
-}
-
-function scopeIncludes(scope: PlanningScope, slot: MealSlot): boolean {
-  return scope === 'both' || scope === slot
 }
 
 function parseDay(value: unknown): DayPlan {
