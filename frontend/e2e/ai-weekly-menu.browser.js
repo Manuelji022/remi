@@ -945,13 +945,6 @@ await scenario('Generate another is disabled while the preview is being saved', 
 ])
 
 const dinnerOptions = `[...${preview}.querySelector(${JSON.stringify(firstDayDinnerSelector)}).options].map(option => option.textContent)`
-const generateFromReady = [
-  wait(`${shell}.innerText.includes('Saved dinner')`),
-  click('Regenerate menu'),
-  click('Confirm schedule and generate'),
-  wait(`${preview} !== null`),
-  waitPreviewAcceptable(),
-]
 
 await scenario('preview alternatives are alphabetical per locale, with No recipe first and the selection kept', [
   open('sorted-catalog'),
