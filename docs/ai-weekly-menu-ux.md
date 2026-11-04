@@ -71,7 +71,12 @@ Vista previa editable
 
 ### 5.2 Comprobación previa de recetas
 
-Antes de abrir el diálogo de horario se comprueba que exista **al menos una receta de cada tipo necesario** (comida y/o cena, según el horario de la semana). No hay mínimo cuantitativo. Si falta un tipo entero, se muestra un aviso que dice qué tipo falta (comida o cena) con un enlace para añadir recetas. **No se consume intento.**
+El horario se confirma dentro del diálogo, así que la comprobación tiene **dos pasos**. Ninguno consume intento ni llama a la generación.
+
+1. **Antes de abrir el diálogo:** solo se bloquea si la persona no tiene **ninguna receta guardada** (ni de comida ni de cena). En ese caso no se abre el diálogo: se muestra un aviso modal que explica que hacen falta recetas, con la acción principal «Añadir recetas» (abre Preferencias en la sección de recetas) y «Cerrar». Al cerrar, el foco vuelve al botón que lo abrió. Si no se puede leer el catálogo, no se bloquea y se abre el diálogo.
+2. **Al confirmar el horario:** se calculan los tipos de comida que el horario confirmado deja **en casa** (con las mismas reglas de franjas cubiertas que la generación). Si falta un tipo necesario (comida o cena), el diálogo **sigue abierto** y muestra un aviso inline (`role="alert"`) que nombra el tipo que falta, con la misma acción «Añadir recetas». La persona puede editar el horario (por ejemplo, marcar esas franjas como comer fuera) y volver a confirmar. Un tipo sin recetas que el horario ya cubre por completo no bloquea.
+
+Los avisos de escasez de la vista previa (`unavailableSlots`) siguen igual.
 
 ### 5.3 Diálogo de horario (siempre obligatorio)
 
@@ -85,7 +90,9 @@ Antes de abrir el diálogo de horario se comprueba que exista **al menos una rec
 
 ### 5.4 Generación
 
-- Se abre ya la **vista previa en esqueleto**, con los huecos rellenándose al llegar el resultado.
+- Al confirmar, el diálogo **se cierra** y el planificador muestra la **semana objetivo** con la **vista previa en esqueleto**: 7 tarjetas de día con huecos de carga y una etiqueta visible («Armando el menú de la próxima semana…») en lugar del banner. Es una única región de estado anunciada con cortesía (`role="status"`, `aria-live="polite"`, `aria-busy="true"`). Mientras dura no hay acciones de aceptar, descartar ni editar horario.
+- Al llegar el resultado, el esqueleto se sustituye por la vista previa editable. Si falla, se muestra el error con «Reintentar» y no queda nada anterior.
+- Si se regenera tras editar el horario desde una vista previa, la vista previa anterior queda oculta y también se muestra el esqueleto. El movimiento del brillo respeta `prefers-reduced-motion`.
 - Duración máxima aproximada de 20 s.
 
 ### 5.5 Vista previa editable

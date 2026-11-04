@@ -112,6 +112,16 @@ export function applySchedule(
   return { weekStart: menu.weekStart, days }
 }
 
+// Slot types that still need a home-planned recipe somewhere in the week,
+// using the same covered-slot rules as scheduling and AI validation.
+export function homePlannedSlotTypes(
+  menu: CalendarWeekMenu,
+): readonly MealSlot[] {
+  return (['lunch', 'dinner'] as const).filter((slot) =>
+    DAYS.some((day) => scopeIncludes(menu.days[day].scope, slot)),
+  )
+}
+
 const NO_PRIOR_RECIPE_IDS: ReadonlySet<string> = new Set()
 
 export function placedRecipeIds(menu: CalendarWeekMenu): ReadonlySet<string> {

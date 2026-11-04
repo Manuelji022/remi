@@ -238,7 +238,7 @@
   }
 
   function generatedMenu(weekStart, schedule) {
-    const unavailable = scenario === 'empty-catalog' ? ['lunch', 'dinner'] : []
+    const unavailable = scenario === 'empty-catalog' ? ['lunch', 'dinner'] : scenario === 'partial-catalog' ? ['dinner'] : []
     const dayContexts = schedule.dayContexts ?? {}
     const planningScopes = schedule.planningScopes ?? {}
     const resultDays = Object.fromEntries(
@@ -391,7 +391,7 @@
                 { id: 'barley', name: 'Barley', quantity: 200, unit: 'g', position: 0 },
               ],
             },
-          ]
+          ].filter((recipe) => scenario !== 'partial-catalog' || recipe.slot === 'lunch')
       return json({ result })
     }
     if (kind === 'load') {

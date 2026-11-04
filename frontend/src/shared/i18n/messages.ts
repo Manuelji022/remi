@@ -95,6 +95,7 @@ export const messages = {
     'common.skip': 'Skip to content',
     'common.weekend': 'Weekend',
     'common.cancel': 'Cancel',
+    'common.close': 'Close',
     'days.Monday': 'Monday',
     'days.Tuesday': 'Tuesday',
     'days.Wednesday': 'Wednesday',
@@ -174,6 +175,17 @@ export const messages = {
       'No saved lunch recipes are available. Required lunch slots stay empty until a lunch recipe is saved.',
     'planner.aiNoDinnerRecipes':
       'No saved dinner recipes are available. Required dinner slots stay empty until a dinner recipe is saved.',
+    'planner.aiGeneratingMenu': 'Building next week’s menu…',
+    'planner.aiRecipesNeededTitle': 'Add recipes first',
+    'planner.aiRecipesNeededBody':
+      'Your menu is built from your saved recipes. Add at least one lunch or dinner recipe, then try again.',
+    'planner.aiAddRecipes': 'Add recipes',
+    'planner.aiMissingLunchRecipes':
+      'This schedule needs lunches at home, but you have no lunch recipes. Add lunch recipes or mark those days as eating out.',
+    'planner.aiMissingDinnerRecipes':
+      'This schedule needs dinners at home, but you have no dinner recipes. Add dinner recipes or mark those days as eating out.',
+    'planner.aiMissingBothRecipes':
+      'This schedule needs lunches and dinners at home, but you have no lunch or dinner recipes. Add recipes or mark those days as eating out.',
     'planner.aiSignInRequired':
       'Sign in to use AI generation. Guest planning stays available here.',
     'planner.generateMenu': 'Generate menu',
@@ -336,6 +348,7 @@ export const messages = {
     'common.skip': 'Saltar al contenido',
     'common.weekend': 'Fin de semana',
     'common.cancel': 'Cancelar',
+    'common.close': 'Cerrar',
     'days.Monday': 'Lunes',
     'days.Tuesday': 'Martes',
     'days.Wednesday': 'Miércoles',
@@ -415,6 +428,17 @@ export const messages = {
       'No hay recetas de comida guardadas. Los espacios de comida requeridos quedarán vacíos hasta que guardes una receta de comida.',
     'planner.aiNoDinnerRecipes':
       'No hay recetas de cena guardadas. Los espacios de cena requeridos quedarán vacíos hasta que guardes una receta de cena.',
+    'planner.aiGeneratingMenu': 'Armando el menú de la próxima semana…',
+    'planner.aiRecipesNeededTitle': 'Primero añade recetas',
+    'planner.aiRecipesNeededBody':
+      'Tu menú se arma con tus recetas guardadas. Añade al menos una receta de comida o de cena y vuelve a intentarlo.',
+    'planner.aiAddRecipes': 'Añadir recetas',
+    'planner.aiMissingLunchRecipes':
+      'Esta agenda necesita comidas en casa, pero no tienes recetas de comida. Añade recetas de comida o marca esos días como comer fuera.',
+    'planner.aiMissingDinnerRecipes':
+      'Esta agenda necesita cenas en casa, pero no tienes recetas de cena. Añade recetas de cena o marca esos días como comer fuera.',
+    'planner.aiMissingBothRecipes':
+      'Esta agenda necesita comidas y cenas en casa, pero no tienes recetas de comida ni de cena. Añade recetas o marca esos días como comer fuera.',
     'planner.aiSignInRequired':
       'Inicia sesión para usar la generación con IA. Aquí puedes seguir planificando como invitado.',
     'planner.generateMenu': 'Generar menú',

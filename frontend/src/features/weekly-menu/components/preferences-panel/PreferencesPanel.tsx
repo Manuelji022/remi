@@ -24,6 +24,7 @@ import {
 
 interface PreferencesPanelProps {
   isOpen: boolean
+  initialTab?: PreferencesPanelTab
   isSaving: boolean
   isRecipeMutationPending: boolean
   onRecipeMutation: () => Promise<void>
@@ -39,6 +40,7 @@ interface PreferencesPanelProps {
 
 export function PreferencesPanel({
   isOpen,
+  initialTab = 'schedule',
   isSaving,
   isRecipeMutationPending,
   onRecipeMutation,
@@ -78,7 +80,7 @@ export function PreferencesPanel({
     if (!isOpen) return
 
     setDraftPrefs(savedPrefsRef.current)
-    setActiveTab('schedule')
+    setActiveTab(initialTab)
   }, [isOpen])
 
   useLayoutEffect(() => {
