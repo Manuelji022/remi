@@ -103,7 +103,6 @@ export function WeeklyMenuPlanner() {
     userId,
     weekStart: viewedWeek,
     enabled: isHydrated && !isSessionPending,
-    preferencesOpen: isPreferencesOpen,
   })
   const { data, action } = plannerWeek
 
@@ -761,7 +760,10 @@ export function WeeklyMenuPlanner() {
         saveError={saveError}
         legacyCustomRecipes={legacyCustomRecipes}
         onClose={() => {
-          if (!isSavingPreferences) setIsPreferencesOpen(false)
+          if (!isSavingPreferences) {
+            setIsPreferencesOpen(false)
+            void plannerWeek.refreshRecipes()
+          }
         }}
         onLegacyRecipesMigrated={handleLegacyRecipesMigrated}
         onSave={handleSavePreferences}
