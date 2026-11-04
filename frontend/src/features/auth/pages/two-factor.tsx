@@ -1,23 +1,32 @@
 import { Link, useNavigate } from '@tanstack/react-router'
+import type { FormSubmitEvent } from '#/features/auth/useAuthForm'
 import '../auth.css'
-import type { ComponentProps } from 'react'
 import { useEffect, useRef, useState } from 'react'
 import { getLocalizedPath, useI18n } from '#/shared/i18n'
+import { AUTH_STORAGE_KEYS } from '#/features/auth/storage-keys'
+import { useAuthForm } from '#/features/auth/useAuthForm'
 import { authClient } from '#/features/auth/auth-client'
 
-type FormSubmitEvent = Parameters<
-  NonNullable<ComponentProps<'form'>['onSubmit']>
->[0]
+const ERROR_MAPPING = {
+  INVALID_CODE: 'auth.errors.invalidOtpCode',
+  RATE_LIMIT: 'auth.errors.rateLimited',
+  EXPIRED: 'auth.errors.otpExpired',
+}
 
 export function TwoFactorPage() {
   const navigate = useNavigate()
   const { locale, t } = useI18n()
   const [code, setCode] = useState('')
-  const [error, setError] = useState<string | null>(null)
   const [isSending, setIsSending] = useState(false)
-  const [isVerifying, setIsVerifying] = useState(false)
   const [showSignupMessage, setShowSignupMessage] = useState(false)
   const hasSentInitialOtp = useRef(false)
+  const {
+    error,
+    isSubmitting: isVerifying,
+    setError,
+    setIsSubmitting: setIsVerifying,
+    handleApiError,
+  } = useAuthForm()
 
   async function sendOtp() {
     setError(null)
@@ -30,15 +39,16 @@ export function TwoFactorPage() {
     setIsSending(false)
 
     if (result.error) {
-      setError(result.error.message ?? t('auth.otpSendError'))
+      handleApiError(result.error, ERROR_MAPPING, 'auth.otpSendError', t)
     }
   }
 
   useEffect(() => {
     setShowSignupMessage(
-      window.sessionStorage.getItem('remi:signupOtpPending') === 'true',
+      window.sessionStorage.getItem(AUTH_STORAGE_KEYS.signup.otpPending) ===
+        'true',
     )
-    window.sessionStorage.removeItem('remi:signupOtpPending')
+    window.sessionStorage.removeItem(AUTH_STORAGE_KEYS.signup.otpPending)
 
     if (hasSentInitialOtp.current) return
     hasSentInitialOtp.current = true
@@ -55,10 +65,9 @@ export function TwoFactorPage() {
       trustDevice: false,
     })
 
-    setIsVerifying(false)
-
     if (result.error) {
-      setError(result.error.message ?? t('auth.otpVerifyError'))
+      setIsVerifying(false)
+      handleApiError(result.error, ERROR_MAPPING, 'auth.otpVerifyError', t)
       return
     }
 

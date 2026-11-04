@@ -1,22 +1,27 @@
 import { Link, useNavigate } from '@tanstack/react-router'
 import '../auth.css'
-import type { ComponentProps } from 'react'
 import { useState } from 'react'
 import { getLocalizedPath, useI18n } from '#/shared/i18n'
+import { useAuthForm } from '#/features/auth/useAuthForm'
+import type { FormSubmitEvent } from '#/features/auth/useAuthForm'
 import { authClient } from '#/features/auth/auth-client'
 
-type FormSubmitEvent = Parameters<
-  NonNullable<ComponentProps<'form'>['onSubmit']>
->[0]
 type SignInData = { twoFactorRedirect?: boolean } | null
+
+const ERROR_MAPPING = {
+  INVALID_EMAIL: 'auth.errors.invalidEmail',
+  INVALID_PASSWORD: 'auth.errors.invalidPassword',
+  INVALID_CREDENTIALS: 'auth.errors.invalidCredentials',
+  RATE_LIMIT: 'auth.errors.rateLimited',
+}
 
 export function LoginPage() {
   const navigate = useNavigate()
   const { locale, t } = useI18n()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState<string | null>(null)
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const { error, isSubmitting, setError, setIsSubmitting, handleApiError } =
+    useAuthForm()
 
   async function handleSubmit(event: FormSubmitEvent) {
     event.preventDefault()
@@ -30,7 +35,7 @@ export function LoginPage() {
 
     if (result.error) {
       setIsSubmitting(false)
-      setError(result.error.message ?? t('auth.loginError'))
+      handleApiError(result.error, ERROR_MAPPING, 'auth.loginError', t)
       return
     }
 

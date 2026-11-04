@@ -1,7 +1,6 @@
 import { createServerFn } from '@tanstack/react-start'
 import { z } from 'zod'
-import { getRequest } from '@tanstack/react-start/server'
-import { auth } from '#/features/auth/auth'
+import { requireUserId } from '#/features/auth/require-user'
 import {
   loadMenuWeekForUser,
   saveMenuWeekForUser,
@@ -126,11 +125,3 @@ export const generateNextWeeklyMenu = createServerFn({ method: 'POST' })
       throw error
     }
   })
-
-async function requireUserId(): Promise<string> {
-  const session = await auth.api.getSession({
-    headers: getRequest().headers,
-  })
-  if (!session?.user.id) throw new Error('Unauthorized')
-  return session.user.id
-}
