@@ -166,7 +166,7 @@
           "reused": true,
           "saveStatus": "not_attempted"
         },
-        "origin": "http://127.0.0.1:3101/es/weekly-menu-planner?scenario=sorted-catalog",
+        "origin": "http://127.0.0.1:3102/es/weekly-menu-planner?scenario=sorted-catalog",
         "result": {
           "fixture": "sorted-catalog",
           "generationRequests": 1,
