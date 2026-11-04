@@ -237,7 +237,10 @@
     return schedule
   }
 
-  function generatedMenu(weekStart, schedule) {
+  function generatedMenu(weekStart, schedule, previousMenu) {
+    // With a previous proposal the fixture rotates to the alternative recipes
+    // so a regenerated preview is visibly different.
+    const rotate = (id, base) => (previousMenu && id === base ? `${base}-alternative` : base)
     const unavailable = scenario === 'empty-catalog' ? ['lunch', 'dinner'] : scenario === 'partial-catalog' ? ['dinner'] : []
     const dayContexts = schedule.dayContexts ?? {}
     const planningScopes = schedule.planningScopes ?? {}
@@ -253,8 +256,8 @@
         return [day, {
           context,
           scope,
-          lunchRecipeId: scope !== 'dinner' && !unavailable.includes('lunch') ? 'saved-lunch' : null,
-          dinnerRecipeId: scope !== 'lunch' && !unavailable.includes('dinner') ? 'saved-dinner' : null,
+          lunchRecipeId: scope !== 'dinner' && !unavailable.includes('lunch') ? rotate(previousMenu?.days?.[day]?.lunchRecipeId, 'saved-lunch') : null,
+          dinnerRecipeId: scope !== 'lunch' && !unavailable.includes('dinner') ? rotate(previousMenu?.days?.[day]?.dinnerRecipeId, 'saved-dinner') : null,
         }]
       }),
     )
@@ -264,6 +267,7 @@
         'saved-lunch': 'Lemon chickpea pasta',
         'saved-dinner': 'Roasted vegetable bowl',
         'saved-dinner-alternative': 'Mushroom barley bowl',
+        'saved-lunch-alternative': 'Crispy lentil salad',
       },
       unavailableSlots: unavailable,
     }
@@ -350,6 +354,7 @@
     if (kind === 'generation') {
       log.schedule = scheduleFromPayload(payload)
       log.mockScenario = findValue(payload, ['mockScenario'])
+      log.previousMenu = findValue(payload, ['previousMenu'])
       fixture.generationRequests.push(log)
     }
     else if (kind === 'save') fixture.saveRequests.push(log)
@@ -391,7 +396,18 @@
                 { id: 'barley', name: 'Barley', quantity: 200, unit: 'g', position: 0 },
               ],
             },
-          ].filter((recipe) => scenario !== 'partial-catalog' || recipe.slot === 'lunch')
+          ]
+            .concat(
+              scenario === 'sorted-catalog'
+                ? ['Zucchini bake', 'Épinards crème', 'Apple stew 10', 'Apple stew 2'].map((name, index) => ({
+                    id: `sorted-dinner-${index}`,
+                    name,
+                    slot: 'dinner',
+                    ingredients: [{ id: `sorted-${index}`, name: 'Salt', quantity: 1, unit: 'g', position: 0 }],
+                  }))
+                : [],
+            )
+            .filter((recipe) => scenario !== 'partial-catalog' || recipe.slot === 'lunch')
       return json({ result })
     }
     if (kind === 'load') {
@@ -452,7 +468,7 @@
       return json({
         result: {
           ok: true,
-          ...generatedMenu(requestWeek, scheduleFromPayload(payload)),
+          ...generatedMenu(requestWeek, scheduleFromPayload(payload), log.previousMenu),
         },
       })
     }

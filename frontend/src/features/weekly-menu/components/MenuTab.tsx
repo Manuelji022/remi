@@ -31,14 +31,19 @@ export function MenuTab({
   onUpdateRecipe,
   areRecipeEditsDisabled = false,
 }: MenuTabProps) {
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const recipesBySlot = useMemo<SlotRecipes | undefined>(() => {
     if (!editableRecipes) return undefined
-    return {
-      lunch: editableRecipes.filter((recipe) => recipe.slot === 'lunch'),
-      dinner: editableRecipes.filter((recipe) => recipe.slot === 'dinner'),
-    }
-  }, [editableRecipes])
+    const collator = new Intl.Collator(locale, {
+      sensitivity: 'base',
+      numeric: true,
+    })
+    const sorted = (slot: MealSlot) =>
+      editableRecipes
+        .filter((recipe) => recipe.slot === slot)
+        .sort((a, b) => collator.compare(a.name, b.name))
+    return { lunch: sorted('lunch'), dinner: sorted('dinner') }
+  }, [editableRecipes, locale])
 
   if (isGenerating) {
     return (

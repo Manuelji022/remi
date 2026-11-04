@@ -2,6 +2,7 @@ import './weekly-menu-planner.css'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useBlocker } from '@tanstack/react-router'
 import { AiMenuPreview } from '../components/AiMenuPreview'
+import { WeekLockButton } from '../components/WeekLockButton'
 import { MenuTab } from '../components/MenuTab'
 import { PlannerHeader } from '../components/PlannerHeader'
 import { MainTab } from '../components/MainTab'
@@ -11,6 +12,7 @@ import { AiMenuSkeleton } from '../components/AiMenuSkeleton'
 import { RecipesNeededDialog } from '../components/RecipesNeededDialog'
 import { AiGenerationScheduleDialog } from '../components/AiGenerationScheduleDialog'
 import { DiscardPreviewDialog } from '../components/DiscardPreviewDialog'
+import { GenerateAnotherDialog } from '../components/GenerateAnotherDialog'
 import type { Day } from '#/features/weekly-menu/constants'
 import { formatRecipeIngredient } from '#/features/recipes/format'
 import { listRecipes } from '#/features/recipes/functions'
@@ -24,7 +26,10 @@ import type {
   Preferences,
 } from '#/features/weekly-menu/types'
 import { authClient } from '#/features/auth/auth-client'
-import { useAiMenuGeneration } from '#/features/weekly-menu/hooks/useAiMenuGeneration'
+import {
+  hasManualEdits,
+  useAiMenuGeneration,
+} from '#/features/weekly-menu/hooks/useAiMenuGeneration'
 import { usePlannerWeek } from '#/features/weekly-menu/hooks/usePlannerWeek'
 import { shoppingList } from '#/features/weekly-menu/shopping'
 import type { ShoppingLine } from '#/features/weekly-menu/shopping'
@@ -33,6 +38,7 @@ import {
   assignRecipesToWeek,
   emptyMenu,
   homePlannedSlotTypes,
+  isWeekLocked,
   scheduleFromMenu,
   viewWeekStart,
   weekStartFromDate,
@@ -55,6 +61,7 @@ export function WeeklyMenuPlanner() {
   )
   const [isPreferencesOpen, setIsPreferencesOpen] = useState(false)
   const [weekOffset, setWeekOffset] = useState(0)
+  const [unlockedWeek, setUnlockedWeek] = useState<string | null>(null)
   const [guestPreferences, setGuestPreferences] = useState<Preferences>(() =>
     getDefaultPreferences(),
   )
@@ -72,17 +79,19 @@ export function WeeklyMenuPlanner() {
     useState<PreferencesPanelTab>('schedule')
   const [showRecipesNotice, setShowRecipesNotice] = useState(false)
   const [missingRecipeSlots, setMissingRecipeSlots] = useState<MealSlot[]>([])
+  const [showGenerateAnother, setShowGenerateAnother] = useState(false)
   const precheckPendingRef = useRef(false)
+  const generateAnotherOpenerRef = useRef<HTMLElement | null>(null)
   const hasLoadedRef = useRef(false)
   const scheduleOpenerRef = useRef<HTMLElement | null>(null)
   const scheduleHeaderButtonRef = useRef<HTMLButtonElement | null>(null)
   const { data: session, isPending: isSessionPending } = authClient.useSession()
   const userId = session?.user.id
   const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone
-  const onPreviewWeek = useCallback(
-    (target: string) => setWeekOffset(calendarWeekOffset(target)),
-    [],
-  )
+  const onPreviewWeek = useCallback((target: string) => {
+    setUnlockedWeek(null)
+    setWeekOffset(calendarWeekOffset(target))
+  }, [])
   const aiGeneration = useAiMenuGeneration({ userId, timeZone, onPreviewWeek })
   const currentPreview =
     aiGeneration.preview?.userId === userId ? aiGeneration.preview : null
@@ -176,6 +185,13 @@ export function WeeklyMenuPlanner() {
             [],
           )
         : null
+  const isLocked = Boolean(
+    visibleMenu &&
+    !currentPreview &&
+    !generatingTargetWeek &&
+    isWeekLocked(viewedWeek, new Date()) &&
+    unlockedWeek !== viewedWeek,
+  )
   const shoppingEnabled = Boolean(
     userId && !currentPreview && readyData?.week.hasSavedMenu,
   )
@@ -353,6 +369,19 @@ export function WeeklyMenuPlanner() {
     }
   }
 
+  function startGenerateAnother() {
+    setShowGenerateAnother(false)
+    plannerWeek.clearAction()
+    void aiGeneration.regenerate()
+  }
+
+  function handleGenerateAnother(opener: HTMLElement) {
+    if (!currentPreview || !canGenerateAnother || showGenerateAnother) return
+    generateAnotherOpenerRef.current = opener
+    if (hasManualEdits(currentPreview)) setShowGenerateAnother(true)
+    else startGenerateAnother()
+  }
+
   function handleRetryGeneration() {
     rememberScheduleOpener(scheduleHeaderButtonRef.current)
     void aiGeneration.retry()
@@ -387,6 +416,13 @@ export function WeeklyMenuPlanner() {
 
   function handleSavePreferences(preferences: Preferences) {
     if (!canWrite || isWriting || currentPreview) return
+    const targetWeek = readyData?.week.menu.weekStart ?? viewedWeek
+    if (
+      visibleMenu &&
+      isWeekLocked(targetWeek, new Date()) &&
+      unlockedWeek !== targetWeek
+    )
+      return
     if (!userId) {
       setGuestPreferences(preferences)
       setIsPreferencesOpen(false)
@@ -419,6 +455,7 @@ export function WeeklyMenuPlanner() {
       setShowDiscardConfirmation(true)
       return
     }
+    if (clamped !== weekOffset) setUnlockedWeek(null)
     setWeekOffset(clamped)
   }
 
@@ -456,6 +493,9 @@ export function WeeklyMenuPlanner() {
     isHydrated &&
     !isRecipeMutationPending &&
     !isWriting,
+  )
+  const canGenerateAnother = Boolean(
+    canAcceptPreview && aiGeneration.canRegenerate,
   )
   const generationErrorMessage =
     currentGeneration?.reason === 'stale-week'
@@ -598,6 +638,9 @@ export function WeeklyMenuPlanner() {
               isSaveUnconfirmed={Boolean(previewSaveError)}
               canAccept={canAcceptPreview}
               isSignedIn={Boolean(userId)}
+              replacesSavedMenu={currentPreview.replacesSavedMenu}
+              canGenerateAnother={canGenerateAnother}
+              onGenerateAnother={handleGenerateAnother}
               onEditSchedule={() =>
                 void openGenerationSchedule(
                   undefined,
@@ -613,13 +656,29 @@ export function WeeklyMenuPlanner() {
               onUpdateRecipe={handlePreviewRecipeChange}
             />
           ) : (
-            <MenuTab
-              isGenerating={isGenerating}
-              menu={visibleMenu}
-              onGenerateMenu={handleGenerateMenu}
-              recipeNames={readyData?.week.recipeNames ?? {}}
-              isSignedIn={Boolean(userId)}
-            />
+            <>
+              {visibleMenu && (
+                <WeekLockButton
+                  key={viewedWeek}
+                  isLocked={isLocked}
+                  onUnlock={() => {
+                    setUnlockedWeek(viewedWeek)
+                    document
+                      .querySelector<HTMLButtonElement>(
+                        '.planner-actions .planner-secondary-btn',
+                      )
+                      ?.focus()
+                  }}
+                />
+              )}
+              <MenuTab
+                isGenerating={isGenerating}
+                menu={visibleMenu}
+                onGenerateMenu={handleGenerateMenu}
+                recipeNames={readyData?.week.recipeNames ?? {}}
+                isSignedIn={Boolean(userId)}
+              />
+            </>
           )
         ) : shoppingEnabled ? (
           <ShoppingTab
@@ -642,6 +701,7 @@ export function WeeklyMenuPlanner() {
         <AiGenerationScheduleDialog
           isPending={false}
           missingRecipeSlots={missingRecipeSlots}
+          replacesSavedMenu={scheduleDialog.replacesSavedMenu}
           onAddRecipes={openRecipes}
           preferences={scheduleDraft}
           targetWeekRange={targetWeekRange}
@@ -661,6 +721,14 @@ export function WeeklyMenuPlanner() {
         />
       )}
 
+      {showGenerateAnother && currentPreview && (
+        <GenerateAnotherDialog
+          returnFocusTo={generateAnotherOpenerRef.current}
+          onCancel={() => setShowGenerateAnother(false)}
+          onConfirm={startGenerateAnother}
+        />
+      )}
+
       {isDiscardDialogOpen && hasUnsavedPreview && (
         <DiscardPreviewDialog
           onKeep={keepPreview}
@@ -677,7 +745,10 @@ export function WeeklyMenuPlanner() {
         isRecipeMutationPending={isRecipeMutationPending}
         onRecipeMutation={handleRecipeMutation}
         onRecipeMutationPendingChange={setIsRecipeMutationPending}
-        saveDisabled={!canWrite || isWriting || Boolean(currentPreview)}
+        scheduleLocked={isLocked}
+        saveDisabled={
+          isLocked || !canWrite || isWriting || Boolean(currentPreview)
+        }
         saveError={saveError}
         legacyCustomRecipes={legacyCustomRecipes}
         onClose={() => {

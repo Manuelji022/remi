@@ -6,6 +6,7 @@ const dialogSelector = 'dialog[aria-labelledby="ai-generation-title"]'
 const dialog = `document.querySelector(${JSON.stringify(dialogSelector)})`
 const previewSelector = '.planner-ai-preview'
 const preview = `document.querySelector(${JSON.stringify(previewSelector)})`
+const generateAnotherButton = `[...${preview}.querySelectorAll('.planner-ai-preview-actions button')].find(button => /Generate another|Generar otra/.test(button.textContent))`
 const firstDayDinnerSelector = `${previewSelector} .delay-1 .meal-recipe-editor select[aria-label="Choose a saved dinner recipe"]`
 const noticeDialog = `document.querySelector('dialog[aria-labelledby="ai-recipes-needed-title"]')`
 const skeleton = `document.querySelector('.planner-ai-skeleton')`
@@ -709,6 +710,7 @@ await scenario('AI schedule and preview feedback are localized in Spanish', [
     `${preview}.innerText.includes('Vista previa del Menú Semanal con IA') && ${saveCount}===0`,
     'Spanish schedule confirmation produces an unsaved localized preview',
   ),
+  assert(`${generateAnotherButton} !== null && ${generateAnotherButton}.textContent.includes('Generar otra')`, 'the Generar otra button is localized'),
   click('Descartar vista previa'),
   text('¿Descartar esta vista previa generada?'),
   click('Descartar la vista previa generada'),
@@ -752,6 +754,227 @@ await scenario('guest generation remains local and never calls the AI server fun
   click('Generate menu'),
   wait(`document.querySelector('.planner-day-grid') !== null`),
   assert(`${generationCount}===0 && ${saveCount}===0`, 'guest planner retains its local flow and makes no AI request'),
+])
+
+const shot = (name) => ['screenshot', `${typeof process === 'undefined' ? '.' : process.cwd()}/e2e/artifacts/${name}`]
+const generateAnotherDialog = `document.querySelector('dialog[aria-labelledby="ai-generate-another-title"]')`
+const lastRequest = `${fixture}.generationRequests[${fixture}.generationRequests.length-1]`
+const generateFromReady = [
+  wait(`${shell}.innerText.includes('Saved dinner')`),
+  click('Regenerate menu'),
+  click('Confirm schedule and generate'),
+  wait(`${preview} !== null`),
+  waitPreviewAcceptable(),
+]
+
+await scenario('replace note is absent when the target week is empty (dialog and banner)', [
+  open('ready'),
+  wait(`${shell}.innerText.includes('Saved dinner')`),
+  click('Regenerate menu'),
+  text("Review next week’s schedule"),
+  assert(`!${dialog}.innerText.includes('already has a menu')`, 'no replace note in the dialog for an empty week'),
+  click('Confirm schedule and generate'),
+  wait(`${preview} !== null`),
+  assert(`!${preview}.innerText.includes('replaces the menu already saved')`, 'no replace note in the banner for an empty week'),
+])
+
+await scenario('replace note shows in dialog and banner for a saved target week and survives Edit schedule', [
+  open('target-saved'),
+  wait(`${shell}.innerText.includes('Saved dinner')`),
+  click('Regenerate menu'),
+  text("Review next week’s schedule"),
+  assert(
+    `${dialog}.innerText.includes('Next week already has a menu. Accepting the new proposal will replace all of it.') && ${dialog}.querySelector('.planner-ai-replace-note') && !${dialog}.querySelector('.planner-ai-replace-note').closest('[role="alert"]') && ${dialog}.querySelector('.planner-ai-replace-note').compareDocumentPosition(${dialog}.querySelector('footer')) & Node.DOCUMENT_POSITION_FOLLOWING`,
+    'dialog shows a non-alert replace note above the footer',
+  ),
+  click('Confirm schedule and generate'),
+  wait(`${preview} !== null`),
+  waitPreviewAcceptable(),
+  assert(`${preview}.querySelector('.planner-ai-preview-banner').innerText.includes('Accepting replaces the menu already saved for this week.')`, 'banner shows the replace note'),
+  shot('ai-preview-actions-banner.png'),
+  click('Edit target schedule'),
+  text("Review next week’s schedule"),
+  assert(`${dialog}.innerText.includes('Next week already has a menu')`, 'note still shows after the Edit schedule round trip'),
+  click('Cancel'),
+  wait(`${preview} !== null`),
+  assert(`${preview}.innerText.includes('replaces the menu already saved')`, 'note survives Cancel (restored preview)'),
+  assert(`${generateAnotherButton} !== null && !${generateAnotherButton}.disabled`, 'Generate another works after a restored preview'),
+])
+
+await scenario('Generate another without edits sends one request with previousMenu and shows the skeleton', [
+  open('ready'),
+  ...generateFromReady,
+  assert(`${generationCount}===1 && ${fixture}.generationRequests[0].previousMenu===undefined`, 'the confirm path sends no previousMenu'),
+  evaluate(`${fixture}.holdGeneration=true; ${generateAnotherButton}.click()`),
+  wait(`${fixture}.pendingGeneration`),
+  assert(`!${generateAnotherDialog} && ${skeleton} !== null && ${preview}===null && ${generationCount}===2`, 'no confirmation without manual edits; skeleton replaces the preview while held'),
+  assert(
+    `${lastRequest}.previousMenu.weekStart===${fixture}.targetWeekStart && ${lastRequest}.previousMenu.days.Monday.dinnerRecipeId==='saved-dinner' && ${lastRequest}.previousMenu.days.Monday.lunchRecipeId==='saved-lunch' && ${lastRequest}.weekStart===${fixture}.targetWeekStart`,
+    'the request carries the shown proposal as previousMenu for the same week',
+  ),
+  evaluate(`${fixture}.holdGeneration=false; ${fixture}.releaseGeneration()`),
+  wait(`${preview} !== null`),
+  waitPreviewAcceptable(),
+  assert(
+    `${skeleton}===null && ${generationCount}===2 && ${saveCount}===0 && ${preview}.querySelector(${JSON.stringify(firstDayDinnerSelector)}).value==='saved-dinner-alternative'`,
+    'the new proposal replaces the skeleton and differs; nothing saved',
+  ),
+])
+
+await scenario('Generate another with a manual edit confirms first; Cancel sends nothing, Confirm sends one request', [
+  open('ready'),
+  ...generateFromReady,
+  ['select', firstDayDinnerSelector, 'saved-dinner-alternative'],
+  evaluate(`${generateAnotherButton}.click()`),
+  wait(`${generateAnotherDialog} !== null`),
+  assert(`${generateAnotherDialog}.innerText.includes('Generate another?') && ${generateAnotherDialog}.innerText.includes('Your manual changes to this proposal will be lost.') && ${generateAnotherDialog}.open && ${generateAnotherDialog}.contains(document.activeElement)`, 'a confirmation dialog warns that manual changes will be lost'),
+  shot('ai-preview-actions-confirm.png'),
+  ['press', 'Escape'],
+  assert(`!${generateAnotherDialog} && ${generationCount}===1 && ${preview}.querySelector(${JSON.stringify(firstDayDinnerSelector)}).value==='saved-dinner-alternative' && document.activeElement===${generateAnotherButton}`, 'Escape/Cancel sends nothing, keeps the edit and returns focus to the button'),
+  evaluate(`${generateAnotherButton}.click()`),
+  wait(`${generateAnotherDialog} !== null`),
+  evaluate(`[...${generateAnotherDialog}.querySelectorAll('button')].find(button => button.textContent.trim()==='Cancel').click()`),
+  assert(`!${generateAnotherDialog} && ${generationCount}===1`, 'the Cancel button sends nothing'),
+  evaluate(`${generateAnotherButton}.click()`),
+  wait(`${generateAnotherDialog} !== null`),
+  evaluate(`[...${generateAnotherDialog}.querySelectorAll('button')].find(button => button.textContent.trim()==='Generate another').click()`),
+  wait(`${generationCount}===2 && ${preview} !== null`),
+  assert(`${lastRequest}.previousMenu.days.Monday.dinnerRecipeId==='saved-dinner-alternative' && ${saveCount}===0`, 'Confirm sends exactly one request carrying the edited proposal as previousMenu'),
+])
+
+await scenario('reverting a manual edit means no confirmation; double click sends one request', [
+  open('ready'),
+  ...generateFromReady,
+  ['select', firstDayDinnerSelector, 'saved-dinner-alternative'],
+  ['select', firstDayDinnerSelector, 'saved-dinner'],
+  evaluate(`${fixture}.holdGeneration=true; const button=${generateAnotherButton}; button.click(); button.click()`),
+  wait(`${fixture}.pendingGeneration`),
+  assert(`!${generateAnotherDialog} && ${generationCount}===2`, 'a reverted edit regenerates directly and a double click sends one request'),
+  evaluate(`${fixture}.holdGeneration=false; ${fixture}.releaseGeneration()`),
+  wait(`${preview} !== null`),
+  assert(`${generationCount}===2`, 'still exactly one extra request after completion'),
+])
+
+await scenario('failed Generate another keeps the previous edited proposal and Accept still saves it', [
+  open('ready'),
+  ...generateFromReady,
+  ['select', firstDayDinnerSelector, 'saved-dinner-alternative'],
+  evaluate(`${fixture}.failGeneration=true; ${generateAnotherButton}.click()`),
+  wait(`${generateAnotherDialog} !== null`),
+  evaluate(`[...${generateAnotherDialog}.querySelectorAll('button')].find(button => button.textContent.trim()==='Generate another').click()`),
+  text('Could not generate next week’s menu'),
+  assert(
+    `${skeleton}===null && ${preview} !== null && ${preview}.querySelector(${JSON.stringify(firstDayDinnerSelector)}).value==='saved-dinner-alternative' && ${saveCount}===0 && ${generationCount}===2`,
+    'the previous proposal with its manual edit stays visible with the error; nothing saved',
+  ),
+  evaluate(`${fixture}.failGeneration=false`),
+  waitPreviewAcceptable(),
+  click('Accept and save menu'),
+  text('Weekly Menu saved.'),
+  assert(`${saveCount}===1 && JSON.stringify(${fixture}.saveRequests[0].payload).includes('saved-dinner-alternative')`, 'Accept saves the previous proposal'),
+])
+
+for (const reason of ['generate', 'in-progress']) {
+  await scenario(`Retry after ${reason} preserves the edited proposal and confirmed schedule`, [
+    open('target-saved'),
+    ...generateFromReady,
+    wait(`${preview}.contains(document.activeElement)`),
+    assert(`document.activeElement.getAttribute('role')==='heading'`, 'confirmation settles focus on the preview heading'),
+    ['select', firstDayDinnerSelector, 'saved-dinner-alternative'],
+    evaluate(`${fixture}.failGeneration=${reason === 'generate'}; ${fixture}.generationRejection=${JSON.stringify(reason === 'in-progress' ? reason : null)}; ${generateAnotherButton}.click()`),
+    wait(`${generateAnotherDialog} !== null`),
+    evaluate(`[...${generateAnotherDialog}.querySelectorAll('button')].find(button => button.textContent.trim()==='Generate another').click()`),
+    wait(`${shell}.querySelector('[role="alert"]') !== null && ${preview} !== null`),
+    waitPreviewAcceptable(),
+    assert(`!${generateAnotherButton}.disabled`, 'Generate another is available after a retryable failure'),
+    click('Retry generation'),
+    wait(`${generationCount}===3 && ${preview} !== null && ${shell}.querySelector('[role="alert"]') !== null`),
+    assert(`!${dialog} && ${preview}.querySelector(${JSON.stringify(firstDayDinnerSelector)}).value==='saved-dinner-alternative'`, 'Retry never opens a fresh schedule flow and another failure keeps the manual edit'),
+    ['press', 'Escape'],
+    assert(`${preview} !== null && ${saveCount}===0 && ${preview}.querySelector(${JSON.stringify(firstDayDinnerSelector)}).value==='saved-dinner-alternative'`, 'Escape cannot silently discard the retained proposal'),
+    evaluate(`${fixture}.failGeneration=false; ${fixture}.generationRejection=null`),
+    click('Retry generation'),
+    wait(`${generationCount}===4 && ${preview} !== null && !${shell}.querySelector('[role="alert"]')`),
+    wait(`${preview}.contains(document.activeElement)`),
+    assert(`document.activeElement.getAttribute('role')==='heading' && ${lastRequest}.previousMenu.days.Monday.dinnerRecipeId==='saved-dinner-alternative' && JSON.stringify(${lastRequest}.schedule)===JSON.stringify(${fixture}.generationRequests[0].schedule) && ${lastRequest}.schedule.Monday.context==='office' && ${lastRequest}.schedule.Monday.scope==='dinner' && ${lastRequest}.schedule.Tuesday.context==='eatOut' && ${lastRequest}.schedule.Tuesday.scope==='lunch' && ${saveCount}===0`, 'retry sends the edited proposal with all original day contexts/scopes and focuses the settled preview'),
+  ])
+}
+
+await scenario('rate-limited Generate another keeps the proposal; retry after a failed first generation has no previousMenu', [
+  open('ready'),
+  wait(`${shell}.innerText.includes('Saved dinner')`),
+  evaluate(`${fixture}.failGeneration=true`),
+  click('Regenerate menu'),
+  click('Confirm schedule and generate'),
+  text('Could not generate next week’s menu'),
+  evaluate(`${fixture}.failGeneration=false`),
+  wait(`document.querySelector('[role="alert"] .planner-secondary-btn') && !document.querySelector('[role="alert"] .planner-secondary-btn').disabled`),
+  click('Retry generation'),
+  click('Confirm schedule and generate'),
+  wait(`${preview} !== null`),
+  waitPreviewAcceptable(),
+  assert(`${generationCount}===2 && ${fixture}.generationRequests.every(request => request.previousMenu===undefined)`, 'confirm and retry paths never send previousMenu'),
+  evaluate(`${fixture}.generationRejection='rate-limited'; ${generateAnotherButton}.click()`),
+  wait(`${shell}.querySelector('[role="alert"]') !== null`),
+  assert(`${preview} !== null && ${saveCount}===0 && ${generationCount}===3 && ${generateAnotherButton}.disabled`, 'rate-limited regenerate keeps the proposal; the action is disabled until a settled preview'),
+])
+
+await scenario('Generate another after Monday targets the preview week and a stale answer keeps the proposal', [
+  open('preview-rollover'),
+  ...generateFromReady,
+  evaluate(`${fixture}.advanceClock(2 * 60 * 1000)`),
+  assert(`new Date().getDay()===1`, 'the browser crossed into Monday with the preview open'),
+  evaluate(`${generateAnotherButton}.click()`),
+  text('The Calendar Week changed.'),
+  assert(
+    `${lastRequest}.weekStart===${fixture}.targetWeekStart && ${lastRequest}.previousMenu.weekStart===${fixture}.targetWeekStart && ${preview} !== null && ${saveCount}===0`,
+    'regenerate targets the pinned preview week; the stale answer keeps the saveable proposal',
+  ),
+])
+
+await scenario('Generate another is disabled while the preview is being saved', [
+  open('ready'),
+  ...generateFromReady,
+  evaluate(`${fixture}.holdSave=true`),
+  click('Accept and save menu'),
+  wait(`${fixture}.pendingSave`),
+  assert(`${generateAnotherButton}.disabled && ${generationCount}===1`, 'the button is disabled during acceptance'),
+  evaluate(`${generateAnotherButton}.click(); ${fixture}.holdSave=false; ${fixture}.releaseSave()`),
+  text('Weekly Menu saved.'),
+  assert(`${generationCount}===1`, 'no generation was sent while saving'),
+])
+
+const dinnerOptions = `[...${preview}.querySelector(${JSON.stringify(firstDayDinnerSelector)}).options].map(option => option.textContent)`
+
+await scenario('preview alternatives are alphabetical per locale, with No recipe first and the selection kept', [
+  open('sorted-catalog'),
+  ...generateFromReady,
+  assert(
+    `JSON.stringify(${dinnerOptions})===JSON.stringify(['No recipe','Apple stew 2','Apple stew 10','Épinards crème','Mushroom barley bowl','Roasted vegetable bowl','Zucchini bake'])`,
+    'dinner alternatives are alphabetical (accent-insensitive, numeric) with No recipe first',
+  ),
+  ['screenshot', `${process.cwd()}/e2e/artifacts/ai-sorted-alternatives.png`],
+  assert(
+    `${preview}.querySelector(${JSON.stringify(firstDayDinnerSelector)}).value==='saved-dinner' && ${preview}.querySelector(${JSON.stringify(firstDayDinnerSelector)}).selectedOptions[0].textContent==='Roasted vegetable bowl'`,
+    'the generated recipe stays selected after sorting',
+  ),
+  assert(
+    `JSON.stringify([...${preview}.querySelector('.delay-1 .meal-recipe-editor select[aria-label="Choose a saved lunch recipe"]').options].map(option => option.textContent))===JSON.stringify(['No recipe','Crispy lentil salad','Lemon chickpea pasta'])`,
+    'lunch alternatives are alphabetical too',
+  ),
+])
+
+await scenario('Spanish selectors use the Spanish collation', [
+  open('sorted-catalog', '/es'),
+  wait(`${shell}.innerText.includes('Saved dinner')`),
+  click('Regenerar menú'),
+  text('Revisa la agenda de la próxima semana'),
+  click('Confirmar agenda y generar'),
+  wait(`${preview} !== null`),
+  assert(
+    `(() => { const selects=[...${preview}.querySelectorAll('.delay-1 .meal-recipe-editor select')]; const names=[...selects[selects.length-1].options].slice(1).map(option => option.textContent); const expected=[...names].sort(new Intl.Collator('es',{sensitivity:'base',numeric:true}).compare); return JSON.stringify(names)===JSON.stringify(expected) && names.indexOf('Épinards crème') < names.indexOf('Mushroom barley bowl') })()`,
+    'Spanish dinner options follow the es collator',
+  ),
 ])
 
 emit({

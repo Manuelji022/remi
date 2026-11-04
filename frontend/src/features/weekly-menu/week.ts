@@ -67,6 +67,10 @@ export function weekStartFromDate(date: Date): string {
   )
 }
 
+export function isWeekLocked(weekStart: string, today: Date): boolean {
+  return weekStart <= weekStartFromDate(today)
+}
+
 export function viewWeekStart(today: Date, offset: number): string {
   const clamped: -1 | 0 | 1 = offset <= -1 ? -1 : offset >= 1 ? 1 : 0
   return shiftWeekStart(weekStartFromDate(today), clamped)
