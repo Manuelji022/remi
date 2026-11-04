@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { MenuTab } from './MenuTab'
 import type { Day } from '../constants'
 import type { CalendarWeekMenu } from '../week'
@@ -17,6 +18,8 @@ interface AiMenuPreviewProps {
   canAccept: boolean
   isSignedIn: boolean
   replacesSavedMenu: boolean
+  canGenerateAnother: boolean
+  onGenerateAnother: (opener: HTMLElement) => void
   onEditSchedule: () => void
   onDiscard: () => void
   onAccept: () => void
@@ -38,6 +41,8 @@ export function AiMenuPreview({
   canAccept,
   isSignedIn,
   replacesSavedMenu,
+  canGenerateAnother,
+  onGenerateAnother,
   onEditSchedule,
   onDiscard,
   onAccept,
@@ -46,12 +51,22 @@ export function AiMenuPreview({
   onUpdateRecipe,
 }: AiMenuPreviewProps) {
   const { t } = useI18n()
+  const headingRef = useRef<HTMLParagraphElement>(null)
+  useEffect(() => {
+    if (document.activeElement === document.body) headingRef.current?.focus()
+  }, [])
 
   return (
     <div className="planner-ai-preview">
       <div className="planner-ai-preview-banner" aria-live="polite">
         <div>
-          <p className="planner-ai-preview-kicker">
+          <p
+            className="planner-ai-preview-kicker"
+            ref={headingRef}
+            role="heading"
+            aria-level={2}
+            tabIndex={-1}
+          >
             {t('planner.aiPreviewLabel')}
           </p>
           <p>
@@ -75,6 +90,14 @@ export function AiMenuPreview({
             disabled={isWriting}
           >
             {t('planner.aiEditSchedule')}
+          </button>
+          <button
+            className="planner-secondary-btn"
+            type="button"
+            onClick={(event) => onGenerateAnother(event.currentTarget)}
+            disabled={!canGenerateAnother}
+          >
+            {t('planner.aiGenerateAnother')}
           </button>
           <button
             className="planner-secondary-btn"

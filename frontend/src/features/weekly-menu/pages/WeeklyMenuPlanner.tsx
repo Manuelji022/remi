@@ -12,6 +12,7 @@ import { AiMenuSkeleton } from '../components/AiMenuSkeleton'
 import { RecipesNeededDialog } from '../components/RecipesNeededDialog'
 import { AiGenerationScheduleDialog } from '../components/AiGenerationScheduleDialog'
 import { DiscardPreviewDialog } from '../components/DiscardPreviewDialog'
+import { GenerateAnotherDialog } from '../components/GenerateAnotherDialog'
 import type { Day } from '#/features/weekly-menu/constants'
 import { formatRecipeIngredient } from '#/features/recipes/format'
 import { listRecipes } from '#/features/recipes/functions'
@@ -25,7 +26,10 @@ import type {
   Preferences,
 } from '#/features/weekly-menu/types'
 import { authClient } from '#/features/auth/auth-client'
-import { useAiMenuGeneration } from '#/features/weekly-menu/hooks/useAiMenuGeneration'
+import {
+  hasManualEdits,
+  useAiMenuGeneration,
+} from '#/features/weekly-menu/hooks/useAiMenuGeneration'
 import { usePlannerWeek } from '#/features/weekly-menu/hooks/usePlannerWeek'
 import { shoppingList } from '#/features/weekly-menu/shopping'
 import type { ShoppingLine } from '#/features/weekly-menu/shopping'
@@ -75,7 +79,9 @@ export function WeeklyMenuPlanner() {
     useState<PreferencesPanelTab>('schedule')
   const [showRecipesNotice, setShowRecipesNotice] = useState(false)
   const [missingRecipeSlots, setMissingRecipeSlots] = useState<MealSlot[]>([])
+  const [showGenerateAnother, setShowGenerateAnother] = useState(false)
   const precheckPendingRef = useRef(false)
+  const generateAnotherOpenerRef = useRef<HTMLElement | null>(null)
   const hasLoadedRef = useRef(false)
   const scheduleOpenerRef = useRef<HTMLElement | null>(null)
   const scheduleHeaderButtonRef = useRef<HTMLButtonElement | null>(null)
@@ -363,6 +369,19 @@ export function WeeklyMenuPlanner() {
     }
   }
 
+  function startGenerateAnother() {
+    setShowGenerateAnother(false)
+    plannerWeek.clearAction()
+    void aiGeneration.regenerate()
+  }
+
+  function handleGenerateAnother(opener: HTMLElement) {
+    if (!currentPreview || !canGenerateAnother || showGenerateAnother) return
+    generateAnotherOpenerRef.current = opener
+    if (hasManualEdits(currentPreview)) setShowGenerateAnother(true)
+    else startGenerateAnother()
+  }
+
   function handleRetryGeneration() {
     rememberScheduleOpener(scheduleHeaderButtonRef.current)
     void aiGeneration.retry()
@@ -474,6 +493,9 @@ export function WeeklyMenuPlanner() {
     isHydrated &&
     !isRecipeMutationPending &&
     !isWriting,
+  )
+  const canGenerateAnother = Boolean(
+    canAcceptPreview && aiGeneration.canRegenerate,
   )
   const generationErrorMessage =
     currentGeneration?.reason === 'stale-week'
@@ -617,6 +639,8 @@ export function WeeklyMenuPlanner() {
               canAccept={canAcceptPreview}
               isSignedIn={Boolean(userId)}
               replacesSavedMenu={currentPreview.replacesSavedMenu}
+              canGenerateAnother={canGenerateAnother}
+              onGenerateAnother={handleGenerateAnother}
               onEditSchedule={() =>
                 void openGenerationSchedule(
                   undefined,
@@ -694,6 +718,14 @@ export function WeeklyMenuPlanner() {
           returnFocusTo={scheduleOpenerRef.current}
           onAddRecipes={openRecipes}
           onClose={() => setShowRecipesNotice(false)}
+        />
+      )}
+
+      {showGenerateAnother && currentPreview && (
+        <GenerateAnotherDialog
+          returnFocusTo={generateAnotherOpenerRef.current}
+          onCancel={() => setShowGenerateAnother(false)}
+          onConfirm={startGenerateAnother}
         />
       )}
 

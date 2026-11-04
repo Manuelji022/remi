@@ -175,3 +175,28 @@ Documented before implementation; transport tests use fake fetch only, never a r
 - `keeps zero/one candidates, absent previous proposal, and empty scenario behavior`: cases 5, 7 (mock output), and 10 (empty scenario).
 - Cases 1, 3, and 4 were inspected at the server-function boundary: `calendarWeekSchema.optional()` validates input before the handler; only a matching target week reaches the generator; no save/log call was added and generation remains inside the existing guard. Short-circuit scenario branches are unchanged. These paths were not exercised through authenticated transport or a live database in this task.
 - Production request compatibility without a previous proposal is supported by the existing fake-Gateway transport tests and inspection of the conditional prompt fields/system sentence. No live Gateway call, browser UI, or model choice variability was verified.
+
+## Preview actions failure cases
+
+Documented before implementation (generate another).
+
+1. **Regenerate wipes manual edits without asking.** With a manual recipe swap in the preview, Generate another must open a confirmation first; Cancel sends nothing and keeps the edit.
+2. **Regenerate asks when there were no edits.** With no manual change (or a change reverted to the generated recipe) it must regenerate directly with no dialog.
+3. **Failure of regenerate loses the previous proposal.** On a rejected, rate-limited, in-progress or stale-week answer, the previous proposal (with manual edits) stays visible with the error, nothing stale is saved, and Accept still saves the previous proposal.
+4. **Regenerate sends a previousMenu from another week.** The request must carry the shown proposal's menu for the preview's own week, never a saved/other week's menu.
+5. **Double click or double dispatch sends two requests.** Two rapid clicks (or click plus confirm-dialog confirm) must produce exactly one generation request.
+6. **Regenerate while saving.** The button is disabled/no-op while Accept is saving; a held save is never overtaken by a generation.
+7. **Regenerate after rollover targets the wrong week.** A Sunday preview opened and then Monday must regenerate for the preview's weekStart; a stale-week answer shows the existing stale error, not a preview.
+8. **Accepting during regeneration.** Accept, Discard and Edit schedule must not exist during the skeleton; the previous proposal is hidden, not saveable.
+9. **Confirm path now sends previousMenu.** The first generation (and retry after a failed first generation) must carry no `previousMenu`.
+10. **Hook change breaks pinned-week preview.** The Sunday preview stays pinned after Monday; epoch, identity and in-flight guards behave as before.
+11. **Retry loses the retained proposal.** After generate/in-progress failure with a preview, Retry must regenerate directly with that edited proposal and its full day context/scope; another failure and Escape must retain it without opening a new schedule dialog.
+12. **Generated menu overwritten by manual edits.** `generatedMenu` must not change on recipe edits, otherwise edit detection breaks.
+
+13. **Focus falls to BODY after generation.** When the skeleton removes the opener, the settled preview heading receives focus; a still-valid focus target is not stolen.
+
+### Generate-another verification
+
+From `frontend/`, run `pnpm lint`, `pnpm check`, `pnpm typecheck`, `pnpm test`, and `pnpm build`, then use the production server and CLI runner documented in “Repeatable browser harness” and “CLI-only harness runner” above. This branch's harness has 46 scenarios (47 result entries including the summary), including retry after both provider error and in-progress rejection, manual-edit retention through repeated failure/Escape, full seven-day schedule preservation, and focus after confirmation/regeneration. Evidence is in `artifacts/ai-weekly-menu-results.json`; screenshots are `artifacts/ai-preview-actions-banner.png` and `artifacts/ai-preview-actions-confirm.png`.
+
+Regeneration uses the already-loaded catalog and the visible menu's context/scope, without another recipe precheck or notice flow. Browser responses are synthetic; live authenticated transport, database/provider behavior, and non-Chrome focus remain unverified.

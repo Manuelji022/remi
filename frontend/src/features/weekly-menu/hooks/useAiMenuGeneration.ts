@@ -12,6 +12,7 @@ import {
   nextCalendarWeekStart,
   targetScheduleFromPreferences,
 } from '../ai-schedule'
+import { DAYS } from '../constants'
 import type { Day } from '../constants'
 import type { MealSlot, Recipe } from '#/features/recipes/recipe'
 import type { DayContext, PlanningScope, Preferences } from '../types'
@@ -25,9 +26,22 @@ import { scheduleFromMenu } from '../week'
 export type AiPreview = {
   userId: string
   weekStart: string
+  /** The server result as generated; manual recipe edits never change it. */
+  generatedMenu: CalendarWeekMenu
   /** The target week already has a saved menu that accepting replaces. */
   replacesSavedMenu: boolean
 } & AiMenuResult
+
+export function hasManualEdits(preview: AiPreview): boolean {
+  return DAYS.some((day) => {
+    const shown = preview.menu.days[day]
+    const generated = preview.generatedMenu.days[day]
+    return (
+      shown.lunchRecipeId !== generated.lunchRecipeId ||
+      shown.dinnerRecipeId !== generated.dinnerRecipeId
+    )
+  })
+}
 export type AiGenerationState =
   | { phase: 'idle' }
   | {
@@ -295,6 +309,112 @@ export function useAiMenuGeneration({
     [state],
   )
 
+  // Shared generation core: epoch/identity/in-flight guards, error mapping and
+  // preview creation. Callers check their own phase preconditions first.
+  const runGeneration = useCallback(
+    async ({
+      requester,
+      target,
+      draft,
+      replacesSavedMenu,
+      previousPreview,
+      previousMenu,
+    }: {
+      requester: string
+      target: string
+      draft: Preferences
+      replacesSavedMenu: boolean
+      previousPreview?: AiPreview
+      previousMenu?: CalendarWeekMenu
+    }) => {
+      generationInFlightRef.current = true
+      const epoch = ++epochRef.current
+      const current = () =>
+        epoch === epochRef.current && requester === identityRef.current
+      dispatch({
+        type: 'generating',
+        userId: requester,
+        targetWeekStart: target,
+        draft,
+        replacesSavedMenu,
+        preview: previousPreview,
+      })
+      try {
+        const parsedMock = aiMockScenarioSchema.safeParse(
+          new URLSearchParams(window.location.search).get('mock'),
+        )
+        const result = await generateNextWeeklyMenu({
+          data: {
+            targetWeekStart: target,
+            timeZone,
+            schedule: targetScheduleFromPreferences(draft),
+            ...(previousMenu ? { previousMenu } : {}),
+            ...(parsedMock.success ? { mockScenario: parsedMock.data } : {}),
+          },
+        })
+        if (!current()) return
+        if (!result.ok) {
+          if (result.reason === 'stale-week')
+            dispatch({
+              type: 'failure',
+              state: {
+                phase: 'error',
+                userId: requester,
+                targetWeekStart: target,
+                reason: 'stale-week',
+                expectedTargetWeekStart: result.expectedTargetWeekStart,
+                preview: previousPreview,
+              },
+            })
+          else
+            dispatch({
+              type: 'failure',
+              state: {
+                phase: 'error',
+                userId: requester,
+                targetWeekStart: target,
+                reason: result.reason,
+                retry: { targetWeekStart: target, draft },
+                preview: previousPreview,
+              },
+            })
+          return
+        }
+        const generated: AiPreview = {
+          userId: requester,
+          weekStart: target,
+          menu: result.menu,
+          generatedMenu: result.menu,
+          replacesSavedMenu,
+          recipeNames: result.recipeNames,
+          unavailableSlots: result.unavailableSlots,
+        }
+        dispatch({
+          type: 'preview',
+          preview: generated,
+          retry: { targetWeekStart: target, draft },
+        })
+        onPreviewWeek(target)
+      } catch {
+        if (current())
+          dispatch({
+            type: 'failure',
+            state: {
+              phase: 'error',
+              userId: requester,
+              targetWeekStart: target,
+              reason: 'generate',
+              retry: { targetWeekStart: target, draft },
+              preview: previousPreview,
+            },
+          })
+      } finally {
+        if (epoch === epochRef.current) generationInFlightRef.current = false
+      }
+    },
+    [timeZone, onPreviewWeek],
+  )
+
   const confirm = useCallback(async () => {
     if (
       state.phase !== 'confirming' ||
@@ -302,98 +422,54 @@ export function useAiMenuGeneration({
       generationInFlightRef.current
     )
       return
-    const {
-      userId: requester,
-      targetWeekStart: target,
-      draft,
-      replacesSavedMenu,
-    } = state
-    generationInFlightRef.current = true
-    const epoch = ++epochRef.current
-    const current = () =>
-      epoch === epochRef.current && requester === identityRef.current
-    dispatch({
-      type: 'generating',
-      userId: requester,
-      targetWeekStart: target,
-      draft,
-      replacesSavedMenu,
-      preview: state.preview,
+    await runGeneration({
+      requester: state.userId,
+      target: state.targetWeekStart,
+      draft: state.draft,
+      replacesSavedMenu: state.replacesSavedMenu,
+      previousPreview: state.preview,
     })
-    try {
-      const parsedMock = aiMockScenarioSchema.safeParse(
-        new URLSearchParams(window.location.search).get('mock'),
-      )
-      const result = await generateNextWeeklyMenu({
-        data: {
-          targetWeekStart: target,
-          timeZone,
-          schedule: targetScheduleFromPreferences(draft),
-          ...(parsedMock.success ? { mockScenario: parsedMock.data } : {}),
-        },
-      })
-      if (!current()) return
-      if (!result.ok) {
-        if (result.reason === 'stale-week')
-          dispatch({
-            type: 'failure',
-            state: {
-              phase: 'error',
-              userId: requester,
-              targetWeekStart: target,
-              reason: 'stale-week',
-              expectedTargetWeekStart: result.expectedTargetWeekStart,
-              preview: state.preview,
-            },
-          })
-        else
-          dispatch({
-            type: 'failure',
-            state: {
-              phase: 'error',
-              userId: requester,
-              targetWeekStart: target,
-              reason: result.reason,
-              retry: { targetWeekStart: target, draft },
-              preview: state.preview,
-            },
-          })
-        return
-      }
-      const generated: AiPreview = {
-        userId: requester,
-        weekStart: target,
-        menu: result.menu,
-        replacesSavedMenu,
-        recipeNames: result.recipeNames,
-        unavailableSlots: result.unavailableSlots,
-      }
-      dispatch({
-        type: 'preview',
-        preview: generated,
-        retry: { targetWeekStart: target, draft },
-      })
-      onPreviewWeek(target)
-    } catch {
-      if (current())
-        dispatch({
-          type: 'failure',
-          state: {
-            phase: 'error',
-            userId: requester,
-            targetWeekStart: target,
-            reason: 'generate',
-            retry: { targetWeekStart: target, draft },
-            preview: state.preview,
-          },
-        })
-    } finally {
-      if (epoch === epochRef.current) generationInFlightRef.current = false
-    }
-  }, [state, timeZone, onPreviewWeek])
+  }, [state, runGeneration])
+
+  const canRegenerate =
+    state.phase === 'preview' ||
+    (state.phase === 'error' &&
+      Boolean(state.preview) &&
+      (state.reason === 'generate' || state.reason === 'in-progress'))
+
+  // Regeneration and its retry retain the proposal until another succeeds.
+  const regenerate = useCallback(async () => {
+    const previousPreview =
+      state.phase === 'preview' || state.phase === 'error'
+        ? state.preview
+        : undefined
+    if (
+      !canRegenerate ||
+      !previousPreview ||
+      !identityRef.current ||
+      previousPreview.userId !== identityRef.current ||
+      generationInFlightRef.current
+    )
+      return
+    await runGeneration({
+      requester: previousPreview.userId,
+      target: previousPreview.weekStart,
+      draft: scheduleFromMenu(previousPreview.menu),
+      replacesSavedMenu: previousPreview.replacesSavedMenu,
+      previousPreview,
+      previousMenu: previousPreview.menu,
+    })
+  }, [state, canRegenerate, runGeneration])
 
   const retry = useCallback(async () => {
     if (state.phase !== 'error') return
+    if (
+      state.preview &&
+      (state.reason === 'generate' || state.reason === 'in-progress')
+    ) {
+      await regenerate()
+      return
+    }
     if (state.reason === 'stale-week' && state.expectedTargetWeekStart) {
       await openSchedule({
         targetWeekStart: state.expectedTargetWeekStart,
@@ -416,7 +492,7 @@ export function useAiMenuGeneration({
       mode: 'new',
       preferences: savedDraft,
     })
-  }, [state, openSchedule, timeZone])
+  }, [state, openSchedule, timeZone, regenerate])
 
   const updateRecipe = useCallback(
     (
@@ -523,6 +599,8 @@ export function useAiMenuGeneration({
     updateContext,
     updateScope,
     confirm,
+    regenerate,
+    canRegenerate,
     retry,
     updateRecipe,
     accept,

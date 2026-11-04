@@ -140,6 +140,42 @@
     "verdict": "PASS"
   },
   {
+    "scenario": "Generate another without edits sends one request with previousMenu and shows the skeleton",
+    "verdict": "PASS"
+  },
+  {
+    "scenario": "Generate another with a manual edit confirms first; Cancel sends nothing, Confirm sends one request",
+    "verdict": "PASS"
+  },
+  {
+    "scenario": "reverting a manual edit means no confirmation; double click sends one request",
+    "verdict": "PASS"
+  },
+  {
+    "scenario": "failed Generate another keeps the previous edited proposal and Accept still saves it",
+    "verdict": "PASS"
+  },
+  {
+    "scenario": "Retry after generate preserves the edited proposal and confirmed schedule",
+    "verdict": "PASS"
+  },
+  {
+    "scenario": "Retry after in-progress preserves the edited proposal and confirmed schedule",
+    "verdict": "PASS"
+  },
+  {
+    "scenario": "rate-limited Generate another keeps the proposal; retry after a failed first generation has no previousMenu",
+    "verdict": "PASS"
+  },
+  {
+    "scenario": "Generate another after Monday targets the preview week and a stale answer keeps the proposal",
+    "verdict": "PASS"
+  },
+  {
+    "scenario": "Generate another is disabled while the preview is being saved",
+    "verdict": "PASS"
+  },
+  {
     "scenario": "preview alternatives are alphabetical per locale, with No recipe first and the selection kept",
     "verdict": "PASS"
   },
@@ -157,7 +193,7 @@
           "effectiveLaunch": {
             "browserLaunched": true,
             "engine": "chrome",
-            "launchHash": 10648038973705824000
+            "launchHash": 6701229096119436000
           },
           "launched": false,
           "relaunchedBrowser": false,
@@ -166,7 +202,7 @@
           "reused": true,
           "saveStatus": "not_attempted"
         },
-        "origin": "http://127.0.0.1:3102/es/weekly-menu-planner?scenario=sorted-catalog",
+        "origin": "http://127.0.0.1:3101/es/weekly-menu-planner?scenario=sorted-catalog",
         "result": {
           "fixture": "sorted-catalog",
           "generationRequests": 1,
