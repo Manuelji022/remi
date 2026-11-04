@@ -175,3 +175,24 @@ Documented before implementation; transport tests use fake fetch only, never a r
 - `keeps zero/one candidates, absent previous proposal, and empty scenario behavior`: cases 5, 7 (mock output), and 10 (empty scenario).
 - Cases 1, 3, and 4 were inspected at the server-function boundary: `calendarWeekSchema.optional()` validates input before the handler; only a matching target week reaches the generator; no save/log call was added and generation remains inside the existing guard. Short-circuit scenario branches are unchanged. These paths were not exercised through authenticated transport or a live database in this task.
 - Production request compatibility without a previous proposal is supported by the existing fake-Gateway transport tests and inspection of the conditional prompt fields/system sentence. No live Gateway call, browser UI, or model choice variability was verified.
+
+## Preview actions failure cases
+
+Documented before implementation (generate another).
+
+1. **Regenerate wipes manual edits without asking.** With a manual recipe swap in the preview, Generate another must open a confirmation first; Cancel sends nothing and keeps the edit.
+2. **Regenerate asks when there were no edits.** With no manual change (or a change reverted to the generated recipe) it must regenerate directly with no dialog.
+3. **Failure of regenerate loses the previous proposal.** On a rejected, rate-limited, in-progress or stale-week answer, the previous proposal (with manual edits) stays visible with the error, nothing stale is saved, and Accept still saves the previous proposal.
+4. **Regenerate sends a previousMenu from another week.** The request must carry the shown proposal's menu for the preview's own week, never a saved/other week's menu.
+5. **Double click or double dispatch sends two requests.** Two rapid clicks (or click plus confirm-dialog confirm) must produce exactly one generation request.
+6. **Regenerate while saving.** The button is disabled/no-op while Accept is saving; a held save is never overtaken by a generation.
+7. **Regenerate after rollover targets the wrong week.** A Sunday preview opened and then Monday must regenerate for the preview's weekStart; a stale-week answer shows the existing stale error, not a preview.
+8. **Accepting during regeneration.** Accept, Discard and Edit schedule must not exist during the skeleton; the previous proposal is hidden, not saveable.
+9. **Confirm path now sends previousMenu.** The first generation (and retry after a failed first generation) must carry no `previousMenu`.
+10. **Hook change breaks pinned-week preview.** The Sunday preview stays pinned after Monday; epoch, identity and in-flight guards behave as before.
+11. **Precheck skipped on regenerate.** If the user deleted every recipe of a needed type in between, the notice shows and no request is sent.
+12. **Generated menu overwritten by manual edits.** `generatedMenu` must not change on recipe edits, otherwise edit detection breaks.
+
+### Generate-another verification
+
+The repeatable browser harness covers all 42 scenarios on this branch; sorting is verified independently in feat/ai-sorted-alternatives. Results and screenshots are refreshed from the production build. No live Gateway/authenticated transport is exercised.

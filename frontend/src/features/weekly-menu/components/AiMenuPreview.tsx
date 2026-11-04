@@ -17,6 +17,8 @@ interface AiMenuPreviewProps {
   canAccept: boolean
   isSignedIn: boolean
   replacesSavedMenu: boolean
+  canGenerateAnother: boolean
+  onGenerateAnother: (opener: HTMLElement) => void
   onEditSchedule: () => void
   onDiscard: () => void
   onAccept: () => void
@@ -38,6 +40,8 @@ export function AiMenuPreview({
   canAccept,
   isSignedIn,
   replacesSavedMenu,
+  canGenerateAnother,
+  onGenerateAnother,
   onEditSchedule,
   onDiscard,
   onAccept,
@@ -75,6 +79,14 @@ export function AiMenuPreview({
             disabled={isWriting}
           >
             {t('planner.aiEditSchedule')}
+          </button>
+          <button
+            className="planner-secondary-btn"
+            type="button"
+            onClick={(event) => onGenerateAnother(event.currentTarget)}
+            disabled={isWriting || !canGenerateAnother}
+          >
+            {t('planner.aiGenerateAnother')}
           </button>
           <button
             className="planner-secondary-btn"
