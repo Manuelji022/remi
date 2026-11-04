@@ -1,4 +1,4 @@
-import { Dialog } from '#/components/primitives/Dialog'
+import { ConfirmDialog } from '#/components/primitives'
 import { useI18n } from '#/shared/i18n'
 
 interface GenerateAnotherDialogProps {
@@ -14,31 +14,16 @@ export function GenerateAnotherDialog({
 }: GenerateAnotherDialogProps) {
   const { t } = useI18n()
   return (
-    <Dialog
-      labelledBy="ai-generate-another-title"
-      describedBy="ai-generate-another-description"
-      className="planner-ai-discard-dialog"
+    <ConfirmDialog
+      id="ai-generate-another"
+      isOpen={true}
+      title={t('planner.aiGenerateAnotherTitle')}
+      body={t('planner.aiGenerateAnotherBody')}
+      cancelLabel={t('common.cancel')}
+      confirmLabel={t('planner.aiGenerateAnother')}
       returnFocusTo={returnFocusTo}
-      onDismiss={onCancel}
-    >
-      <h2 id="ai-generate-another-title">
-        {t('planner.aiGenerateAnotherTitle')}
-      </h2>
-      <p id="ai-generate-another-description">
-        {t('planner.aiGenerateAnotherBody')}
-      </p>
-      <div className="planner-ai-dialog-footer">
-        <button
-          className="panel-secondary-btn"
-          type="button"
-          onClick={onCancel}
-        >
-          {t('common.cancel')}
-        </button>
-        <button className="panel-primary-btn" type="button" onClick={onConfirm}>
-          {t('planner.aiGenerateAnother')}
-        </button>
-      </div>
-    </Dialog>
+      onCancel={onCancel}
+      onConfirm={onConfirm}
+    />
   )
 }
