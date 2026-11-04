@@ -12,6 +12,10 @@ import {
   AiGenerationLimitError,
   runAiGenerationWithGuard,
 } from '#/features/weekly-menu/ai-generation-guard'
+import {
+  aiMockScenarioSchema,
+  isAiMockEnabled,
+} from '#/features/weekly-menu/ai-mock'
 import { generateAiMenu } from '#/features/weekly-menu/ai-generator'
 import {
   AiGenerationStaleWeekError,
@@ -20,6 +24,7 @@ import {
 import {
   calendarTimeZoneSchema,
   getStaleTargetWeekStart,
+  nextCalendarWeekStart,
   targetWeekScheduleSchema,
 } from '#/features/weekly-menu/ai-schedule'
 
@@ -43,11 +48,33 @@ export const generateNextWeeklyMenu = createServerFn({ method: 'POST' })
       targetWeekStart: weekStartSchema,
       timeZone: calendarTimeZoneSchema,
       schedule: targetWeekScheduleSchema,
+      mockScenario: aiMockScenarioSchema.optional(),
     }),
   )
   .handler(async ({ data }) => {
     const userId = await requireUserId()
+    const mockScenario = isAiMockEnabled() ? data.mockScenario : undefined
     try {
+      if (mockScenario === 'error') {
+        await new Promise((resolve) => setTimeout(resolve, 1_000))
+        throw new Error('AI Weekly Menu generation failed')
+      }
+      if (mockScenario === 'rate-limited') {
+        return { ok: false as const, reason: 'rate-limited' as const }
+      }
+      if (mockScenario === 'in-progress') {
+        return { ok: false as const, reason: 'in-progress' as const }
+      }
+      if (mockScenario === 'stale') {
+        return {
+          ok: false as const,
+          reason: 'stale-week' as const,
+          expectedTargetWeekStart: nextCalendarWeekStart(
+            new Date(),
+            data.timeZone,
+          ),
+        }
+      }
       const staleTargetWeekStart = getStaleTargetWeekStart(
         data.targetWeekStart,
         data.timeZone,
@@ -62,7 +89,7 @@ export const generateNextWeeklyMenu = createServerFn({ method: 'POST' })
           data.targetWeekStart,
           data.schedule,
         )
-        return generateAiMenu(context)
+        return generateAiMenu(context, { mockScenario })
       })
       const staleAfterGeneration = getStaleTargetWeekStart(
         data.targetWeekStart,

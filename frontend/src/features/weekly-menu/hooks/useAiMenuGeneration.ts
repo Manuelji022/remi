@@ -1,3 +1,4 @@
+import { aiMockScenarioSchema } from '#/features/weekly-menu/ai-mock'
 import {
   useCallback,
   useEffect,
@@ -303,11 +304,15 @@ export function useAiMenuGeneration({
       preview: state.preview,
     })
     try {
+      const parsedMock = aiMockScenarioSchema.safeParse(
+        new URLSearchParams(window.location.search).get('mock'),
+      )
       const result = await generateNextWeeklyMenu({
         data: {
           targetWeekStart: target,
           timeZone,
           schedule: targetScheduleFromPreferences(draft),
+          ...(parsedMock.success ? { mockScenario: parsedMock.data } : {}),
         },
       })
       if (!current()) return

@@ -20,9 +20,9 @@ const waitPreviewAcceptable = () =>
 // a JSON-safe scalar while allowing thrown assertion errors to propagate.
 const evaluate = (source) => ['eval', `(() => { ${source}; return true })()`]
 const evaluateAsync = (source) => ['eval', `(async () => { ${source}; return true })()`]
-const open = (fixtureScenario, locale = '') => [
+const open = (fixtureScenario, locale = '', mockScenario) => [
   'open',
-  `${base}${locale}/weekly-menu-planner?scenario=${fixtureScenario}`,
+  `${base}${locale}/weekly-menu-planner?scenario=${fixtureScenario}${mockScenario ? `&mock=${mockScenario}` : ''}`,
 ]
 const assert = (condition, message) =>
   evaluate(`(() => {
@@ -601,6 +601,37 @@ await scenario('AI schedule and preview feedback are localized in Spanish', [
   text('¿Descartar esta vista previa generada?'),
   click('Descartar la vista previa generada'),
   assert(`${preview}===null && ${saveCount}===0`, 'Spanish discard confirmation keeps saved data untouched'),
+])
+
+await scenario('URL mock error is serialized on generation and retry', [
+  open('ready', '', 'error'),
+  wait(`${shell}.innerText.includes('Saved dinner')`),
+  click('Regenerate menu'),
+  click('Confirm schedule and generate'),
+  text('Could not generate next week’s menu'),
+  assert(`${generationCount}===1 && ${fixture}.generationRequests[0].mockScenario==='error' && ${saveCount}===0`, 'decoded generation request carries URL-selected error scenario'),
+  wait(`document.querySelector('[role="alert"] .planner-secondary-btn') && !document.querySelector('[role="alert"] .planner-secondary-btn').disabled`),
+  click('Retry generation'),
+  click('Confirm schedule and generate'),
+  text('Could not generate next week’s menu'),
+  assert(`${generationCount}===2 && ${fixture}.generationRequests[1].mockScenario==='error' && ${saveCount}===0`, 'retry serializes the same URL-selected error scenario'),
+])
+
+await scenario('invalid URL mock value is omitted from generation', [
+  open('ready', '', 'nope'),
+  wait(`${shell}.innerText.includes('Saved dinner')`),
+  click('Regenerate menu'),
+  click('Confirm schedule and generate'),
+  wait(`${preview} !== null`),
+  assert(`${generationCount}===1 && !JSON.stringify(${fixture}.generationRequests[0].payload).includes('mockScenario') && ${saveCount}===0`, 'invalid mock URL does not crash or send mockScenario'),
+])
+
+await scenario('guest URL mock never calls generation', [
+  open('guest', '', 'error'),
+  wait(`${fixture}.userId===null`),
+  click('Generate menu'),
+  wait(`document.querySelector('.planner-day-grid') !== null`),
+  assert(`${generationCount}===0 && ${saveCount}===0`, 'guest ignores URL mock and keeps generation local'),
 ])
 
 await scenario('guest generation remains local and never calls the AI server function', [
