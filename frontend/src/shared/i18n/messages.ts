@@ -7,6 +7,12 @@ export const LOCALES = localeSchema.options
 
 export const messages = {
   en: {
+    'planner.holdToUnlock': 'Hold to unlock',
+    'planner.weekLockedLabel':
+      'Week locked. Hold Enter, Space, or press and hold for 1 second to unlock.',
+    'planner.weekUnlocked': 'Week unlocked',
+    'planner.lockedScheduleNote':
+      'This week is locked. Close preferences and hold the lock to edit its schedule.',
     'app.title': 'Remi - Your weekly meal planner',
     'header.languageLabel': 'Language',
     'header.languageEn': 'English',
@@ -259,6 +265,12 @@ export const messages = {
     'units.pack': 'pack',
   },
   es: {
+    'planner.holdToUnlock': 'Mantén pulsado para desbloquear',
+    'planner.weekLockedLabel':
+      'Semana bloqueada. Mantén Enter, Espacio o pulsa durante 1 segundo para desbloquear.',
+    'planner.weekUnlocked': 'Semana desbloqueada',
+    'planner.lockedScheduleNote':
+      'Esta semana está bloqueada. Cierra las preferencias y mantén pulsado el candado para editar el horario.',
     'app.title': 'Remi - Tu planificador semanal de comidas',
     'header.languageLabel': 'Idioma',
     'header.languageEn': 'Inglés',
