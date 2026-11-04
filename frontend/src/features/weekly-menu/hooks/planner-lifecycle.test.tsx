@@ -76,7 +76,6 @@ describe('usePlannerWeek write ownership', () => {
           userId: 'one',
           weekStart,
           enabled,
-          preferencesOpen: false,
         }),
       )
       await view.render()
@@ -111,7 +110,6 @@ describe('usePlannerWeek write ownership', () => {
           userId,
           weekStart,
           enabled: true,
-          preferencesOpen: false,
         }),
       )
       await view.render()
