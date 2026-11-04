@@ -45,7 +45,11 @@ export function ConfirmDialog({
       <h2 id={`${id}-title`}>{title}</h2>
       <p id={`${id}-description`}>{body}</p>
       <div className="planner-ai-dialog-footer">
-        <button className="panel-secondary-btn" type="button" onClick={onCancel}>
+        <button
+          className="panel-secondary-btn"
+          type="button"
+          onClick={onCancel}
+        >
           {cancelLabel}
         </button>
         <button
