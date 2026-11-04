@@ -46,7 +46,7 @@ with the results after execution. No pure-function unit tests are added.
 
 ## Verification evidence
 
-- Independent production-build browser run: **24 passed, 0 failed**; the JSON
+- Independent production-build browser run: **25 passed, 0 failed**; the JSON
   artifact includes each result and limitations. Native pointer leave is tested
   at 500 ms with pointer capture installed before the React handler.
 - `pnpm install --frozen-lockfile`: passed; lockfile unchanged.
@@ -60,7 +60,7 @@ pnpm test: Test Files 11 passed | 1 skipped (12); Tests 62 passed | 1 skipped (6
 pnpm build: Generated .output/nitro.json; You can preview this build using npx vite preview
 ```
 
-Source scope: 7 files, **264 additions + 20 deletions = 284 changed source LOC**.
+Source scope: 7 files, **277 additions + 19 deletions = 296 changed source LOC**.
 The remaining files are documentation, the independent harness, its JSON results,
 and the screenshot; no AI implementation, dependencies, server code, or schema changed.
 
@@ -76,4 +76,10 @@ week navigation. A small standalone CLI runner makes the harness directly
 repeatable without `agent_browser_code`. Not verified: real authenticated
 HTTP/database/provider behavior, physical touch long presses, screen-reader audio,
 or heap profiling. Timer cleanup is covered by a navigation/unmount regression;
-calendar boundaries reevaluate on render and have no midnight relock timer.
+calendar boundaries reevaluate on render and at the save boundary, without a
+midnight relock timer.
+
+Review regression cases (recorded before fixes): an already-open Sunday schedule
+must not save after its target becomes current on Monday; keyboard unlock must
+focus Preferences; hold timing must measure actual button removal and reject a
+600 ms confirmation rather than merely measuring the harness sleeps.

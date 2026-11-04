@@ -396,7 +396,14 @@ export function WeeklyMenuPlanner() {
   }
 
   function handleSavePreferences(preferences: Preferences) {
-    if (!canWrite || isWriting || currentPreview || isLocked) return
+    if (!canWrite || isWriting || currentPreview) return
+    const targetWeek = readyData?.week.menu.weekStart ?? viewedWeek
+    if (
+      visibleMenu &&
+      isWeekLocked(targetWeek, new Date()) &&
+      unlockedWeek !== targetWeek
+    )
+      return
     if (!userId) {
       setGuestPreferences(preferences)
       setIsPreferencesOpen(false)
@@ -629,7 +636,14 @@ export function WeeklyMenuPlanner() {
                 <WeekLockButton
                   key={viewedWeek}
                   isLocked={isLocked}
-                  onUnlock={() => setUnlockedWeek(viewedWeek)}
+                  onUnlock={() => {
+                    setUnlockedWeek(viewedWeek)
+                    document
+                      .querySelector<HTMLButtonElement>(
+                        '.planner-actions .planner-secondary-btn',
+                      )
+                      ?.focus()
+                  }}
                 />
               )}
               <MenuTab

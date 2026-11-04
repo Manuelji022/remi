@@ -66,8 +66,9 @@ await scenario('native pointer hold confirms after about 1 second and announces 
 for (const value of ['Enter', ' ']) {
   await scenario(`${JSON.stringify(value)} hold ignores repeats and confirms at 1000ms`, [
     ...open(), locked(), ['focus', '.week-lock-button'],
-    ev(`const b=${lock}; const started=performance.now(); ${key('keydown', value)}; ${sleep(500)}; ${key('keydown', value, true)}; if (!${lock} || !document.querySelector('.week-lock-progress')) throw new Error('unlocked before 500ms or no ring'); ${sleep(600)}; if (${lock}) throw new Error('repeat delayed confirmation'); window.holdElapsed=performance.now()-started; ${key('keydown', value, true)}; ${key('keyup', value)}`),
-    unlocked(), check(`window.holdElapsed>=1000 && window.holdElapsed<1500`, '1000ms confirmation has bounded tolerance'),
+    ev(`const b=${lock}; const started=performance.now(); window.holdElapsed=null; const observer=new MutationObserver(() => { if (!${lock} && window.holdElapsed===null) { window.holdElapsed=performance.now()-started; observer.disconnect() } }); observer.observe(b.parentElement, { childList:true }); ${key('keydown', value)}; ${sleep(500)}; ${key('keydown', value, true)}; if (!${lock} || !document.querySelector('.week-lock-progress')) throw new Error('unlocked before 500ms or no ring'); ${sleep(600)}; if (${lock}) { observer.disconnect(); throw new Error('repeat delayed confirmation') } ${key('keydown', value, true)}; ${key('keyup', value)}`),
+    unlocked(), check(`window.holdElapsed>=990 && window.holdElapsed<1500`, 'actual lock removal occurs near 1000ms, never at 600ms'),
+    check(`document.activeElement===document.querySelector('.planner-actions .planner-secondary-btn')`, 'keyboard unlock focuses Preferences'),
   ])
   await scenario(`${JSON.stringify(value)} keyup and blur cancel`, [
     ...open(), locked(), ['focus', '.week-lock-button'],
@@ -99,6 +100,14 @@ await scenario('unlocked schedule can edit and save', [
   wait(`document.querySelector('.panel-day-card button') !== null`),
   ['click', '.panel-day-card:first-child .panel-context-pill:first-child'], ['click', '.panel-primary-btn'],
   wait(`${f}.saveRequests.length===1`), check(`JSON.stringify(${f}.saveRequests[0]).includes('office')`, 'unlocked edit is persisted'),
+])
+await scenario('already-open Sunday schedule cannot save its now-current target on Monday', [
+  ...open('rollover'), locked(), click('Next week'), unlocked(), click('Preferences'),
+  wait(`document.querySelector('.panel-day-card button') !== null`),
+  ['click', '.panel-day-card:first-child .panel-context-pill:first-child'],
+  check(`!document.querySelector('.panel-primary-btn').disabled`, 'future schedule starts editable'),
+  ev(`${f}.advanceClock(120000); document.querySelector('.panel-primary-btn').click(); ${sleep(300)}`),
+  check(`new Date().getDay()===1 && ${f}.saveRequests.length===0`, 'fresh save-boundary date rejects the stale enabled Save action'),
 ])
 await scenario('AI Generate from a locked week still opens next-week schedule', [
   ...open(), locked(), click('Regenerate menu'), wait(`document.querySelector('dialog[aria-labelledby="ai-generation-title"]')`),
