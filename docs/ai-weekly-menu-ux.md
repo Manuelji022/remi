@@ -173,7 +173,13 @@ Los límites de semana se calculan con la zona horaria IANA del navegador valida
 
 ## 8bis. Primera vez
 
-La primera vez que una cuenta usa **Generar con IA** se muestra un **tour de 2 o 3 pasos**: (1) confirmar el horario, (2) revisar y cambiar la propuesta, (3) aceptar; nada se guarda hasta ese momento. Se puede saltar y no vuelve a aparecer una vez completado o saltado.
+La primera vez que una cuenta usa **Generar con IA** se muestran exactamente **3 pasos**, sin modal, sin bloquear controles ni mover el foco:
+
+1. En el diálogo de agenda: confirma dónde comes; no se guarda nada hasta aceptar. **Siguiente** oculta este paso y deja la agenda editable. Confirmar la agenda también permite continuar sin pulsar Siguiente.
+2. Solo cuando existe una vista previa, en su banner: revisa y cambia recetas con los selectores o prueba **Generar otra**. **Siguiente** muestra el paso 3.
+3. Junto a **Aceptar**: aceptar guarda la semana y sustituye el menú anterior si lo había. **Listo** termina la guía.
+
+Cada tarjeta muestra «Paso n de 3», **Siguiente** (o **Listo**) y **Saltar guía**. Listo o Saltar guarda la finalización por cuenta y navegador en `localStorage`, clave `remi:ai-tour:v1:<userId>`. Si el almacenamiento está bloqueado, la guía termina para esa sesión sin interrumpir el flujo. El progreso solo vive en memoria: cancelar, descartar o recargar a mitad no marca la guía como completada; al iniciar otra generación vuelve al paso 1. Los invitados nunca ven la guía.
 
 ## 9. Idioma y tono
 
@@ -191,7 +197,8 @@ La primera vez que una cuenta usa **Generar con IA** se muestra un **tour de 2 o
 Resueltos: "Generar otra" (cuenta como un intento; confirmación solo con cambios manuales), orden alfabético de alternativas, aviso de reemplazo, sin mínimo cuantitativo de recetas, y tour de primera vez.
 
 1. **Resuelto para v1 — desbloqueo temporal solo cliente:** el bloqueo es una protección de la experiencia de usuario, no un permiso de servidor. Las llamadas directas a la API no están bloqueadas; no hay estado persistido ni cambio de esquema.
-2. **Textos finales** en ambos idiomas, y diseño visual del anillo, del candado y del tour.
+2. **Tour resuelto para v1:** tres tarjetas en el flujo, textos EN/ES, finalización por cuenta y navegador, reinicio al cancelar o descartar.
+3. **Textos finales** y diseño visual del anillo y del candado.
 
 ## Diferencias con la PR actual
 

@@ -279,3 +279,23 @@
     }
   }
 }
+
+.planner-tour {
+  flex: 1 1 100%;
+  min-width: 0;
+  padding: 1rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 1rem;
+  background: var(--bg-surface);
+}
+
+.planner-tour p {
+  margin: 0.35rem 0;
+}
+
+.planner-tour-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}

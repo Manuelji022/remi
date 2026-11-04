@@ -30,6 +30,7 @@ import {
   hasManualEdits,
   useAiMenuGeneration,
 } from '#/features/weekly-menu/hooks/useAiMenuGeneration'
+import { useFirstRunTour } from '#/features/weekly-menu/hooks/useFirstRunTour'
 import { usePlannerWeek } from '#/features/weekly-menu/hooks/usePlannerWeek'
 import { shoppingList } from '#/features/weekly-menu/shopping'
 import type { ShoppingLine } from '#/features/weekly-menu/shopping'
@@ -119,6 +120,11 @@ export function WeeklyMenuPlanner() {
     aiGeneration.state.phase === 'generating'
       ? aiGeneration.state
       : null
+  const tour = useFirstRunTour(
+    scheduleDialog || currentPreview || aiGeneration.hasUnsavedPreview
+      ? userId
+      : undefined,
+  )
   const scheduleDraft = scheduleDialog?.draft
   const generatingTargetWeek =
     aiGeneration.state.phase === 'generating' &&
@@ -363,6 +369,7 @@ export function WeeklyMenuPlanner() {
       setMissingRecipeSlots([])
       plannerWeek.clearAction()
       setActiveTab('menu')
+      if (tour.step === 1) tour.next()
       void aiGeneration.confirm()
     } finally {
       precheckPendingRef.current = false
@@ -627,6 +634,7 @@ export function WeeklyMenuPlanner() {
         ) : activeTab === 'menu' ? (
           currentPreview ? (
             <AiMenuPreview
+              tour={tour}
               menu={currentPreview.menu}
               recipeNames={currentPreview.recipeNames}
               unavailableSlots={currentPreview.unavailableSlots}
@@ -699,6 +707,7 @@ export function WeeklyMenuPlanner() {
 
       {scheduleDialog && scheduleDraft && !isGenerating && (
         <AiGenerationScheduleDialog
+          tour={tour}
           isPending={false}
           missingRecipeSlots={missingRecipeSlots}
           replacesSavedMenu={scheduleDialog.replacesSavedMenu}
