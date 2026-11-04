@@ -1,0 +1,217 @@
+{
+  "suite": "real-stack",
+  "results": [
+    {
+      "check": "real server accepts signed post-2FA session and rejects tampered cookie",
+      "verdict": "PASS",
+      "evidence": true
+    },
+    {
+      "check": "authenticated planner: Generate opens schedule dialog",
+      "verdict": "PASS",
+      "evidence": true
+    },
+    {
+      "check": "confirmation closes dialog and displays skeleton",
+      "verdict": "PASS",
+      "evidence": true
+    },
+    {
+      "check": "mock ok waits 1.5s, consumes one attempt, releases lease, preview does not save",
+      "verdict": "PASS",
+      "evidence": [
+        {
+          "day": "Monday",
+          "ids": [
+            "e2e-lunch",
+            "e2e-dinner"
+          ],
+          "names": [
+            "Synthetic lunch",
+            "Synthetic dinner"
+          ]
+        },
+        {
+          "day": "Tuesday",
+          "ids": [
+            "e2e-lunch",
+            "e2e-dinner"
+          ],
+          "names": [
+            "Synthetic lunch",
+            "Synthetic dinner"
+          ]
+        },
+        {
+          "day": "Wednesday",
+          "ids": [
+            "e2e-lunch",
+            "e2e-dinner"
+          ],
+          "names": [
+            "Synthetic lunch",
+            "Synthetic dinner"
+          ]
+        },
+        {
+          "day": "Thursday",
+          "ids": [
+            "e2e-lunch",
+            "e2e-dinner"
+          ],
+          "names": [
+            "Synthetic lunch",
+            "Synthetic dinner"
+          ]
+        },
+        {
+          "day": "Friday",
+          "ids": [
+            "e2e-lunch",
+            "e2e-dinner"
+          ],
+          "names": [
+            "Synthetic lunch",
+            "Synthetic dinner"
+          ]
+        },
+        {
+          "day": "Saturday",
+          "ids": [
+            "e2e-lunch",
+            "e2e-dinner"
+          ],
+          "names": [
+            "Synthetic lunch",
+            "Synthetic dinner"
+          ]
+        },
+        {
+          "day": "Sunday",
+          "ids": [
+            "e2e-lunch",
+            "e2e-dinner"
+          ],
+          "names": [
+            "Synthetic lunch",
+            "Synthetic dinner"
+          ]
+        }
+      ]
+    },
+    {
+      "check": "Accept persists exactly seven preview days and recipe IDs for next week",
+      "verdict": "PASS",
+      "evidence": [
+        {
+          "week_start": "2026-11-09",
+          "day": "Friday",
+          "context": null,
+          "scope": "both",
+          "lunch_recipe_id": "e2e-lunch",
+          "dinner_recipe_id": "e2e-dinner"
+        },
+        {
+          "week_start": "2026-11-09",
+          "day": "Monday",
+          "context": null,
+          "scope": "both",
+          "lunch_recipe_id": "e2e-lunch",
+          "dinner_recipe_id": "e2e-dinner"
+        },
+        {
+          "week_start": "2026-11-09",
+          "day": "Saturday",
+          "context": null,
+          "scope": "both",
+          "lunch_recipe_id": "e2e-lunch",
+          "dinner_recipe_id": "e2e-dinner"
+        },
+        {
+          "week_start": "2026-11-09",
+          "day": "Sunday",
+          "context": null,
+          "scope": "both",
+          "lunch_recipe_id": "e2e-lunch",
+          "dinner_recipe_id": "e2e-dinner"
+        },
+        {
+          "week_start": "2026-11-09",
+          "day": "Thursday",
+          "context": null,
+          "scope": "both",
+          "lunch_recipe_id": "e2e-lunch",
+          "dinner_recipe_id": "e2e-dinner"
+        },
+        {
+          "week_start": "2026-11-09",
+          "day": "Tuesday",
+          "context": null,
+          "scope": "both",
+          "lunch_recipe_id": "e2e-lunch",
+          "dinner_recipe_id": "e2e-dinner"
+        },
+        {
+          "week_start": "2026-11-09",
+          "day": "Wednesday",
+          "context": null,
+          "scope": "both",
+          "lunch_recipe_id": "e2e-lunch",
+          "dinner_recipe_id": "e2e-dinner"
+        }
+      ]
+    },
+    {
+      "check": "error: real server feedback, zero attempts, no lease, saved week unchanged",
+      "verdict": "PASS",
+      "evidence": true
+    },
+    {
+      "check": "rate-limited: real server feedback, zero attempts, no lease, saved week unchanged",
+      "verdict": "PASS",
+      "evidence": true
+    },
+    {
+      "check": "in-progress: real server feedback, zero attempts, no lease, saved week unchanged",
+      "verdict": "PASS",
+      "evidence": true
+    },
+    {
+      "check": "stale: real server feedback, zero attempts, no lease, saved week unchanged",
+      "verdict": "PASS",
+      "evidence": true
+    },
+    {
+      "check": "guarded ok generation 2: attempt recorded and lease released",
+      "verdict": "PASS",
+      "evidence": true
+    },
+    {
+      "check": "guarded ok generation 3: attempt recorded and lease released",
+      "verdict": "PASS",
+      "evidence": true
+    },
+    {
+      "check": "guarded ok generation 4: attempt recorded and lease released",
+      "verdict": "PASS",
+      "evidence": true
+    },
+    {
+      "check": "guarded ok generation 5: attempt recorded and lease released",
+      "verdict": "PASS",
+      "evidence": true
+    },
+    {
+      "check": "sixth ok generation hits real rolling-hour DB limit; saved week unchanged",
+      "verdict": "PASS",
+      "evidence": true
+    }
+  ],
+  "verdict": "PASS",
+  "cleanup": {
+    "container": "remi-real-stack-1793814204-801934",
+    "containerRemoved": true,
+    "serverPort": "40635",
+    "serverPortClosed": true
+  }
+}
