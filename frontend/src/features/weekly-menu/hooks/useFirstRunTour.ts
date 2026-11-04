@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
+import { AUTH_STORAGE_KEYS } from '#/features/auth/storage-keys'
 
 type Step = 1 | 2 | 3 | null
 
@@ -11,14 +12,18 @@ export function useFirstRunTour(userId?: string) {
     userId,
     step: 1,
   })
-  const storedCompletion = useMemo(() => {
-    if (!userId) return false
+
+  // Lazy read from localStorage instead of caching with useMemo
+  let storedCompletion = false
+  if (userId) {
     try {
-      return localStorage.getItem(`remi:ai-tour:v1:${userId}`) === 'done'
+      storedCompletion =
+        localStorage.getItem(AUTH_STORAGE_KEYS.tour.progress(userId)) === 'done'
     } catch {
-      return false
+      // Session completion still applies when browser storage is unavailable.
     }
-  }, [userId])
+  }
+
   if (progress.userId !== userId) setProgress({ userId, step: 1 })
   const step: Step =
     !userId || completed.has(userId) || storedCompletion
@@ -31,7 +36,7 @@ export function useFirstRunTour(userId?: string) {
     if (!userId) return
     setCompleted((previous) => new Set([...previous, userId]))
     try {
-      localStorage.setItem(`remi:ai-tour:v1:${userId}`, 'done')
+      localStorage.setItem(AUTH_STORAGE_KEYS.tour.progress(userId), 'done')
     } catch {
       // Session completion still applies when browser storage is unavailable.
     }

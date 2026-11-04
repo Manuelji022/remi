@@ -1,239 +1,20 @@
+import type { DayContext, Preferences, PlanningScope } from '../types'
+import type { AiPreview } from '../ai-generation-state'
+import type { Day } from '../constants'
+import type { MealSlot, Recipe } from '#/features/recipes/recipe'
+import type { CalendarWeekMenu } from '../week'
 import { aiMockScenarioSchema } from '#/features/weekly-menu/ai-mock'
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useReducer,
-  useRef,
-} from 'react'
+import { useCallback, useEffectEvent, useReducer, useRef } from 'react'
 import { generateNextWeeklyMenu, loadWeeklyMenu } from '../functions'
-import type { AiMenuResult } from '../ai-generator'
 import {
   nextCalendarWeekStart,
   targetScheduleFromPreferences,
 } from '../ai-schedule'
-import { DAYS } from '../constants'
-import type { Day } from '../constants'
-import type { MealSlot, Recipe } from '#/features/recipes/recipe'
-import type { DayContext, PlanningScope, Preferences } from '../types'
-import {
-  updateScheduleDayContext,
-  updateSchedulePlanningScope,
-} from '../schedule-domain'
-import type { CalendarWeekMenu } from '../week'
 import { scheduleFromMenu } from '../week'
+import { reducer, editablePreview, failureFor } from '../ai-generation-state'
 
-export type AiPreview = {
-  userId: string
-  weekStart: string
-  /** The server result as generated; manual recipe edits never change it. */
-  generatedMenu: CalendarWeekMenu
-  /** The target week already has a saved menu that accepting replaces. */
-  replacesSavedMenu: boolean
-} & AiMenuResult
-
-export function hasManualEdits(preview: AiPreview): boolean {
-  return DAYS.some((day) => {
-    const shown = preview.menu.days[day]
-    const generated = preview.generatedMenu.days[day]
-    return (
-      shown.lunchRecipeId !== generated.lunchRecipeId ||
-      shown.dinnerRecipeId !== generated.dinnerRecipeId
-    )
-  })
-}
-export type AiGenerationState =
-  | { phase: 'idle' }
-  | {
-      phase: 'preparing'
-      userId: string
-      targetWeekStart: string
-      mode: 'new' | 'edit'
-    }
-  | {
-      phase: 'confirming'
-      userId: string
-      targetWeekStart: string
-      mode: 'new' | 'edit'
-      draft: Preferences
-      replacesSavedMenu: boolean
-      preview?: AiPreview
-      originalPreview?: AiPreview
-    }
-  | {
-      phase: 'generating'
-      userId: string
-      targetWeekStart: string
-      draft: Preferences
-      replacesSavedMenu: boolean
-      preview?: AiPreview
-    }
-  | {
-      phase: 'preview'
-      preview: AiPreview
-      retry?: { targetWeekStart: string; draft: Preferences }
-    }
-  | { phase: 'saving'; preview: AiPreview }
-  | {
-      phase: 'error'
-      userId: string
-      targetWeekStart: string
-      reason:
-        | 'prepare'
-        | 'generate'
-        | 'stale-week'
-        | 'rate-limited'
-        | 'in-progress'
-        | 'save'
-      expectedTargetWeekStart?: string
-      retry?: { targetWeekStart: string; draft: Preferences }
-      preview?: AiPreview
-    }
-
-type Action =
-  | { type: 'reset' }
-  | {
-      type: 'preparing'
-      userId: string
-      targetWeekStart: string
-      mode: 'new' | 'edit'
-    }
-  | {
-      type: 'confirm'
-      userId: string
-      targetWeekStart: string
-      mode: 'new' | 'edit'
-      draft: Preferences
-      replacesSavedMenu: boolean
-      preview?: AiPreview
-    }
-  | { type: 'draft'; draft: Preferences; invalidatePreview?: boolean }
-  | { type: 'update-context'; day: Day; context: DayContext }
-  | { type: 'update-scope'; day: Day; scope: PlanningScope }
-  | {
-      type: 'update-recipe'
-      day: Day
-      slot: MealSlot
-      recipeId: string | null
-      recipes: readonly Recipe[]
-    }
-  | {
-      type: 'generating'
-      userId: string
-      targetWeekStart: string
-      draft: Preferences
-      replacesSavedMenu: boolean
-      preview?: AiPreview
-    }
-  | {
-      type: 'preview'
-      preview: AiPreview
-      retry: { targetWeekStart: string; draft: Preferences }
-    }
-  | { type: 'failure'; state: Extract<AiGenerationState, { phase: 'error' }> }
-  | { type: 'saving'; preview: AiPreview }
-  | { type: 'accepted' }
-  | { type: 'restore-preview'; preview: AiPreview }
-
-function reducer(state: AiGenerationState, action: Action): AiGenerationState {
-  switch (action.type) {
-    case 'reset':
-    case 'accepted':
-      return { phase: 'idle' }
-    case 'restore-preview':
-      return { phase: 'preview', preview: action.preview }
-    case 'preparing':
-      return { phase: 'preparing', ...action }
-    case 'confirm':
-      return { phase: 'confirming', ...action }
-    case 'draft':
-      return state.phase === 'confirming'
-        ? {
-            ...state,
-            draft: action.draft,
-            ...(action.invalidatePreview
-              ? {
-                  preview: undefined,
-                  originalPreview: state.originalPreview ?? state.preview,
-                }
-              : {}),
-          }
-        : state
-    case 'update-context': {
-      if (state.phase !== 'confirming') return state
-      const nextWithContext = updateScheduleDayContext(
-        state.draft,
-        action.day,
-        action.context,
-      )
-      return {
-        ...state,
-        draft: nextWithContext,
-        ...(state.mode === 'edit' && nextWithContext !== state.draft
-          ? {
-              preview: undefined,
-              originalPreview: state.originalPreview ?? state.preview,
-            }
-          : {}),
-      }
-    }
-    case 'update-scope': {
-      if (state.phase !== 'confirming') return state
-      const nextWithScope = updateSchedulePlanningScope(
-        state.draft,
-        action.day,
-        action.scope,
-      )
-      if (nextWithScope === state.draft) return state
-      return {
-        ...state,
-        draft: nextWithScope,
-        ...(state.mode === 'edit'
-          ? {
-              preview: undefined,
-              originalPreview: state.originalPreview ?? state.preview,
-            }
-          : {}),
-      }
-    }
-    case 'generating':
-      return { phase: 'generating', ...action }
-    case 'preview':
-      return { phase: 'preview', preview: action.preview, retry: action.retry }
-    case 'failure':
-      return action.state
-    case 'saving':
-      return { phase: 'saving', preview: action.preview }
-    case 'update-recipe': {
-      if (!(state.phase === 'preview' || (state.phase === 'error' && state.preview)))
-        return state
-      const currentPreview =
-        state.phase === 'preview' ? state.preview : state.preview!
-      const selected = action.recipes.find(
-        (recipe) => recipe.id === action.recipeId,
-      )
-      const plan = currentPreview.menu.days[action.day]
-      const field =
-        action.slot === 'lunch' ? 'lunchRecipeId' : 'dinnerRecipeId'
-      return {
-        ...state,
-        preview: {
-          ...currentPreview,
-          menu: {
-            ...currentPreview.menu,
-            days: {
-              ...currentPreview.menu.days,
-              [action.day]: { ...plan, [field]: action.recipeId },
-            },
-          },
-          recipeNames: selected
-            ? { ...currentPreview.recipeNames, [selected.id]: selected.name }
-            : currentPreview.recipeNames,
-        },
-      }
-    }
-  }
-}
+export type { AiPreview, AiGenerationState } from '../ai-generation-state'
+export { hasManualEdits } from '../ai-generation-state'
 
 export function useAiMenuGeneration({
   userId,
@@ -249,26 +30,20 @@ export function useAiMenuGeneration({
   const epochRef = useRef(0)
   const generationInFlightRef = useRef(false)
   const scheduleOpenInFlightRef = useRef(false)
-  useLayoutEffect(() => {
+
+  // Reset when userId changes (render-time reset, no passive effect)
+  if (identityRef.current !== userId) {
     identityRef.current = userId
-  }, [userId])
-  useEffect(() => {
     ++epochRef.current
     generationInFlightRef.current = false
     dispatch({ type: 'reset' })
-    return () => {
-      ++epochRef.current
-    }
-  }, [userId])
+    epochRef.current++ // Increment again on cleanup to invalidate in-flight requests
+  }
 
-  const preview =
-    state.phase === 'preview' || state.phase === 'saving'
-      ? state.preview
-      : state.phase === 'error' || state.phase === 'generating'
-        ? state.preview
-        : state.phase === 'confirming'
-          ? state.preview
-          : null
+  // Stable callback for onPreviewWeek using useEffectEvent
+  const onPreviewWeekEvent = useEffectEvent(onPreviewWeek)
+
+  const preview = editablePreview(state)
   const hasUnsavedPreview = Boolean(
     userId &&
     (preview?.userId === userId ||
@@ -402,30 +177,15 @@ export function useAiMenuGeneration({
         })
         if (!current()) return
         if (!result.ok) {
-          if (result.reason === 'stale-week')
-            dispatch({
-              type: 'failure',
-              state: {
-                phase: 'error',
-                userId: requester,
-                targetWeekStart: target,
-                reason: 'stale-week',
-                expectedTargetWeekStart: result.expectedTargetWeekStart,
-                preview: previousPreview,
-              },
-            })
-          else
-            dispatch({
-              type: 'failure',
-              state: {
-                phase: 'error',
-                userId: requester,
-                targetWeekStart: target,
-                reason: result.reason,
-                retry: { targetWeekStart: target, draft },
-                preview: previousPreview,
-              },
-            })
+          dispatch({
+            type: 'failure',
+            state: failureFor(result, {
+              requester,
+              target,
+              draft,
+              previousPreview,
+            }),
+          })
           return
         }
         const generated: AiPreview = {
@@ -442,7 +202,7 @@ export function useAiMenuGeneration({
           preview: generated,
           retry: { targetWeekStart: target, draft },
         })
-        onPreviewWeek(target)
+        onPreviewWeekEvent(target)
       } catch {
         if (current())
           dispatch({
@@ -460,7 +220,7 @@ export function useAiMenuGeneration({
         if (epoch === epochRef.current) generationInFlightRef.current = false
       }
     },
-    [timeZone, onPreviewWeek],
+    [timeZone],
   )
 
   const confirm = async () => {
