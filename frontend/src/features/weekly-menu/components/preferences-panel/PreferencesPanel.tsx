@@ -29,6 +29,7 @@ interface PreferencesPanelProps {
   isRecipeMutationPending: boolean
   onRecipeMutation: () => Promise<void>
   onRecipeMutationPendingChange: (pending: boolean) => void
+  scheduleLocked?: boolean
   saveDisabled: boolean
   saveError: string | null
   onClose: () => void
@@ -45,6 +46,7 @@ export function PreferencesPanel({
   isRecipeMutationPending,
   onRecipeMutation,
   onRecipeMutationPendingChange,
+  scheduleLocked = false,
   saveDisabled,
   saveError,
   onClose,
@@ -230,15 +232,24 @@ export function PreferencesPanel({
 
         <fieldset
           className="panel-content panel-edit-fields"
-          disabled={isSaving || isRecipeMutationPending}
+          disabled={
+            isSaving ||
+            isRecipeMutationPending ||
+            (activeTab === 'schedule' && scheduleLocked)
+          }
         >
           {activeTab === 'schedule' ? (
-            <ScheduleTab
-              dayContexts={draftPrefs.dayContexts}
-              planningScopes={draftPrefs.planningScopes}
-              onUpdateDayContext={updateDayContext}
-              onUpdatePlanningScope={updatePlanningScope}
-            />
+            <>
+              {scheduleLocked && (
+                <p role="note">{t('planner.lockedScheduleNote')}</p>
+              )}
+              <ScheduleTab
+                dayContexts={draftPrefs.dayContexts}
+                planningScopes={draftPrefs.planningScopes}
+                onUpdateDayContext={updateDayContext}
+                onUpdatePlanningScope={updatePlanningScope}
+              />
+            </>
           ) : (
             <RecipesTab
               legacyPending={legacyCustomRecipes.length > 0}
