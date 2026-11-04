@@ -100,7 +100,7 @@ Los avisos de escasez de la vista previa (`unavailableSlots`) siguen igual.
 - Muestra los 7 días con sus comidas y cenas.
 - Las comidas **cubiertas fuera de casa** se ven **bloqueadas y etiquetadas** (p. ej. "Oficina", "Fuera"); no admiten receta y nunca cuentan como táper.
 - En cada hueco planificado en casa, la persona puede **cambiar la receta** por otra de sus recetas del tipo correspondiente (comida o cena). Este cambio es **local, sin IA y sin consumir cuota**.
-- Las alternativas se ofrecen en **orden alfabético**.
+- Las alternativas se ofrecen en **orden alfabético** según el idioma de la interfaz (sin distinguir mayúsculas ni acentos, números en orden numérico). «Sin receta» va siempre primero y la receta elegida se mantiene seleccionada.
 - **Generar otra:** acción disponible en la vista previa que pide una propuesta completa nueva reutilizando el horario ya confirmado. Cuenta como **un intento** de los 5 por hora. Si la persona hizo cambios manuales, se avisa antes de que se perderán. Durante la espera se muestra de nuevo el esqueleto y, si falla, se conserva la propuesta anterior con su mensaje de error y Reintentar.
 - No hay explicaciones de por qué se eligió cada receta.
 - Las recetas pueden repetirse en huecos distintos.
