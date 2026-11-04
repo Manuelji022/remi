@@ -19,6 +19,7 @@ import {
 import {
   aiMockScenarioSchema,
   isAiMockEnabled,
+  handleMockScenario,
 } from '#/features/weekly-menu/ai-mock'
 import { generateAiMenu } from '#/features/weekly-menu/ai-generator'
 import {
@@ -28,7 +29,6 @@ import {
 import {
   calendarTimeZoneSchema,
   getStaleTargetWeekStart,
-  nextCalendarWeekStart,
   targetWeekScheduleSchema,
 } from '#/features/weekly-menu/ai-schedule'
 
@@ -60,26 +60,16 @@ export const generateNextWeeklyMenu = createServerFn({ method: 'POST' })
     const userId = await requireUserId()
     const mockScenario = isAiMockEnabled() ? data.mockScenario : undefined
     try {
+      // Handle mock scenarios for development/testing
+      const mockResponse = handleMockScenario(mockScenario, data.timeZone)
+      if (mockResponse) return mockResponse as any
+
+      // Handle 'error' mock scenario with delay
       if (mockScenario === 'error') {
         await new Promise((resolve) => setTimeout(resolve, 1_000))
         throw new Error('AI Weekly Menu generation failed')
       }
-      if (mockScenario === 'rate-limited') {
-        return { ok: false as const, reason: 'rate-limited' as const }
-      }
-      if (mockScenario === 'in-progress') {
-        return { ok: false as const, reason: 'in-progress' as const }
-      }
-      if (mockScenario === 'stale') {
-        return {
-          ok: false as const,
-          reason: 'stale-week' as const,
-          expectedTargetWeekStart: nextCalendarWeekStart(
-            new Date(),
-            data.timeZone,
-          ),
-        }
-      }
+
       const staleTargetWeekStart = getStaleTargetWeekStart(
         data.targetWeekStart,
         data.timeZone,
