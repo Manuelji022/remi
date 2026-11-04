@@ -14,7 +14,7 @@ This feature uses an authenticated server function to load an owned recipe catal
 6. **Provider failure preserves data and is retryable.** A rejected, invalid, late, or timed-out generation leaves the saved menu intact, shows an actionable error and retry, and never invokes the deterministic legacy assignment path.
 7. **Model output is not trusted.** Invalid or missing recipe IDs in eligible slots are repaired deterministically from that slot's candidates. Wrong-week results, assignments to covered slots, and malformed or duplicate day keys are still rejected before any preview or save. Repeated recipe IDs in separate slots are allowed.
 8. **Shortage is explicit, not invented.** If no owned lunch or dinner recipes exist, each eligible slot of that type stays empty and the UI explains which saved recipe type is missing. The generator invents neither recipes nor dietary/nutrition claims.
-9. **History and prompt scope are minimized.** Current week includes all seven saved days (including future days) and previous week is complete; missing history is accepted. The AI request receives only owned recipe IDs, names, ingredients, authoritative classifications, the two weeks' assignments, and the confirmed target schedule. Account identity is never sent; recipe text is data, not instructions.
+9. **History and prompt scope are minimized.** Current week includes all seven saved days (including future days) and previous week is complete; missing history is accepted. The AI request receives only owned recipe IDs, names, ingredients, authoritative classifications, the two weeks' assignments, and the confirmed target schedule. The request may also include the previous proposal's recipe IDs only, per day and slot. Account identity is never sent; recipe text is data, not instructions.
 10. **Authentication and guest behavior remain separate.** Guests retain the current local planner path without hitting AI. An authenticated server-side call rejects missing sessions and never returns another owner's recipes/history.
 11. **Provider protection survives deployment scaling.** More than five accepted calls in a rolling hour is rejected and simultaneous calls for the same account cannot invoke the provider twice, even across server processes. Provider retries/timeouts are bounded and prompt contents are not persisted.
 12. **No existing save invariant is weakened except duplicate use.** A recipe must still belong to the owner and match its authoritative Meal Slot classification. Reusing one recipe ID across multiple week slots is allowed in storage and generation.
@@ -144,3 +144,26 @@ Documented before implementation.
 - Screenshots: [`artifacts/ai-generation-skeleton.png`](artifacts/ai-generation-skeleton.png) and [`artifacts/recipe-precheck-notice.png`](artifacts/recipe-precheck-notice.png).
 - Not verified in a browser: the catalog-fetch fallback (`listRecipes` failure). Signed-in users cannot reach Generate until the planner's own catalog has loaded, so the fallback is exercised only by code reading.
 - One earlier run failed a previously-passing scenario (`route navigation protects a preview stashed by schedule editing`, "missing dinner selector") and the next full run passed; treated as a timing flake, not reproduced.
+
+## Generate-another backend failure cases
+
+Documented before implementation; transport tests use fake fetch only, never a real Gateway.
+
+1. A previousMenu for another week is trusted instead of silently ignored.
+2. The previous proposal leaks names, ingredients, schedule metadata, or account identity into the prompt instead of containing only per-day recipe IDs.
+3. The previousMenu is persisted or logged, or regeneration bypasses the existing guard: generating another proposal is one more attempt toward the unchanged five-per-hour limit.
+4. An invalid previousMenu shape crashes generation instead of being rejected by calendarWeekSchema validation at the server-function boundary.
+5. With only one candidate, regeneration leaves an eligible slot empty or errors; with zero candidates it invents a recipe.
+6. Mock rotation chooses the wrong slot type, assigns a covered slot, depends on catalog order, or fails to wrap from the last candidate to the first.
+7. Absent previousMenu changes today's deterministic mock output or production request.
+8. A previous proposal with null, removed, or wrong-type IDs causes eligible slots to remain empty, or changes provider assignment repair rules.
+9. Prompt injection through recipe text is no longer explicitly treated as untrusted data; previousProposal itself is treated as instructions.
+10. The empty mock scenario starts filling slots when given a previous proposal, or ok/slow timing and short-circuit scenarios change.
+
+### Generate-another backend verification
+
+- `ai-generator.test.ts`, `sends only per-day previous recipe IDs and preserves untrusted-data instructions`: cases 2 and 9, plus case 8's unchanged provider repair behavior with missing assignments.
+- `rotates ok/slow by recipe ID per slot, wraps, and preserves covered slots`: cases 6 and 8 (null, removed, and wrong-type previous IDs), plus case 10's successful mock scenarios with fake timers.
+- `keeps zero/one candidates, absent previous proposal, and empty scenario behavior`: cases 5, 7 (mock output), and 10 (empty scenario).
+- Cases 1, 3, and 4 were inspected at the server-function boundary: `calendarWeekSchema.optional()` validates input before the handler; only a matching target week reaches the generator; no save/log call was added and generation remains inside the existing guard. Short-circuit scenario branches are unchanged. These paths were not exercised through authenticated transport or a live database in this task.
+- Production request compatibility without a previous proposal is supported by the existing fake-Gateway transport tests and inspection of the conditional prompt fields/system sentence. No live Gateway call, browser UI, or model choice variability was verified.

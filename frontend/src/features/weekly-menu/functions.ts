@@ -6,7 +6,11 @@ import {
   loadMenuWeekForUser,
   saveMenuWeekForUser,
 } from '#/features/weekly-menu/store'
-import { parseCalendarWeek, weekStartSchema } from '#/features/weekly-menu/week'
+import {
+  calendarWeekSchema,
+  parseCalendarWeek,
+  weekStartSchema,
+} from '#/features/weekly-menu/week'
 import {
   AiGenerationInProgressError,
   AiGenerationLimitError,
@@ -49,6 +53,7 @@ export const generateNextWeeklyMenu = createServerFn({ method: 'POST' })
       timeZone: calendarTimeZoneSchema,
       schedule: targetWeekScheduleSchema,
       mockScenario: aiMockScenarioSchema.optional(),
+      previousMenu: calendarWeekSchema.optional(),
     }),
   )
   .handler(async ({ data }) => {
@@ -89,6 +94,9 @@ export const generateNextWeeklyMenu = createServerFn({ method: 'POST' })
           data.targetWeekStart,
           data.schedule,
         )
+        if (data.previousMenu?.weekStart === data.targetWeekStart) {
+          context.previousProposal = data.previousMenu
+        }
         return generateAiMenu(context, { mockScenario })
       })
       const staleAfterGeneration = getStaleTargetWeekStart(
