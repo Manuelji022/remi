@@ -1,1 +1,14 @@
-export { Calendar as CalendarIcon, Check as CheckIcon, ChevronLeft as ChevronLeftIcon, ChevronRight as ChevronRightIcon, X as CloseIcon, Leaf as LeafIcon, Plus as PlusIcon, Settings as SettingsIcon, ShoppingCart as ShoppingCartIcon, Sparkles as SparkleIcon, Trash2 as TrashIcon, Utensils as UtensilsIcon } from 'lucide-react'
+export {
+  Calendar as CalendarIcon,
+  Check as CheckIcon,
+  ChevronLeft as ChevronLeftIcon,
+  ChevronRight as ChevronRightIcon,
+  X as CloseIcon,
+  Leaf as LeafIcon,
+  Plus as PlusIcon,
+  Settings as SettingsIcon,
+  ShoppingCart as ShoppingCartIcon,
+  Sparkles as SparkleIcon,
+  Trash2 as TrashIcon,
+  Utensils as UtensilsIcon,
+} from 'lucide-react'
