@@ -391,7 +391,18 @@
                 { id: 'barley', name: 'Barley', quantity: 200, unit: 'g', position: 0 },
               ],
             },
-          ].filter((recipe) => scenario !== 'partial-catalog' || recipe.slot === 'lunch')
+          ]
+            .concat(
+              scenario === 'sorted-catalog'
+                ? ['Zucchini bake', 'Épinards crème', 'Apple stew 10', 'Apple stew 2'].map((name, index) => ({
+                    id: `sorted-dinner-${index}`,
+                    name,
+                    slot: 'dinner',
+                    ingredients: [{ id: `sorted-${index}`, name: 'Salt', quantity: 1, unit: 'g', position: 0 }],
+                  }))
+                : [],
+            )
+            .filter((recipe) => scenario !== 'partial-catalog' || recipe.slot === 'lunch')
       return json({ result })
     }
     if (kind === 'load') {

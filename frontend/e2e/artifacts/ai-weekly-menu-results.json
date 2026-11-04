@@ -140,6 +140,14 @@
     "verdict": "PASS"
   },
   {
+    "scenario": "preview alternatives are alphabetical per locale, with No recipe first and the selection kept",
+    "verdict": "PASS"
+  },
+  {
+    "scenario": "Spanish selectors use the Spanish collation",
+    "verdict": "PASS"
+  },
+  {
     "suite": "AI Weekly Menu browser checks",
     "verdict": "PASS",
     "evidence": {
@@ -149,7 +157,7 @@
           "effectiveLaunch": {
             "browserLaunched": true,
             "engine": "chrome",
-            "launchHash": 6701229096119436000
+            "launchHash": 10648038973705824000
           },
           "launched": false,
           "relaunchedBrowser": false,
@@ -158,9 +166,9 @@
           "reused": true,
           "saveStatus": "not_attempted"
         },
-        "origin": "http://127.0.0.1:3101/weekly-menu-planner?scenario=target-saved",
+        "origin": "http://127.0.0.1:3101/es/weekly-menu-planner?scenario=sorted-catalog",
         "result": {
-          "fixture": "target-saved",
+          "fixture": "sorted-catalog",
           "generationRequests": 1,
           "saveRequests": 0,
           "targetWeekStart": "2026-11-09"

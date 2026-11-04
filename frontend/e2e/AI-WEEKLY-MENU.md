@@ -148,3 +148,7 @@ Documented before implementation.
 ## Replacement warning failure cases
 
 For ready, neither the schedule dialog nor preview may show a replace note. For target-saved, both must show a non-alert note; it must survive Edit schedule and Cancel or confirmation, retry, and preview restoration. The browser harness verifies presence, absence and the Edit schedule/Cancel round trip.
+
+## Alphabetical alternatives failure cases
+
+Options must use the active locale, ignore case and accents, order numbers numerically, preserve the selected recipe and keep No recipe first. Slot lists must be memoized on recipes and locale only; the sorted-catalog fixture verifies English and Spanish options in the browser.

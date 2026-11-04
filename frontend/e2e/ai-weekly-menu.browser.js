@@ -787,6 +787,46 @@ await scenario('replace note shows in dialog and banner for a saved target week 
   assert(`${preview}.innerText.includes('replaces the menu already saved')`, 'note survives Cancel (restored preview)'),
 ])
 
+const dinnerOptions = `[...${preview}.querySelector(${JSON.stringify(firstDayDinnerSelector)}).options].map(option => option.textContent)`
+const generateFromReady = [
+  wait(`${shell}.innerText.includes('Saved dinner')`),
+  click('Regenerate menu'),
+  click('Confirm schedule and generate'),
+  wait(`${preview} !== null`),
+  waitPreviewAcceptable(),
+]
+
+await scenario('preview alternatives are alphabetical per locale, with No recipe first and the selection kept', [
+  open('sorted-catalog'),
+  ...generateFromReady,
+  assert(
+    `JSON.stringify(${dinnerOptions})===JSON.stringify(['No recipe','Apple stew 2','Apple stew 10','Épinards crème','Mushroom barley bowl','Roasted vegetable bowl','Zucchini bake'])`,
+    'dinner alternatives are alphabetical (accent-insensitive, numeric) with No recipe first',
+  ),
+  ['screenshot', `${process.cwd()}/e2e/artifacts/ai-sorted-alternatives.png`],
+  assert(
+    `${preview}.querySelector(${JSON.stringify(firstDayDinnerSelector)}).value==='saved-dinner' && ${preview}.querySelector(${JSON.stringify(firstDayDinnerSelector)}).selectedOptions[0].textContent==='Roasted vegetable bowl'`,
+    'the generated recipe stays selected after sorting',
+  ),
+  assert(
+    `JSON.stringify([...${preview}.querySelector('.delay-1 .meal-recipe-editor select[aria-label="Choose a saved lunch recipe"]').options].map(option => option.textContent))===JSON.stringify(['No recipe','Crispy lentil salad','Lemon chickpea pasta'])`,
+    'lunch alternatives are alphabetical too',
+  ),
+])
+
+await scenario('Spanish selectors use the Spanish collation', [
+  open('sorted-catalog', '/es'),
+  wait(`${shell}.innerText.includes('Saved dinner')`),
+  click('Regenerar menú'),
+  text('Revisa la agenda de la próxima semana'),
+  click('Confirmar agenda y generar'),
+  wait(`${preview} !== null`),
+  assert(
+    `(() => { const selects=[...${preview}.querySelectorAll('.delay-1 .meal-recipe-editor select')]; const names=[...selects[selects.length-1].options].slice(1).map(option => option.textContent); const expected=[...names].sort(new Intl.Collator('es',{sensitivity:'base',numeric:true}).compare); return JSON.stringify(names)===JSON.stringify(expected) && names.indexOf('Épinards crème') < names.indexOf('Mushroom barley bowl') })()`,
+    'Spanish dinner options follow the es collator',
+  ),
+])
+
 emit({
   suite: 'AI Weekly Menu browser checks',
   verdict: 'PASS',
