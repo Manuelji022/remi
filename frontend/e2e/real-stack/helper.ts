@@ -167,6 +167,15 @@ try {
         )[0].count,
       ),
     })
+    // Makes the server's context read fail; the disposable DB is restored even on failure.
+    const withRecipeTableHidden = async (run: () => Promise<void>) => {
+      await sql`alter table recipe rename to recipe_hidden_e2e`
+      try {
+        await run()
+      } finally {
+        await sql`alter table recipe_hidden_e2e rename to recipe`
+      }
+    }
     const saved = async () =>
       Array.from(
         await sql`select m.week_start::text, d.day,d.context,d.scope,d.lunch_recipe_id,d.dinner_recipe_id from weekly_menu m join weekly_menu_day d on d.weekly_menu_id=m.id where m.user_id=${userId} order by d.day`,
@@ -206,6 +215,7 @@ try {
         open,
         accounting,
         saved,
+        withRecipeTableHidden,
         emit,
         artifact,
       })
