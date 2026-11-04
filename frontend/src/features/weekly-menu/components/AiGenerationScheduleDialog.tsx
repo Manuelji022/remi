@@ -4,6 +4,7 @@ import type {
   ScheduleDayContextChange,
   SchedulePlanningScopeChange,
 } from '#/features/weekly-menu/schedule-domain'
+import type { MealSlot } from '#/features/recipes/recipe'
 import { useI18n } from '#/shared/i18n'
 import { ScheduleEditor } from './ScheduleEditor'
 
@@ -12,6 +13,8 @@ interface AiGenerationScheduleDialogProps {
   preferences: Preferences
   targetWeekRange: { start: string; end: string }
   returnFocusTo: HTMLElement | null
+  missingRecipeSlots: readonly MealSlot[]
+  onAddRecipes: () => void
   onCancel: () => void
   onConfirm: () => void
   onUpdateDayContext: ScheduleDayContextChange
@@ -23,6 +26,8 @@ export function AiGenerationScheduleDialog({
   preferences,
   targetWeekRange,
   returnFocusTo,
+  missingRecipeSlots,
+  onAddRecipes,
   onCancel,
   onConfirm,
   onUpdateDayContext,
@@ -60,6 +65,26 @@ export function AiGenerationScheduleDialog({
           onUpdatePlanningScope={onUpdatePlanningScope}
         />
       </fieldset>
+      {missingRecipeSlots.length > 0 && (
+        <div className="planner-feedback" role="alert">
+          <p>
+            {t(
+              missingRecipeSlots.length > 1
+                ? 'planner.aiMissingBothRecipes'
+                : missingRecipeSlots[0] === 'lunch'
+                  ? 'planner.aiMissingLunchRecipes'
+                  : 'planner.aiMissingDinnerRecipes',
+            )}
+          </p>
+          <button
+            className="planner-secondary-btn"
+            type="button"
+            onClick={onAddRecipes}
+          >
+            {t('planner.aiAddRecipes')}
+          </button>
+        </div>
+      )}
       <footer className="planner-ai-dialog-footer">
         <button
           className="panel-secondary-btn"

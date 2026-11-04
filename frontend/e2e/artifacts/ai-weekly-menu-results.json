@@ -84,7 +84,31 @@
     "verdict": "PASS"
   },
   {
-    "scenario": "empty catalog leaves required meal types empty with a clear warning",
+    "scenario": "empty catalog shows the recipes-needed notice and never generates",
+    "verdict": "PASS"
+  },
+  {
+    "scenario": "partial catalog blocks only the missing type, per confirmed schedule",
+    "verdict": "PASS"
+  },
+  {
+    "scenario": "partial catalog alert offers Add recipes",
+    "verdict": "PASS"
+  },
+  {
+    "scenario": "confirming closes the dialog and shows a target-week skeleton until the preview replaces it",
+    "verdict": "PASS"
+  },
+  {
+    "scenario": "skeleton is replaced by the existing error and Retry on failure",
+    "verdict": "PASS"
+  },
+  {
+    "scenario": "regenerating from an edited preview shows the skeleton, not the stale preview",
+    "verdict": "PASS"
+  },
+  {
+    "scenario": "schedule load failure and Cancel never show a skeleton",
     "verdict": "PASS"
   },
   {
@@ -117,7 +141,7 @@
           "effectiveLaunch": {
             "browserLaunched": true,
             "engine": "chrome",
-            "launchHash": 3267251482748820500
+            "launchHash": 2531873004173184500
           },
           "launched": false,
           "relaunchedBrowser": false,

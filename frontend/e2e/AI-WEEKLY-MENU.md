@@ -118,3 +118,29 @@ agent-browser --session remi-ai-mock-scenarios close
 - A direct module smoke check covered development/production crossed with absent/false/true/uppercase-TRUE flag values; only development plus exact `true` enabled mocks, and the schema rejected `nope`.
 - Initial runner setup failed on batch-response normalization and the default viewport's sticky-header obstruction; the documented adapter and viewport resolved both before the complete passing run.
 - Not verified live: authenticated server mock delays/results, timezone rollover for the new stale short circuit, or DB lease/attempt accounting for short circuits. Browser fixtures intercept HTTP; gate smoke checks cover the shared function only.
+
+## Skeleton and recipe precheck failure cases
+
+Documented before implementation.
+
+1. **Dialog still open during generation.** After the user confirms the schedule, the schedule dialog must close at once; "Generating…" must not stay inside it.
+2. **Skeleton never replaced on failure.** When generation fails, the skeleton must disappear, the existing error feedback and Retry must show, and no stale preview or skeleton may remain.
+3. **Skeleton for the wrong week.** The skeleton and week header must show the target (next) week, not the week the user was viewing, including when generation starts from the current week or from a preview edit.
+4. **Accept, Discard or Edit schedule reachable during generation.** None of these actions may exist or be clickable while the skeleton shows, including the stale preview hidden during an edit-then-regenerate.
+5. **Precheck consumes an attempt or calls the server.** Neither precheck may issue a generation request; the fixture must record zero generation requests when a precheck blocks.
+6. **Precheck blocks a user who has recipes.** A user with at least one recipe of any type must reach the dialog; a user with only lunch recipes must be able to confirm a schedule that needs no dinners.
+7. **Precheck blocks when the missing type is covered.** If every slot of a missing type is covered by the schedule (Office lunch, Eat Out, ...), confirming must generate, not show the alert.
+8. **Catalog-fetch failure blocks generation.** If the recipe list cannot be read, the dialog must open as before and generation must remain possible.
+9. **Guest affected.** Guests keep the current local path: no notice, no recipe call, no skeleton.
+10. **Focus lost after closing the notice.** Closing the "recipes needed" notice must return focus to the opener (Generate button).
+11. **Spurious skeleton on schedule-load failure.** Failing to load the schedule (prepare error) or cancelling the dialog must not show a skeleton or change the viewed week.
+12. **Inline alert mismatches.** The per-type alert must name the real missing type (lunch, dinner, or both), keep the dialog open with the schedule intact, and clear once the schedule is edited so the user can confirm again.
+13. **"Add recipes" does nothing.** The action must open Preferences on its recipes section from both the notice and the inline alert.
+14. **Skeleton announced repeatedly.** The container must be a single polite status region with `aria-busy`, not one region per card.
+
+### Skeleton and precheck verification (2026-11-04)
+
+- All 34 results (33 scenarios plus the suite summary) passed in the browser harness against the production build at `127.0.0.1:3101` through the CLI runner at 1440 × 1200; evidence is in `artifacts/ai-weekly-menu-results.json`. New fixture scenario `partial-catalog` serves lunch recipes only. `empty-catalog` now asserts the notice and zero generation requests.
+- Screenshots: [`artifacts/ai-generation-skeleton.png`](artifacts/ai-generation-skeleton.png) and [`artifacts/recipe-precheck-notice.png`](artifacts/recipe-precheck-notice.png).
+- Not verified in a browser: the catalog-fetch fallback (`listRecipes` failure). Signed-in users cannot reach Generate until the planner's own catalog has loaded, so the fallback is exercised only by code reading.
+- One earlier run failed a previously-passing scenario (`route navigation protects a preview stashed by schedule editing`, "missing dinner selector") and the next full run passed; treated as a timing flake, not reproduced.

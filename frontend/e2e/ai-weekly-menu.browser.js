@@ -7,6 +7,8 @@ const dialog = `document.querySelector(${JSON.stringify(dialogSelector)})`
 const previewSelector = '.planner-ai-preview'
 const preview = `document.querySelector(${JSON.stringify(previewSelector)})`
 const firstDayDinnerSelector = `${previewSelector} .delay-1 .meal-recipe-editor select[aria-label="Choose a saved dinner recipe"]`
+const noticeDialog = `document.querySelector('dialog[aria-labelledby="ai-recipes-needed-title"]')`
+const skeleton = `document.querySelector('.planner-ai-skeleton')`
 const shell = 'document.querySelector(".planner-shell")'
 const generationCount = `${fixture}.generationRequests.length`
 const saveCount = `${fixture}.saveRequests.length`
@@ -574,16 +576,126 @@ await scenario('failed acceptance keeps the preview and saved target menu retrya
   assert(`${preview}===null && ${saveCount}===2`, 'acceptance retry persists only after success'),
 ])
 
-await scenario('empty catalog leaves required meal types empty with a clear warning', [
+await scenario('empty catalog shows the recipes-needed notice and never generates', [
   open('empty-catalog'),
+  wait(`${shell}.innerText.includes('Saved dinner')`),
+  evaluate(`window.__noticeOpener = [...document.querySelectorAll('button')].find(button => button.textContent.trim()==='Regenerate menu')`),
+  click('Regenerate menu'),
+  text('Add recipes first'),
+  assert(
+    `${noticeDialog} && !${dialog} && ${generationCount}===0 && ${saveCount}===0`,
+    'zero recipes show the notice instead of the schedule dialog and record no generation request',
+  ),
+  click('Close'),
+  assert(`!${noticeDialog} && document.activeElement===window.__noticeOpener`, 'closing the notice returns focus to the opener'),
+  click('Regenerate menu'),
+  text('Add recipes first'),
+  click('Add recipes'),
+  wait(`document.querySelector('#preferences-recipes-tab[aria-selected="true"]') !== null`),
+  assert(`!${noticeDialog} && !${dialog} && ${generationCount}===0`, 'Add recipes opens Preferences on the recipes section'),
+])
+
+await scenario('partial catalog blocks only the missing type, per confirmed schedule', [
+  open('partial-catalog'),
+  wait(`${shell}.innerText.includes('Saved dinner')`),
+  click('Regenerate menu'),
+  text("Review next week’s schedule"),
+  click('Confirm schedule and generate'),
+  wait(`${dialog}.querySelector('[role="alert"]') !== null`),
+  assert(
+    `${dialog}.querySelector('[role="alert"]').innerText.includes('dinner recipes') && !${dialog}.querySelector('[role="alert"]').innerText.includes('lunch recipes') && ${generationCount}===0 && ${skeleton}===null`,
+    'all-home schedule keeps the dialog open with an alert naming only dinner and records no generation request',
+  ),
+  ...[1, 2, 3, 4, 5, 6, 7].flatMap((n) => [
+    ['click', `${dialogSelector} .panel-day-card:nth-child(${n}) .panel-context-pill:nth-child(2)`],
+    ['click', `${dialogSelector} .panel-day-card:nth-child(${n}) .panel-scope-pill:nth-child(1)`],
+  ]),
+  assert(`!${dialog}.querySelector('[role="alert"]')`, 'editing the schedule clears the alert'),
+  click('Confirm schedule and generate'),
+  wait(`${preview} !== null`),
+  assert(
+    `${generationCount}===1 && Object.values(${fixture}.generationRequests[0].schedule).every(day => day.scope==='lunch') && ${saveCount}===0`,
+    'with every dinner eaten out the same catalog generates one request',
+  ),
+])
+
+await scenario('partial catalog alert offers Add recipes', [
+  open('partial-catalog'),
+  wait(`${shell}.innerText.includes('Saved dinner')`),
+  click('Regenerate menu'),
+  click('Confirm schedule and generate'),
+  wait(`${dialog}.querySelector('[role="alert"]') !== null`),
+  click('Add recipes'),
+  wait(`document.querySelector('#preferences-recipes-tab[aria-selected="true"]') !== null`),
+  assert(`!${dialog} && ${generationCount}===0`, 'inline Add recipes closes the dialog and opens the recipes section'),
+])
+
+await scenario('confirming closes the dialog and shows a target-week skeleton until the preview replaces it', [
+  open('ready'),
+  wait(`${shell}.innerText.includes('Saved dinner')`),
+  click('Regenerate menu'),
+  text("Review next week’s schedule"),
+  evaluate(`${fixture}.holdGeneration=true`),
+  click('Confirm schedule and generate'),
+  wait(`${fixture}.pendingGeneration`),
+  assert(`!${dialog} && ${skeleton} !== null`, 'dialog is closed and the skeleton is visible while generation is held'),
+  assert(
+    `${skeleton}.getAttribute('role')==='status' && ${skeleton}.getAttribute('aria-live')==='polite' && ${skeleton}.getAttribute('aria-busy')==='true' && ${skeleton}.innerText.includes('Building next week’s menu…') && ${skeleton}.querySelectorAll('.day-card').length===7 && document.querySelectorAll('.planner-ai-skeleton').length===1`,
+    'skeleton is one polite busy status region with the label and seven day cards',
+  ),
+  assert(
+    `![...${shell}.querySelectorAll('button')].some(button => /Accept|Discard|Edit target/.test(button.textContent)) && ${preview}===null && !${shell}.querySelector('.planner-current-week-label') && ${shell}.querySelector('button[aria-label="Next week"]').disabled`,
+    'no preview actions are reachable and the planner shows the target (next) week',
+  ),
+  evaluate(`${fixture}.holdGeneration=false; ${fixture}.releaseGeneration()`),
+  wait(`${shell}.querySelector('.planner-ai-preview-actions') !== null`),
+  assert(`${skeleton}===null && ${preview}.querySelectorAll('.day-card').length===7 && ${generationCount}===1 && ${saveCount}===0`, 'the skeleton is replaced by the editable preview'),
+])
+
+await scenario('skeleton is replaced by the existing error and Retry on failure', [
+  open('ready'),
+  wait(`${shell}.innerText.includes('Saved dinner')`),
+  click('Regenerate menu'),
+  text("Review next week’s schedule"),
+  evaluate(`${fixture}.holdGeneration=true; ${fixture}.failGeneration=true`),
+  click('Confirm schedule and generate'),
+  wait(`${fixture}.pendingGeneration && ${skeleton} !== null`),
+  evaluate(`${fixture}.holdGeneration=false; ${fixture}.releaseGeneration()`),
+  text('Could not generate next week’s menu'),
+  assert(
+    `${skeleton}===null && ${preview}===null && !${dialog} && [...document.querySelectorAll('button')].some(button => button.textContent.trim()==='Retry generation') && ${saveCount}===0`,
+    'failure removes the skeleton and leaves error feedback with Retry',
+  ),
+])
+
+await scenario('regenerating from an edited preview shows the skeleton, not the stale preview', [
+  open('ready'),
   wait(`${shell}.innerText.includes('Saved dinner')`),
   click('Regenerate menu'),
   click('Confirm schedule and generate'),
   wait(`${preview} !== null`),
+  click('Edit target schedule'),
+  text("Review next week’s schedule"),
+  evaluate(`[...${dialog}.querySelector('.panel-day-card').querySelectorAll('.panel-context-pill')].find(pill => pill.textContent.includes('Office')).click(); ${fixture}.holdGeneration=true`),
+  click('Confirm schedule and generate'),
+  wait(`${fixture}.pendingGeneration`),
   assert(
-    `${preview}.innerText.includes('No saved lunch recipes') && ${preview}.innerText.includes('No saved dinner recipes') && ${preview}.innerText.includes('No home-planned meal') && ${saveCount}===0`,
-    'zero lunch/dinner candidates yield empty eligible slots and explicit shortage warnings',
+    `!${dialog} && ${skeleton} !== null && !${shell}.querySelector('.planner-ai-preview-menu') && ![...${shell}.querySelectorAll('button')].some(button => /Accept|Discard|Edit target/.test(button.textContent))`,
+    'edited-schedule regeneration hides the stale preview behind the skeleton',
   ),
+  evaluate(`${fixture}.holdGeneration=false; ${fixture}.releaseGeneration()`),
+  wait(`${shell}.querySelector('.planner-ai-preview-menu') !== null`),
+  assert(`${skeleton}===null && ${generationCount}===2`, 'the regenerated preview replaces the skeleton'),
+])
+
+await scenario('schedule load failure and Cancel never show a skeleton', [
+  open('ready'),
+  wait(`${shell}.innerText.includes('Saved dinner')`),
+  click('Regenerate menu'),
+  text("Review next week’s schedule"),
+  assert(`${skeleton}===null`, 'no skeleton while the schedule dialog is open'),
+  click('Cancel'),
+  assert(`${skeleton}===null && !${dialog} && ${generationCount}===0`, 'Cancel leaves no skeleton and no request'),
 ])
 
 await scenario('AI schedule and preview feedback are localized in Spanish', [
