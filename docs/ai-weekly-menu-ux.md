@@ -86,7 +86,7 @@ Los avisos de escasez de la vista previa (`unavailableSlots`) siguen igual.
   - **Comer fuera:** la persona elige si cubre comida, cena o ambas.
 - Valores iniciales: si la semana siguiente ya tiene horario guardado, se precarga; si no, **todo en casa** (no se copia el horario de la semana actual).
 - Hay una acción explícita de confirmar. Antes de confirmar no hay llamada a la IA ni guardado.
-- Si ya existe un menú guardado para la semana siguiente, el diálogo avisa de que **aceptar reemplazará todo el menú**.
+- Si ya existe un menú guardado para la semana siguiente, el diálogo muestra, encima de los botones, una nota visible (no es una alerta): «La próxima semana ya tiene un menú. Si aceptas la nueva propuesta, lo reemplazará por completo.» Si la semana está vacía no se muestra nada.
 
 ### 5.4 Generación
 
@@ -100,7 +100,8 @@ Los avisos de escasez de la vista previa (`unavailableSlots`) siguen igual.
 - Muestra los 7 días con sus comidas y cenas.
 - Las comidas **cubiertas fuera de casa** se ven **bloqueadas y etiquetadas** (p. ej. "Oficina", "Fuera"); no admiten receta y nunca cuentan como táper.
 - En cada hueco planificado en casa, la persona puede **cambiar la receta** por otra de sus recetas del tipo correspondiente (comida o cena). Este cambio es **local, sin IA y sin consumir cuota**.
-- Las alternativas se ofrecen en **orden alfabético**.
+- Las alternativas se ofrecen en **orden alfabético** según el idioma de la interfaz (sin distinguir mayúsculas ni acentos, números en orden numérico). «Sin receta» va siempre primero y la receta elegida se mantiene seleccionada.
+- Si la semana ya tenía un menú guardado, el banner de la vista previa añade una línea junto a «Aceptar»: «Al aceptar, se reemplaza el menú que ya tienes guardado esta semana.»
 - **Generar otra:** acción disponible en la vista previa que pide una propuesta completa nueva reutilizando el horario ya confirmado. Cuenta como **un intento** de los 5 por hora. Si la persona hizo cambios manuales, se avisa antes de que se perderán. Durante la espera se muestra de nuevo el esqueleto y, si falla, se conserva la propuesta anterior con su mensaje de error y Reintentar.
 - No hay explicaciones de por qué se eligió cada receta.
 - Las recetas pueden repetirse en huecos distintos.
@@ -111,7 +112,7 @@ Los avisos de escasez de la vista previa (`unavailableSlots`) siguen igual.
 
 ### 5.6 Aceptar
 
-- Guarda exactamente lo que se ve en la vista previa y **reemplaza toda la semana siguiente**.
+- Guarda exactamente lo que se ve en la vista previa y **reemplaza toda la semana siguiente**. Si esa semana ya tenía menú, el diálogo de horario y el banner lo avisan antes de aceptar (secciones 5.3 y 5.5).
 - Tras guardar, el planner **navega a la semana siguiente** con el menú aplicado.
 - Si el guardado falla, la vista previa se conserva intacta y se puede reintentar.
 

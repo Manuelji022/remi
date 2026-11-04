@@ -22,7 +22,12 @@ import {
 import type { CalendarWeekMenu } from '../week'
 import { scheduleFromMenu } from '../week'
 
-export type AiPreview = { userId: string; weekStart: string } & AiMenuResult
+export type AiPreview = {
+  userId: string
+  weekStart: string
+  /** The target week already has a saved menu that accepting replaces. */
+  replacesSavedMenu: boolean
+} & AiMenuResult
 export type AiGenerationState =
   | { phase: 'idle' }
   | {
@@ -37,6 +42,7 @@ export type AiGenerationState =
       targetWeekStart: string
       mode: 'new' | 'edit'
       draft: Preferences
+      replacesSavedMenu: boolean
       preview?: AiPreview
       originalPreview?: AiPreview
     }
@@ -45,6 +51,7 @@ export type AiGenerationState =
       userId: string
       targetWeekStart: string
       draft: Preferences
+      replacesSavedMenu: boolean
       preview?: AiPreview
     }
   | {
@@ -83,6 +90,7 @@ type Action =
       targetWeekStart: string
       mode: 'new' | 'edit'
       draft: Preferences
+      replacesSavedMenu: boolean
       preview?: AiPreview
     }
   | { type: 'draft'; draft: Preferences; invalidatePreview?: boolean }
@@ -91,6 +99,7 @@ type Action =
       userId: string
       targetWeekStart: string
       draft: Preferences
+      replacesSavedMenu: boolean
       preview?: AiPreview
     }
   | {
@@ -218,6 +227,7 @@ export function useAiMenuGeneration({
           targetWeekStart: target,
           mode,
           draft: options.preferences ?? scheduleFromMenu(options.preview.menu),
+          replacesSavedMenu: options.preview.replacesSavedMenu,
           preview: options.preview,
         })
         return
@@ -241,6 +251,7 @@ export function useAiMenuGeneration({
             (week.hasSavedMenu
               ? scheduleFromMenu(week.menu)
               : { dayContexts: {}, planningScopes: {} }),
+          replacesSavedMenu: week.hasSavedMenu,
         })
       } catch {
         if (current())
@@ -291,7 +302,12 @@ export function useAiMenuGeneration({
       generationInFlightRef.current
     )
       return
-    const { userId: requester, targetWeekStart: target, draft } = state
+    const {
+      userId: requester,
+      targetWeekStart: target,
+      draft,
+      replacesSavedMenu,
+    } = state
     generationInFlightRef.current = true
     const epoch = ++epochRef.current
     const current = () =>
@@ -301,6 +317,7 @@ export function useAiMenuGeneration({
       userId: requester,
       targetWeekStart: target,
       draft,
+      replacesSavedMenu,
       preview: state.preview,
     })
     try {
@@ -347,6 +364,7 @@ export function useAiMenuGeneration({
         userId: requester,
         weekStart: target,
         menu: result.menu,
+        replacesSavedMenu,
         recipeNames: result.recipeNames,
         unavailableSlots: result.unavailableSlots,
       }

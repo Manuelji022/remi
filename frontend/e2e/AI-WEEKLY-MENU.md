@@ -144,3 +144,11 @@ Documented before implementation.
 - Screenshots: [`artifacts/ai-generation-skeleton.png`](artifacts/ai-generation-skeleton.png) and [`artifacts/recipe-precheck-notice.png`](artifacts/recipe-precheck-notice.png).
 - Not verified in a browser: the catalog-fetch fallback (`listRecipes` failure). Signed-in users cannot reach Generate until the planner's own catalog has loaded, so the fallback is exercised only by code reading.
 - One earlier run failed a previously-passing scenario (`route navigation protects a preview stashed by schedule editing`, "missing dinner selector") and the next full run passed; treated as a timing flake, not reproduced.
+
+## Replacement warning failure cases
+
+For ready, neither the schedule dialog nor preview may show a replace note. For target-saved, both must show a non-alert note; it must survive Edit schedule and Cancel or confirmation, retry, and preview restoration. The browser harness verifies presence, absence and the Edit schedule/Cancel round trip.
+
+## Alphabetical alternatives failure cases
+
+Options must use the active locale, ignore case and accents, order numbers numerically, preserve the selected recipe and keep No recipe first. Slot lists must be memoized on recipes and locale only; the sorted-catalog fixture verifies English and Spanish options in the browser.
