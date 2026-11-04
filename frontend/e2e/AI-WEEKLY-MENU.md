@@ -200,3 +200,25 @@ Documented before implementation (generate another).
 From `frontend/`, run `pnpm lint`, `pnpm check`, `pnpm typecheck`, `pnpm test`, and `pnpm build`, then use the production server and CLI runner documented in “Repeatable browser harness” and “CLI-only harness runner” above. This branch's harness has 46 scenarios (47 result entries including the summary), including retry after both provider error and in-progress rejection, manual-edit retention through repeated failure/Escape, full seven-day schedule preservation, and focus after confirmation/regeneration. Evidence is in `artifacts/ai-weekly-menu-results.json`; screenshots are `artifacts/ai-preview-actions-banner.png` and `artifacts/ai-preview-actions-confirm.png`.
 
 Regeneration uses the already-loaded catalog and the visible menu's context/scope, without another recipe precheck or notice flow. Browser responses are synthetic; live authenticated transport, database/provider behavior, and non-Chrome focus remain unverified.
+
+## First-run tour failure cases
+
+Documented before implementation.
+
+1. Guests see the tour or gain access to AI generation.
+2. Done or Skip allows the tour to reappear after reopening or reloading.
+3. Cancel or Discard marks the tour completed instead of restarting at step 1 next time.
+4. A callout blocks Accept, Cancel, recipe selectors or schedule controls, or steals focus.
+5. Throwing/blocked storage crashes the planner or interrupts generation; failed writes do not end the tour for the session.
+6. Two accounts share a completion flag instead of using separate account keys.
+7. Step 2 appears before a preview exists, including while generation is pending.
+8. Step 3 is separated from the Accept button.
+9. Callouts introduce duplicate live announcements or modal semantics.
+10. Next on step 1 closes or disables the schedule dialog instead of leaving it usable.
+11. Reload midway persists progress/completion instead of restarting at step 1.
+
+### First-run tour verification (2026-11-04)
+
+- Full harness: 54 scenarios (55 result entries including the summary), all PASS against the production build at `127.0.0.1:3101` through the CLI runner at 1440 × 1200. Evidence: `artifacts/ai-weekly-menu-results.json`; screenshot of the preview with step 3: [`artifacts/ai-first-run-tour-step-3.png`](artifacts/ai-first-run-tour-step-3.png).
+- Eight new scenarios cover failure cases 1–11: guest, full 1→2→3→Done through a mocked generation, Done/Skip persistence across reload, second account, cancel/discard restart, reload midway, and blocked reads/writes of storage. The init script presets the completed flag unless the URL has `tour=…`, so older scenarios are undisturbed.
+- Not verified: real authentication (the account id is a fixture) and non-Chrome browsers.

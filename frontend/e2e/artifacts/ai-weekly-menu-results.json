@@ -184,6 +184,38 @@
     "verdict": "PASS"
   },
   {
+    "scenario": "first-run tour follows generation through Done without blocking controls",
+    "verdict": "PASS"
+  },
+  {
+    "scenario": "Skip at step 1 persists completion across reload",
+    "verdict": "PASS"
+  },
+  {
+    "scenario": "a second account has its own first-run tour",
+    "verdict": "PASS"
+  },
+  {
+    "scenario": "cancel and discard restart the incomplete tour",
+    "verdict": "PASS"
+  },
+  {
+    "scenario": "reload midway restarts at step 1 without completing",
+    "verdict": "PASS"
+  },
+  {
+    "scenario": "storage blocked still allows generation and session completion",
+    "verdict": "PASS"
+  },
+  {
+    "scenario": "storage write-blocked still allows generation and session completion",
+    "verdict": "PASS"
+  },
+  {
+    "scenario": "guests never see the first-run tour",
+    "verdict": "PASS"
+  },
+  {
     "suite": "AI Weekly Menu browser checks",
     "verdict": "PASS",
     "evidence": {
@@ -193,7 +225,7 @@
           "effectiveLaunch": {
             "browserLaunched": true,
             "engine": "chrome",
-            "launchHash": 6701229096119436000
+            "launchHash": 13669441039350102000
           },
           "launched": false,
           "relaunchedBrowser": false,
@@ -202,10 +234,10 @@
           "reused": true,
           "saveStatus": "not_attempted"
         },
-        "origin": "http://127.0.0.1:3101/es/weekly-menu-planner?scenario=sorted-catalog",
+        "origin": "http://127.0.0.1:3101/weekly-menu-planner?scenario=guest&tour=first",
         "result": {
-          "fixture": "sorted-catalog",
-          "generationRequests": 1,
+          "fixture": "guest",
+          "generationRequests": 0,
           "saveRequests": 0,
           "targetWeekStart": "2026-11-09"
         }
