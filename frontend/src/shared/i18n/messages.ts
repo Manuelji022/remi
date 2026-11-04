@@ -156,6 +156,10 @@ export const messages = {
     'planner.aiPreviewRecipeSelect': 'Choose a saved {slot} recipe',
     'planner.aiPreviewNoRecipe': 'No recipe',
     'planner.aiEditSchedule': 'Edit target schedule',
+    'planner.aiReplaceNote':
+      'Next week already has a menu. Accepting the new proposal will replace all of it.',
+    'planner.aiPreviewReplaceNote':
+      'Accepting replaces the menu already saved for this week.',
     'planner.aiDiscardPreview': 'Discard preview',
     'planner.aiAcceptPreview': 'Accept and save menu',
     'planner.aiSavingPreview': 'Saving menu...',
@@ -409,6 +413,10 @@ export const messages = {
     'planner.aiPreviewRecipeSelect': 'Elige una receta guardada para {slot}',
     'planner.aiPreviewNoRecipe': 'Sin receta',
     'planner.aiEditSchedule': 'Editar agenda de destino',
+    'planner.aiReplaceNote':
+      'La próxima semana ya tiene un menú. Si aceptas la nueva propuesta, lo reemplazará por completo.',
+    'planner.aiPreviewReplaceNote':
+      'Al aceptar, se reemplaza el menú que ya tienes guardado esta semana.',
     'planner.aiDiscardPreview': 'Descartar vista previa',
     'planner.aiAcceptPreview': 'Aceptar y guardar menú',
     'planner.aiSavingPreview': 'Guardando menú...',

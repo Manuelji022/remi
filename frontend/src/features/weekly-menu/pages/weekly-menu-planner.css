@@ -140,6 +140,17 @@
     font-weight: var(--weight-semibold);
   }
 
+  .planner-ai-replace-note {
+    margin-block-start: var(--gap-stack-sm);
+    color: var(--text-secondary);
+    font-size: var(--type-body-size);
+    line-height: var(--type-body-lh);
+  }
+
+  .planner-ai-preview-banner .planner-ai-replace-note {
+    margin-block-start: 0;
+  }
+
   .planner-ai-preview-actions {
     display: flex;
     align-items: center;

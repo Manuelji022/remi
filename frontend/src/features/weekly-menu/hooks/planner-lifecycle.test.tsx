@@ -142,6 +142,7 @@ describe('unchanged AI schedule regeneration', () => {
         userId: 'one',
         weekStart: target,
         menu: emptyMenu(target),
+        replacesSavedMenu: false,
         recipeNames: {},
         unavailableSlots: [],
       }
@@ -217,6 +218,7 @@ describe('unchanged AI schedule regeneration', () => {
       userId: 'one',
       weekStart: target,
       menu: emptyMenu(target),
+      replacesSavedMenu: false,
       recipeNames: {},
       unavailableSlots: [],
     }

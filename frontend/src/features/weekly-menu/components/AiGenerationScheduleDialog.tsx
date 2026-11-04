@@ -14,6 +14,7 @@ interface AiGenerationScheduleDialogProps {
   targetWeekRange: { start: string; end: string }
   returnFocusTo: HTMLElement | null
   missingRecipeSlots: readonly MealSlot[]
+  replacesSavedMenu: boolean
   onAddRecipes: () => void
   onCancel: () => void
   onConfirm: () => void
@@ -27,6 +28,7 @@ export function AiGenerationScheduleDialog({
   targetWeekRange,
   returnFocusTo,
   missingRecipeSlots,
+  replacesSavedMenu,
   onAddRecipes,
   onCancel,
   onConfirm,
@@ -84,6 +86,9 @@ export function AiGenerationScheduleDialog({
             {t('planner.aiAddRecipes')}
           </button>
         </div>
+      )}
+      {replacesSavedMenu && (
+        <p className="planner-ai-replace-note">{t('planner.aiReplaceNote')}</p>
       )}
       <footer className="planner-ai-dialog-footer">
         <button

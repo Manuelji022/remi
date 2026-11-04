@@ -16,6 +16,7 @@ interface AiMenuPreviewProps {
   isSaveUnconfirmed: boolean
   canAccept: boolean
   isSignedIn: boolean
+  replacesSavedMenu: boolean
   onEditSchedule: () => void
   onDiscard: () => void
   onAccept: () => void
@@ -36,6 +37,7 @@ export function AiMenuPreview({
   isSaveUnconfirmed,
   canAccept,
   isSignedIn,
+  replacesSavedMenu,
   onEditSchedule,
   onDiscard,
   onAccept,
@@ -59,6 +61,11 @@ export function AiMenuPreview({
                 : 'planner.aiPreviewBody',
             )}
           </p>
+          {replacesSavedMenu && (
+            <p className="planner-ai-replace-note">
+              {t('planner.aiPreviewReplaceNote')}
+            </p>
+          )}
         </div>
         <div className="planner-ai-preview-actions">
           <button

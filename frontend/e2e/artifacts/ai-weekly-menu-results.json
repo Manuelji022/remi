@@ -132,6 +132,14 @@
     "verdict": "PASS"
   },
   {
+    "scenario": "replace note is absent when the target week is empty (dialog and banner)",
+    "verdict": "PASS"
+  },
+  {
+    "scenario": "replace note shows in dialog and banner for a saved target week and survives Edit schedule",
+    "verdict": "PASS"
+  },
+  {
     "suite": "AI Weekly Menu browser checks",
     "verdict": "PASS",
     "evidence": {
@@ -141,7 +149,7 @@
           "effectiveLaunch": {
             "browserLaunched": true,
             "engine": "chrome",
-            "launchHash": 2531873004173184500
+            "launchHash": 6701229096119436000
           },
           "launched": false,
           "relaunchedBrowser": false,
@@ -150,10 +158,10 @@
           "reused": true,
           "saveStatus": "not_attempted"
         },
-        "origin": "http://127.0.0.1:3101/weekly-menu-planner?scenario=guest",
+        "origin": "http://127.0.0.1:3101/weekly-menu-planner?scenario=target-saved",
         "result": {
-          "fixture": "guest",
-          "generationRequests": 0,
+          "fixture": "target-saved",
+          "generationRequests": 1,
           "saveRequests": 0,
           "targetWeekStart": "2026-11-09"
         }
