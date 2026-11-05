@@ -1,0 +1,35 @@
+# Decisions pilot: failures specified before implementation
+
+1. Unknown engine values silently activate either engine; the default must remain `legacy`.
+2. Planning or database reads happen inside the lease. A singleton must still consume one guarded action without contacting Gateway.
+3. A fabricated choice, refusal, malformed answer, HTTP error, missing credential or invalid model becomes a successful preview. Initial generation and regeneration must both throw; no degraded fallback ships before its visible notice.
+4. Retries or multiple questions cause multiple paid calls; the sole choice has a total 20-second deadline and zero retries.
+5. Decisions invents or repairs assignments instead of resolving an existing, complete, validated candidate. Covered slots, unavailable types and recipe ownership must remain authoritative.
+6. State leaks identities, credentials, unrelated catalog recipes or ingredient metadata; history is invented when absent, partial history is dropped, or current/prior history is conflated with the previous proposal.
+7. Unbounded state exceeds the budget, or ingredient names are silently truncated. Reduce finalists down to two, then fail if the complete state cannot fit 64 KiB of UTF-8.
+8. Recipe text becomes instructions; the rubric makes nutritional assertions or treats unknown composition as known. Prefer avoiding clearly heavy pairs, then variety and current-week avoidance (prior week weaker).
+9. Errors skip guard release, stale checks, auth/date validation or persist a menu before acceptance. Keep the existing guard and browser recovery harnesses.
+
+The new transport tests must call the installed SDK's `experimental_decide` through a fake Gateway `fetch`, selecting a non-first candidate from multiple finalists. They establish transport and domain guarantees, not culinary model quality. Server-boundary tests cover routing, quota, preconditions and stale checks; the existing real-stack and UI harnesses cover persistence and preview recovery.
+
+A fully covered week is not representable in the existing `lunch|dinner|both` schedule contract: Office and Eat Out each retain at least one home-planned slot per day. That case is deferred; this slice adds no unreachable quota bypass or synthetic scope. Empty recipe pools report `unavailableSlots`, not an all-away schedule.
+
+## VPS operation and rollback
+
+Keep `AI_WEEKLY_MENU_ENGINE=legacy` until credentials and a live quality comparison are explicitly authorized. An opt-in pilot uses `decisions`, server-only `AI_GATEWAY_API_KEY`, and `AI_WEEKLY_MENU_DECISION_MODEL` (default proposed model: `openai/gpt-6-luna-decisions`). Unknown engines, absent remote credentials, and malformed model IDs fail explicitly. A singleton requires no remote credentials. Model availability and culinary quality remain unverified without a live call.
+
+Inject the key through the existing VPS process/container secret mechanism, never a `VITE_` variable or a tracked file. Allow outbound HTTPS to `ai-gateway.vercel.sh:443` from Node/Nitro. Configure the reverse proxy read/upstream timeout above the 20-second remote budget plus local planning and database time (for example, 60 seconds); the 60-second generation lease covers only the bounded selection. This PR performs no deployment or environment activation. Roll back by setting the engine to `legacy` and restarting the existing process/container; no migration is needed.
+
+The adapter returns the existing `AiMenuResult` (`menu`, `recipeNames`, `unavailableSlots`); no source metadata or degraded fallback is added before the UI notice. Remote errors throw the existing recoverable generation error on both first generation and regeneration. Diagnostics contain only rubric version, model ID, finalist count, UTF-8 state size, elapsed milliseconds and technical outcome; no credentials, recipe text, raw provider error or invented token/cost values. State is minified, bounded to 64 KiB, and retains whole ingredient names while reducing finalists to at least two. Local planning and all context reads precede lease acquisition; a valid singleton still uses it once.
+
+## Repeatable checks
+
+From `frontend/`, run `pnpm lint`, `pnpm check`, `pnpm typecheck`, `pnpm test`, `pnpm build`, and `pnpm e2e:real-stack e2e/real-stack/ai-weekly-menu.scenario.js`. For targeted mocked Gateway evidence: `pnpm exec vitest run src/features/weekly-menu/menu-decision*.test.ts --reporter=json --outputFile=/tmp/weekly-menu-decisions-tests.json`. Also run the production UI harness in [AI-WEEKLY-MENU.md](AI-WEEKLY-MENU.md); its failure/regeneration scenarios verify draft retention and acceptance. Existing harnesses exercise the default legacy/mock route, not live Decisions; one UI wait now requires the editable dinner selector rather than the earlier preview wrapper, preserving the existing timeout and assertion. All Decisions HTTP calls in tests use synthetic credentials and fake transport through the installed SDK.
+
+## Observed verification (2026-11-05)
+
+- `pnpm lint`, `pnpm check`, `pnpm typecheck`, `pnpm test` (104 passed, 1 skipped), and `pnpm build`: PASS. Focused SDK/server-boundary run: 22 passed, JSON written to `/tmp/remi-decisions-server-evidence/decisions-tests.json`. Decisions configuration/rubric markers occur only in the server build, absent from `.output/public`.
+- Real stack: `REAL_STACK_BROWSER_BIN="$(realpath "$(agent-browser skills path core)/../../bin/agent-browser-linux-x64")" pnpm e2e:real-stack e2e/real-stack/ai-weekly-menu.scenario.js /tmp/remi-decisions-server-evidence/real-stack.json`: PASS (18 recorded results), container removed and server port closed. All migrations ran on disposable PostgreSQL; no schema change is introduced here.
+- Guard: `env -i PATH="$PATH" HOME="$HOME" AI_GUARD_ARTIFACT=/tmp/remi-decisions-server-evidence/guard.json timeout 120 ./e2e/run-ai-generation-guard-postgres.sh`: PASS, synthetic rows and disposable container removed.
+- Production UI harness through the documented CLI adapter, session `remi-decisions-server-ui`, viewport 1440 × 1200: PASS, 54 scenarios plus suite summary in `/tmp/remi-decisions-server-evidence/ui-results.json`. Initial run failed the previously documented route-navigation selector race; its log/JSON remain in `ui-initial-failure.{log,json}` in that directory. The approved one-line wait re-queries the current DOM for the editable dinner selector within the same timeout and retains the missing-selector assertion. The original main harness and its documented prior failure establish the inherited timing issue; a separate pristine-main browser run was not performed.
+- Unverified: live Gateway access/model availability, culinary selection quality, actual VPS/proxy operation, and rollback in production. No live calls, deployment, activation, new dependencies, auth changes or database schema changes occurred. The real-stack/UI harnesses cover the existing legacy/mock route; Decisions selection itself is covered by the actual SDK with fake Gateway transport and the mocked server boundary.
