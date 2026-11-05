@@ -43,6 +43,8 @@ export type AiMenuResult = {
   menu: CalendarWeekMenu
   recipeNames: Record<string, string>
   unavailableSlots: MealSlot[]
+  // Set only when a local menu replaced a failed remote selection.
+  selectionSource?: 'local'
 }
 
 export type AiProviderOptions = {

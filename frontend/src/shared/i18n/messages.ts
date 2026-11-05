@@ -181,6 +181,8 @@ export const messages = {
       'Your manual changes to this proposal will be lost.',
     'planner.aiReplaceNote':
       'Next week already has a menu. Accepting the new proposal will replace all of it.',
+    'planner.aiPreviewLocalFallback':
+      "Here's a basic menu. You can review and change the dishes before saving.",
     'planner.aiPreviewReplaceNote':
       'Accepting replaces the menu already saved for this week.',
     'planner.aiDiscardPreview': 'Discard preview',
@@ -461,6 +463,8 @@ export const messages = {
       'Perderás los cambios que hiciste a mano en esta propuesta.',
     'planner.aiReplaceNote':
       'La próxima semana ya tiene un menú. Si aceptas la nueva propuesta, lo reemplazará por completo.',
+    'planner.aiPreviewLocalFallback':
+      'Te proponemos un menú básico. Puedes revisar y cambiar los platos antes de guardarlo.',
     'planner.aiPreviewReplaceNote':
       'Al aceptar, se reemplaza el menú que ya tienes guardado esta semana.',
     'planner.aiDiscardPreview': 'Descartar vista previa',
