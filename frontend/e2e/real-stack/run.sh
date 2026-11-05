@@ -71,7 +71,7 @@ mkdir "$tmp/app/node_modules"
 for dependency in "$PWD"/node_modules/* "$PWD"/node_modules/.bin; do
   ln -s "$dependency" "$tmp/app/node_modules/$(basename "$dependency")"
 done
-printf 'verifyDepsBeforeRun: false\n' > "$tmp/app/pnpm-workspace.yaml"
+printf 'packages:\n  - .\nverifyDepsBeforeRun: false\n' > "$tmp/app/pnpm-workspace.yaml"
 export REAL_STACK_MODULES="$(realpath ../node_modules)"
 cd "$tmp/app"
 cat > real-stack.vite.ts <<'CONFIG'
