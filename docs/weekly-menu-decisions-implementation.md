@@ -39,7 +39,7 @@ Configuración propuesta, exclusivamente de servidor:
 | `AI_GATEWAY_API_KEY`            | Credencial existente de Gateway; pendiente de que el usuario la configure. Nunca usar prefijo `VITE_`.                               |
 | `AI_WEEKLY_MENU_DECISION_MODEL` | Nueva variable para el ID del decision model. Propuesta inicial: `openai/gpt-6-luna-decisions`, sujeta a comprobar acceso y calidad. |
 | `AI_WEEKLY_MENU_MODEL`          | Conservar durante la comparación con el generador actual; no reutilizarla silenciosamente como ID de Decisions.                      |
-| `AI_WEEKLY_MENU_ENGINE`         | Selector de servidor validado: `legacy` (predeterminado) o `decisions` (piloto explícito).                                           |
+| `AI_WEEKLY_MENU_ENGINE`         | Selector de servidor: solo `decisions` (sin distinguir mayúsculas ni espacios) activa el piloto; cualquier otro valor, vacío o no reconocido, vuelve a `legacy` (predeterminado, con un único aviso en servidor). Con `AI_WEEKLY_MENU_MOCK=true` fuera de producción siempre se usa el mock.                                           |
 
 Vercel documenta `openai/gpt-6-luna-decisions` como modelo de Decisions en Gateway, distinto del modelo de propósito general. Gateway admite autenticación con su clave o Vercel OIDC; este diseño usa solo `AI_GATEWAY_API_KEY` y no depende de OIDC ni de servicios de Vercel. No se necesita una clave directa de OpenAI. [Modelo y autenticación](https://vercel.com/i/ai-sdk-evaluation-to-decisions#choose-direct-openai-or-ai-gateway-access).
 

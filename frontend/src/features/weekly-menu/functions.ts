@@ -103,7 +103,7 @@ export const generateNextWeeklyMenu = createServerFn({ method: 'POST' })
         context.previousProposal = data.previousMenu
       }
       const decision =
-        weeklyMenuEngine() === 'decisions'
+        !isAiMockEnabled() && weeklyMenuEngine() === 'decisions'
           ? prepareWeeklyMenuDecision(context)
           : undefined
       const generate =

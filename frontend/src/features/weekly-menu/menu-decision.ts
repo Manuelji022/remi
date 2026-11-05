@@ -28,12 +28,30 @@ type DecisionOptions = {
   seed?: string | number
 }
 
+let warnedEngine = false
+// Fail safe: only an explicit `decisions` opts in; anything else is legacy.
 export function weeklyMenuEngine(): 'legacy' | 'decisions' {
-  const engine = process.env.AI_WEEKLY_MENU_ENGINE ?? 'legacy'
-  if (engine !== 'legacy' && engine !== 'decisions') {
-    throw new Error('Invalid AI Weekly Menu engine configuration')
+  const engine = process.env.AI_WEEKLY_MENU_ENGINE?.trim().toLowerCase()
+  if (engine === 'decisions') return 'decisions'
+  if (engine && engine !== 'legacy' && !warnedEngine) {
+    warnedEngine = true
+    console.warn('Unrecognized AI_WEEKLY_MENU_ENGINE; using legacy')
   }
-  return engine
+  return 'legacy'
+}
+
+// Coarse, allowlisted error names only; never messages, causes or data.
+function failureCategory(error: unknown): string {
+  const name = error instanceof Error ? error.name : ''
+  if (name === 'AbortError' || name === 'TimeoutError') return 'timeout'
+  if (name === 'GatewayAuthenticationError') return 'auth'
+  if (name === 'AI_DecisionRefusalError') return 'refusal'
+  if (
+    name === 'UnknownDecisionChoiceError' ||
+    name === 'AI_InvalidResponseDataError'
+  )
+    return 'invalid-choice'
+  return 'unknown'
 }
 
 // All planning, validation, state sizing and configuration checks precede the
@@ -70,19 +88,21 @@ export function prepareWeeklyMenuDecision(
   if (results.length === 1)
     return { generate: () => Promise.resolve(results[0]) }
 
-  const apiKey = options.apiKey ?? process.env.AI_GATEWAY_API_KEY
+  const apiKey = (options.apiKey ?? process.env.AI_GATEWAY_API_KEY)?.trim()
   const model =
     options.model ??
-    process.env.AI_WEEKLY_MENU_DECISION_MODEL ??
-    'openai/gpt-6-luna-decisions'
+    (process.env.AI_WEEKLY_MENU_DECISION_MODEL?.trim() ||
+      'openai/gpt-6-luna-decisions')
   if (
-    !apiKey?.trim() ||
+    !apiKey ||
     !/^[a-zA-Z0-9._-]+\/[a-zA-Z0-9._/-]+$/.test(model) ||
     model !== model.trim()
   ) {
     throw new Error('Invalid AI Weekly Menu Decisions configuration')
   }
 
+  // History IDs may come from the client; only the user's catalog IDs are sent.
+  const known = new Set(context.recipes.map((recipe) => recipe.id))
   let state = ''
   let stateBytes = 0
   while (candidates.length > 1) {
@@ -110,10 +130,10 @@ export function prepareWeeklyMenuDecision(
             .sort((a, b) => a.position - b.position)
             .map((ingredient) => ingredient.name),
         })),
-      currentWeek: assignments(context.currentWeek),
-      previousWeek: assignments(context.previousWeek),
+      currentWeek: assignments(context.currentWeek, known),
+      previousWeek: assignments(context.previousWeek, known),
       ...(context.previousProposal
-        ? { previousProposal: assignments(context.previousProposal) }
+        ? { previousProposal: assignments(context.previousProposal, known) }
         : {}),
       candidates: Object.fromEntries(
         candidates.map((menu, i) => [`menu-${i}`, assignments(menu)]),
@@ -136,6 +156,7 @@ export function prepareWeeklyMenuDecision(
     generate: async () => {
       const started = Date.now()
       let outcome = 'error'
+      let errorCategory: string | undefined
       try {
         const result = await decide({
           model: createGateway({ apiKey, fetch: options.fetch }).decisionModel(
@@ -154,10 +175,14 @@ export function prepareWeeklyMenuDecision(
         })
         const id = result.answers.selectedMenu.choice
         const index = candidates.findIndex((_, i) => id === `menu-${i}`)
-        if (index < 0) throw new Error('Unknown Weekly Menu decision')
+        if (index < 0)
+          throw Object.assign(new Error('Unknown Weekly Menu decision'), {
+            name: 'UnknownDecisionChoiceError',
+          })
         outcome = 'selected'
         return results[index]
-      } catch {
+      } catch (error) {
+        errorCategory = failureCategory(error)
         // Provider errors can include request data. Keep secrets and recipe text
         // out of client errors and logs; both initial and regeneration fail.
         throw new Error('AI Weekly Menu generation failed')
@@ -169,15 +194,18 @@ export function prepareWeeklyMenuDecision(
           stateBytes,
           durationMs: Date.now() - started,
           outcome,
+          ...(errorCategory ? { errorCategory } : {}),
         })
       }
     },
   }
 }
 
-function assignments(menu: CalendarWeekMenu) {
+function assignments(menu: CalendarWeekMenu, known?: Set<string>) {
+  const id = (value: string | null) =>
+    known && value !== null && !known.has(value) ? null : value
   return DAYS.map((day) => [
-    menu.days[day].lunchRecipeId,
-    menu.days[day].dinnerRecipeId,
+    id(menu.days[day].lunchRecipeId),
+    id(menu.days[day].dinnerRecipeId),
   ])
 }

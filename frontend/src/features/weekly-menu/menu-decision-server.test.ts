@@ -147,3 +147,30 @@ it('leaves legacy as the default and only attaches a previous proposal for the t
   await invoke({ data: { ...data(), previousMenu: emptyMenu('2026-11-02') } })
   expect(context.previousProposal).toBeUndefined()
 })
+it('gives the development mock precedence over Decisions with zero Gateway calls', async () => {
+  vi.stubEnv('AI_WEEKLY_MENU_MOCK', 'true')
+  vi.stubEnv('AI_GATEWAY_API_KEY', 'synthetic-gateway-key')
+  context.recipes.push({
+    id: 'other',
+    name: 'Other lunch',
+    slot: 'lunch',
+    ingredients: [],
+  })
+  const transport = vi.fn(
+    async () => new Response('unexpected', { status: 500 }),
+  )
+  vi.stubGlobal('fetch', transport)
+  const mocked = {
+    menu: emptyMenu(context.targetWeekStart),
+    recipeNames: {},
+    unavailableSlots: [],
+  }
+  mock.legacy.mockResolvedValue(mocked)
+  expect(await invoke({ data: data() })).toMatchObject({
+    ok: true,
+    menu: mocked.menu,
+  })
+  expect(mock.legacy).toHaveBeenCalledTimes(1)
+  expect(transport).not.toHaveBeenCalled()
+  vi.unstubAllGlobals()
+})
