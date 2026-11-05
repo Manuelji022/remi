@@ -44,6 +44,8 @@ Fuera (explícitamente):
 
 Entradas: recetas propias (nombre, ingredientes, tipo comida/cena), asignaciones de la **semana actual (los 7 días)** y de la **semana anterior**, y el horario confirmado de la semana objetivo normalizado a franjas en casa (comida/cena por día), con el número de recetas guardadas de cada tipo. Para regenerar se incluyen solo los IDs por día y franja de la propuesta anterior. Nada más. No se envía identidad de la cuenta.
 
+Piloto Decisions (solo con `AI_WEEKLY_MENU_ENGINE=decisions`; `legacy` sigue predeterminado): el planificador usa todo el catálogo y el proveedor recibe solo las recetas referenciadas en propuestas completas, con nombres e ingredientes, más horario e historial disponible. Selecciona un ID de propuesta existente; una respuesta inválida no se repara. Los fallos iniciales y de regeneración mantienen el error recuperable actual; la alternativa degradada con aviso queda pendiente. Si solo hay un candidato válido se devuelve sin llamada remota, contando un intento normal. No cambia la edición ni el guardado explícito.
+
 ## 5. Flujo principal
 
 ```

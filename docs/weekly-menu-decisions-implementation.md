@@ -39,6 +39,7 @@ Configuración propuesta, exclusivamente de servidor:
 | `AI_GATEWAY_API_KEY`            | Credencial existente de Gateway; pendiente de que el usuario la configure. Nunca usar prefijo `VITE_`.                               |
 | `AI_WEEKLY_MENU_DECISION_MODEL` | Nueva variable para el ID del decision model. Propuesta inicial: `openai/gpt-6-luna-decisions`, sujeta a comprobar acceso y calidad. |
 | `AI_WEEKLY_MENU_MODEL`          | Conservar durante la comparación con el generador actual; no reutilizarla silenciosamente como ID de Decisions.                      |
+| `AI_WEEKLY_MENU_ENGINE`         | Selector de servidor: solo `decisions` (sin distinguir mayúsculas ni espacios) activa el piloto; cualquier otro valor, vacío o no reconocido, vuelve a `legacy` (predeterminado, con un único aviso en servidor). Con `AI_WEEKLY_MENU_MOCK=true` fuera de producción siempre se usa el mock.                                           |
 
 Vercel documenta `openai/gpt-6-luna-decisions` como modelo de Decisions en Gateway, distinto del modelo de propósito general. Gateway admite autenticación con su clave o Vercel OIDC; este diseño usa solo `AI_GATEWAY_API_KEY` y no depende de OIDC ni de servicios de Vercel. No se necesita una clave directa de OpenAI. [Modelo y autenticación](https://vercel.com/i/ai-sdk-evaluation-to-decisions#choose-direct-openai-or-ai-gateway-access).
 
@@ -189,6 +190,10 @@ No establecer un umbral arbitrario de confianza para aceptar menús. Las distrib
 - Limitar y medir tamaño del estado. Si no cabe la lista finalista, reducir el número de propuestas y eliminar detalle duplicado, preservando las recetas completas que se evalúan. Si aun así no cabe, usar el tratamiento de error de selección; no recortar ingredientes silenciosamente.
 
 ## 6. Errores y alternativa local
+
+Entrega 2, piloto de servidor: tanto la generación inicial como la regeneración fallan de forma recuperable ante errores remotos. La alternativa local degradada de la tabla siguiente queda pendiente de la entrega 3 junto con su aviso visible; no se presenta silenciosamente como éxito. Un único candidato válido sí se devuelve localmente y consume un intento protegido, sin petición remota. El contrato público sigue siendo `menu`, `recipeNames` y `unavailableSlots`, sin metadatos de origen nuevos.
+
+La semana totalmente cubierta no se puede representar con el contrato actual `lunch|dinner|both`: Oficina y Comer fuera conservan al menos una franja doméstica por día. Ese caso queda diferido sin cambiar el esquema ni añadir una rama de cuota inalcanzable; un catálogo vacío no equivale a una semana cubierta.
 
 Separar fallos de contexto/autorización de fallos de selección remota:
 

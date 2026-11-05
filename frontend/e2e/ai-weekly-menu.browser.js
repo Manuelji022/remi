@@ -282,7 +282,7 @@ await scenario('route navigation protects a preview stashed by schedule editing'
     button('Regenerate menu')
     await waitFor('schedule dialog', () => ${dialog}?.open)
     button('Confirm schedule and generate')
-    await waitFor('preview', () => Boolean(${preview}))
+    await waitFor('editable dinner', () => Boolean(${preview}?.querySelector(${JSON.stringify(firstDayDinnerSelector)})))
     const dinner = ${preview}?.querySelector(${JSON.stringify(firstDayDinnerSelector)})
     if (!dinner) throw new Error('missing dinner selector')
     Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set.call(dinner, 'saved-dinner-alternative')
