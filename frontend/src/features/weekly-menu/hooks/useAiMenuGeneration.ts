@@ -205,7 +205,10 @@ function reducer(state: AiGenerationState, action: Action): AiGenerationState {
     case 'saving':
       return { phase: 'saving', preview: action.preview }
     case 'update-recipe': {
-      if (!(state.phase === 'preview' || (state.phase === 'error' && state.preview)))
+      if (!(
+        state.phase === 'preview' ||
+        (state.phase === 'error' && state.preview)
+      ))
         return state
       const currentPreview =
         state.phase === 'preview' ? state.preview : state.preview!
@@ -213,8 +216,7 @@ function reducer(state: AiGenerationState, action: Action): AiGenerationState {
         (recipe) => recipe.id === action.recipeId,
       )
       const plan = currentPreview.menu.days[action.day]
-      const field =
-        action.slot === 'lunch' ? 'lunchRecipeId' : 'dinnerRecipeId'
+      const field = action.slot === 'lunch' ? 'lunchRecipeId' : 'dinnerRecipeId'
       return {
         ...state,
         preview: {
