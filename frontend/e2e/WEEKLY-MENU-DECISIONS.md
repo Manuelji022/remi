@@ -8,7 +8,6 @@ Scenarios (real server function, guard, PostgreSQL, browser):
 - **B** Changing one home slot's recipe with the preview selector makes no further `generateNextWeeklyMenu` call and no new attempt row; covered (office) slots stay without recipes.
 - **C** Accept saves exactly the visible edited menu; reload shows it; the shopping list contains the swapped recipe's ingredient and not the replaced recipe's.
 - **D** With an edited, unsaved preview, "Generate another" with `decision-invalid` shows the loss-confirmation dialog; after confirming, the request fails recoverably and the edited preview returns with identical assignments; the attempt is counted and no lease remains.
-
 - **E** (after C, saved week present) initial generation with `decision-invalid` renders a preview with the basic-menu notice visible; exactly one guarded attempt and one transport call; every assigned recipe belongs to the user's catalog; a manual change keeps the notice; accept saves exactly the visible menu (DB equality) and the notice disappears.
 
 Failure modes each scenario must catch:
