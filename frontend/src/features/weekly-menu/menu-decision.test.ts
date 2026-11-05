@@ -2,7 +2,10 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { DAYS } from '#/features/weekly-menu/constants'
 import { emptyMenu, placedRecipeIds } from '#/features/weekly-menu/week'
 import { buildWeeklyMenuCandidates } from '#/features/weekly-menu/menu-candidates'
-import type { AiMenuContext } from '#/features/weekly-menu/ai-generator'
+import type {
+  AiMenuContext,
+  AiMenuResult,
+} from '#/features/weekly-menu/ai-generator'
 import { prepareWeeklyMenuDecision } from '#/features/weekly-menu/menu-decision'
 
 function context(): AiMenuContext {
@@ -44,6 +47,14 @@ afterEach(() => {
 })
 const choice = (answer: unknown) => async () =>
   Response.json({ answers: { selectedMenu: answer } })
+// Local fallback = first candidate, validated, marked 'local'.
+async function expectLocal(run: Promise<AiMenuResult>) {
+  const first = buildWeeklyMenuCandidates(context(), options.seed)[0]
+  const result = await run
+  expect(result.selectionSource).toBe('local')
+  expect(result.menu).toEqual(first)
+  expect(result.unavailableSlots).toEqual([])
+}
 const status =
   (code: number, body: object | string = 'synthetic body') =>
   async () =>
@@ -121,6 +132,7 @@ describe('Decisions real SDK transport', () => {
       expect(transport).not.toHaveBeenCalled()
       const result = await prepared.generate()
       expect(result.menu).toEqual(candidates[1])
+      expect(result).not.toHaveProperty('selectionSource')
       expect(result.unavailableSlots).toEqual([])
       expect(result.menu.days.Monday.lunchRecipeId).toBeNull()
       expect(result.menu.days.Sunday.dinnerRecipeId).toBeNull()
@@ -134,15 +146,15 @@ describe('Decisions real SDK transport', () => {
     { type: 'choice', choice: 'invented' },
     { type: 'score', score: 1 },
   ])(
-    'rejects malformed, refused and unknown selections (%j)',
+    'falls back locally once on malformed, refused and unknown selections (%j)',
     async (answer) => {
       const transport = vi.fn<typeof fetch>(choice(answer))
-      await expect(generate(context(), transport)).rejects.toThrow()
+      await expectLocal(generate(context(), transport))
       expect(transport).toHaveBeenCalledTimes(1)
     },
   )
   it.each([401, 404, 429, 503])(
-    'throws HTTP %i once for initial and regeneration',
+    'HTTP %i: unclassified body: initial falls back locally, regeneration throws',
     async (code) => {
       for (const regenerate of [false, true]) {
         const input = context()
@@ -150,14 +162,31 @@ describe('Decisions real SDK transport', () => {
           input.previousProposal = buildWeeklyMenuCandidates(input, 9)[0]
         const original = structuredClone(input)
         const transport = vi.fn<typeof fetch>(status(code))
-        await expect(generate(input, transport)).rejects.toThrow(
-          'AI Weekly Menu generation failed',
-        )
+        const run = generate(input, transport)
+        if (regenerate)
+          await expect(run).rejects.toThrow('AI Weekly Menu generation failed')
+        else await expectLocal(run)
         expect(input).toEqual(original)
         expect(transport).toHaveBeenCalledTimes(1)
       }
     },
   )
+  it.each([
+    choice({ type: 'refusal' }),
+    choice({ type: 'choice', choice: 'invented' }),
+    status(429),
+    status(503),
+  ])('regeneration never falls back locally (%#)', async (transport) => {
+    const input = context()
+    input.previousProposal = buildWeeklyMenuCandidates(input, 9)[0]
+    const original = structuredClone(input)
+    const send = vi.fn<typeof fetch>(transport)
+    await expect(generate(input, send)).rejects.toThrow(
+      'AI Weekly Menu generation failed',
+    )
+    expect(input).toEqual(original)
+    expect(send).toHaveBeenCalledTimes(1)
+  })
   it('sets one total 20-second abort budget without retries', async () => {
     const timeout = vi
       .spyOn(AbortSignal, 'timeout')
@@ -165,7 +194,7 @@ describe('Decisions real SDK transport', () => {
     const transport = vi.fn<typeof fetch>(async () => {
       throw new Error('must not reach transport')
     })
-    await expect(generate(context(), transport)).rejects.toThrow()
+    await expectLocal(generate(context(), transport))
     expect(timeout).toHaveBeenCalledExactlyOnceWith(20_000)
     expect(transport).not.toHaveBeenCalled()
   })
@@ -314,13 +343,15 @@ describe('Decisions real SDK transport', () => {
     const info = vi.spyOn(console, 'info').mockImplementation(() => {})
     if (name === 'timeout')
       vi.spyOn(AbortSignal, 'timeout').mockReturnValue(deadline.signal)
-    await expect(
-      generate(context(), transport as typeof fetch),
-    ).rejects.toThrow('AI Weekly Menu generation failed')
+    const run = generate(context(), transport)
+    const credentials = name === 'auth' || name === 'model-not-found'
+    if (credentials)
+      await expect(run).rejects.toThrow('AI Weekly Menu generation failed')
+    else await expectLocal(run)
     expect(info).toHaveBeenCalledTimes(1)
-    expect(
-      (info.mock.calls[0][1] as Record<string, unknown>).errorCategory,
-    ).toBe(name)
+    const logged = info.mock.calls[0][1] as Record<string, unknown>
+    expect(logged.errorCategory).toBe(name)
+    expect(logged.outcome).toBe(credentials ? 'error' : 'local-fallback')
     expect(JSON.stringify(info.mock.calls)).not.toMatch(
       /synthetic|Recipe|Known/,
     )

@@ -191,7 +191,7 @@ No establecer un umbral arbitrario de confianza para aceptar menús. Las distrib
 
 ## 6. Errores y alternativa local
 
-Entrega 2, piloto de servidor: tanto la generación inicial como la regeneración fallan de forma recuperable ante errores remotos. La alternativa local degradada de la tabla siguiente queda pendiente de la entrega 3 junto con su aviso visible; no se presenta silenciosamente como éxito. Un único candidato válido sí se devuelve localmente y consume un intento protegido, sin petición remota. El contrato público sigue siendo `menu`, `recipeNames` y `unavailableSlots`, sin metadatos de origen nuevos.
+Entrega 2, piloto de servidor: tanto la generación inicial como la regeneración fallan de forma recuperable ante errores remotos. Entrega 4 (servidor): en la generación inicial, timeout, rechazo, elección inválida, límite de tasa o error desconocido devuelven el primer candidato local validado (mejor por las métricas locales) con `selectionSource: 'local'`; `auth`, `model-not-found` y toda regeneración siguen fallando. El aviso visible llega con la parte de interfaz de la misma entrega. Un único candidato válido sí se devuelve localmente y consume un intento protegido, sin petición remota. El contrato público sigue siendo `menu`, `recipeNames` y `unavailableSlots`, salvo el campo opcional `selectionSource?: 'local'`, presente solo en la alternativa local y nunca persistido.
 
 La semana totalmente cubierta no se puede representar con el contrato actual `lunch|dinner|both`: Oficina y Comer fuera conservan al menos una franja doméstica por día. Ese caso queda diferido sin cambiar el esquema ni añadir una rama de cuota inalcanzable; un catálogo vacío no equivale a una semana cubierta.
 

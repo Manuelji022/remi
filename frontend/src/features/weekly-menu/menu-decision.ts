@@ -191,8 +191,18 @@ export function prepareWeeklyMenuDecision(
         return results[index]
       } catch (error) {
         errorCategory = failureCategory(error, signal)
+        // Initial generation degrades to the best local candidate, except for
+        // credential/configuration failures. Regeneration always fails.
+        if (
+          !context.previousProposal &&
+          errorCategory !== 'auth' &&
+          errorCategory !== 'model-not-found'
+        ) {
+          outcome = 'local-fallback'
+          return { ...results[0], selectionSource: 'local' }
+        }
         // Provider errors can include request data. Keep secrets and recipe text
-        // out of client errors and logs; both initial and regeneration fail.
+        // out of client errors and logs.
         throw new Error('AI Weekly Menu generation failed')
       } finally {
         console.info('Weekly Menu decision', {
