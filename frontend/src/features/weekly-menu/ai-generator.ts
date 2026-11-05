@@ -6,10 +6,8 @@ import { DAYS } from '#/features/weekly-menu/constants'
 import type { Day } from '#/features/weekly-menu/constants'
 import type { Recipe, MealSlot } from '#/features/recipes/recipe'
 import { mealSlotSchema } from '#/features/recipes/recipe'
-import {
-  assignRecipesToWeek,
-  placedRecipeIds,
-} from '#/features/weekly-menu/week'
+import { buildWeeklyMenuCandidates } from '#/features/weekly-menu/menu-candidates'
+import { placedRecipeIds } from '#/features/weekly-menu/week'
 import type { CalendarWeekMenu } from '#/features/weekly-menu/week'
 import type { TargetWeekSchedule } from '#/features/weekly-menu/ai-schedule'
 import { menuForTargetSchedule } from '#/features/weekly-menu/ai-schedule'
@@ -222,11 +220,7 @@ export function validateAiMenuAssignments(
     ...placedRecipeIds(context.currentWeek),
     ...placedRecipeIds(context.previousWeek),
   ])
-  const fallbackMenu = assignRecipesToWeek(
-    menu,
-    orderedRecipes.map(({ id, slot }) => ({ id, slot })),
-    priorRecipeIds,
-  )
+  const fallbackMenu = buildWeeklyMenuCandidates(context, 0)[0]
   const repairCounts: Record<MealSlot, number> = { lunch: 0, dinner: 0 }
   const unavailableSlots: MealSlot[] = []
   // Reserve every valid model choice before repairing any earlier missing slot.

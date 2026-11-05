@@ -317,7 +317,7 @@ function recipeQueues(
   }
 }
 
-function scopeIncludes(scope: PlanningScope, slot: MealSlot): boolean {
+export function scopeIncludes(scope: PlanningScope, slot: MealSlot): boolean {
   return scope === 'both' || scope === slot
 }
 

@@ -2,6 +2,7 @@
 
 Review regressions (documented before fixes): direct-PID SIGTERM can defer cleanup during a foreground helper; Chromium background connections can escape the app origin; a JavaScript CLI launcher can outlive its timeout through a native child holding pipes open. The regression check must stop a deliberately stalled helper, and network probes plus a socket trace must fail on any successful non-loopback connection.
 
+- The isolated frontend copy's pnpm workspace metadata omits `packages`, so current pnpm exits before running migrations or the scenario.
 - Inherited credentials or dotenv loading could target the shared remote database.
 - A failed assertion or signal could leak PostgreSQL, the browser, or the dev server.
 - A stale/unsigned cookie or a pending 2FA challenge could masquerade as authentication.

@@ -72,6 +72,25 @@ This database test does not exercise browser authentication, the authenticated s
 
 The browser harness verifies URL serialization, invalid-value omission, retry, and guest isolation at the mocked HTTP boundary; it does not prove server environment gates, mock timing, or DB guard accounting.
 
+## Bounded local candidate planner failure cases
+
+Documented before planner implementation. The planner is deterministic and pure; focused tests assert its proposal contract, while the authenticated real-stack AI menu scenario exercises the wired mock/repair path.
+
+1. A missing history week prevents generation, or a valid empty current/previous week is replaced with invented history.
+2. The planner changes the target Monday, omits a target weekday, or fails to retain normalized context/scope from the confirmed schedule.
+3. A recipe is assigned to a covered slot, a lunch recipe is used for dinner (or vice versa), or an ID outside the full supplied catalog is emitted.
+4. Avoiding current/previous recipe IDs becomes a hard exclusion, or previous-week reuse is penalized more strongly than current-week reuse; eligible slots must still fill.
+5. A scarce pool leaves home-planned slots empty even though a compatible recipe can repeat; a missing meal type is filled with another type instead of staying unavailable.
+6. Identical normalized inputs and explicit seed produce different proposals, or catalog ordering changes the result.
+7. More than eight proposals are returned, generation explores an unbounded combination space, or candidate ordering drops useful variety.
+8. Distinct candidates only change the selected recipe set but never explore different weekday pairings; equivalent permutations are not deduplicated.
+9. Regeneration repeats the previous identical proposal despite another valid proposal, or invents an alternative when only one distinct valid week exists.
+10. A fixed recipe subset remains eligible regardless of seed; compatible recipes elsewhere in the full catalog never enter proposals across seeds.
+11. A schedule with no home-planned slots, if represented by the domain, receives invented assignments instead of a valid empty week; every covered slot in current schedules remains empty.
+12. The planner classifies recipes as heavy/light or claims nutritional balance from names or ingredients that do not encode those facts.
+
+Verification order for this change: the cases above and `menu-candidates.test.ts` were authored before `menu-candidates.ts` or generator wiring. The tests cover schedule/slot fidelity, empty history, soft recency, scarce pools, deterministic seeds, bounded distinct proposals, pairing variation, regeneration, and catalog eligibility across seeds. The real-stack scenario uses only its existing disposable local database and provider mock.
+
 ### CLI-only harness runner
 
 When `agent_browser_code` is unavailable, run the same harness through the native CLI adapter below from `frontend/`, with the production server from step 1 already running. Use a fresh named session, register the init script before navigation, and set a 1440 × 1200 viewport (the shorter default viewport can place an action behind the sticky header).
