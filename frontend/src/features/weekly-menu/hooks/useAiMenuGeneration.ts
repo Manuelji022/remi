@@ -108,6 +108,15 @@ type Action =
       preview?: AiPreview
     }
   | { type: 'draft'; draft: Preferences; invalidatePreview?: boolean }
+  | { type: 'update-context'; day: Day; context: DayContext }
+  | { type: 'update-scope'; day: Day; scope: PlanningScope }
+  | {
+      type: 'update-recipe'
+      day: Day
+      slot: MealSlot
+      recipeId: string | null
+      recipes: readonly Recipe[]
+    }
   | {
       type: 'generating'
       userId: string
@@ -125,7 +134,6 @@ type Action =
   | { type: 'saving'; preview: AiPreview }
   | { type: 'accepted' }
   | { type: 'restore-preview'; preview: AiPreview }
-  | { type: 'recipe'; preview: AiPreview }
 
 function reducer(state: AiGenerationState, action: Action): AiGenerationState {
   switch (action.type) {
@@ -151,6 +159,43 @@ function reducer(state: AiGenerationState, action: Action): AiGenerationState {
               : {}),
           }
         : state
+    case 'update-context': {
+      if (state.phase !== 'confirming') return state
+      const nextWithContext = updateScheduleDayContext(
+        state.draft,
+        action.day,
+        action.context,
+      )
+      return {
+        ...state,
+        draft: nextWithContext,
+        ...(state.mode === 'edit' && nextWithContext !== state.draft
+          ? {
+              preview: undefined,
+              originalPreview: state.originalPreview ?? state.preview,
+            }
+          : {}),
+      }
+    }
+    case 'update-scope': {
+      if (state.phase !== 'confirming') return state
+      const nextWithScope = updateSchedulePlanningScope(
+        state.draft,
+        action.day,
+        action.scope,
+      )
+      if (nextWithScope === state.draft) return state
+      return {
+        ...state,
+        draft: nextWithScope,
+        ...(state.mode === 'edit'
+          ? {
+              preview: undefined,
+              originalPreview: state.originalPreview ?? state.preview,
+            }
+          : {}),
+      }
+    }
     case 'generating':
       return { phase: 'generating', ...action }
     case 'preview':
@@ -159,11 +204,34 @@ function reducer(state: AiGenerationState, action: Action): AiGenerationState {
       return action.state
     case 'saving':
       return { phase: 'saving', preview: action.preview }
-    case 'recipe':
-      return state.phase === 'preview' ||
-        (state.phase === 'error' && Boolean(state.preview))
-        ? { ...state, preview: action.preview }
-        : state
+    case 'update-recipe': {
+      if (!(state.phase === 'preview' || (state.phase === 'error' && state.preview)))
+        return state
+      const currentPreview =
+        state.phase === 'preview' ? state.preview : state.preview!
+      const selected = action.recipes.find(
+        (recipe) => recipe.id === action.recipeId,
+      )
+      const plan = currentPreview.menu.days[action.day]
+      const field =
+        action.slot === 'lunch' ? 'lunchRecipeId' : 'dinnerRecipeId'
+      return {
+        ...state,
+        preview: {
+          ...currentPreview,
+          menu: {
+            ...currentPreview.menu,
+            days: {
+              ...currentPreview.menu.days,
+              [action.day]: { ...plan, [field]: action.recipeId },
+            },
+          },
+          recipeNames: selected
+            ? { ...currentPreview.recipeNames, [selected.id]: selected.name }
+            : currentPreview.recipeNames,
+        },
+      }
+    }
   }
 }
 
@@ -180,6 +248,7 @@ export function useAiMenuGeneration({
   const identityRef = useRef(userId)
   const epochRef = useRef(0)
   const generationInFlightRef = useRef(false)
+  const scheduleOpenInFlightRef = useRef(false)
   useLayoutEffect(() => {
     identityRef.current = userId
   }, [userId])
@@ -217,13 +286,7 @@ export function useAiMenuGeneration({
       } = {},
     ) => {
       const requester = identityRef.current
-      if (
-        !requester ||
-        state.phase === 'preparing' ||
-        state.phase === 'generating' ||
-        state.phase === 'saving'
-      )
-        return
+      if (!requester || scheduleOpenInFlightRef.current) return
       const target =
         options.targetWeekStart ?? nextCalendarWeekStart(new Date(), timeZone)
       const mode = options.mode ?? 'new'
@@ -246,6 +309,7 @@ export function useAiMenuGeneration({
         })
         return
       }
+      scheduleOpenInFlightRef.current = true
       dispatch({
         type: 'preparing',
         userId: requester,
@@ -278,36 +342,20 @@ export function useAiMenuGeneration({
               reason: 'prepare',
             },
           })
+      } finally {
+        scheduleOpenInFlightRef.current = false
       }
     },
-    [state.phase, timeZone],
+    [timeZone],
   )
 
-  const updateContext = useCallback(
-    (day: Day, context: DayContext) => {
-      if (state.phase !== 'confirming') return
-      const next = updateScheduleDayContext(state.draft, day, context)
-      dispatch({
-        type: 'draft',
-        draft: next,
-        invalidatePreview: state.mode === 'edit' && next !== state.draft,
-      })
-    },
-    [state],
-  )
-  const updateScope = useCallback(
-    (day: Day, scope: PlanningScope) => {
-      if (state.phase !== 'confirming') return
-      const next = updateSchedulePlanningScope(state.draft, day, scope)
-      if (next === state.draft) return
-      dispatch({
-        type: 'draft',
-        draft: next,
-        invalidatePreview: state.mode === 'edit',
-      })
-    },
-    [state],
-  )
+  const updateContext = (day: Day, context: DayContext) => {
+    dispatch({ type: 'update-context', day, context })
+  }
+
+  const updateScope = (day: Day, scope: PlanningScope) => {
+    dispatch({ type: 'update-scope', day, scope })
+  }
 
   // Shared generation core: epoch/identity/in-flight guards, error mapping and
   // preview creation. Callers check their own phase preconditions first.
@@ -415,7 +463,7 @@ export function useAiMenuGeneration({
     [timeZone, onPreviewWeek],
   )
 
-  const confirm = useCallback(async () => {
+  const confirm = async () => {
     if (
       state.phase !== 'confirming' ||
       !identityRef.current ||
@@ -429,7 +477,7 @@ export function useAiMenuGeneration({
       replacesSavedMenu: state.replacesSavedMenu,
       previousPreview: state.preview,
     })
-  }, [state, runGeneration])
+  }
 
   const canRegenerate =
     state.phase === 'preview' ||
@@ -438,7 +486,7 @@ export function useAiMenuGeneration({
       (state.reason === 'generate' || state.reason === 'in-progress'))
 
   // Regeneration and its retry retain the proposal until another succeeds.
-  const regenerate = useCallback(async () => {
+  const regenerate = async () => {
     const previousPreview =
       state.phase === 'preview' || state.phase === 'error'
         ? state.preview
@@ -459,9 +507,9 @@ export function useAiMenuGeneration({
       previousPreview,
       previousMenu: previousPreview.menu,
     })
-  }, [state, canRegenerate, runGeneration])
+  }
 
-  const retry = useCallback(async () => {
+  const retry = async () => {
     if (state.phase !== 'error') return
     if (
       state.preview &&
@@ -492,44 +540,22 @@ export function useAiMenuGeneration({
       mode: 'new',
       preferences: savedDraft,
     })
-  }, [state, openSchedule, timeZone, regenerate])
+  }
 
-  const updateRecipe = useCallback(
-    (
-      day: Day,
-      slot: MealSlot,
-      recipeId: string | null,
-      recipes: readonly Recipe[],
-    ) => {
-      if (!(
-        state.phase === 'preview' ||
-        (state.phase === 'error' && state.preview)
-      ))
-        return
-      const currentPreview =
-        state.phase === 'preview' ? state.preview : state.preview!
-      const selected = recipes.find((recipe) => recipe.id === recipeId)
-      const plan = currentPreview.menu.days[day]
-      const field = slot === 'lunch' ? 'lunchRecipeId' : 'dinnerRecipeId'
-      dispatch({
-        type: 'recipe',
-        preview: {
-          ...currentPreview,
-          menu: {
-            ...currentPreview.menu,
-            days: {
-              ...currentPreview.menu.days,
-              [day]: { ...plan, [field]: recipeId },
-            },
-          },
-          recipeNames: selected
-            ? { ...currentPreview.recipeNames, [selected.id]: selected.name }
-            : currentPreview.recipeNames,
-        },
-      })
-    },
-    [state],
-  )
+  const updateRecipe = (
+    day: Day,
+    slot: MealSlot,
+    recipeId: string | null,
+    recipes: readonly Recipe[],
+  ) => {
+    dispatch({
+      type: 'update-recipe',
+      day,
+      slot,
+      recipeId,
+      recipes,
+    })
+  }
 
   const accept = useCallback(
     async (
