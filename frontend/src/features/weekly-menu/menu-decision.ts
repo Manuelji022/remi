@@ -41,10 +41,21 @@ export function weeklyMenuEngine(): 'legacy' | 'decisions' {
 }
 
 // Coarse, allowlisted error names only; never messages, causes or data.
-function failureCategory(error: unknown): string {
+function failureCategory(error: unknown, signal: AbortSignal): string {
   const name = error instanceof Error ? error.name : ''
-  if (name === 'AbortError' || name === 'TimeoutError') return 'timeout'
+  const cause =
+    error instanceof Error ? (error.cause as Error | undefined) : undefined
+  const timedOut = ['AbortError', 'TimeoutError']
+  if (
+    signal.aborted ||
+    timedOut.includes(name) ||
+    timedOut.includes(cause?.name ?? '') ||
+    name === 'GatewayTimeoutError'
+  )
+    return 'timeout'
   if (name === 'GatewayAuthenticationError') return 'auth'
+  if (name === 'GatewayModelNotFoundError') return 'model-not-found'
+  if (name === 'GatewayRateLimitError') return 'rate-limit'
   if (name === 'AI_DecisionRefusalError') return 'refusal'
   if (
     name === 'UnknownDecisionChoiceError' ||
@@ -93,11 +104,7 @@ export function prepareWeeklyMenuDecision(
     options.model ??
     (process.env.AI_WEEKLY_MENU_DECISION_MODEL?.trim() ||
       'openai/gpt-6-luna-decisions')
-  if (
-    !apiKey ||
-    !/^[a-zA-Z0-9._-]+\/[a-zA-Z0-9._/-]+$/.test(model) ||
-    model !== model.trim()
-  ) {
+  if (!apiKey || !/^[a-zA-Z0-9._-]+\/[a-zA-Z0-9._/-]+$/.test(model)) {
     throw new Error('Invalid AI Weekly Menu Decisions configuration')
   }
 
@@ -155,6 +162,7 @@ export function prepareWeeklyMenuDecision(
   return {
     generate: async () => {
       const started = Date.now()
+      const signal = AbortSignal.timeout(20_000)
       let outcome = 'error'
       let errorCategory: string | undefined
       try {
@@ -171,7 +179,7 @@ export function prepareWeeklyMenuDecision(
             },
           },
           maxRetries: 0,
-          abortSignal: AbortSignal.timeout(20_000),
+          abortSignal: signal,
         })
         const id = result.answers.selectedMenu.choice
         const index = candidates.findIndex((_, i) => id === `menu-${i}`)
@@ -182,7 +190,7 @@ export function prepareWeeklyMenuDecision(
         outcome = 'selected'
         return results[index]
       } catch (error) {
-        errorCategory = failureCategory(error)
+        errorCategory = failureCategory(error, signal)
         // Provider errors can include request data. Keep secrets and recipe text
         // out of client errors and logs; both initial and regeneration fail.
         throw new Error('AI Weekly Menu generation failed')

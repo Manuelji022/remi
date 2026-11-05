@@ -287,24 +287,36 @@ describe('Decisions real SDK transport', () => {
     await generate(input, transport)
     expect(transport).toHaveBeenCalledTimes(1)
   })
+  const providerError = (code: number, type: string) =>
+    status(code, { error: { message: 'synthetic body', type } })
+  // Aborts mid-request (after the transport starts), like a real timeout.
+  const deadline = new AbortController()
+  const midRequestTimeout = (init?: RequestInit) =>
+    new Promise<Response>((_, reject) => {
+      init?.signal?.addEventListener('abort', () => reject(init.signal?.reason))
+      setTimeout(
+        () => deadline.abort(new DOMException('synthetic', 'TimeoutError')),
+        5,
+      )
+    })
   it.each([
-    [
-      'auth',
-      status(401, { error: { message: 'x', type: 'authentication_error' } }),
-    ],
+    ['auth', providerError(401, 'authentication_error')],
+    ['model-not-found', providerError(404, 'model_not_found')],
+    ['rate-limit', providerError(429, 'rate_limit_exceeded')],
     ['invalid-choice', choice({ type: 'choice', choice: 'invented' })],
     ['refusal', choice({ type: 'refusal' })],
     ['unknown', status(503)],
-    ['timeout', status(200)],
+    [
+      'timeout',
+      async (_: unknown, init?: RequestInit) => midRequestTimeout(init),
+    ],
   ])('logs only the coarse failure category %s', async (name, transport) => {
     const info = vi.spyOn(console, 'info').mockImplementation(() => {})
     if (name === 'timeout')
-      vi.spyOn(AbortSignal, 'timeout').mockReturnValue(
-        AbortSignal.abort(new DOMException('synthetic', 'TimeoutError')),
-      )
-    await expect(generate(context(), transport)).rejects.toThrow(
-      'AI Weekly Menu generation failed',
-    )
+      vi.spyOn(AbortSignal, 'timeout').mockReturnValue(deadline.signal)
+    await expect(
+      generate(context(), transport as typeof fetch),
+    ).rejects.toThrow('AI Weekly Menu generation failed')
     expect(info).toHaveBeenCalledTimes(1)
     expect(
       (info.mock.calls[0][1] as Record<string, unknown>).errorCategory,
