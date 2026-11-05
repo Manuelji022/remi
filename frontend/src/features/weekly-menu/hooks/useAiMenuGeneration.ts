@@ -438,6 +438,9 @@ export function useAiMenuGeneration({
           replacesSavedMenu,
           recipeNames: result.recipeNames,
           unavailableSlots: result.unavailableSlots,
+          ...(result.selectionSource && {
+            selectionSource: result.selectionSource,
+          }),
         }
         dispatch({
           type: 'preview',

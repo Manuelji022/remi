@@ -92,7 +92,7 @@ export default async function scenario({ assert, browser, evaluate, wait, click,
   await seedDecisionFixture()
   const dir = dirname(artifact)
   const stem = join(dir, 'weekly-menu-decisions-results')
-  const shots = ['preview', 'manual', 'failure-recovery', 'accepted']
+  const shots = ['preview', 'manual', 'failure-recovery', 'accepted', 'local-fallback']
   await Promise.all([`${stem}.json`, ...shots.map((n) => `${stem}-${n}.png`)].map((f) => rm(f, { force: true })))
   const assertions = []
   const check = async (name, run) => {
@@ -219,6 +219,51 @@ export default async function scenario({ assert, browser, evaluate, wait, click,
       assert(!lines.some((l) => l.includes(`Ingredient ${generated[1][1].slice(4).replace('-', ' ')}`)) || edited.flat().includes(generated[1][1]))
     })
     emit('accept persists the edited menu; reload and shopping list match it', { shoppingLines: lines.length })
+    // E: initial generation with an invalid choice falls back to the local menu.
+    const noticeText = "Here's a basic menu. You can review and change the dishes before saving."
+    const notice = `Array.from(${preview}?.querySelectorAll('[role="status"]') ?? [], n => n.textContent).includes(${JSON.stringify(noticeText)})`
+    const before = { acc: await accounting(), calls: (await transportLog()).length }
+    await browser(['open', `${origin}/weekly-menu-planner?mock=decision-invalid`])
+    await wait(ready)
+    await browser(['click', '.planner-actions .planner-primary-btn'])
+    await wait(`${dialog} !== null`)
+    await click('Confirm schedule and generate')
+    await wait(`${preview} !== null && ${preview}.querySelector('select') !== null`)
+    const fallback = await read()
+    const flog = await transportLog()
+    await check('local fallback preview shows the plain-language notice', async () => assert(await evaluate(notice)))
+    await check('one guarded attempt, one transport call, lease released, nothing saved by preview', async () => {
+      assert.deepEqual(await accounting(), { attempts: before.acc.attempts + 1, leases: 0 })
+      assert.equal(flog.length, before.calls + 1)
+      assert.equal(flog.at(-1).scenario, 'decision-invalid')
+      assert.equal(flog.at(-1).selected, null)
+      assert.deepEqual((await saved()).sort((a, b) => week.indexOf(a.day) - week.indexOf(b.day)).map((r) => [r.day, r.lunch_recipe_id, r.dinner_recipe_id]), rows.map((r) => [r.day, r.lunch_recipe_id, r.dinner_recipe_id]))
+    })
+    await check('fallback recipes come from the user catalog', () => {
+      const ids = fallback.flat().filter(Boolean)
+      assert(ids.length > 0)
+      assert(ids.every((id) => /^dec-(lunch|dinner)-\d$/.test(id)))
+    })
+    await browser(['screenshot', `${stem}-local-fallback.png`])
+    const fbSwap = await evaluate(`(() => {
+      const select = ${preview}.querySelectorAll('.day-card')[2].querySelectorAll('select')[1]
+      const next = Array.from(select.options).map(o => o.value).find(v => v && v !== select.value)
+      Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set.call(select, next)
+      select.dispatchEvent(new Event('change', { bubbles: true }))
+      return next
+    })()`)
+    await wait(`${preview}.querySelectorAll('.day-card')[2].querySelectorAll('select')[1].value === ${JSON.stringify(fbSwap)}`)
+    const fbEdited = await read()
+    await check('manual change keeps the notice', async () => assert(await evaluate(notice)))
+    await click('Accept and save menu')
+    await browser(['wait', '--text', 'Weekly Menu saved.'])
+    await check('accept saves exactly the visible menu and the notice disappears', async () => {
+      const saved2 = (await saved()).sort((a, b) => week.indexOf(a.day) - week.indexOf(b.day))
+      assert.deepEqual(saved2.map((r) => [r.lunch_recipe_id, r.dinner_recipe_id]), fbEdited)
+      assert.equal(await evaluate(`document.body.innerText.includes(${JSON.stringify(noticeText)})`), false)
+    })
+    emit('decision-invalid on initial generation: local basic menu with notice; one attempt; accept saves the visible menu')
+
     result = {
       scenario: 'decisions-real-stack-mock-transport',
       verdict: 'PASS',
@@ -232,6 +277,7 @@ export default async function scenario({ assert, browser, evaluate, wait, click,
       invalidChoiceId: log[1].choice,
       manualChange: { day: 'Tuesday', slot: 'dinner', from: generated[1][1], to: swapped.to },
       attempts: 2,
+      localFallback: { selectionSource: 'local (mock transport failure)', attempts: 1, transportCalls: 1, noticeVisible: true, manualChangeKeepsNotice: true },
       screenshots: shots.map((n) => `weekly-menu-decisions-results-${n}.png`),
     }
   } finally {

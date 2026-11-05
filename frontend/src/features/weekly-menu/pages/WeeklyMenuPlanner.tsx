@@ -647,6 +647,7 @@ export function WeeklyMenuPlanner() {
               canAccept={canAcceptPreview}
               isSignedIn={Boolean(userId)}
               replacesSavedMenu={currentPreview.replacesSavedMenu}
+              isLocalFallback={currentPreview.selectionSource === 'local'}
               canGenerateAnother={canGenerateAnother}
               onGenerateAnother={handleGenerateAnother}
               onEditSchedule={() =>

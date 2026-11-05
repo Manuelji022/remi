@@ -21,6 +21,7 @@ interface AiMenuPreviewProps {
   canAccept: boolean
   isSignedIn: boolean
   replacesSavedMenu: boolean
+  isLocalFallback?: boolean
   canGenerateAnother: boolean
   onGenerateAnother: (opener: HTMLElement) => void
   onEditSchedule: () => void
@@ -45,6 +46,7 @@ export function AiMenuPreview({
   canAccept,
   isSignedIn,
   replacesSavedMenu,
+  isLocalFallback = false,
   canGenerateAnother,
   onGenerateAnother,
   onEditSchedule,
@@ -80,6 +82,11 @@ export function AiMenuPreview({
                 : 'planner.aiPreviewBody',
             )}
           </p>
+          {isLocalFallback && (
+            <p className="planner-ai-replace-note" role="status">
+              {t('planner.aiPreviewLocalFallback')}
+            </p>
+          )}
           {replacesSavedMenu && (
             <p className="planner-ai-replace-note">
               {t('planner.aiPreviewReplaceNote')}

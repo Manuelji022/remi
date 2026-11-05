@@ -20,11 +20,19 @@
     "to": "dec-dinner-0"
   },
   "attempts": 2,
+  "localFallback": {
+    "selectionSource": "local (mock transport failure)",
+    "attempts": 1,
+    "transportCalls": 1,
+    "noticeVisible": true,
+    "manualChangeKeepsNotice": true
+  },
   "screenshots": [
     "weekly-menu-decisions-results-preview.png",
     "weekly-menu-decisions-results-manual.png",
     "weekly-menu-decisions-results-failure-recovery.png",
-    "weekly-menu-decisions-results-accepted.png"
+    "weekly-menu-decisions-results-accepted.png",
+    "weekly-menu-decisions-results-local-fallback.png"
   ],
   "assertions": [
     {
@@ -77,6 +85,26 @@
     },
     {
       "name": "shopping list contains exactly the edited menu ingredients, including the swapped recipe",
+      "verdict": "PASS"
+    },
+    {
+      "name": "local fallback preview shows the plain-language notice",
+      "verdict": "PASS"
+    },
+    {
+      "name": "one guarded attempt, one transport call, lease released, nothing saved by preview",
+      "verdict": "PASS"
+    },
+    {
+      "name": "fallback recipes come from the user catalog",
+      "verdict": "PASS"
+    },
+    {
+      "name": "manual change keeps the notice",
+      "verdict": "PASS"
+    },
+    {
+      "name": "accept saves exactly the visible menu and the notice disappears",
       "verdict": "PASS"
     }
   ]
