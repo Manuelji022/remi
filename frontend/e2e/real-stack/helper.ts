@@ -180,6 +180,32 @@ try {
       Array.from(
         await sql`select m.week_start::text, d.day,d.context,d.scope,d.lunch_recipe_id,d.dinner_recipe_id from weekly_menu m join weekly_menu_day d on d.weekly_menu_id=m.id where m.user_id=${userId} order by d.day`,
       )
+    // Decisions needs several candidates, and the legacy flow above spends the
+    // whole hourly quota: start from clean accounting and an empty saved week.
+    const seedDecisionFixture = async () => {
+      await sql`delete from weekly_menu where user_id=${userId}`
+      await sql`delete from ai_menu_generation_request where user_id=${userId}`
+      for (const slot of ['lunch', 'dinner'])
+        for (let i = 0; i < 9; i++) {
+          const id = `dec-${slot}-${i}`
+          await sql`insert into recipe (id,user_id,name,slot) values (${id},${userId},${`Decision ${slot} ${i}`},${slot})`
+          await sql`insert into recipe_ingredient (id,recipe_id,name,quantity,unit,position) values (${`${id}-ing`},${id},${`Ingredient ${slot} ${i}`},1,'g',0)`
+        }
+    }
+    // Lines written by the in-process fake Gateway to the dev server log.
+    const logPath = process.env.REAL_STACK_SERVER_LOG
+    assert(logPath)
+    const transportLog = async () =>
+      (await readFile(logPath, 'utf8'))
+        .split('\n')
+        .filter((line) => line.includes('DECISION_MOCK_TRANSPORT'))
+        .map(
+          (line) =>
+            JSON.parse(line.slice(line.indexOf('{'))) as Record<
+              string,
+              unknown
+            >,
+        )
     try {
       emit(
         'real server accepts signed post-2FA session and rejects tampered cookie',
@@ -216,6 +242,8 @@ try {
         accounting,
         saved,
         withRecipeTableHidden,
+        seedDecisionFixture,
+        transportLog,
         emit,
         artifact,
       })

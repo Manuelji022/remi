@@ -8,6 +8,8 @@ export const aiMockScenarioSchema = z.enum([
   'in-progress',
   'stale',
   'empty',
+  'decision-ok',
+  'decision-invalid',
 ])
 
 export function isAiMockEnabled(): boolean {
