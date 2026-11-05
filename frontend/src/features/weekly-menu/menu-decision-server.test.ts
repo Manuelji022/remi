@@ -85,6 +85,20 @@ beforeEach(() => {
     }
   })
 })
+const addRecipe = () =>
+  context.recipes.push({
+    id: 'other',
+    name: 'Other lunch',
+    slot: 'lunch',
+    ingredients: [],
+  })
+const mockedResult = () => ({
+  menu: emptyMenu(context.targetWeekStart),
+  recipeNames: {},
+  unavailableSlots: [],
+})
+const run = () => invoke({ data: data() })
+const stale = { ok: false, reason: 'stale-week' }
 const data = () => ({
   targetWeekStart: context.targetWeekStart,
   timeZone: 'UTC',
@@ -92,53 +106,38 @@ const data = () => ({
 })
 
 it('guards a local singleton once with no credentials, and retains the post-generation stale check', async () => {
-  expect((await invoke({ data: data() })).ok).toBe(true)
+  expect((await run()).ok).toBe(true)
   expect(mock.guard).toHaveBeenCalledTimes(1)
   expect(mock.stale).toHaveBeenCalledTimes(2)
   mock.stale
     .mockReset()
     .mockReturnValueOnce(undefined)
     .mockReturnValueOnce('2026-11-16')
-  expect(await invoke({ data: data() })).toMatchObject({
-    ok: false,
-    reason: 'stale-week',
-  })
+  expect(await run()).toMatchObject(stale)
 })
 it('does not convert auth, stale, database, configuration or guard errors into previews', async () => {
   mock.requireSession.mockResolvedValueOnce(null)
-  await expect(invoke({ data: data() })).rejects.toThrow('Unauthorized')
+  await expect(run()).rejects.toThrow('Unauthorized')
   expect(mock.load).not.toHaveBeenCalled()
   mock.stale.mockReturnValueOnce('2026-11-16')
-  expect(await invoke({ data: data() })).toMatchObject({
-    ok: false,
-    reason: 'stale-week',
-  })
+  expect(await run()).toMatchObject(stale)
   expect(mock.load).not.toHaveBeenCalled()
   mock.load.mockRejectedValueOnce(new Error('synthetic DB failure'))
-  await expect(invoke({ data: data() })).rejects.toThrow('synthetic DB failure')
+  await expect(run()).rejects.toThrow('synthetic DB failure')
   expect(mock.guard).not.toHaveBeenCalled()
-  context.recipes.push({
-    id: 'other',
-    name: 'Other lunch',
-    slot: 'lunch',
-    ingredients: [],
-  })
-  await expect(invoke({ data: data() })).rejects.toThrow('configuration')
+  addRecipe()
+  await expect(run()).rejects.toThrow('configuration')
   expect(mock.guard).not.toHaveBeenCalled()
   context.recipes.pop()
   mock.guard.mockRejectedValueOnce(new AiGenerationLimitError())
-  expect(await invoke({ data: data() })).toMatchObject({
+  expect(await run()).toMatchObject({
     ok: false,
     reason: 'rate-limited',
   })
 })
 it('leaves legacy as the default and only attaches a previous proposal for the target week', async () => {
   vi.stubEnv('AI_WEEKLY_MENU_ENGINE', undefined)
-  mock.legacy.mockResolvedValue({
-    menu: emptyMenu(context.targetWeekStart),
-    recipeNames: {},
-    unavailableSlots: [],
-  })
+  mock.legacy.mockResolvedValue(mockedResult())
   const previous = emptyMenu(context.targetWeekStart)
   await invoke({ data: { ...data(), previousMenu: previous } })
   expect(context.previousProposal).toEqual(previous)
@@ -150,23 +149,14 @@ it('leaves legacy as the default and only attaches a previous proposal for the t
 it('gives the development mock precedence over Decisions with zero Gateway calls', async () => {
   vi.stubEnv('AI_WEEKLY_MENU_MOCK', 'true')
   vi.stubEnv('AI_GATEWAY_API_KEY', 'synthetic-gateway-key')
-  context.recipes.push({
-    id: 'other',
-    name: 'Other lunch',
-    slot: 'lunch',
-    ingredients: [],
-  })
+  addRecipe()
   const transport = vi.fn(
     async () => new Response('unexpected', { status: 500 }),
   )
   vi.stubGlobal('fetch', transport)
-  const mocked = {
-    menu: emptyMenu(context.targetWeekStart),
-    recipeNames: {},
-    unavailableSlots: [],
-  }
+  const mocked = mockedResult()
   mock.legacy.mockResolvedValue(mocked)
-  expect(await invoke({ data: data() })).toMatchObject({
+  expect(await run()).toMatchObject({
     ok: true,
     menu: mocked.menu,
   })
