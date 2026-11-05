@@ -127,3 +127,5 @@ isolated PostgreSQL guard harness remains useful for lock/concurrency cases.
 8. `accounting()` queries attempts/leases; `saved()` queries owned persisted days.
 9. `emit(description, evidence)` records PASS evidence; `artifact` names screenshots.
 10. Run `pnpm e2e:real-stack e2e/real-stack/your-name.scenario.js`; cookie setup is automatic.
+
+The same scenario also covers the Decisions adapter with an in-process fake Gateway (`?mock=decision-ok` / `decision-invalid`); see [WEEKLY-MENU-DECISIONS.md](WEEKLY-MENU-DECISIONS.md#real-stack-decisions-run-mock-transport-added-with-this-e2e).

@@ -98,6 +98,7 @@ done
 if [[ "$ready" != 1 ]]; then cat "$tmp/server.log"; exit 1; fi
 # Scenarios run from the isolated copy too, with the app's installed modules.
 cp "$scenario" "$tmp/app/e2e/real-stack/selected.scenario.js"
+export REAL_STACK_SERVER_LOG="$tmp/server.log"
 run_stage pnpm exec tsx e2e/real-stack/helper.ts run "$tmp/cookie.json" "$artifact" || { cat "$tmp/server.log"; exit 1; }
 cleanup
 trap - EXIT

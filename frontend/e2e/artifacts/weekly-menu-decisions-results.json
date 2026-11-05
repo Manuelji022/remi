@@ -1,0 +1,83 @@
+{
+  "scenario": "decisions-real-stack-mock-transport",
+  "verdict": "PASS",
+  "label": "mock transport (in-process fake fetch); no live Gateway, no model-quality claim",
+  "input": {
+    "recipes": "9 lunch + 9 dinner synthetic with one ingredient each (+1 legacy lunch/dinner)",
+    "schedule": "Monday office (lunch covered), other days both",
+    "engine": "AI_WEEKLY_MENU_MOCK=true"
+  },
+  "seed": 17,
+  "rubricVersion": "weekly-menu-choice-v1",
+  "candidateCount": 8,
+  "selectedChoiceId": "menu-7",
+  "selectionSource": "decision (mock transport)",
+  "invalidChoiceId": "menu-unknown",
+  "manualChange": {
+    "day": "Tuesday",
+    "slot": "dinner",
+    "from": "dec-dinner-6",
+    "to": "dec-dinner-0"
+  },
+  "attempts": 2,
+  "screenshots": [
+    "weekly-menu-decisions-results-preview.png",
+    "weekly-menu-decisions-results-manual.png",
+    "weekly-menu-decisions-results-failure-recovery.png",
+    "weekly-menu-decisions-results-accepted.png"
+  ],
+  "assertions": [
+    {
+      "name": "transport called once with more than one candidate",
+      "verdict": "PASS"
+    },
+    {
+      "name": "selected the LAST (non-first) candidate; preview equals it",
+      "verdict": "PASS"
+    },
+    {
+      "name": "covered Monday lunch has no recipe and no selector",
+      "verdict": "PASS"
+    },
+    {
+      "name": "every home slot has a recipe",
+      "verdict": "PASS"
+    },
+    {
+      "name": "one guarded attempt, no lease, nothing saved by preview",
+      "verdict": "PASS"
+    },
+    {
+      "name": "manual change is reflected only in the edited slot",
+      "verdict": "PASS"
+    },
+    {
+      "name": "manual change: no extra generateNextWeeklyMenu call or attempt row",
+      "verdict": "PASS"
+    },
+    {
+      "name": "invalid choice fails recoverably and edited preview is restored intact",
+      "verdict": "PASS"
+    },
+    {
+      "name": "invalid transport answered with an unknown id",
+      "verdict": "PASS"
+    },
+    {
+      "name": "failed regeneration: attempt counted, lease released, nothing saved",
+      "verdict": "PASS"
+    },
+    {
+      "name": "PostgreSQL week equals the visible edited menu",
+      "verdict": "PASS"
+    },
+    {
+      "name": "reload shows the saved edited menu",
+      "verdict": "PASS"
+    },
+    {
+      "name": "shopping list contains exactly the edited menu ingredients, including the swapped recipe",
+      "verdict": "PASS"
+    }
+  ]
+}
