@@ -97,4 +97,9 @@ Antes de activar Decisions:
 - [ ] En piloto se miden aceptación sin cambios, número de cambios y regeneraciones. Son señales de utilidad, no medidas nutricionales.
 - [ ] Antes del piloto se acuerdan los límites de fallos, latencia y coste, a partir de una línea base medida.
 - [ ] Se verifica el retorno al motor anterior y se declara lo que no se haya probado.
+- [ ] Runtime en VPS propio: Node con Nitro, `AI_GATEWAY_API_KEY` inyectada en el proceso o contenedor, sin dependencia de OIDC ni de servicios de Vercel.
+- [ ] La salida a Gateway es HTTPS desde el servidor, y el proxy inverso tiene un tiempo de espera superior al presupuesto de generación.
+- [ ] La credencial no aparece en navegador, respuestas, errores, logs ni estado de Decisions.
+- [ ] `AI_WEEKLY_MENU_ENGINE` mantiene `legacy` por defecto hasta aprobar la evaluación.
+- [ ] La serie de PR apunta a `main`, es secuencial y cada PR está verde, verificada, revisada y fusionada antes de crear la siguiente rama.
 - [ ] Pendiente de la persona: credencial de Gateway, acceso al modelo y revisión de ejemplos de recetas.

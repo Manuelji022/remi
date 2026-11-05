@@ -40,11 +40,22 @@ Configuración propuesta, exclusivamente de servidor:
 | `AI_WEEKLY_MENU_DECISION_MODEL` | Nueva variable para el ID del decision model. Propuesta inicial: `openai/gpt-6-luna-decisions`, sujeta a comprobar acceso y calidad. |
 | `AI_WEEKLY_MENU_MODEL`          | Conservar durante la comparación con el generador actual; no reutilizarla silenciosamente como ID de Decisions.                      |
 
-Vercel documenta `openai/gpt-6-luna-decisions` como modelo de Decisions en Gateway, distinto del modelo de propósito general. Gateway admite autenticación con su clave o Vercel OIDC. No se necesita una clave directa de OpenAI para este diseño. [Modelo y autenticación](https://vercel.com/i/ai-sdk-evaluation-to-decisions#choose-direct-openai-or-ai-gateway-access).
+Vercel documenta `openai/gpt-6-luna-decisions` como modelo de Decisions en Gateway, distinto del modelo de propósito general. Gateway admite autenticación con su clave o Vercel OIDC; este diseño usa solo `AI_GATEWAY_API_KEY` y no depende de OIDC ni de servicios de Vercel. No se necesita una clave directa de OpenAI. [Modelo y autenticación](https://vercel.com/i/ai-sdk-evaluation-to-decisions#choose-direct-openai-or-ai-gateway-access).
 
 Antes de integrar, comprobar que `createGateway(...).decisionModel(id)` existe en la versión resuelta y que el modelo soporta `choice`. Si la versión instalada obliga a importar `@ai-sdk/gateway` directamente, declararlo como dependencia directa compatible y actualizar el lockfile; no depender de una importación transitiva.
 
 Una clave ausente o un modelo mal configurado no deben producir una supuesta generación con IA correcta. Sin credenciales se desarrolla con fixtures; la verificación real quedará pendiente y declarada.
+
+### Runtime en VPS propio
+
+La aplicación se despliega en un VPS del propietario, no en el hosting de Vercel.
+
+- El servidor corre Node con Nitro (TanStack Start) y es el único proceso que llama a Gateway. No se usan funciones serverless de Vercel ni servicios específicos de esa plataforma.
+- `AI_GATEWAY_API_KEY` se inyecta como variable de entorno del proceso o del contenedor. No se guarda en archivos versionados y no se obtiene con `vercel link` ni `vercel env pull`. No hay `vercel deploy`.
+- La salida hacia Gateway es HTTPS desde el servidor. El navegador nunca llama a Gateway directamente.
+- El proxy inverso del VPS tiene un tiempo de espera superior al tiempo máximo de la generación acotada por la aplicación (presupuesto remoto de 20 segundos más trabajo local), para que el error controlado llegue antes de que el proxy corte la respuesta.
+- La credencial no se envía al navegador, no aparece en respuestas, errores, logs ni estado de Decisions.
+- Este plan no cambia infraestructura, variables reales ni acceso a producción. La operación se documentará en la entrega 2.
 
 ## 4. Reglas de producto
 
@@ -212,11 +223,13 @@ Un intento que llegó al tramo protegido conserva la política actual de consumo
 
 Nombres orientativos para módulos nuevos: `menu-candidates.ts` para construcción y métricas, `menu-decision.ts` para Gateway. Evitar renombrados generales de componentes, rutas o tipos solo para quitar «AI» del nombre.
 
-Entregar unidades pequeñas y operativas; cada PR debe cumplir las comprobaciones del repositorio y el límite de tamaño. No crear un stack de más de cuatro PRs. Si una unidad crece, dividirla antes de continuar.
+Entregar unidades pequeñas y operativas; cada PR debe cumplir las comprobaciones del repositorio y el límite de tamaño. Si una unidad crece, dividirla antes de continuar.
+
+Flujo de ramas: todas las PR apuntan a `main` y no se hacen commits ni pushes directos a `main`. Las PR de la serie se ejecutan en orden secuencial: una PR solo se considera terminada cuando está en verde en CI, verificada, revisada y fusionada. Después se crea la siguiente rama desde un `origin/main` actualizado. No hay PR con base en otra rama ni stacks.
 
 1. **Planificador local integrado:** definir primero fallos y casos E2E; extraer validación común y usar la construcción de propuestas en la asignación local/de reparación existente. El camino actual sigue operativo y las funciones nuevas tienen uso real.
-2. **Selección con Decisions:** añadir configuración, adaptador Gateway, resolución de opciones y tratamiento de errores. Integrar el camino completo con aviso de alternativa local y fixtures deterministas, conservando edición/aceptación. Actualizar `.env.example` solo con nombres/placeholders y documentación de operación.
-3. **Evaluación y activación:** ejecutar la comparación real una vez configurada la credencial, ajustar rúbrica con recetas revisadas y activar la selección al superar los criterios de calidad. Para un piloto reversible puede usarse una configuración de servidor `AI_WEEKLY_MENU_ENGINE=legacy|decisions`, validada y con `legacy` como valor inicial.
+2. **Selección con Decisions:** añadir configuración, adaptador Gateway, resolución de opciones y tratamiento de errores. Integrar el camino completo con aviso de alternativa local y fixtures deterministas, conservando edición/aceptación. Introducir `AI_WEEKLY_MENU_ENGINE=legacy|decisions` con `legacy` como valor por defecto: sin credencial real y evaluación aprobada, el comportamiento por defecto no cambia. Actualizar `.env.example` solo con nombres/placeholders y documentación de operación.
+3. **Evaluación y activación:** ejecutar la comparación real una vez configurada la credencial, ajustar rúbrica con recetas revisadas y activar la selección al superar los criterios de calidad. Para un piloto reversible se usa `AI_WEEKLY_MENU_ENGINE`, validada, con `legacy` como valor por defecto hasta aprobar la evaluación.
 4. **Retirada del camino anterior:** tras validar el piloto, eliminar generador antiguo y selector temporal. Conservar únicamente el planificador, Decisions y la alternativa local documentada.
 
 No hacen falta cambios de base de datos para esta primera versión. Cualquier futura etiqueta persistida de pesadez requerirá su propio cambio de esquema, migración, formulario y plan de compatibilidad.
