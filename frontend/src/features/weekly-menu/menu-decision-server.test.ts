@@ -215,6 +215,16 @@ it('ignores the mock flag and scenario in production, using Decisions', async ()
   expect(mock.stale).toHaveBeenCalledTimes(2)
   expect(mock.guard).toHaveBeenCalledTimes(1)
 })
+it('rejects missing/blank credentials in production before the guard or network', async () => {
+  vi.stubEnv('NODE_ENV', 'production')
+  addRecipe()
+  for (const key of [undefined, '', '  \n']) {
+    vi.stubEnv('AI_GATEWAY_API_KEY', key)
+    await expect(run()).rejects.toThrow('Decisions configuration')
+    expect(mock.guard).not.toHaveBeenCalled()
+    expect(fetch).not.toHaveBeenCalled()
+  }
+})
 
 // Obsolete deployment variables must be ignored; these are compatibility tests.
 it.each([undefined, 'legacy', 'decisions', 'unknown'])(
