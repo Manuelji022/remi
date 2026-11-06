@@ -28,18 +28,6 @@ type DecisionOptions = {
   seed?: string | number
 }
 
-let warnedEngine = false
-// Fail safe: only an explicit `decisions` opts in; anything else is legacy.
-export function weeklyMenuEngine(): 'legacy' | 'decisions' {
-  const engine = process.env.AI_WEEKLY_MENU_ENGINE?.trim().toLowerCase()
-  if (engine === 'decisions') return 'decisions'
-  if (engine && engine !== 'legacy' && !warnedEngine) {
-    warnedEngine = true
-    console.warn('Unrecognized AI_WEEKLY_MENU_ENGINE; using legacy')
-  }
-  return 'legacy'
-}
-
 // Coarse, allowlisted error names only; never messages, causes or data.
 function failureCategory(error: unknown, signal: AbortSignal): string {
   const name = error instanceof Error ? error.name : ''
@@ -89,7 +77,7 @@ export function prepareWeeklyMenuDecision(
         ]),
       ),
     })
-    // Legacy validation can repair. Decisions must never silently repair a
+    // Shared validation can repair. Decisions must never silently repair a
     // candidate or attribute a new assignment to the remote selection.
     if (JSON.stringify(result.menu) !== JSON.stringify(menu)) {
       throw new Error('Invalid Weekly Menu decision candidate')

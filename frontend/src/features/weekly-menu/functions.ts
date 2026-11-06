@@ -25,11 +25,7 @@ import {
   MOCK_DECISION_SEED,
   mockDecisionFetch,
 } from '#/features/weekly-menu/ai-mock-decision'
-import { generateAiMenu } from '#/features/weekly-menu/ai-generator'
-import {
-  prepareWeeklyMenuDecision,
-  weeklyMenuEngine,
-} from '#/features/weekly-menu/menu-decision'
+import { prepareWeeklyMenuDecision } from '#/features/weekly-menu/menu-decision'
 import {
   AiGenerationStaleWeekError,
   loadAiMenuContextForUser,
@@ -108,24 +104,24 @@ export const generateNextWeeklyMenu = createServerFn({ method: 'POST' })
         context.previousProposal = data.previousMenu
       }
       const mockEnabled = isAiMockEnabled()
-      const decision =
-        mockEnabled && mockScenario !== 'empty'
-          ? prepareWeeklyMenuDecision(context, {
-              apiKey: 'mock-not-a-key',
-              fetch: mockDecisionFetch(
-                mockScenario === 'slow' || mockScenario === 'decision-invalid'
-                  ? mockScenario
-                  : 'ok',
-              ),
-              seed: MOCK_DECISION_SEED,
-            })
-          : !mockEnabled && weeklyMenuEngine() === 'decisions'
-            ? prepareWeeklyMenuDecision(context)
-            : undefined
       const generate =
         mockEnabled && mockScenario === 'empty'
           ? () => Promise.resolve(mockEmptyMenu(context))
-          : (decision?.generate ?? (() => generateAiMenu(context)))
+          : prepareWeeklyMenuDecision(
+              context,
+              mockEnabled
+                ? {
+                    apiKey: 'mock-not-a-key',
+                    fetch: mockDecisionFetch(
+                      mockScenario === 'slow' ||
+                        mockScenario === 'decision-invalid'
+                        ? mockScenario
+                        : 'ok',
+                    ),
+                    seed: MOCK_DECISION_SEED,
+                  }
+                : {},
+            ).generate
       const generated = await runAiGenerationWithGuard(userId, generate)
       const staleAfterGeneration = getStaleTargetWeekStart(
         data.targetWeekStart,

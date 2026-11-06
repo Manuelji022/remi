@@ -180,7 +180,7 @@ try {
       Array.from(
         await sql`select m.week_start::text, d.day,d.context,d.scope,d.lunch_recipe_id,d.dinner_recipe_id from weekly_menu m join weekly_menu_day d on d.weekly_menu_id=m.id where m.user_id=${userId} order by d.day`,
       )
-    // Decisions needs several candidates, and the legacy flow above spends the
+    // Decisions needs several candidates, and the first flow above spends the
     // whole hourly quota: start from clean accounting and an empty saved week.
     const seedDecisionFixture = async () => {
       await sql`delete from weekly_menu where user_id=${userId}`

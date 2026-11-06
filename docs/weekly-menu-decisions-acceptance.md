@@ -1,8 +1,8 @@
 # Checklist de aceptación previa: menú semanal con Decisions
 
-Estado: **propuesta; funcionalidad pendiente**. Fecha: 2026-11-05.
+Estado: **checklist de verificación y evaluación pendiente**. Actualizado: 2026-11-06.
 
-Checklist derivada de las secciones 4, 6, 7, 9 y 10 de [plan de implementación](weekly-menu-decisions-implementation.md). Sirve para revisar el diseño antes de implementar. No describe comportamiento existente. Las reglas de interacción siguen en [menú semanal con IA](ai-weekly-menu-ux.md).
+Checklist derivada de las secciones 4, 6, 7, 9 y 10 de [plan de implementación](weekly-menu-decisions-implementation.md). El propietario ordenó el 2026-11-06 retirar el motor anterior antes de la evaluación en vivo; los puntos sin marcar no se declaran verificados. Las reglas de interacción siguen en [menú semanal con IA](ai-weekly-menu-ux.md).
 
 Separar dos tipos de verificación:
 
@@ -78,7 +78,7 @@ Separar dos tipos de verificación:
 
 Requiere credencial de Gateway proporcionada por la persona, acceso al modelo elegido y revisión previa de recetas de prueba.
 
-- [ ] La rúbrica «pesado / ligero / desconocido» se revisa con ejemplos reales antes de activar la selección. Una receta ambigua o con ingredientes incompletos no se marca como ligera.
+- [ ] La rúbrica «pesado / ligero / desconocido» se revisa con ejemplos reales en la evaluación posterior a la activación. Una receta ambigua o con ingredientes incompletos no se marca como ligera.
 - [ ] Ningún ingrediente aislado (arroz, pasta, legumbres, queso) define por sí solo la pesadez.
 - [ ] Con evidencia de platos pesados y ligeros, el modelo prefiere repartir los pesados entre días. Si solo hay pesados, no deja huecos ni cambia franjas.
 - [ ] Con recetas revisadas, la selección no es peor que la local en repeticiones evitables ni en parejas pesadas evitables.
@@ -86,20 +86,20 @@ Requiere credencial de Gateway proporcionada por la persona, acceso al modelo el
 - [ ] Se documentan los errores de juicio culinario encontrados. Ninguna salida afirma equilibrio nutricional.
 - [ ] Se registran modelo, versiones de rúbrica y algoritmo, número de candidatos, disponibilidad de historial, origen, duración y resultado técnico. No se guardan claves ni ingredientes completos por defecto, y los tokens desconocidos no se registran como cero.
 
-## C. Criterios de activación (sección 10)
+## C. Evaluación posterior a la activación (sección 10)
 
-Antes de activar Decisions:
+Pendiente tras la retirada anticipada ordenada por el propietario (sin llamadas en vivo en esta PR):
 
 - [ ] Las reglas obligatorias y los flujos de edición y aceptación pasan el E2E determinista sin regresiones.
 - [ ] Cada generación remota usa una sola selección; editar a mano cuesta cero llamadas.
 - [ ] El conjunto revisado incluye historial ausente y parejas pesadas evitables, sin violaciones conocidas de reglas obligatorias.
-- [ ] Hay comparación contra el generador actual y contra la selección local, con las mismas entradas.
+- [ ] Hay comparación contra la versión anterior archivada y contra la selección local, con las mismas entradas.
 - [ ] En piloto se miden aceptación sin cambios, número de cambios y regeneraciones. Son señales de utilidad, no medidas nutricionales.
-- [ ] Antes del piloto se acuerdan los límites de fallos, latencia y coste, a partir de una línea base medida.
-- [ ] Se verifica el retorno al motor anterior y se declara lo que no se haya probado.
+- [ ] Antes de la evaluación en vivo se acuerdan los límites de fallos, latencia y coste, a partir de una línea base medida.
+- [ ] Se verifica redesplegar la versión anterior para rollback y se declara lo que no se haya probado.
 - [ ] Runtime en VPS propio: Node con Nitro, `AI_GATEWAY_API_KEY` inyectada en el proceso o contenedor, sin dependencia de OIDC ni de servicios de Vercel.
 - [ ] La salida a Gateway es HTTPS desde el servidor, y el proxy inverso tiene un tiempo de espera superior al presupuesto de generación.
 - [ ] La credencial no aparece en navegador, respuestas, errores, logs ni estado de Decisions.
-- [ ] `AI_WEEKLY_MENU_ENGINE` mantiene `legacy` por defecto hasta aprobar la evaluación.
+- [ ] Decisions es el único motor; el VPS requiere `AI_GATEWAY_API_KEY` para generación remota (sin clave: error recuperable, edición/guardado manual disponibles); no hay selector de rollback.
 - [ ] La serie de PR apunta a `main`, es secuencial y cada PR está verde, verificada, revisada y fusionada antes de crear la siguiente rama.
 - [ ] Pendiente de la persona: credencial de Gateway, acceso al modelo y revisión de ejemplos de recetas.

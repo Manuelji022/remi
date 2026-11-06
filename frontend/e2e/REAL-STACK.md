@@ -132,6 +132,6 @@ The same scenario also covers the Decisions adapter with an in-process fake Gate
 
 ## Legacy removal PR A
 
-Failure modes are recorded before code changes in [WEEKLY-MENU-DECISIONS.md](WEEKLY-MENU-DECISIONS.md#legacy-removal-pr-a-mock-failure-modes-before-implementation). All successful development mock generations now plan candidates and use fake Decisions transport (a singleton needs no transport); the dedicated Decisions scenario uses the shared `ok` scenario. No persistence, guard/lease, quota, stale-week, identity or cleanup assertion is relaxed; any required recipe-order assertion changes will be recorded here.
+Failure modes are recorded before code changes in [WEEKLY-MENU-DECISIONS.md](WEEKLY-MENU-DECISIONS.md#legacy-removal-pr-a-historical-mock-failure-modes-2026-11-06-before-pr-b). All successful development mock generations now plan candidates and use fake Decisions transport (a singleton needs no transport); the dedicated Decisions scenario uses the shared `ok` scenario. No persistence, guard/lease, quota, stale-week, identity or cleanup assertion is relaxed; any required recipe-order assertion changes will be recorded here.
 
 Changed timing assertions: `ok` generations wait for the closed dialog and settled preview without requiring a transient skeleton or the removed 1.5-second delay. The initial singleton has no transport to delay; the production UI suite retains skeleton coverage and the server-boundary test checks slow transport timing. All saved IDs and attempt counts remain exact.

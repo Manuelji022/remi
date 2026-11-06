@@ -1,8 +1,8 @@
 # Plan de implementación: menú semanal con decision models
 
-Estado: **propuesta de implementación; funcionalidad pendiente**. Fecha: 2026-11-05.
+Estado: **Decisions implementado como único motor**. Actualizado: 2026-11-06.
 
-Este documento define la sustitución de la selección generativa actual por un planificador de propuestas y un decision model mediante **Vercel AI SDK + AI Gateway**. No requiere credenciales para su redacción. La variable de autenticación la proporcionará el usuario más adelante.
+Este documento define la sustitución de la selección generativa actual por un planificador de propuestas y un decision model mediante **Vercel AI SDK + AI Gateway**. No requiere credenciales para su redacción. El propietario ordenó retirar el motor anterior el 2026-11-06 antes de evaluar Gateway en vivo; acepta que la generación en producción requiere `AI_GATEWAY_API_KEY`. La evaluación en vivo previa a la activación se omite por esa decisión y queda pendiente para después, con autorización explícita.
 
 ## 1. Resultado esperado
 
@@ -16,7 +16,7 @@ La implementación conserva el flujo de [menú semanal con IA](ai-weekly-menu-ux
 
 | Pieza actual                                                                                | Función                                                         | Uso en la implementación                                                         |
 | ------------------------------------------------------------------------------------------- | --------------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| `frontend/src/features/weekly-menu/ai-generator.ts`                                         | `generateText`, Gateway y validación de asignaciones            | Sustituir la selección por Decisions y separar la validación del proveedor.      |
+| `frontend/src/features/weekly-menu/ai-generator.ts`                                         | Tipos compartidos y validación de asignaciones            | Conservar la validación; `menu-decision.ts` es el único adaptador Gateway.      |
 | `frontend/src/features/weekly-menu/week.ts`                                                 | Normalización y `assignRecipesToWeek`                           | Reutilizar las reglas del calendario; extender la construcción de propuestas.    |
 | `frontend/src/features/weekly-menu/ai-generation-store.ts`                                  | Carga catálogo y dos semanas de historial                       | Conservar lecturas por usuario; representar historial disponible explícitamente. |
 | `frontend/src/features/weekly-menu/functions.ts`                                            | Autenticación, semana objetivo y generación protegida           | Mantener `createServerFn`, permisos y comprobaciones de fecha.                   |
@@ -32,14 +32,12 @@ El tipo `Recipe` actual contiene ID, nombre, tipo comida/cena e ingredientes. No
 
 Se usará `experimental_decide` de `ai` con una instancia de Gateway que exponga `decisionModel()`. La documentación de Vercel sitúa esta API a partir de `ai` 7.0.128 y la mantiene experimental: conservar versiones fijadas y verificar compatibilidad al actualizar. [Referencia de integración](https://vercel.com/i/ai-sdk-evaluation-to-decisions).
 
-Configuración propuesta, exclusivamente de servidor:
+Configuración vigente, exclusivamente de servidor (sin selector de motor):
 
 | Variable                        | Tratamiento                                                                                                                          |
 | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `AI_GATEWAY_API_KEY`            | Credencial existente de Gateway; pendiente de que el usuario la configure. Nunca usar prefijo `VITE_`.                               |
-| `AI_WEEKLY_MENU_DECISION_MODEL` | Nueva variable para el ID del decision model. Propuesta inicial: `openai/gpt-6-luna-decisions`, sujeta a comprobar acceso y calidad. |
-| `AI_WEEKLY_MENU_MODEL`          | Conservar durante la comparación con el generador actual; no reutilizarla silenciosamente como ID de Decisions.                      |
-| `AI_WEEKLY_MENU_ENGINE`         | Selector de servidor: solo `decisions` (sin distinguir mayúsculas ni espacios) activa el piloto; cualquier otro valor, vacío o no reconocido, vuelve a `legacy` (predeterminado, con un único aviso en servidor). Con `AI_WEEKLY_MENU_MOCK=true` fuera de producción siempre se usa el mock.                                           |
+| `AI_GATEWAY_API_KEY`            | Obligatoria en el VPS para generación remota; la configura el propietario. Nunca usar prefijo `VITE_`.                               |
+| `AI_WEEKLY_MENU_DECISION_MODEL` | Variable opcional para el ID del decision model. Predeterminado: `openai/gpt-6-luna-decisions`, sujeta a comprobar acceso y calidad. |
 
 Vercel documenta `openai/gpt-6-luna-decisions` como modelo de Decisions en Gateway, distinto del modelo de propósito general. Gateway admite autenticación con su clave o Vercel OIDC; este diseño usa solo `AI_GATEWAY_API_KEY` y no depende de OIDC ni de servicios de Vercel. No se necesita una clave directa de OpenAI. [Modelo y autenticación](https://vercel.com/i/ai-sdk-evaluation-to-decisions#choose-direct-openai-or-ai-gateway-access).
 
@@ -233,9 +231,9 @@ Entregar unidades pequeñas y operativas; cada PR debe cumplir las comprobacione
 Flujo de ramas: todas las PR apuntan a `main` y no se hacen commits ni pushes directos a `main`. Las PR de la serie se ejecutan en orden secuencial: una PR solo se considera terminada cuando está en verde en CI, verificada, revisada y fusionada. Después se crea la siguiente rama desde un `origin/main` actualizado. No hay PR con base en otra rama ni stacks.
 
 1. **Planificador local integrado:** definir primero fallos y casos E2E; extraer validación común y usar la construcción de propuestas en la asignación local/de reparación existente. El camino actual sigue operativo y las funciones nuevas tienen uso real.
-2. **Selección con Decisions:** añadir configuración, adaptador Gateway, resolución de opciones y tratamiento de errores. Integrar el camino completo con aviso de alternativa local y fixtures deterministas, conservando edición/aceptación. Introducir `AI_WEEKLY_MENU_ENGINE=legacy|decisions` con `legacy` como valor por defecto: sin credencial real y evaluación aprobada, el comportamiento por defecto no cambia. Actualizar `.env.example` solo con nombres/placeholders y documentación de operación.
-3. **Evaluación y activación:** ejecutar la comparación real una vez configurada la credencial, ajustar rúbrica con recetas revisadas y activar la selección al superar los criterios de calidad. Para un piloto reversible se usa `AI_WEEKLY_MENU_ENGINE`, validada, con `legacy` como valor por defecto hasta aprobar la evaluación.
-4. **Retirada del camino anterior:** tras validar el piloto, eliminar generador antiguo y selector temporal. Conservar únicamente el planificador, Decisions y la alternativa local documentada.
+2. **Selección con Decisions (entregada):** adaptador Gateway, configuración, errores, alternativa local y fixtures deterministas, conservando edición/aceptación.
+3. **Retirada del camino anterior (2026-11-06):** por orden del propietario, eliminar generador y selector antes de la evaluación en vivo. Decisions es el único motor; el mock de desarrollo usa transporte falso. No se renombran archivos solo para quitar «AI».
+4. **Evaluación posterior a la activación (pendiente):** cuando se autorice y configure la credencial, comprobar acceso y calidad con recetas revisadas, ajustar la rúbrica y medir errores, latencia y coste. Revertir requiere redesplegar la versión anterior; ya no hay interruptor de motor.
 
 No hacen falta cambios de base de datos para esta primera versión. Cualquier futura etiqueta persistida de pesadez requerirá su propio cambio de esquema, migración, formulario y plan de compatibilidad.
 
@@ -278,16 +276,16 @@ Ampliar el escenario real existente y ejecutar también el harness de interfaz d
 
 Los E2E con fixtures no prueban calidad del modelo. Añadir una ejecución real pequeña, explícita y separada cuando haya credenciales; registrar modelo y versiones sin guardar claves ni datos personales. No convertir esa ejecución variable en requisito de red de todos los tests.
 
-## 10. Criterios de activación y decisiones pendientes
+## 10. Evaluación posterior a la activación y decisiones pendientes
 
-Para activar Decisions deben cumplirse estas condiciones:
+La orden del propietario del 2026-11-06 adelanta la retirada a la evaluación en vivo. Los criterios siguientes siguen pendientes como evaluación posterior a la activación; no se afirma haberlos cumplido:
 
 - Reglas obligatorias y flujos de edición/aceptación pasan los escenarios repetibles sin regresiones.
 - No se gasta una llamada por editar manualmente; cada generación remota usa una sola selección.
 - El conjunto revisado incluye casos con historia ausente y parejas pesadas evitables. No hay violaciones conocidas de las reglas obligatorias y se documentan los errores de juicio culinario.
-- Comparar contra el generador actual **y contra la selección local**, usando las mismas entradas. Medir tasa de aceptación sin cambios, número de cambios y regeneraciones en piloto; son señales de utilidad, no una medida nutricional.
-- Acordar antes del piloto los límites aceptables de fallos, latencia y coste a partir de la línea base medida. No asumir mejoras por las cifras generales del proveedor.
+- Comparar contra la versión anterior archivada **y contra la selección local**, usando las mismas entradas. Medir tasa de aceptación sin cambios, número de cambios y regeneraciones en piloto; son señales de utilidad, no una medida nutricional.
+- Acordar antes de la evaluación en vivo los límites aceptables de fallos, latencia y coste a partir de la línea base medida. No asumir mejoras por las cifras generales del proveedor.
 - Registrar versión de rúbrica/algoritmo, modelo, cantidad de candidatos, disponibilidad de historial, origen de selección, duración y resultado técnico. No registrar ingredientes/nombres completos por defecto ni campos de tokens desconocidos como cero.
-- Verificar retorno al motor anterior durante el piloto y declarar lo que no se haya probado.
+- Verificar redespliegue de la versión anterior como rollback y declarar lo que no se haya probado.
 
-Pendiente para ejecución real: credencial de Gateway proporcionada por el usuario, acceso al modelo elegido y revisión de ejemplos de «pesado/ligero/desconocido». La arquitectura, fixtures y casos E2E pueden prepararse sin esos secretos. Este documento no instala paquetes, no llama a modelos de pago y no activa la funcionalidad.
+Pendiente para ejecución real: credencial de Gateway proporcionada por el usuario, acceso al modelo elegido y revisión de ejemplos de «pesado/ligero/desconocido». La arquitectura, fixtures y casos E2E pueden prepararse sin esos secretos. Esta retirada no configura secretos reales, no despliega y no llama a modelos de pago; el motor queda seleccionado en código sin evaluación en vivo previa.
