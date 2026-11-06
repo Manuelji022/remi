@@ -42,9 +42,9 @@ Fuera (explícitamente):
 
 ## 4. Qué sabe la IA
 
-Entradas: recetas propias (nombre, ingredientes, tipo comida/cena), asignaciones de la **semana actual (los 7 días)** y de la **semana anterior**, y el horario confirmado de la semana objetivo normalizado a franjas en casa (comida/cena por día), con el número de recetas guardadas de cada tipo. Para regenerar se incluyen solo los IDs por día y franja de la propuesta anterior. Nada más. No se envía identidad de la cuenta.
+Entradas: recetas propias referenciadas en propuestas finalistas (nombre, ingredientes, tipo comida/cena), propuestas completas, asignaciones disponibles de la **semana actual (los 7 días)** y de la **semana anterior**, y horario confirmado de la semana objetivo normalizado a franjas en casa (comida/cena por día). Para regenerar se incluyen solo los IDs por día y franja de la propuesta anterior. Nada más. No se envía identidad de la cuenta.
 
-Piloto Decisions (solo con `AI_WEEKLY_MENU_ENGINE=decisions`; `legacy` sigue predeterminado): el planificador usa todo el catálogo y el proveedor recibe solo las recetas referenciadas en propuestas completas, con nombres e ingredientes, más horario e historial disponible. Selecciona un ID de propuesta existente; una respuesta inválida no se repara. Los fallos iniciales y de regeneración mantienen el error recuperable actual; la alternativa degradada con aviso queda pendiente. Si solo hay un candidato válido se devuelve sin llamada remota, contando un intento normal. No cambia la edición ni el guardado explícito.
+Decisions es el único motor por orden del propietario del 2026-11-06, antes de la evaluación en vivo: el planificador usa todo el catálogo y el proveedor recibe solo las recetas referenciadas en propuestas completas, con nombres e ingredientes, más horario e historial disponible. Selecciona un ID de propuesta existente; una respuesta inválida no se repara. En la generación inicial, los fallos remotos recuperables ofrecen una propuesta local con aviso; credenciales/modelo incorrectos y toda regeneración fallida conservan el error recuperable. La clave Gateway es obligatoria para selección remota; editar/guardar manualmente sigue disponible. Si solo hay un candidato válido se devuelve sin llamada remota, contando un intento normal. No cambia la edición ni el guardado explícito.
 
 ## 5. Flujo principal
 
@@ -133,8 +133,8 @@ Los avisos de escasez de la vista previa (`unavailableSlots`) siguen igual.
 
 | Situación                                                              | Comportamiento                                                                                                |
 | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| Fallo, timeout o respuesta inválida                                    | Mensaje claro y botón **Reintentar**. Datos guardados intactos. No hay relleno aleatorio.                     |
-| Respuesta con recetas inválidas en huecos elegibles                    | Se reparan en silencio con candidatas del mismo hueco.                                                        |
+| Fallo de configuración o regeneración; timeout inicial               | Error recuperable y **Reintentar**, o propuesta local con aviso en timeout inicial. Datos guardados intactos.                     |
+| Respuesta con elección inválida de Decisions                         | No se repara; alternativa local con aviso solo en generación inicial.                                                        |
 | Respuesta de otra semana, huecos cubiertos asignados o días duplicados | Se rechaza; se trata como fallo.                                                                              |
 | Límite de 5 generaciones por hora                                      | Se comunica **solo al alcanzarlo**, indicando cuándo se podrá volver a generar. Las fallidas también cuentan. |
 | Dos generaciones simultáneas de la misma cuenta                        | Solo se procesa una; la otra se rechaza con mensaje.                                                          |

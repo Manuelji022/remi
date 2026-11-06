@@ -2,7 +2,7 @@ import { and, eq, gt, lte, sql } from 'drizzle-orm'
 import { db, schema } from '#/shared/db'
 
 const MAX_REQUESTS_PER_HOUR = 5
-// generateAiMenu aborts its single provider call after 20s (no retries). The
+// Decisions aborts its single provider call after 20s (no retries). The
 // callback must settle within that bound: expiry recovers crashed workers, not
 // arbitrary callbacks that ignore cancellation. Allow 40s of scheduling margin.
 const LEASE_SECONDS = 60

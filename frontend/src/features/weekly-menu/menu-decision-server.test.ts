@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
+import { mockDecisionFetch } from '#/features/weekly-menu/ai-mock-decision'
 import { DAYS } from '#/features/weekly-menu/constants'
 import { emptyMenu } from '#/features/weekly-menu/week'
 import { generateNextWeeklyMenu } from '#/features/weekly-menu/functions'
@@ -10,7 +11,6 @@ const mock = vi.hoisted(() => ({
   load: vi.fn(),
   guard: vi.fn(),
   stale: vi.fn(),
-  legacy: vi.fn(),
 }))
 vi.mock('@tanstack/react-start', () => ({
   createServerFn: () => ({
@@ -40,10 +40,6 @@ vi.mock('#/features/weekly-menu/ai-generation-guard', () => ({
   AiGenerationLimitError: class extends Error {},
   AiGenerationInProgressError: class extends Error {},
 }))
-vi.mock('#/features/weekly-menu/ai-generator', async (importOriginal) => ({
-  ...(await importOriginal<object>()),
-  generateAiMenu: mock.legacy,
-}))
 vi.mock('#/features/weekly-menu/ai-schedule', async (importOriginal) => ({
   ...(await importOriginal<object>()),
   getStaleTargetWeekStart: mock.stale,
@@ -58,7 +54,12 @@ beforeEach(() => {
   guardActive = false
   vi.resetAllMocks()
   vi.unstubAllEnvs()
-  vi.stubEnv('AI_WEEKLY_MENU_ENGINE', 'decisions')
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(() => {
+      throw new Error('Unexpected network')
+    }),
+  )
   vi.stubEnv('AI_WEEKLY_MENU_MOCK', 'false')
   vi.stubEnv('AI_GATEWAY_API_KEY', '')
   context = {
@@ -92,11 +93,6 @@ const addRecipe = () =>
     slot: 'lunch',
     ingredients: [],
   })
-const mockedResult = () => ({
-  menu: emptyMenu(context.targetWeekStart),
-  recipeNames: {},
-  unavailableSlots: [],
-})
 const run = () => invoke({ data: data() })
 const stale = { ok: false, reason: 'stale-week' }
 const data = () => ({
@@ -135,13 +131,10 @@ it('does not convert auth, stale, database, configuration or guard errors into p
     reason: 'rate-limited',
   })
 })
-it('leaves legacy as the default and only attaches a previous proposal for the target week', async () => {
-  vi.stubEnv('AI_WEEKLY_MENU_ENGINE', undefined)
-  mock.legacy.mockResolvedValue(mockedResult())
+it('only attaches a previous proposal for the target week', async () => {
   const previous = emptyMenu(context.targetWeekStart)
   await invoke({ data: { ...data(), previousMenu: previous } })
   expect(context.previousProposal).toEqual(previous)
-  expect(mock.legacy).toHaveBeenCalledTimes(1)
   delete context.previousProposal
   await invoke({ data: { ...data(), previousMenu: emptyMenu('2026-11-02') } })
   expect(context.previousProposal).toBeUndefined()
@@ -154,7 +147,6 @@ it.each([undefined, 'ok', 'slow'])(
   'routes mock %s through guarded Decisions with no network',
   async (mockScenario) => {
     vi.stubEnv('AI_WEEKLY_MENU_MOCK', 'true')
-    vi.stubEnv('AI_WEEKLY_MENU_ENGINE', 'legacy')
     addRecipe()
     vi.useFakeTimers()
     const network = vi.fn(() => {
@@ -197,14 +189,13 @@ it.each([undefined, 'ok', 'slow'])(
         },
       })
       expect(mock.guard).toHaveBeenCalledTimes(1)
-      expect(mock.legacy).not.toHaveBeenCalled()
       expect(network).not.toHaveBeenCalled()
     } finally {
       log.mockRestore()
     }
   },
 )
-it('returns the empty mock shortage inside one guard without legacy generation', async () => {
+it('returns the empty mock shortage inside one guard', async () => {
   vi.stubEnv('AI_WEEKLY_MENU_MOCK', 'true')
   const result = await invoke({ data: { ...data(), mockScenario: 'empty' } })
   expect(result).toMatchObject({
@@ -214,16 +205,42 @@ it('returns the empty mock shortage inside one guard without legacy generation',
     unavailableSlots: ['lunch', 'dinner'],
   })
   expect(mock.guard).toHaveBeenCalledTimes(1)
-  expect(mock.legacy).not.toHaveBeenCalled()
 })
-it('ignores the mock flag and scenario in production, retaining legacy routing', async () => {
+it('ignores the mock flag and scenario in production, using Decisions', async () => {
   vi.stubEnv('NODE_ENV', 'production')
   vi.stubEnv('AI_WEEKLY_MENU_MOCK', 'true')
-  vi.stubEnv('AI_WEEKLY_MENU_ENGINE', 'legacy')
-  mock.legacy.mockResolvedValue(mockedResult())
   expect(
     await invoke({ data: { ...data(), mockScenario: 'empty' } }),
   ).toMatchObject({ ok: true })
-  expect(mock.legacy).toHaveBeenCalledWith(context)
+  expect(mock.stale).toHaveBeenCalledTimes(2)
   expect(mock.guard).toHaveBeenCalledTimes(1)
 })
+
+// Obsolete deployment variables must be ignored; these are compatibility tests.
+it.each([undefined, 'legacy', 'decisions', 'unknown'])(
+  'always selects Decisions with obsolete engine %j and model configuration',
+  async (engine) => {
+    vi.stubEnv('AI_WEEKLY_MENU_ENGINE', engine)
+    vi.stubEnv('AI_WEEKLY_MENU_MODEL', 'obsolete/unused')
+    vi.stubEnv('AI_GATEWAY_API_KEY', 'synthetic-key')
+    addRecipe()
+    const transport = mockDecisionFetch('ok')
+    const network = vi.fn<typeof fetch>(async (...args) => {
+      expect(guardActive).toBe(true)
+      return transport(...args)
+    })
+    vi.stubGlobal('fetch', network)
+    expect(await run()).toMatchObject({ ok: true })
+    expect(network).toHaveBeenCalledTimes(1)
+    expect(mock.guard).toHaveBeenCalledTimes(1)
+  },
+)
+it.each([undefined, '', '  \n'])(
+  'rejects missing/blank key %j before any attempt or lease',
+  async (key) => {
+    vi.stubEnv('AI_GATEWAY_API_KEY', key)
+    addRecipe()
+    await expect(run()).rejects.toThrow('Decisions configuration')
+    expect(mock.guard).not.toHaveBeenCalled()
+  },
+)

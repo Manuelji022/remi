@@ -25,11 +25,7 @@ import {
   MOCK_DECISION_SEED,
   mockDecisionFetch,
 } from '#/features/weekly-menu/ai-mock-decision'
-import { generateAiMenu } from '#/features/weekly-menu/ai-generator'
-import {
-  prepareWeeklyMenuDecision,
-  weeklyMenuEngine,
-} from '#/features/weekly-menu/menu-decision'
+import { prepareWeeklyMenuDecision } from '#/features/weekly-menu/menu-decision'
 import {
   AiGenerationStaleWeekError,
   loadAiMenuContextForUser,
@@ -119,13 +115,13 @@ export const generateNextWeeklyMenu = createServerFn({ method: 'POST' })
               ),
               seed: MOCK_DECISION_SEED,
             })
-          : !mockEnabled && weeklyMenuEngine() === 'decisions'
+          : !mockEnabled
             ? prepareWeeklyMenuDecision(context)
             : undefined
       const generate =
         mockEnabled && mockScenario === 'empty'
           ? () => Promise.resolve(mockEmptyMenu(context))
-          : (decision?.generate ?? (() => generateAiMenu(context)))
+          : decision!.generate
       const generated = await runAiGenerationWithGuard(userId, generate)
       const staleAfterGeneration = getStaleTargetWeekStart(
         data.targetWeekStart,

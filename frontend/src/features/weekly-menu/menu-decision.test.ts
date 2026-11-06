@@ -216,9 +216,8 @@ describe('Decisions real SDK transport', () => {
     ['', 'openai/gpt-6-luna-decisions'],
     ['  ', 'openai/gpt-6-luna-decisions'],
   ])(
-    'resolves model variable %j to %s independently of the legacy model',
+    'resolves model variable %j to %s using the independent Decisions model ID',
     async (value, expected) => {
-      vi.stubEnv('AI_WEEKLY_MENU_MODEL', 'wrong/legacy')
       vi.stubEnv('AI_WEEKLY_MENU_DECISION_MODEL', value)
       const transport = vi.fn<typeof fetch>(async (_, init) => {
         expect(new Headers(init?.headers).get('ai-model-id')).toBe(expected)
@@ -257,25 +256,6 @@ describe('Decisions real SDK transport', () => {
     for (const recipe of input.recipes)
       recipe.ingredients[0].name = 'x'.repeat(70000)
     expect(() => prepareWeeklyMenuDecision(input, options)).toThrow('state')
-  })
-  it('fails safe to legacy for any value other than decisions, warning once without echoing it', async () => {
-    vi.resetModules()
-    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
-    const { weeklyMenuEngine: engine } =
-      await import('#/features/weekly-menu/menu-decision')
-    const engineFor = (value?: string) => {
-      vi.stubEnv('AI_WEEKLY_MENU_ENGINE', value)
-      return engine()
-    }
-    const legacy = [undefined, '', '   ', 'legacy', ' Legacy\n']
-    const decisions = ['decisions', ' DECISIONS\n', 'Decisions']
-    expect(legacy.map(engineFor)).toEqual(legacy.map(() => 'legacy'))
-    expect(warn).not.toHaveBeenCalled()
-    expect(decisions.map(engineFor)).toEqual(decisions.map(() => 'decisions'))
-    const typos = ['decisons', 'secret-typo', 'on']
-    expect(typos.map(engineFor)).toEqual(typos.map(() => 'legacy'))
-    expect(warn).toHaveBeenCalledTimes(1)
-    expect(JSON.stringify(warn.mock.calls)).not.toMatch(/decisons|secret-typo/)
   })
   it('sends the trimmed API key and rejects a blank one', async () => {
     const transport = vi.fn<typeof fetch>(async (_, init) => {

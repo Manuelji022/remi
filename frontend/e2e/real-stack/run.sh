@@ -10,7 +10,7 @@ artifact="$(realpath -m "${2:-e2e/artifacts/real-stack-$(basename "$scenario" .s
 if [[ "${REMI_REAL_STACK_CLEAN:-}" != 1 ]]; then
   exec env -i PATH="$PATH" HOME="$HOME" REAL_STACK_BROWSER_BIN="${REAL_STACK_BROWSER_BIN:-$(command -v agent-browser)}" REMI_REAL_STACK_CLEAN=1 bash "$runner" "$scenario" "$artifact"
 fi
-unset DATABASE_URL AI_GATEWAY_API_KEY AI_WEEKLY_MENU_MODEL
+unset DATABASE_URL AI_GATEWAY_API_KEY AI_WEEKLY_MENU_DECISION_MODEL
 export NODE_ENV=development AI_WEEKLY_MENU_MOCK=true TZ=UTC
 browser_bin="$(realpath "$REAL_STACK_BROWSER_BIN")"
 if [[ "$(od -An -tx1 -N4 "$browser_bin" | tr -d ' \n')" != 7f454c46 ]]; then
