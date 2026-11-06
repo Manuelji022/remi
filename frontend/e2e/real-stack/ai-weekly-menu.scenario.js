@@ -10,13 +10,11 @@ export default async function scenario({ assert, browser, evaluate, wait, click,
     await browser(['click', '.planner-actions .planner-primary-btn'])
     await wait(`${dialog} !== null`)
     if (first) emit('authenticated planner: Generate opens schedule dialog')
-    const start = Date.now()
     await click('Confirm schedule and generate')
     if (mock === 'ok') {
-      await wait(`${skeleton} !== null && ${dialog} === null`)
-      if (first) emit('confirmation closes dialog and displays skeleton')
+      await wait(`${dialog} === null`)
+      if (first) emit('confirmation closes dialog and settles to preview')
       await wait(`${preview} !== null`)
-      assert(Date.now() - start >= 1500)
       await wait(`${preview}.querySelector('.planner-primary-btn:not(:disabled)') !== null`)
     }
   }
@@ -26,7 +24,7 @@ export default async function scenario({ assert, browser, evaluate, wait, click,
   assert(shown.every((day) => day.names.includes('Synthetic dinner') && day.names.includes('Synthetic lunch')))
   assert.deepEqual(await accounting(), { attempts: 1, leases: 0 })
   assert.deepEqual(await saved(), [])
-  emit('mock ok waits 1.5s, consumes one attempt, releases lease, preview does not save', shown)
+  emit('mock ok consumes one attempt, releases lease, preview does not save', shown)
   await browser(['screenshot', artifact.replace(/\.json$/, '.png')])
   await click('Accept and save menu')
   await browser(['wait', '--text', 'Weekly Menu saved.'])
@@ -109,7 +107,7 @@ export default async function scenario({ assert, browser, evaluate, wait, click,
   const names = () => evaluate(`Array.from(document.querySelectorAll('.day-card .meal-name'), n => n.textContent)`)
   const setMock = (m) => evaluate(`history.replaceState(null, '', location.pathname + '?mock=${m}'); true`)
   const origin = await evaluate('location.origin')
-  const pageUrl = `${origin}/weekly-menu-planner?mock=decision-ok`
+  const pageUrl = `${origin}/weekly-menu-planner?mock=ok`
   const ready = "document.querySelector('.planner-actions .planner-primary-btn:not(:disabled)') !== null"
   let result = { scenario: 'decisions-real-stack-mock-transport', verdict: 'FAIL' }
   try {
@@ -139,7 +137,7 @@ export default async function scenario({ assert, browser, evaluate, wait, click,
       assert.deepEqual(await saved(), [])
     })
     await browser(['screenshot', `${stem}-preview.png`])
-    emit('decision-ok: real adapter selected last candidate; one guarded attempt; preview unsaved', { candidateCount: transport.candidateCount, choice: transport.choice })
+    emit('ok: real adapter selected last candidate; one guarded attempt; preview unsaved', { candidateCount: transport.candidateCount, choice: transport.choice })
 
     // B: manual edit of one home slot.
     const swapped = await evaluate(`(() => {

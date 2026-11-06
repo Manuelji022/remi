@@ -19,6 +19,7 @@ import {
 import {
   aiMockScenarioSchema,
   isAiMockEnabled,
+  mockEmptyMenu,
 } from '#/features/weekly-menu/ai-mock'
 import {
   MOCK_DECISION_SEED,
@@ -106,20 +107,25 @@ export const generateNextWeeklyMenu = createServerFn({ method: 'POST' })
       if (data.previousMenu?.weekStart === data.targetWeekStart) {
         context.previousProposal = data.previousMenu
       }
-      // Mock Decisions scenarios exercise the real adapter and SDK transport
-      // against an in-process fake Gateway; otherwise mock mode stays legacy.
+      const mockEnabled = isAiMockEnabled()
       const decision =
-        mockScenario === 'decision-ok' || mockScenario === 'decision-invalid'
+        mockEnabled && mockScenario !== 'empty'
           ? prepareWeeklyMenuDecision(context, {
               apiKey: 'mock-not-a-key',
-              fetch: mockDecisionFetch(mockScenario),
+              fetch: mockDecisionFetch(
+                mockScenario === 'slow' || mockScenario === 'decision-invalid'
+                  ? mockScenario
+                  : 'ok',
+              ),
               seed: MOCK_DECISION_SEED,
             })
-          : !isAiMockEnabled() && weeklyMenuEngine() === 'decisions'
+          : !mockEnabled && weeklyMenuEngine() === 'decisions'
             ? prepareWeeklyMenuDecision(context)
             : undefined
       const generate =
-        decision?.generate ?? (() => generateAiMenu(context, { mockScenario }))
+        mockEnabled && mockScenario === 'empty'
+          ? () => Promise.resolve(mockEmptyMenu(context))
+          : (decision?.generate ?? (() => generateAiMenu(context)))
       const generated = await runAiGenerationWithGuard(userId, generate)
       const staleAfterGeneration = getStaleTargetWeekStart(
         data.targetWeekStart,

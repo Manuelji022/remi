@@ -271,78 +271,6 @@ describe('Generate-another backend', () => {
     expect(result.menu.days.Monday.lunchRecipeId).toBe('lunch-one')
     expect(result.menu.days.Monday.dinnerRecipeId).toBe('dinner-one')
   })
-
-  it.each(['ok', 'slow'] as const)(
-    'rotates %s by recipe ID per slot, wraps, and preserves covered slots',
-    async (mockScenario) => {
-      vi.stubEnv('NODE_ENV', 'test')
-      vi.stubEnv('AI_WEEKLY_MENU_MOCK', 'true')
-      vi.useFakeTimers()
-      const previousProposal = history(targetWeekStart)
-      previousProposal.days.Monday.lunchRecipeId = 'lunch-one'
-      previousProposal.days.Monday.dinnerRecipeId = 'dinner-two'
-      previousProposal.days.Tuesday.lunchRecipeId = 'lunch-two'
-      previousProposal.days.Tuesday.dinnerRecipeId = 'removed'
-      previousProposal.days.Wednesday.lunchRecipeId = 'dinner-one'
-      const variedContext = {
-        ...context,
-        previousProposal,
-        recipes: [
-          { ...recipes[1], id: 'dinner-two' },
-          { ...recipes[0], id: 'lunch-two' },
-          ...recipes,
-        ],
-        schedule: {
-          ...schedule,
-          Thursday: { context: 'office' as const, scope: 'both' as const },
-          Friday: { context: null, scope: 'lunch' as const },
-        },
-      }
-      const pending = generateAiMenu(variedContext, { mockScenario })
-      await vi.advanceTimersByTimeAsync(mockScenario === 'slow' ? 8000 : 1500)
-      const result = await pending
-      expect(result.menu.days.Monday.lunchRecipeId).toBe('lunch-two')
-      expect(result.menu.days.Monday.dinnerRecipeId).toBe('dinner-one')
-      expect(result.menu.days.Tuesday.lunchRecipeId).toBe('lunch-one')
-      expect(result.menu.days.Thursday.lunchRecipeId).toBeNull()
-      expect(result.menu.days.Friday.dinnerRecipeId).toBeNull()
-      for (const plan of Object.values(result.menu.days)) {
-        if (plan.scope === 'both' || plan.scope === 'lunch')
-          expect(['lunch-one', 'lunch-two']).toContain(plan.lunchRecipeId)
-        if (plan.scope === 'both' || plan.scope === 'dinner')
-          expect(['dinner-one', 'dinner-two']).toContain(plan.dinnerRecipeId)
-      }
-    },
-  )
-
-  it('keeps zero/one candidates, absent previous proposal, and empty scenario behavior', async () => {
-    vi.stubEnv('NODE_ENV', 'test')
-    vi.stubEnv('AI_WEEKLY_MENU_MOCK', 'true')
-    vi.useFakeTimers()
-    for (const pool of [recipes, [recipes[0]], []]) {
-      const baseline = validateAiMenuAssignments(
-        { ...context, recipes: pool },
-        assignments(targetWeekStart, null, null),
-      )
-      for (const previousProposal of [undefined, history(targetWeekStart)]) {
-        const pending = generateAiMenu({
-          ...context,
-          recipes: pool,
-          previousProposal,
-        })
-        await vi.advanceTimersByTimeAsync(1500)
-        expect(await pending).toEqual(baseline)
-      }
-    }
-    const pending = generateAiMenu(
-      { ...context, previousProposal: history(targetWeekStart) },
-      { mockScenario: 'empty' },
-    )
-    await vi.advanceTimersByTimeAsync(1500)
-    const result = await pending
-    expect(result.menu).toEqual(emptyMenu(targetWeekStart))
-    expect(result.unavailableSlots).toEqual(['lunch', 'dinner'])
-  })
 })
 
 describe('AI prompt and repair quality', () => {
@@ -504,14 +432,6 @@ describe('AI prompt and repair quality', () => {
           ),
         }).menu,
       ).toEqual(result.menu)
-      if (count !== 7) {
-        vi.stubEnv('NODE_ENV', 'test')
-        vi.stubEnv('AI_WEEKLY_MENU_MOCK', 'true')
-        vi.useFakeTimers()
-        const pending = generateAiMenu(input)
-        await vi.advanceTimersByTimeAsync(1500)
-        expect(await pending).toEqual(result)
-      }
     },
   )
 
