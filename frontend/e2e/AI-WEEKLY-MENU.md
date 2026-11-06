@@ -64,7 +64,7 @@ This database test does not exercise browser authentication, the authenticated s
 5. Guest generation sends a mock parameter or invokes the authenticated AI server function.
 6. Error, rate-limited, in-progress, or stale scenarios acquire a DB lease, load menu context, consume rate-limit attempts, or bypass authentication.
 7. The stale scenario returns the request's claimed week, a fixed date, or the server's timezone week instead of the real next Monday in the validated request timezone, including Sunday/Monday and DST boundaries.
-8. Default/ok no longer waits about 1.5 seconds or changes deterministic fallback assignments; slow does not wait about 8 seconds or changes the resulting menu.
+8. Default/ok bypasses Decisions candidate selection or contacts the network; slow does not delay its fake transport by eight seconds or honor cancellation. Empty returns immediately. The production UI harness intercepts server functions and needs no server mock delay.
 9. Error does not throw after about 1 second, changes saved data, or fails to show the existing error and Retry path; rejection scenarios return the wrong discriminant.
 10. Empty repairs null assignments with available recipes, drops the confirmed schedule, or omits either lunch/dinner from unavailableSlots.
 11. Successful mock scenarios bypass the existing guard or the before/after generation stale-week checks.

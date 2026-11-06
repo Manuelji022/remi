@@ -1,4 +1,4 @@
-import { beforeEach, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { DAYS } from '#/features/weekly-menu/constants'
 import { emptyMenu } from '#/features/weekly-menu/week'
 import { generateNextWeeklyMenu } from '#/features/weekly-menu/functions'
@@ -146,21 +146,84 @@ it('leaves legacy as the default and only attaches a previous proposal for the t
   await invoke({ data: { ...data(), previousMenu: emptyMenu('2026-11-02') } })
   expect(context.previousProposal).toBeUndefined()
 })
-it('gives the development mock precedence over Decisions with zero Gateway calls', async () => {
-  vi.stubEnv('AI_WEEKLY_MENU_MOCK', 'true')
-  vi.stubEnv('AI_GATEWAY_API_KEY', 'synthetic-gateway-key')
-  addRecipe()
-  const transport = vi.fn(
-    async () => new Response('unexpected', { status: 500 }),
-  )
-  vi.stubGlobal('fetch', transport)
-  const mocked = mockedResult()
-  mock.legacy.mockResolvedValue(mocked)
-  expect(await run()).toMatchObject({
-    ok: true,
-    menu: mocked.menu,
-  })
-  expect(mock.legacy).toHaveBeenCalledTimes(1)
-  expect(transport).not.toHaveBeenCalled()
+afterEach(() => {
+  vi.useRealTimers()
   vi.unstubAllGlobals()
+})
+it.each([undefined, 'ok', 'slow'])(
+  'routes mock %s through guarded Decisions with no network',
+  async (mockScenario) => {
+    vi.stubEnv('AI_WEEKLY_MENU_MOCK', 'true')
+    vi.stubEnv('AI_WEEKLY_MENU_ENGINE', 'legacy')
+    addRecipe()
+    vi.useFakeTimers()
+    const network = vi.fn(() => {
+      throw new Error('Unexpected network')
+    })
+    vi.stubGlobal('fetch', network)
+    const log = vi.spyOn(console, 'info').mockImplementation(() => {})
+    try {
+      let settled = false
+      const pending = invoke({ data: { ...data(), mockScenario } }).then(
+        (result) => {
+          settled = true
+          return result
+        },
+      )
+      if (mockScenario === 'slow') {
+        await vi.advanceTimersByTimeAsync(7_999)
+        expect(settled).toBe(false)
+        await vi.advanceTimersByTimeAsync(1)
+      }
+      const result = await pending
+      const call = log.mock.calls.find(
+        ([marker]) => marker === 'DECISION_MOCK_TRANSPORT',
+      )!
+      const transport = JSON.parse(String(call[1]))
+      expect(transport.candidateCount).toBeGreaterThan(1)
+      expect(transport.choice).not.toBe('menu-0')
+      expect(result).toMatchObject({
+        ok: true,
+        menu: {
+          days: Object.fromEntries(
+            DAYS.map((day, index) => [
+              day,
+              {
+                lunchRecipeId: transport.selected[index][0],
+                dinnerRecipeId: transport.selected[index][1],
+              },
+            ]),
+          ),
+        },
+      })
+      expect(mock.guard).toHaveBeenCalledTimes(1)
+      expect(mock.legacy).not.toHaveBeenCalled()
+      expect(network).not.toHaveBeenCalled()
+    } finally {
+      log.mockRestore()
+    }
+  },
+)
+it('returns the empty mock shortage inside one guard without legacy generation', async () => {
+  vi.stubEnv('AI_WEEKLY_MENU_MOCK', 'true')
+  const result = await invoke({ data: { ...data(), mockScenario: 'empty' } })
+  expect(result).toMatchObject({
+    ok: true,
+    menu: emptyMenu(context.targetWeekStart),
+    recipeNames: { lunch: 'Lunch' },
+    unavailableSlots: ['lunch', 'dinner'],
+  })
+  expect(mock.guard).toHaveBeenCalledTimes(1)
+  expect(mock.legacy).not.toHaveBeenCalled()
+})
+it('ignores the mock flag and scenario in production, retaining legacy routing', async () => {
+  vi.stubEnv('NODE_ENV', 'production')
+  vi.stubEnv('AI_WEEKLY_MENU_MOCK', 'true')
+  vi.stubEnv('AI_WEEKLY_MENU_ENGINE', 'legacy')
+  mock.legacy.mockResolvedValue(mockedResult())
+  expect(
+    await invoke({ data: { ...data(), mockScenario: 'empty' } }),
+  ).toMatchObject({ ok: true })
+  expect(mock.legacy).toHaveBeenCalledWith(context)
+  expect(mock.guard).toHaveBeenCalledTimes(1)
 })

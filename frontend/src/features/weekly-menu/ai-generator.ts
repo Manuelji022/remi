@@ -1,7 +1,5 @@
 import { createGateway, Output, generateText } from 'ai'
 import { z } from 'zod'
-import { isAiMockEnabled } from '#/features/weekly-menu/ai-mock'
-import type { aiMockScenarioSchema } from '#/features/weekly-menu/ai-mock'
 import { DAYS } from '#/features/weekly-menu/constants'
 import type { Day } from '#/features/weekly-menu/constants'
 import type { Recipe, MealSlot } from '#/features/recipes/recipe'
@@ -48,7 +46,6 @@ export type AiMenuResult = {
 }
 
 export type AiProviderOptions = {
-  mockScenario?: z.infer<typeof aiMockScenarioSchema>
   apiKey?: string
   model?: string
   fetch?: typeof fetch
@@ -56,74 +53,11 @@ export type AiProviderOptions = {
 
 const DEFAULT_MODEL = 'openai/gpt-4o-mini'
 const GENERATION_TIMEOUT_MS = 20_000
-const MOCK_GENERATION_DELAY_MS = 1_500
 
 export async function generateAiMenu(
   context: AiMenuContext,
   options: AiProviderOptions = {},
 ): Promise<AiMenuResult> {
-  // Local UX exploration without spending tokens; validation still fills and
-  // repairs assignments using the same rules as the real provider.
-  if (isAiMockEnabled()) {
-    await new Promise((resolve) =>
-      setTimeout(
-        resolve,
-        options.mockScenario === 'slow' ? 8_000 : MOCK_GENERATION_DELAY_MS,
-      ),
-    )
-    if (options.mockScenario === 'empty') {
-      return {
-        menu: menuForTargetSchedule(context.targetWeekStart, context.schedule),
-        recipeNames: Object.fromEntries(
-          context.recipes.map((recipe) => [recipe.id, recipe.name]),
-        ),
-        unavailableSlots: ['lunch', 'dinner'],
-      }
-    }
-    const menu = menuForTargetSchedule(
-      context.targetWeekStart,
-      context.schedule,
-    )
-    const orderedRecipes = context.recipes
-      .slice()
-      .sort((left, right) =>
-        left.id < right.id ? -1 : left.id > right.id ? 1 : 0,
-      )
-    return validateAiMenuAssignments(context, {
-      weekStart: context.targetWeekStart,
-      days: Object.fromEntries(
-        DAYS.map((day) => {
-          const assignment: {
-            lunchRecipeId: string | null
-            dinnerRecipeId: string | null
-          } = {
-            lunchRecipeId: null,
-            dinnerRecipeId: null,
-          }
-          if (context.previousProposal) {
-            for (const slot of mealSlotSchema.options) {
-              const plan = menu.days[day]
-              if (plan.scope !== 'both' && plan.scope !== slot) continue
-              const candidates = orderedRecipes.filter(
-                (recipe) => recipe.slot === slot,
-              )
-              if (candidates.length < 2) continue
-              const field =
-                slot === 'lunch' ? 'lunchRecipeId' : 'dinnerRecipeId'
-              const previousId = context.previousProposal.days[day][field]
-              const previousIndex = candidates.findIndex(
-                (recipe) => recipe.id === previousId,
-              )
-              assignment[field] =
-                candidates[(previousIndex + 1) % candidates.length].id
-            }
-          }
-          return [day, assignment]
-        }),
-      ),
-    })
-  }
-
   const modelName =
     options.model ?? process.env.AI_WEEKLY_MENU_MODEL ?? DEFAULT_MODEL
   const model = createGateway({

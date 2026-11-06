@@ -1,10 +1,10 @@
 # Decisions real-stack E2E: scenarios and failure modes (written before implementation)
 
-Scope: `?mock=decision-ok` and `?mock=decision-invalid` (honored only when `AI_WEEKLY_MENU_MOCK=true` and `NODE_ENV !== 'production'`) run the real `prepareWeeklyMenuDecision` adapter, the installed AI SDK `experimental_decide` and the real Gateway HTTP transport code against an in-process fake `fetch`. No network I/O, no key. Mock transport only: no claim about model quality or live Gateway behavior.
+Scope: `?mock=ok` and `?mock=decision-invalid` (honored only when `AI_WEEKLY_MENU_MOCK=true` and `NODE_ENV !== 'production'`) run the real `prepareWeeklyMenuDecision` adapter, the installed AI SDK `experimental_decide` and the real Gateway HTTP transport code against an in-process fake `fetch`. No network I/O, no key. Mock transport only: no claim about model quality or live Gateway behavior.
 
 Scenarios (real server function, guard, PostgreSQL, browser):
 
-- **A** `decision-ok` initial generation renders a preview; the selected candidate is the LAST criteria key sent in the request (non-first); one guarded attempt, lease released, nothing saved.
+- **A** `ok` initial generation renders a preview; the selected candidate is the LAST criteria key sent in the request (non-first); one guarded attempt, lease released, nothing saved.
 - **B** Changing one home slot's recipe with the preview selector makes no further `generateNextWeeklyMenu` call and no new attempt row; covered (office) slots stay without recipes.
 - **C** Accept saves exactly the visible edited menu; reload shows it; the shopping list contains the swapped recipe's ingredient and not the replaced recipe's.
 - **D** With an edited, unsaved preview, "Generate another" with `decision-invalid` shows the loss-confirmation dialog; after confirming, the request fails recoverably and the edited preview returns with identical assignments; the attempt is counted and no lease remains.
@@ -48,7 +48,7 @@ The adapter returns the existing `AiMenuResult` (`menu`, `recipeNames`, `unavail
 
 ## Repeatable checks
 
-From `frontend/`, run `pnpm lint`, `pnpm check`, `pnpm typecheck`, `pnpm test`, `pnpm build`, and `pnpm e2e:real-stack e2e/real-stack/ai-weekly-menu.scenario.js`. For targeted mocked Gateway evidence: `pnpm exec vitest run src/features/weekly-menu/menu-decision*.test.ts --reporter=json --outputFile=/tmp/weekly-menu-decisions-tests.json`. Also run the production UI harness in [AI-WEEKLY-MENU.md](AI-WEEKLY-MENU.md); its failure/regeneration scenarios verify draft retention and acceptance. The legacy real-stack scenarios exercise the default route; the Decisions mock-transport section below adds the real adapter without a live Gateway; one UI wait now requires the editable dinner selector rather than the earlier preview wrapper, preserving the existing timeout and assertion. All Decisions HTTP calls in tests use synthetic credentials and fake transport through the installed SDK.
+From `frontend/`, run `pnpm lint`, `pnpm check`, `pnpm typecheck`, `pnpm test`, `pnpm build`, and `pnpm e2e:real-stack e2e/real-stack/ai-weekly-menu.scenario.js`. For targeted mocked Gateway evidence: `pnpm exec vitest run src/features/weekly-menu/menu-decision*.test.ts --reporter=json --outputFile=/tmp/weekly-menu-decisions-tests.json`. Also run the production UI harness in [AI-WEEKLY-MENU.md](AI-WEEKLY-MENU.md); its failure/regeneration scenarios verify draft retention and acceptance. The real-stack scenarios exercise the development mock route; the Decisions mock-transport section below adds the real adapter without a live Gateway; one UI wait now requires the editable dinner selector rather than the earlier preview wrapper, preserving the existing timeout and assertion. All Decisions HTTP calls in tests use synthetic credentials and fake transport through the installed SDK.
 
 ## Observed verification (2026-11-05)
 
@@ -60,9 +60,9 @@ From `frontend/`, run `pnpm lint`, `pnpm check`, `pnpm typecheck`, `pnpm test`, 
 
 ## Real-stack Decisions run (mock transport, added with this E2E)
 
-`decision-ok` and `decision-invalid` run in `generateNextWeeklyMenu` only when `AI_WEEKLY_MENU_MOCK=true` and `NODE_ENV !== 'production'`. They call the real `prepareWeeklyMenuDecision` with key `mock-not-a-key`, seed 17 and the in-process fake `fetch` in `src/features/weekly-menu/ai-mock-decision.ts` (a separate server-only module, because `ai-mock.ts` is also bundled for the browser). The fake answers the Gateway decision endpoint with the LAST criteria key (`decision-ok`) or `menu-unknown` (`decision-invalid`), and logs one `DECISION_MOCK_TRANSPORT` line (candidate count, choice, the candidate's assignments) that the harness reads from the dev-server log. The generation runs inside the existing `runAiGenerationWithGuard`. Engine selection for non-mock requests is unchanged; legacy remains the default.
+`ok` and `decision-invalid` run in `generateNextWeeklyMenu` only when `AI_WEEKLY_MENU_MOCK=true` and `NODE_ENV !== 'production'`. They call the real `prepareWeeklyMenuDecision` with key `mock-not-a-key`, seed 17 and the in-process fake `fetch` in `src/features/weekly-menu/ai-mock-decision.ts` (a separate server-only module, because `ai-mock.ts` is also bundled for the browser). The fake answers the Gateway decision endpoint with the LAST criteria key (`ok`) or `menu-unknown` (`decision-invalid`), and logs one `DECISION_MOCK_TRANSPORT` line (candidate count, choice, the candidate's assignments) that the harness reads from the dev-server log. The generation runs inside the existing `runAiGenerationWithGuard`. Engine selection for non-mock requests is unchanged; legacy remains the default.
 
-The scenario runs after the 18 legacy results, clears the disposable database's request rows and saved week (the legacy flow spends the whole hourly quota), seeds 9 lunch + 9 dinner recipes with one ingredient each, sets Monday to Office (lunch covered), and then runs scenarios A–D (D before C, so the failed regeneration happens on an edited, unsaved preview).
+The scenario runs after the guard/persistence results, clears the disposable database's request rows and saved week (the first flow spends the whole hourly quota), seeds 9 lunch + 9 dinner recipes with one ingredient each, sets Monday to Office (lunch covered), and then runs scenarios A–D (D before C, so the failed regeneration happens on an edited, unsaved preview).
 
 ```bash
 cd frontend
@@ -70,4 +70,15 @@ REAL_STACK_BROWSER_BIN="$(realpath "$(agent-browser skills path core)/../../bin/
   pnpm e2e:real-stack e2e/real-stack/ai-weekly-menu.scenario.js
 ```
 
-Expected: exit 0; the existing 18 `PASS` lines, then `PASS decision-ok…`, `PASS manual selector change…`, `PASS decision-invalid…`, `PASS accept persists the edited menu…`, the loopback check and the cleanup line. Harness-owned artifacts: `e2e/artifacts/weekly-menu-decisions-results.json` (scenario, input summary, seed 17, `weekly-menu-choice-v1`, candidate count 8, selected `menu-7`, selection source `decision (mock transport)`, per-assertion PASS/FAIL) and the screenshots `weekly-menu-decisions-results-{preview,manual,failure-recovery,accepted,local-fallback}.png`. Reruns produce a byte-identical JSON. This proves transport and flow wiring only: no live Gateway call, no model-quality claim.
+Expected: exit 0; the existing 18 `PASS` lines, then `PASS ok…`, `PASS manual selector change…`, `PASS decision-invalid…`, `PASS accept persists the edited menu…`, the loopback check and the cleanup line. Harness-owned artifacts: `e2e/artifacts/weekly-menu-decisions-results.json` (scenario, input summary, seed 17, `weekly-menu-choice-v1`, candidate count 8, selected `menu-7`, selection source `decision (mock transport)`, per-assertion PASS/FAIL) and the screenshots `weekly-menu-decisions-results-{preview,manual,failure-recovery,accepted,local-fallback}.png`. Reruns produce a byte-identical JSON. This proves transport and flow wiring only: no live Gateway call, no model-quality claim.
+
+## Legacy removal PR A: mock failure modes (before implementation)
+
+- Mock ok/absent must use the real Decisions adapter and fake transport, never legacy or network; each action acquires the guard once.
+- Slow must wait eight seconds inside the abort budget and honor cancellation; empty must retain the schedule, all names and both unavailable types without delay.
+- Regeneration must pass previousProposal to candidate planning; valid catalog assignments, persistence, quota, leases, stale checks, identity and cleanup remain mandatory.
+- Production/mock-disabled routing must retain the legacy default and opt-in Decisions; short-circuit failures remain unchanged.
+
+Assertion changes: remove legacy mock rotation/repair equivalence tests because mock selection now chooses a complete planned candidate; retain remote legacy validation tests and replace mock coverage at the server boundary. The dedicated real-stack scenario now uses the shared ok name; its selection, persistence and guard assertions remain intact. The production UI fixture intercepts server functions, so it requires no mock delay or assertion changes.
+
+Verification (2026-11-06): install, lint, check, typecheck, test (121 passed, 1 skipped) and build passed. Both real-stack runs passed with byte-identical Decisions JSON (SHA-256 `298a445f2f924723780640bf59832ac822ef023517f0d7ebc23f88f718814d4d`); failure/SIGTERM cleanup and the PostgreSQL guard passed. The production UI harness passed all 54 scenarios at 1440×1200; slow transport cancellation also passed a direct smoke check. Meaningful real-stack JSON changes are committed; unrelated screenshots/runtime-only artifacts are restored. No live Gateway/model-quality, deployment or rollback verification.
