@@ -9,23 +9,19 @@ import type { CalendarWeekMenu } from '#/features/weekly-menu/week'
 import type { TargetWeekSchedule } from '#/features/weekly-menu/ai-schedule'
 import { menuForTargetSchedule } from '#/features/weekly-menu/ai-schedule'
 
-const dayAssignmentSchema = z
-  .object({
-    lunchRecipeId: z.string().nullable(),
-    dinnerRecipeId: z.string().nullable(),
-  })
-  .strict()
+const dayAssignmentSchema = z.strictObject({
+  lunchRecipeId: z.string().nullable(),
+  dinnerRecipeId: z.string().nullable(),
+})
 
 const dayAssignmentShape = Object.fromEntries(
   DAYS.map((day) => [day, dayAssignmentSchema]),
 ) as Record<Day, typeof dayAssignmentSchema>
 
-const aiMenuAssignmentsSchema = z
-  .object({
-    weekStart: z.string(),
-    days: z.object(dayAssignmentShape).strict(),
-  })
-  .strict()
+const aiMenuAssignmentsSchema = z.strictObject({
+  weekStart: z.string(),
+  days: z.strictObject(dayAssignmentShape),
+})
 
 export type AiMenuContext = {
   targetWeekStart: string
