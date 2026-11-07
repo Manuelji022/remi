@@ -13,46 +13,172 @@
   },
   {
     "scenario": "generation failRecipes fails before any POST",
-    "verdict": "PASS"
-  },
-  {
-    "scenario": "generation failLoad fails before any POST",
-    "verdict": "PASS"
-  },
-  {
-    "scenario": "failed generation POST retains menu and retry succeeds",
-    "verdict": "PASS"
-  },
-  {
-    "scenario": "schedule failure retains draft; pending retry is guarded and succeeds",
-    "verdict": "PASS"
-  },
-  {
-    "scenario": "late successful read cannot replace another week",
-    "verdict": "PASS"
-  },
-  {
-    "scenario": "late failed read cannot replace another week",
-    "verdict": "PASS"
-  },
-  {
-    "scenario": "sign-out invalidates pending generation save",
-    "verdict": "PASS"
-  },
-  {
-    "scenario": "sign-out invalidates pending generation load",
-    "verdict": "PASS"
-  },
-  {
-    "scenario": "catalog failure is actionable and retry restores shopping",
-    "verdict": "PASS"
-  },
-  {
-    "scenario": "successful empty read permits first generation",
-    "verdict": "PASS"
-  },
-  {
-    "scenario": "Spanish load/save failures and recovery are localized",
-    "verdict": "PASS"
+    "verdict": "FAIL",
+    "error": "Wait timed out after 25000ms",
+    "data": [
+      {
+        "command": [
+          "open",
+          "http://127.0.0.1:3101/weekly-menu-planner?scenario=ready"
+        ],
+        "error": null,
+        "result": {
+          "lifecycle": {
+            "effectiveLaunch": {
+              "browserLaunched": true,
+              "engine": "chrome",
+              "launchHash": 18288040442354377000
+            },
+            "launched": false,
+            "relaunchedBrowser": false,
+            "restartedBackground": false,
+            "restoreStatus": "not_configured",
+            "reused": true,
+            "saveStatus": "not_attempted"
+          },
+          "targetId": "8B85A4A09CA9197330A38D515398FD2F",
+          "title": "Remi - Your weekly meal planner",
+          "url": "http://127.0.0.1:3101/weekly-menu-planner?scenario=ready"
+        },
+        "success": true
+      },
+      {
+        "command": [
+          "get",
+          "url"
+        ],
+        "error": null,
+        "result": {
+          "lifecycle": {
+            "effectiveLaunch": {
+              "browserLaunched": true,
+              "engine": "chrome",
+              "launchHash": 18288040442354377000
+            },
+            "launched": false,
+            "relaunchedBrowser": false,
+            "restartedBackground": false,
+            "restoreStatus": "not_configured",
+            "reused": true,
+            "saveStatus": "not_attempted"
+          },
+          "url": "http://127.0.0.1:3101/weekly-menu-planner?scenario=ready"
+        },
+        "success": true
+      },
+      {
+        "command": [
+          "wait",
+          "--fn",
+          "document.querySelector(\".planner-day-grid\")?.innerText.includes('Saved dinner ' + window.plannerReliability.reads.find(r=>r.kind==='load').weekStart)"
+        ],
+        "error": null,
+        "result": {
+          "lifecycle": {
+            "effectiveLaunch": {
+              "browserLaunched": true,
+              "engine": "chrome",
+              "launchHash": 18288040442354377000
+            },
+            "launched": false,
+            "relaunchedBrowser": false,
+            "restartedBackground": false,
+            "restoreStatus": "not_configured",
+            "reused": true,
+            "saveStatus": "not_attempted"
+          },
+          "result": true
+        },
+        "success": true
+      },
+      {
+        "command": [
+          "eval",
+          "window.plannerReliability.failRecipes=true"
+        ],
+        "error": null,
+        "result": {
+          "lifecycle": {
+            "effectiveLaunch": {
+              "browserLaunched": true,
+              "engine": "chrome",
+              "launchHash": 18288040442354377000
+            },
+            "launched": false,
+            "relaunchedBrowser": false,
+            "restartedBackground": false,
+            "restoreStatus": "not_configured",
+            "reused": true,
+            "saveStatus": "not_attempted"
+          },
+          "origin": "http://127.0.0.1:3101/weekly-menu-planner?scenario=ready",
+          "result": true
+        },
+        "success": true
+      },
+      {
+        "command": [
+          "get",
+          "url"
+        ],
+        "error": null,
+        "result": {
+          "lifecycle": {
+            "effectiveLaunch": {
+              "browserLaunched": true,
+              "engine": "chrome",
+              "launchHash": 18288040442354377000
+            },
+            "launched": false,
+            "relaunchedBrowser": false,
+            "restartedBackground": false,
+            "restoreStatus": "not_configured",
+            "reused": true,
+            "saveStatus": "not_attempted"
+          },
+          "url": "http://127.0.0.1:3101/weekly-menu-planner?scenario=ready"
+        },
+        "success": true
+      },
+      {
+        "command": [
+          "find",
+          "role",
+          "button",
+          "click",
+          "--name",
+          "Regenerate menu",
+          "--exact"
+        ],
+        "error": null,
+        "result": {
+          "clicked": "@e13",
+          "lifecycle": {
+            "effectiveLaunch": {
+              "browserLaunched": true,
+              "engine": "chrome",
+              "launchHash": 18288040442354377000
+            },
+            "launched": false,
+            "relaunchedBrowser": false,
+            "restartedBackground": false,
+            "restoreStatus": "not_configured",
+            "reused": true,
+            "saveStatus": "not_attempted"
+          }
+        },
+        "success": true
+      },
+      {
+        "command": [
+          "wait",
+          "--text",
+          "Could not finish generating and saving your menu."
+        ],
+        "error": "Wait timed out after 25000ms",
+        "result": null,
+        "success": false
+      }
+    ]
   }
 ]
