@@ -74,6 +74,14 @@
     margin-inline-start: auto;
   }
 
+  .header-auth:empty {
+    min-inline-size: min(
+      calc(var(--auth-max) + var(--size-80)),
+      calc(100vw - var(--size-144))
+    );
+    min-block-size: var(--hit-min);
+  }
+
   .header-user {
     max-inline-size: var(--auth-max);
     overflow: hidden;
