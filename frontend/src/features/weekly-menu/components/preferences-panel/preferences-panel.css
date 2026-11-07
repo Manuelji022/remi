@@ -5,12 +5,23 @@
   }
 
   .panel-root {
+    margin: var(--gap-none);
+    padding: var(--gap-none);
+    border: var(--gap-none);
+    background: transparent;
+    color: inherit;
+    inline-size: 100%;
+    max-inline-size: none;
     position: fixed;
     inset: var(--inset-none);
     block-size: var(--drawer-height);
     max-block-size: var(--drawer-height);
     overflow: hidden;
     z-index: var(--z-overlay);
+  }
+
+  .panel-root::backdrop {
+    background: transparent;
   }
 
   .panel-overlay {
