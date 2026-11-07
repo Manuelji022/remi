@@ -2,39 +2,14 @@ import { createServerFn } from '@tanstack/react-start'
 import { z } from 'zod'
 import { authMiddleware } from '#/features/auth/middleware'
 import {
+  generateNextWeeklyMenuForUser,
+  generateNextWeeklyMenuInputSchema,
+} from '#/features/weekly-menu/generate-next-menu'
+import {
   loadMenuWeekForUser,
   saveMenuWeekForUser,
 } from '#/features/weekly-menu/store'
-import {
-  calendarWeekSchema,
-  parseCalendarWeek,
-  weekStartSchema,
-} from '#/features/weekly-menu/week'
-import {
-  AiGenerationInProgressError,
-  AiGenerationLimitError,
-  runAiGenerationWithGuard,
-} from '#/features/weekly-menu/ai-generation-guard'
-import {
-  aiMockScenarioSchema,
-  isAiMockEnabled,
-  mockEmptyMenu,
-} from '#/features/weekly-menu/ai-mock'
-import {
-  MOCK_DECISION_SEED,
-  mockDecisionFetch,
-} from '#/features/weekly-menu/ai-mock-decision'
-import { prepareWeeklyMenuDecision } from '#/features/weekly-menu/menu-decision'
-import {
-  AiGenerationStaleWeekError,
-  loadAiMenuContextForUser,
-} from '#/features/weekly-menu/ai-generation-store'
-import {
-  calendarTimeZoneSchema,
-  getStaleTargetWeekStart,
-  nextCalendarWeekStart,
-  targetWeekScheduleSchema,
-} from '#/features/weekly-menu/ai-schedule'
+import { parseCalendarWeek, weekStartSchema } from '#/features/weekly-menu/week'
 
 export const loadWeeklyMenu = createServerFn({ method: 'GET' })
   .middleware([authMiddleware])
@@ -52,98 +27,7 @@ export const saveWeeklyMenu = createServerFn({ method: 'POST' })
 
 export const generateNextWeeklyMenu = createServerFn({ method: 'POST' })
   .middleware([authMiddleware])
-  .validator(
-    z.object({
-      targetWeekStart: weekStartSchema,
-      timeZone: calendarTimeZoneSchema,
-      schedule: targetWeekScheduleSchema,
-      mockScenario: aiMockScenarioSchema.optional(),
-      previousMenu: calendarWeekSchema.optional(),
-    }),
+  .validator(generateNextWeeklyMenuInputSchema)
+  .handler(({ data, context }) =>
+    generateNextWeeklyMenuForUser(context.userId, data),
   )
-  .handler(async ({ data, context: { userId } }) => {
-    const mockScenario = isAiMockEnabled() ? data.mockScenario : undefined
-    try {
-      if (mockScenario === 'error') {
-        await new Promise((resolve) => setTimeout(resolve, 1_000))
-        throw new Error('AI Weekly Menu generation failed')
-      }
-      if (mockScenario === 'rate-limited') {
-        return { ok: false as const, reason: 'rate-limited' as const }
-      }
-      if (mockScenario === 'in-progress') {
-        return { ok: false as const, reason: 'in-progress' as const }
-      }
-      if (mockScenario === 'stale') {
-        return {
-          ok: false as const,
-          reason: 'stale-week' as const,
-          expectedTargetWeekStart: nextCalendarWeekStart(
-            new Date(),
-            data.timeZone,
-          ),
-        }
-      }
-      const staleTargetWeekStart = getStaleTargetWeekStart(
-        data.targetWeekStart,
-        data.timeZone,
-      )
-      if (staleTargetWeekStart) {
-        throw new AiGenerationStaleWeekError(staleTargetWeekStart)
-      }
-
-      // Context reads stay outside the 60-second lease: only the bounded
-      // provider call may run while it is held.
-      const context = await loadAiMenuContextForUser(
-        userId,
-        data.targetWeekStart,
-        data.schedule,
-      )
-      if (data.previousMenu?.weekStart === data.targetWeekStart) {
-        context.previousProposal = data.previousMenu
-      }
-      const mockEnabled = isAiMockEnabled()
-      const generate =
-        mockEnabled && mockScenario === 'empty'
-          ? () => Promise.resolve(mockEmptyMenu(context))
-          : prepareWeeklyMenuDecision(
-              context,
-              mockEnabled
-                ? {
-                    apiKey: 'mock-not-a-key',
-                    fetch: mockDecisionFetch(
-                      mockScenario === 'slow' ||
-                        mockScenario === 'decision-invalid'
-                        ? mockScenario
-                        : 'ok',
-                    ),
-                    seed: MOCK_DECISION_SEED,
-                  }
-                : {},
-            ).generate
-      const generated = await runAiGenerationWithGuard(userId, generate)
-      const staleAfterGeneration = getStaleTargetWeekStart(
-        data.targetWeekStart,
-        data.timeZone,
-      )
-      if (staleAfterGeneration) {
-        throw new AiGenerationStaleWeekError(staleAfterGeneration)
-      }
-      return { ok: true as const, ...generated }
-    } catch (error) {
-      if (error instanceof AiGenerationLimitError) {
-        return { ok: false as const, reason: 'rate-limited' as const }
-      }
-      if (error instanceof AiGenerationInProgressError) {
-        return { ok: false as const, reason: 'in-progress' as const }
-      }
-      if (error instanceof AiGenerationStaleWeekError) {
-        return {
-          ok: false as const,
-          reason: 'stale-week' as const,
-          expectedTargetWeekStart: error.expectedTargetWeekStart,
-        }
-      }
-      throw error
-    }
-  })
