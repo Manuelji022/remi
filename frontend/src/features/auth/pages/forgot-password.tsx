@@ -65,7 +65,7 @@ export function ForgotPasswordPage() {
             {error ? <p className="auth-error">{error}</p> : null}
 
             <button
-              className="auth-button"
+              className="btn btn-primary"
               disabled={isSubmitting}
               type="submit"
             >
@@ -75,7 +75,7 @@ export function ForgotPasswordPage() {
         )}
 
         <p className="auth-switch">
-          <Link to={getLocalizedPath('/login', locale)}>
+          <Link className="text-link" to={getLocalizedPath('/login', locale)}>
             {t('auth.backToLogin')}
           </Link>
         </p>

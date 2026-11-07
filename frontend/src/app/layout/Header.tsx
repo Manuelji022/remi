@@ -38,7 +38,7 @@ export default function Header() {
             <>
               <span className="header-user">{session.user.name}</span>
               <button
-                className="header-auth-button"
+                className="btn btn-secondary"
                 onClick={() => void signOut()}
                 type="button"
               >
@@ -49,14 +49,14 @@ export default function Header() {
             <>
               <Link
                 activeProps={{ 'aria-current': 'page' }}
-                className="header-auth-link"
+                className="text-link"
                 to={getLocalizedPath('/login', locale)}
               >
                 {t('auth.login')}
               </Link>
               <Link
                 activeProps={{ 'aria-current': 'page' }}
-                className="header-auth-link header-auth-link-strong"
+                className="btn btn-secondary"
                 to={getLocalizedPath('/signup', locale)}
               >
                 {t('auth.signup')}

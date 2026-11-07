@@ -92,13 +92,17 @@ export function TwoFactorPage() {
 
           {error ? <p className="auth-error">{error}</p> : null}
 
-          <button className="auth-button" disabled={isVerifying} type="submit">
+          <button
+            className="btn btn-primary"
+            disabled={isVerifying}
+            type="submit"
+          >
             {isVerifying ? t('auth.otpVerifying') : t('auth.otpVerify')}
           </button>
         </form>
 
         <button
-          className="auth-secondary-button"
+          className="btn btn-secondary"
           disabled={isSending}
           onClick={sendOtp}
           type="button"
@@ -107,7 +111,7 @@ export function TwoFactorPage() {
         </button>
 
         <p className="auth-switch">
-          <Link to={getLocalizedPath('/login', locale)}>
+          <Link className="text-link" to={getLocalizedPath('/login', locale)}>
             {t('auth.backToLogin')}
           </Link>
         </p>

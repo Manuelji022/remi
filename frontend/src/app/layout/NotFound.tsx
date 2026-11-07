@@ -6,10 +6,10 @@ export function NotFound() {
 
   return (
     <main id="main">
-      <section className="planner-empty-state">
+      <section className="empty-state">
         <h1>{t('notFound.title')}</h1>
         <p>{t('notFound.body')}</p>
-        <Link className="panel-text-link" to={getLocalizedPath('/', locale)}>
+        <Link className="text-link" to={getLocalizedPath('/', locale)}>
           {t('notFound.home')}
         </Link>
       </section>
