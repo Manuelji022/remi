@@ -27,7 +27,7 @@ export default function Header() {
           </Link>
           <Link
             activeProps={{ 'aria-current': 'page' }}
-            className="planner-entry-link"
+            className="header-nav-link"
             to={getLocalizedPath('/weekly-menu-planner', locale)}
           >
             {t('nav.weeklyMenu')}
