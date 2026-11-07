@@ -1,3 +1,5 @@
+import '@tanstack/react-start/server-only'
+
 import { and, eq, inArray } from 'drizzle-orm'
 import { DAYS } from '#/features/weekly-menu/constants'
 import type { Day } from '#/features/weekly-menu/constants'

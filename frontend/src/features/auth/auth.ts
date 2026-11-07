@@ -1,3 +1,5 @@
+import '@tanstack/react-start/server-only'
+
 import { drizzleAdapter } from '@better-auth/drizzle-adapter'
 import { betterAuth } from 'better-auth'
 import { twoFactor } from 'better-auth/plugins/two-factor'

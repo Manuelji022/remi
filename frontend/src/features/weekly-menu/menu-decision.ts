@@ -1,3 +1,5 @@
+import '@tanstack/react-start/server-only'
+
 import { createGateway, experimental_decide as decide } from 'ai'
 import { DAYS } from '#/features/weekly-menu/constants'
 import { buildWeeklyMenuCandidates } from '#/features/weekly-menu/menu-candidates'

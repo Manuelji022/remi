@@ -1,3 +1,5 @@
+import '@tanstack/react-start/server-only'
+
 import { shiftWeekStart } from '#/features/weekly-menu/week'
 import type { AiMenuContext } from '#/features/weekly-menu/ai-generator'
 import { listRecipesForUser } from '#/features/recipes/store'
