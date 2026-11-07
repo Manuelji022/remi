@@ -10,7 +10,7 @@ export default async function scenario({
 }) {
   const auth = "document.querySelector('.header-auth')"
 
-  await open('ok')
+  await open('ok', 'Generate menu')
   const base = await evaluate('location.origin')
   await wait(
     `${auth}?.innerText.includes('Synthetic E2E') && ${auth}?.innerText.includes('Log out')`,

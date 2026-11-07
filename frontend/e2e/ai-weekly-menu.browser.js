@@ -112,7 +112,7 @@ await scenario('schedule preparation retains the opener for Escape focus restora
 await scenario('generation retry restores Escape focus to the stable schedule header trigger', [
   open('ready'),
   wait(`${shell}.innerText.includes('Saved dinner')`),
-  evaluate(`window.__stableScheduleTarget = [...document.querySelectorAll('.planner-actions button')].find(button => button.textContent.includes('Regenerate menu')); ${fixture}.failGeneration=true`),
+  evaluate(`window.__stableScheduleTarget = [...document.querySelectorAll('.planner-actions button')].find(button => button.textContent.trim() === 'Regenerate menu'); ${fixture}.failGeneration=true`),
   click('Regenerate menu'),
   click('Confirm schedule and generate'),
   text('Could not generate next week’s menu'),

@@ -4,10 +4,11 @@
 const base = 'http://127.0.0.1:3101'
 const fixture = 'window.plannerReliability'
 const shell = 'document.querySelector(".planner-shell")'
-const primary = "Array.from(document.querySelectorAll('button')).find(button => ['Generate menu', 'Regenerate menu', 'Generar menú', 'Regenerar menú'].some(label => button.textContent.includes(label)))"
+const primary = (label) =>
+  `Array.from(document.querySelectorAll('button')).find(button => button.textContent.trim() === ${JSON.stringify(label)})`
 const grid = 'document.querySelector(".planner-day-grid")'
 const dialog = 'document.querySelector("[role=dialog]")'
-const save = `Array.from(${dialog}.querySelectorAll('button')).find(button => ['Save preferences', 'Guardar preferencias'].some(label => button.textContent.includes(label)))`
+const save = `Array.from(${dialog}.querySelectorAll('button')).find(button => button.textContent.trim() === 'Save preferences')`
 const currentDinner = `${grid}?.innerText.includes('Saved dinner ' + ${fixture}.reads.find(r=>r.kind==='load').weekStart)`
 const click = (name) => ['find', 'role', 'button', 'click', '--name', name, '--exact']
 const evaluate = (source) => ['eval', source]
@@ -45,13 +46,13 @@ await scenario('failed read is not an empty week; retry restores existing data',
   ['snapshot', '-i'],
   text('Could not load this week'),
   assert(
-    `${primary}.disabled && !${shell}.innerText.includes('No Weekly Menu yet') && ${fixture}.writes.length===0`,
+    `${primary('Generate menu')}.disabled && !${shell}.innerText.includes('No Weekly Menu yet') && ${fixture}.writes.length===0`,
     'failed read blocks writes and does not render the empty state',
   ),
   evaluate(`${fixture}.failLoad=false`),
   click('Retry loading'),
   wait(currentDinner),
-  assert(`!${primary}.disabled && ${fixture}.writes.length===0`, 'safe load recovery'),
+  assert(`!${primary('Regenerate menu')}.disabled && ${fixture}.writes.length===0`, 'safe load recovery'),
 ])
 
 for (const kind of ['auth', 'load']) {
@@ -59,12 +60,12 @@ for (const kind of ['auth', 'load']) {
     open(`${kind}-pending`),
     wait(`Boolean(${fixture}.release.${kind})`),
     assert(
-      `${primary}.disabled && ${fixture}.writes.length===0 && ${shell}.innerText.includes('Loading this week')`,
+      `${primary('Generate menu')}.disabled && ${fixture}.writes.length===0 && ${shell}.innerText.includes('Loading this week')`,
       'pending read blocks actions',
     ),
     evaluate(`${fixture}.hold.${kind}=false;${fixture}.release.${kind}()`),
     wait(currentDinner),
-    assert(`!${primary}.disabled && ${fixture}.writes.length===0`, 'read completion restores actions'),
+    assert(`!${primary('Regenerate menu')}.disabled && ${fixture}.writes.length===0`, 'read completion restores actions'),
   ])
 }
 
@@ -128,7 +129,7 @@ for (const failed of [false, true]) {
     wait(currentDinner),
     evaluate(`${fixture}.release.load()`),
     wait(`${fixture}.completed.filter(r=>r.kind==='load').length===3`),
-    assert(`${currentDinner} && !${shell}.querySelector('[role=alert]') && !${primary}.disabled`, 'late result does not change selected week'),
+    assert(`${currentDinner} && !${shell}.querySelector('[role=alert]') && !${primary('Regenerate menu')}.disabled`, 'late result does not change selected week'),
   ])
 }
 
@@ -139,7 +140,7 @@ for (const kind of ['save', 'load']) {
     evaluate(`${fixture}.hold.${kind}=true`),
     click('Regenerate menu'),
     wait(`Boolean(${fixture}.release.${kind})`),
-    assert(`${primary}.disabled && ${shell}.innerText.includes('Generating')`, 'generation pending state is visible'),
+    assert(`${primary('Regenerate menu')}.disabled && ${shell}.innerText.includes('Generating')`, 'generation pending state is visible'),
     click('Log out'),
     text('Log in'),
     evaluate(`${fixture}.hold.${kind}=false;${fixture}.release.${kind}()`),
@@ -154,7 +155,7 @@ for (const kind of ['save', 'load']) {
 await scenario('catalog failure is actionable and retry restores shopping', [
   open('recipes-error'),
   text('Could not load this week'),
-  assert(`${primary}.disabled && ${fixture}.writes.length===0`, 'catalog failure blocks writes'),
+  assert(`${primary('Generate menu')}.disabled && ${fixture}.writes.length===0`, 'catalog failure blocks writes'),
   evaluate(`${fixture}.failRecipes=false`),
   click('Retry loading'),
   wait(currentDinner),
@@ -165,7 +166,7 @@ await scenario('catalog failure is actionable and retry restores shopping', [
 
 await scenario('successful empty read permits first generation', [
   open('empty'),
-  wait(`!${primary}.disabled`),
+  wait(`!${primary('Generate menu')}.disabled`),
   assert(`${shell}.innerText.includes('No Weekly Menu yet') && ${fixture}.writes.length===0`, 'successful absence is distinct from read failure'),
   click('Generate menu'),
   text('Weekly Menu saved.'),
