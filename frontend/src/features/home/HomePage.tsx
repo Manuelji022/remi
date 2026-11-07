@@ -1,4 +1,3 @@
-import { Link } from '@tanstack/react-router'
 import {
   CalendarIcon,
   ChevronRightIcon,
@@ -6,7 +5,7 @@ import {
   ShoppingCartIcon,
   UtensilsIcon,
 } from '#/components/primitives/icons'
-import { getLocalizedPath, useI18n } from '#/shared/i18n'
+import { LocalizedLink, useI18n } from '#/shared/i18n'
 import './home.css'
 
 const features = [
@@ -16,7 +15,7 @@ const features = [
 ] as const
 
 export function HomePage() {
-  const { locale, t } = useI18n()
+  const { t } = useI18n()
 
   return (
     <main className="home-page" id="main">
@@ -26,19 +25,16 @@ export function HomePage() {
           <h1 id="home-title">{t('home.title')}</h1>
           <p className="home-description">{t('home.copy')}</p>
           <div className="home-actions">
-            <Link
+            <LocalizedLink
               className="btn btn-primary"
-              to={getLocalizedPath('/weekly-menu-planner', locale)}
+              to="/weekly-menu-planner"
             >
               {t('home.start')}
               <ChevronRightIcon aria-hidden="true" />
-            </Link>
-            <Link
-              className="text-link"
-              to={getLocalizedPath('/signup', locale)}
-            >
+            </LocalizedLink>
+            <LocalizedLink className="text-link" to="/signup">
               {t('auth.createAccount')}
-            </Link>
+            </LocalizedLink>
           </div>
           <p className="home-note">{t('home.note')}</p>
         </div>

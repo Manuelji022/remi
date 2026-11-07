@@ -1,12 +1,10 @@
-import { Link } from '@tanstack/react-router'
 import './header.css'
-import { getLocalizedPath, useI18n } from '#/shared/i18n'
+import { LocalizedLink, useI18n } from '#/shared/i18n'
 import { authClient } from '#/features/auth/auth-client'
 import { useSignOut } from '#/features/auth/use-sign-out'
 
-export default function Header() {
-  const { locale, t } = useI18n()
-  const homePath = getLocalizedPath('/', locale)
+export function Header() {
+  const { t } = useI18n()
   const { data: session, isPending: isSessionPending } = authClient.useSession()
   const signOut = useSignOut()
 
@@ -14,24 +12,24 @@ export default function Header() {
     <header className="site-header">
       <nav className="header-wrapper" aria-label="Primary">
         <div className="header-leading">
-          <Link
+          <LocalizedLink
             aria-label={t('nav.home')}
             className="header-logo"
-            to={homePath}
+            to="/"
             translate="no"
           >
             Remi
             <span aria-hidden="true" className="header-logo-span">
               .
             </span>
-          </Link>
-          <Link
-            activeProps={{ 'aria-current': 'page' }}
+          </LocalizedLink>
+          <LocalizedLink
             className="header-nav-link"
-            to={getLocalizedPath('/weekly-menu-planner', locale)}
+            nav
+            to="/weekly-menu-planner"
           >
             {t('nav.weeklyMenu')}
-          </Link>
+          </LocalizedLink>
         </div>
         <div aria-busy={isSessionPending} className="header-auth">
           {isSessionPending ? null : session ? (
@@ -47,20 +45,12 @@ export default function Header() {
             </>
           ) : (
             <>
-              <Link
-                activeProps={{ 'aria-current': 'page' }}
-                className="text-link"
-                to={getLocalizedPath('/login', locale)}
-              >
+              <LocalizedLink className="text-link" nav to="/login">
                 {t('auth.login')}
-              </Link>
-              <Link
-                activeProps={{ 'aria-current': 'page' }}
-                className="btn btn-secondary"
-                to={getLocalizedPath('/signup', locale)}
-              >
+              </LocalizedLink>
+              <LocalizedLink className="btn btn-secondary" nav to="/signup">
                 {t('auth.signup')}
-              </Link>
+              </LocalizedLink>
             </>
           )}
         </div>

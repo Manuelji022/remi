@@ -1,8 +1,7 @@
-import { Link } from '@tanstack/react-router'
 import '../auth.css'
 import type { ComponentProps } from 'react'
 import { useState } from 'react'
-import { getLocalizedPath, useI18n } from '#/shared/i18n'
+import { LocalizedLink, getLocalizedPath, useI18n } from '#/shared/i18n'
 import { authClient } from '#/features/auth/auth-client'
 
 type FormSubmitEvent = Parameters<
@@ -75,9 +74,9 @@ export function ForgotPasswordPage() {
         )}
 
         <p className="auth-switch">
-          <Link className="text-link" to={getLocalizedPath('/login', locale)}>
+          <LocalizedLink className="text-link" to="/login">
             {t('auth.backToLogin')}
-          </Link>
+          </LocalizedLink>
         </p>
       </section>
     </main>
