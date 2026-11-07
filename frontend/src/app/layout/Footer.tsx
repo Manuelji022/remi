@@ -1,7 +1,7 @@
 import { useI18n } from '#/shared/i18n'
 import './footer.css'
 
-export default function Footer() {
+export function Footer() {
   const year = new Date().getFullYear()
   const { t } = useI18n()
 

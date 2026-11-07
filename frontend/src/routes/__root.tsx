@@ -4,8 +4,8 @@ import {
   createRootRoute,
   useLocation,
 } from '@tanstack/react-router'
-import Footer from '#/app/layout/Footer'
-import Header from '#/app/layout/Header'
+import { Footer } from '#/app/layout/Footer'
+import { Header } from '#/app/layout/Header'
 import { NotFound } from '#/app/layout/NotFound'
 import { RouteError } from '#/app/layout/RouteError'
 import { I18nProvider, getLocaleFromPathname, useI18n } from '#/shared/i18n'
