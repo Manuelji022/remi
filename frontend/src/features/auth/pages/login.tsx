@@ -82,20 +82,27 @@ export function LoginPage() {
 
           {error ? <p className="auth-error">{error}</p> : null}
 
-          <button className="auth-button" disabled={isSubmitting} type="submit">
+          <button
+            className="btn btn-primary"
+            disabled={isSubmitting}
+            type="submit"
+          >
             {isSubmitting ? t('auth.loggingIn') : t('auth.login')}
           </button>
         </form>
 
         <p className="auth-forgot">
-          <Link to={getLocalizedPath('/forgot-password', locale)}>
+          <Link
+            className="text-link"
+            to={getLocalizedPath('/forgot-password', locale)}
+          >
             {t('auth.forgotPasswordLink')}
           </Link>
         </p>
 
         <p className="auth-switch">
           {t('auth.noAccount')}{' '}
-          <Link to={getLocalizedPath('/signup', locale)}>
+          <Link className="text-link" to={getLocalizedPath('/signup', locale)}>
             {t('auth.createOne')}
           </Link>
         </p>

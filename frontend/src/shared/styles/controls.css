@@ -18,6 +18,7 @@
 
   h2,
   h3,
+  .empty-state h2,
   .planner-empty-state h2 {
     font-size: var(--type-title-size);
     line-height: var(--type-title-lh);
@@ -57,10 +58,105 @@
     transform: none;
   }
 
+  .empty-state {
+    text-align: center;
+    padding-block: var(--pad-empty-block);
+    padding-inline: var(--pad-card);
+    display: grid;
+    justify-items: center;
+    gap: var(--gap-stack-md);
+    background: var(--bg-surface);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card);
+  }
+
+  .empty-state > svg {
+    inline-size: var(--icon-empty);
+    block-size: var(--icon-empty);
+    color: var(--accent-solid);
+  }
+
+  .empty-state p {
+    max-inline-size: var(--measure);
+    color: var(--text-secondary);
+    font-size: var(--type-body-size);
+    line-height: var(--type-body-lh);
+    font-weight: var(--weight-regular);
+  }
+
+  .btn {
+    font-size: var(--type-callout-size);
+    font-weight: var(--weight-semibold);
+    line-height: var(--type-callout-lh);
+    min-block-size: var(--control-height);
+    min-inline-size: var(--hit-min);
+    border-radius: var(--radius-control);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--gap-inline);
+    text-decoration: none;
+    touch-action: manipulation;
+    white-space: nowrap;
+    transition:
+      background-color var(--duration-fast) var(--ease-standard),
+      transform var(--duration-fast) var(--ease-standard);
+  }
+
+  .btn-primary {
+    padding-inline: var(--pad-control-inline);
+    background: var(--accent-solid);
+    color: var(--on-accent);
+  }
+
+  .btn-primary:hover {
+    background: var(--accent-solid-hover);
+  }
+
+  .btn-primary:active {
+    background: var(--accent-solid-pressed);
+    transform: scale(var(--press-scale));
+  }
+
+  .btn-secondary {
+    padding-inline: var(--pad-control-inline-tight);
+    background: var(--bg-fill);
+    color: var(--text-primary);
+  }
+
+  .btn-secondary:hover {
+    background: var(--bg-fill-hover);
+  }
+
+  .btn-secondary:active {
+    transform: scale(var(--press-scale));
+  }
+
+  .text-link {
+    font-size: var(--type-callout-size);
+    font-weight: var(--weight-semibold);
+    line-height: var(--type-callout-lh);
+    min-block-size: var(--control-height);
+    min-inline-size: var(--hit-min);
+    padding-inline: var(--pad-control-inline-tight);
+    border-radius: var(--radius-link);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--gap-inline);
+    text-decoration: none;
+    color: var(--accent-text);
+    background: transparent;
+    touch-action: manipulation;
+  }
+
+  .text-link:hover {
+    background: var(--bg-selected-soft);
+    text-decoration: underline;
+  }
+
   .planner-primary-btn,
-  .auth-button,
-  .panel-primary-btn,
-  .home-page .planner-entry-link {
+  .panel-primary-btn {
     font-size: var(--type-callout-size);
     font-weight: var(--weight-semibold);
     line-height: var(--type-callout-lh);
@@ -85,27 +181,20 @@
   }
 
   .planner-primary-btn:hover,
-  .auth-button:hover,
-  .panel-primary-btn:hover,
-  .home-page .planner-entry-link:hover {
+  .panel-primary-btn:hover {
     background: var(--accent-solid-hover);
   }
 
   .planner-primary-btn:active,
-  .auth-button:active,
-  .panel-primary-btn:active,
-  .home-page .planner-entry-link:active {
+  .panel-primary-btn:active {
     background: var(--accent-solid-pressed);
     transform: scale(var(--press-scale));
   }
 
   .planner-secondary-btn,
-  .auth-secondary-button,
   .panel-secondary-btn,
   .panel-add-btn,
-  .panel-language-switcher,
-  .header-auth-link-strong,
-  .header-auth-button {
+  .panel-language-switcher {
     font-size: var(--type-callout-size);
     font-weight: var(--weight-semibold);
     line-height: var(--type-callout-lh);
@@ -130,28 +219,19 @@
   }
 
   .planner-secondary-btn:hover,
-  .auth-secondary-button:hover,
   .panel-secondary-btn:hover,
   .panel-add-btn:hover,
-  .panel-language-switcher:hover,
-  .header-auth-link-strong:hover,
-  .header-auth-button:hover {
+  .panel-language-switcher:hover {
     background: var(--bg-fill-hover);
   }
 
   .planner-secondary-btn:active,
-  .auth-secondary-button:active,
   .panel-secondary-btn:active,
-  .panel-add-btn:active,
-  .header-auth-link-strong:active,
-  .header-auth-button:active {
+  .panel-add-btn:active {
     transform: scale(var(--press-scale));
   }
 
-  .header-auth-link:not(.header-auth-link-strong),
   .panel-add-ingredient-btn,
-  .auth-forgot a,
-  .auth-switch a,
   .panel-text-link {
     font-size: var(--type-callout-size);
     font-weight: var(--weight-semibold);
@@ -170,10 +250,7 @@
     touch-action: manipulation;
   }
 
-  .header-auth-link:not(.header-auth-link-strong):hover,
   .panel-add-ingredient-btn:hover,
-  .auth-forgot a:hover,
-  .auth-switch a:hover,
   .panel-text-link:hover {
     background: var(--bg-selected-soft);
     text-decoration: underline;
@@ -223,11 +300,46 @@
     transform: scale(var(--press-scale));
   }
 
+  .icon-btn {
+    inline-size: var(--hit-min);
+    block-size: var(--hit-min);
+    min-inline-size: var(--hit-min);
+    min-block-size: var(--hit-min);
+    border-radius: var(--radius-pill);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    color: var(--text-secondary);
+    transition:
+      background-color var(--duration-fast) var(--ease-standard),
+      transform var(--duration-fast) var(--ease-standard);
+  }
+
+  .icon-btn-filled {
+    background: var(--bg-fill);
+    color: var(--text-primary);
+  }
+
+  .icon-btn:hover:not(.icon-btn-destructive) {
+    background: var(--bg-fill-hover);
+    color: var(--text-primary);
+  }
+
+  .icon-btn-destructive:hover {
+    background: var(--bg-fill);
+    color: var(--destructive);
+  }
+
+  .icon-btn:active {
+    transform: scale(var(--press-scale));
+  }
+
+  .btn-primary:disabled,
   .planner-primary-btn:disabled,
-  .auth-button:disabled,
   .panel-primary-btn:disabled,
+  .btn-secondary:disabled,
   .planner-secondary-btn:disabled,
-  .auth-secondary-button:disabled,
   .panel-add-btn:disabled,
   .planner-week-nav-btn:disabled,
   .tab-btn:disabled,
@@ -335,16 +447,15 @@
   }
 
   @media (min-width: 48rem) {
+    .btn-secondary,
     .planner-secondary-btn,
     .panel-secondary-btn,
     .panel-add-btn,
-    .panel-language-switcher,
-    .header-auth-link-strong,
-    .header-auth-button {
+    .panel-language-switcher {
       padding-inline: var(--pad-control-inline);
     }
 
-    .header-auth-link:not(.header-auth-link-strong),
+    .text-link,
     .panel-add-ingredient-btn {
       padding-inline: var(--pad-control-inline-tight);
     }

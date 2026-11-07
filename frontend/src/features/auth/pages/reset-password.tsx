@@ -55,7 +55,7 @@ export function ResetPasswordPage() {
           <h1 id="reset-done-title">{t('auth.resetPasswordDoneTitle')}</h1>
           <p className="auth-copy">{t('auth.resetPasswordDoneCopy')}</p>
           <button
-            className="auth-button"
+            className="btn btn-primary"
             onClick={() => navigate({ to: getLocalizedPath('/login', locale) })}
             type="button"
           >
@@ -88,7 +88,11 @@ export function ResetPasswordPage() {
 
           {error ? <p className="auth-error">{error}</p> : null}
 
-          <button className="auth-button" disabled={isSubmitting} type="submit">
+          <button
+            className="btn btn-primary"
+            disabled={isSubmitting}
+            type="submit"
+          >
             {isSubmitting
               ? t('auth.resettingPassword')
               : t('auth.resetPassword')}

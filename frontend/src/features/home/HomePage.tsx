@@ -27,14 +27,14 @@ export function HomePage() {
           <p className="home-description">{t('home.copy')}</p>
           <div className="home-actions">
             <Link
-              className="planner-entry-link"
+              className="btn btn-primary"
               to={getLocalizedPath('/weekly-menu-planner', locale)}
             >
               {t('home.start')}
               <ChevronRightIcon aria-hidden="true" />
             </Link>
             <Link
-              className="panel-text-link"
+              className="text-link"
               to={getLocalizedPath('/signup', locale)}
             >
               {t('auth.createAccount')}

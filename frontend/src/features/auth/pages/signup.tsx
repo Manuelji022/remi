@@ -107,14 +107,20 @@ export function SignupPage() {
 
           {error ? <p className="auth-error">{error}</p> : null}
 
-          <button className="auth-button" disabled={isSubmitting} type="submit">
+          <button
+            className="btn btn-primary"
+            disabled={isSubmitting}
+            type="submit"
+          >
             {isSubmitting ? t('auth.creatingAccount') : t('auth.createAccount')}
           </button>
         </form>
 
         <p className="auth-switch">
           {t('auth.alreadyHaveAccount')}{' '}
-          <Link to={getLocalizedPath('/login', locale)}>{t('auth.login')}</Link>
+          <Link className="text-link" to={getLocalizedPath('/login', locale)}>
+            {t('auth.login')}
+          </Link>
         </p>
       </section>
     </main>

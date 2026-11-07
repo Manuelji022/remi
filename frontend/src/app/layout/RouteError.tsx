@@ -6,10 +6,10 @@ export function RouteError({ reset }: ErrorComponentProps) {
 
   return (
     <main id="main">
-      <section className="planner-empty-state">
+      <section className="empty-state">
         <h1>{t('error.title')}</h1>
         <p>{t('error.body')}</p>
-        <button className="planner-secondary-btn" onClick={reset} type="button">
+        <button className="btn btn-secondary" onClick={reset} type="button">
           {t('error.retry')}
         </button>
       </section>

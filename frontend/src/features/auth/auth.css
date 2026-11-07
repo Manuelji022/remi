@@ -41,8 +41,7 @@
     line-height: var(--type-callout-lh);
   }
 
-  .auth-button,
-  .auth-secondary-button {
+  .auth-page .btn {
     inline-size: 100%;
   }
 
