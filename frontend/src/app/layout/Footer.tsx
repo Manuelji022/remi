@@ -7,9 +7,11 @@ export default function Footer() {
 
   return (
     <footer className="footer">
-      <p>
-        &copy; {year} {t('footer.rights')}
-      </p>
+      <div className="footer-inner">
+        <p>
+          &copy; {year} {t('footer.rights')}
+        </p>
+      </div>
     </footer>
   )
 }
