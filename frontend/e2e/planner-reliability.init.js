@@ -12,14 +12,23 @@
     'Sunday',
   ]
   const scenario = new URLSearchParams(window.location.search).get('scenario')
+  const serverFunctions = {
+    load: '/_serverFn/1f656ac1cee7da8b247b8ca1af6ebd86aeee64191d0500aa2b5a6cf8279f3290',
+    recipes: '/_serverFn/69ce94eac4cfe29326de41e874fcb343a821cf3efd97d95b2f45c8cd0c3ff17e',
+    generation: '/_serverFn/117e1c55a3be8fe0e86b8d2d443a3c3c0315ef546f54bee8f1c4e140c9f56071',
+    save: '/_serverFn/911804a5aa8e090e7aa6b7dfaf719d55bbab065a1a4be75ca11057cff880feea',
+  }
   const fixture = {
     userId: 'reliability-user',
     failLoad: !scenario || scenario === 'load-error',
     failRecipes: scenario === 'recipes-error',
     failSave: false,
+    failGeneration: false,
+    generations: 0,
     hold: {
       auth: scenario === 'auth-pending',
       load: scenario === 'load-pending',
+      generation: false,
     },
     release: {},
     reads: [],
@@ -99,23 +108,62 @@
         ? await request.text()
         : decodeURIComponent(url.search)
     const weekStart = /\d{4}-\d{2}-\d{2}/.exec(payload)?.[0]
-    const kind = request.method === 'POST' ? 'save' : weekStart ? 'load' : 'recipes'
+    const kind =
+      url.pathname === serverFunctions.generation
+        ? 'generation'
+        : url.pathname === serverFunctions.save
+          ? 'save'
+          : url.pathname === serverFunctions.load
+            ? 'load'
+            : url.pathname === serverFunctions.recipes
+              ? 'recipes'
+              : request.method === 'POST'
+                ? 'mutation'
+                : weekStart
+                  ? 'load'
+                  : 'recipes'
+    const generationFailure =
+      fixture.failRecipes
+        ? 'recipes'
+        : fixture.failLoad
+          ? 'load'
+          : fixture.failGeneration
+            ? 'generation'
+            : null
     const failed =
-      kind === 'save'
-        ? fixture.failSave
-        : kind === 'load'
-          ? fixture.failLoad
-          : fixture.failRecipes
+      kind === 'generation'
+        ? generationFailure
+        : kind === 'save'
+          ? fixture.failSave
+          : kind === 'load'
+            ? fixture.failLoad
+            : kind === 'recipes'
+              ? fixture.failRecipes
+              : false
     const log = { kind, weekStart, payload, userId: fixture.userId }
-    if (kind === 'save') fixture.writes.push(log)
-    else fixture.reads.push(log)
-    await pause(kind)
+    if (kind === 'generation') fixture.generations += 1
+    else if (kind === 'save') fixture.writes.push(log)
+    else if (kind !== 'mutation') fixture.reads.push(log)
+    if (kind === 'generation') {
+      await pause('generation')
+      await pause('load')
+    } else {
+      await pause(kind)
+    }
     fixture.completed.push(log)
-    if (failed) throw new TypeError(`Synthetic ${kind} network failure`)
+    if (failed) throw new TypeError(`Synthetic ${failed} network failure`)
 
     if (kind === 'recipes') {
       return json({
         result: [
+          {
+            id: 'saved-lunch',
+            name: 'Saved lunch',
+            slot: 'lunch',
+            ingredients: [
+              { id: 'beans', name: 'Beans', quantity: 1, unit: 'can', position: 0 },
+            ],
+          },
           {
             id: 'saved-dinner',
             name: 'Saved dinner',
@@ -128,6 +176,32 @@
       })
     }
     if (!weekStart) throw new Error('Fixture could not identify the Calendar Week')
+    if (kind === 'generation') {
+      return json({
+        result: {
+          ok: true,
+          menu: {
+            weekStart,
+            days: Object.fromEntries(
+              days.map((day) => [
+                day,
+                {
+                  context: null,
+                  scope: 'both',
+                  lunchRecipeId: 'saved-lunch',
+                  dinnerRecipeId: 'saved-dinner',
+                },
+              ]),
+            ),
+          },
+          recipeNames: {
+            'saved-lunch': 'Saved lunch',
+            'saved-dinner': 'Saved dinner',
+          },
+          unavailableSlots: [],
+        },
+      })
+    }
     return json({
       result: loadedWeek(
         weekStart,
