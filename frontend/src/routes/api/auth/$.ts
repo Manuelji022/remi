@@ -3,13 +3,11 @@ import { auth } from '#/features/auth/auth'
 
 export const Route = createFileRoute('/api/auth/$')({
   server: {
-    handlers: {
-      GET: async ({ request }: { request: Request }) => {
-        return await auth.handler(request)
-      },
-      POST: async ({ request }: { request: Request }) => {
-        return await auth.handler(request)
-      },
+    handlers: ({ createHandlers }) => {
+      const handler = createHandlers({
+        GET: ({ request }) => auth.handler(request),
+      }).GET
+      return createHandlers({ GET: handler, POST: handler })
     },
   },
 })

@@ -1,6 +1,5 @@
 import { createServerFn } from '@tanstack/react-start'
-import { getRequest } from '@tanstack/react-start/server'
-import { auth } from '#/features/auth/auth'
+import { authMiddleware } from '#/features/auth/middleware'
 import {
   parseRecipeId,
   parseRecipeInput,
@@ -13,40 +12,29 @@ import {
   updateRecipeForUser,
 } from '#/features/recipes/store'
 
-export const listRecipes = createServerFn({ method: 'GET' }).handler(
-  async () => {
-    const userId = await requireUserId()
-    return listRecipesForUser(userId)
-  },
-)
+export const listRecipes = createServerFn({ method: 'GET' })
+  .middleware([authMiddleware])
+  .handler(async ({ context }) => {
+    return listRecipesForUser(context.userId)
+  })
 
 export const createRecipe = createServerFn({ method: 'POST' })
+  .middleware([authMiddleware])
   .validator(parseRecipeInput)
-  .handler(async ({ data }) => {
-    const userId = await requireUserId()
-    return createRecipeForUser(userId, data)
+  .handler(async ({ data, context }) => {
+    return createRecipeForUser(context.userId, data)
   })
 
 export const updateRecipe = createServerFn({ method: 'POST' })
+  .middleware([authMiddleware])
   .validator(parseRecipeUpdate)
-  .handler(async ({ data }) => {
-    const userId = await requireUserId()
-    return updateRecipeForUser(userId, data)
+  .handler(async ({ data, context }) => {
+    return updateRecipeForUser(context.userId, data)
   })
 
 export const deleteRecipe = createServerFn({ method: 'POST' })
+  .middleware([authMiddleware])
   .validator(parseRecipeId)
-  .handler(async ({ data }) => {
-    const userId = await requireUserId()
-    return deleteRecipeForUser(userId, data.id)
+  .handler(async ({ data, context }) => {
+    return deleteRecipeForUser(context.userId, data.id)
   })
-
-async function requireUserId(): Promise<string> {
-  const session = await auth.api.getSession({
-    headers: getRequest().headers,
-  })
-
-  if (!session?.user.id) throw new Error('Unauthorized')
-
-  return session.user.id
-}
