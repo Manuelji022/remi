@@ -23,28 +23,31 @@ export function LoginPage() {
     setError(null)
     setIsSubmitting(true)
 
-    const result = await authClient.signIn.email({
-      email,
-      password,
-    })
+    try {
+      const result = await authClient.signIn.email({
+        email,
+        password,
+      })
 
-    if (result.error) {
+      if (result.error) {
+        setError(result.error.message ?? t('auth.loginError'))
+        return
+      }
+
+      const data = result.data as SignInData
+
+      if (data?.twoFactorRedirect) {
+        await navigate({ to: getLocalizedPath('/two-factor', locale) })
+        return
+      }
+
+      await authClient.signOut()
+      setError(t('auth.twoFactorRequiredError'))
+    } catch {
+      setError(t('auth.loginError'))
+    } finally {
       setIsSubmitting(false)
-      setError(result.error.message ?? t('auth.loginError'))
-      return
     }
-
-    const data = result.data as SignInData
-
-    if (data?.twoFactorRedirect) {
-      setIsSubmitting(false)
-      await navigate({ to: getLocalizedPath('/two-factor', locale) })
-      return
-    }
-
-    await authClient.signOut()
-    setIsSubmitting(false)
-    setError(t('auth.twoFactorRequiredError'))
   }
 
   return (

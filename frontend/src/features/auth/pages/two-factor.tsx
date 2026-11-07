@@ -1,7 +1,7 @@
 import { useNavigate } from '@tanstack/react-router'
 import '../auth.css'
 import type { ComponentProps } from 'react'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useEffectEvent, useRef, useState } from 'react'
 import { LocalizedLink, getLocalizedPath, useI18n } from '#/shared/i18n'
 import { authClient } from '#/features/auth/auth-client'
 
@@ -23,16 +23,22 @@ export function TwoFactorPage() {
     setError(null)
     setIsSending(true)
 
-    const result = await authClient.twoFactor.sendOtp({
-      trustDevice: false,
-    })
+    try {
+      const result = await authClient.twoFactor.sendOtp({
+        trustDevice: false,
+      })
 
-    setIsSending(false)
-
-    if (result.error) {
-      setError(result.error.message ?? t('auth.otpSendError'))
+      if (result.error) {
+        setError(result.error.message ?? t('auth.otpSendError'))
+      }
+    } catch {
+      setError(t('auth.otpSendError'))
+    } finally {
+      setIsSending(false)
     }
   }
+
+  const sendInitialOtp = useEffectEvent(sendOtp)
 
   useEffect(() => {
     setShowSignupMessage(
@@ -42,7 +48,7 @@ export function TwoFactorPage() {
 
     if (hasSentInitialOtp.current) return
     hasSentInitialOtp.current = true
-    void sendOtp()
+    void sendInitialOtp()
   }, [])
 
   async function handleSubmit(event: FormSubmitEvent) {
@@ -50,19 +56,23 @@ export function TwoFactorPage() {
     setError(null)
     setIsVerifying(true)
 
-    const result = await authClient.twoFactor.verifyOtp({
-      code,
-      trustDevice: false,
-    })
+    try {
+      const result = await authClient.twoFactor.verifyOtp({
+        code,
+        trustDevice: false,
+      })
 
-    setIsVerifying(false)
+      if (result.error) {
+        setError(result.error.message ?? t('auth.otpVerifyError'))
+        return
+      }
 
-    if (result.error) {
-      setError(result.error.message ?? t('auth.otpVerifyError'))
-      return
+      await navigate({ to: getLocalizedPath('/', locale) })
+    } catch {
+      setError(t('auth.otpVerifyError'))
+    } finally {
+      setIsVerifying(false)
     }
-
-    await navigate({ to: getLocalizedPath('/', locale) })
   }
 
   return (

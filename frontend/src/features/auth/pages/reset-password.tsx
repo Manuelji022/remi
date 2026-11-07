@@ -33,19 +33,23 @@ export function ResetPasswordPage() {
 
     setIsSubmitting(true)
 
-    const result = await authClient.resetPassword({
-      newPassword: password,
-      token,
-    })
+    try {
+      const result = await authClient.resetPassword({
+        newPassword: password,
+        token,
+      })
 
-    if (result.error) {
+      if (result.error) {
+        setError(result.error.message ?? t('auth.resetPasswordError'))
+        return
+      }
+
+      setDone(true)
+    } catch {
+      setError(t('auth.resetPasswordError'))
+    } finally {
       setIsSubmitting(false)
-      setError(result.error.message ?? t('auth.resetPasswordError'))
-      return
     }
-
-    setIsSubmitting(false)
-    setDone(true)
   }
 
   if (done) {
