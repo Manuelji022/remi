@@ -191,14 +191,14 @@ export function PreferencesPanel({
                   ? t('header.languageEn')
                   : t('header.languageEs')
               }`}
-              className="panel-language-switcher"
+              className="btn btn-secondary"
               to={getLocalizedPath(location.pathname, alternateLocale)}
             >
               <Globe2 aria-hidden="true" />
               <span>{locale === 'en' ? 'ES' : 'EN'}</span>
             </Link>
             <button
-              className="panel-close-btn"
+              className="icon-btn icon-btn-filled"
               disabled={isSaving || isRecipeMutationPending}
               type="button"
               aria-label={t('preferences.close')}
@@ -268,7 +268,7 @@ export function PreferencesPanel({
           )}
           <div className="panel-footer-actions">
             <button
-              className="panel-secondary-btn"
+              className="btn btn-secondary"
               disabled={isSaving || isRecipeMutationPending}
               type="button"
               onClick={onClose}
@@ -276,7 +276,7 @@ export function PreferencesPanel({
               {t('common.cancel')}
             </button>
             <button
-              className="panel-primary-btn"
+              className="btn btn-primary"
               disabled={saveDisabled || isRecipeMutationPending}
               type="button"
               onClick={() => onSave(draftPrefs)}

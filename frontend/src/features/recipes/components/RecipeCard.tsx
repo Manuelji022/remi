@@ -33,7 +33,7 @@ export function RecipeCard({ recipe, onDelete }: RecipeCardProps) {
       </div>
 
       <button
-        className="panel-icon-btn"
+        className="icon-btn icon-btn-destructive"
         type="button"
         aria-label={t('preferences.deleteRecipe', { name: recipe.name })}
         onClick={onDelete}

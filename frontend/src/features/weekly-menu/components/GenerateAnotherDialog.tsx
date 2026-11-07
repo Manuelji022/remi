@@ -28,14 +28,10 @@ export function GenerateAnotherDialog({
         {t('planner.aiGenerateAnotherBody')}
       </p>
       <div className="planner-ai-dialog-footer">
-        <button
-          className="panel-secondary-btn"
-          type="button"
-          onClick={onCancel}
-        >
+        <button className="btn btn-secondary" type="button" onClick={onCancel}>
           {t('common.cancel')}
         </button>
-        <button className="panel-primary-btn" type="button" onClick={onConfirm}>
+        <button className="btn btn-primary" type="button" onClick={onConfirm}>
           {t('planner.aiGenerateAnother')}
         </button>
       </div>

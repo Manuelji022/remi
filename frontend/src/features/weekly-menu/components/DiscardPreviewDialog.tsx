@@ -32,11 +32,11 @@ export function DiscardPreviewDialog({
         )}
       </p>
       <div className="planner-ai-dialog-footer">
-        <button className="panel-secondary-btn" type="button" onClick={onKeep}>
+        <button className="btn btn-secondary" type="button" onClick={onKeep}>
           {t('planner.aiKeepPreview')}
         </button>
         <button
-          className="panel-primary-btn"
+          className="btn btn-primary"
           type="button"
           onClick={onDiscard}
           disabled={isSaving}

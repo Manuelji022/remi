@@ -105,7 +105,7 @@ export function AiMenuPreview({
         )}
         <div className="planner-ai-preview-actions">
           <button
-            className="planner-secondary-btn"
+            className="btn btn-secondary"
             type="button"
             onClick={onEditSchedule}
             disabled={isWriting}
@@ -113,7 +113,7 @@ export function AiMenuPreview({
             {t('planner.aiEditSchedule')}
           </button>
           <button
-            className="planner-secondary-btn"
+            className="btn btn-secondary"
             type="button"
             onClick={(event) => onGenerateAnother(event.currentTarget)}
             disabled={!canGenerateAnother}
@@ -121,7 +121,7 @@ export function AiMenuPreview({
             {t('planner.aiGenerateAnother')}
           </button>
           <button
-            className="planner-secondary-btn"
+            className="btn btn-secondary"
             type="button"
             onClick={onDiscard}
             disabled={isWriting}
@@ -139,7 +139,7 @@ export function AiMenuPreview({
             />
           )}
           <button
-            className="planner-primary-btn"
+            className="btn btn-primary"
             type="button"
             onClick={onAccept}
             disabled={!canAccept}
@@ -165,7 +165,7 @@ export function AiMenuPreview({
         <div className="planner-feedback" role="alert">
           <p>{t('planner.loadErrorBody')}</p>
           <button
-            className="planner-secondary-btn"
+            className="btn btn-secondary"
             type="button"
             onClick={onRetryCatalog}
           >

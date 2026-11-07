@@ -117,7 +117,7 @@ try {
     const click = (name: string) =>
       browser(['find', 'role', 'button', 'click', '--name', name, '--exact'])
     const browserState = { loaded: false }
-    const open = async (mock: string) => {
+    const open = async (mock: string, generateButtonLabel: string) => {
       const pageUrl = `${base}/weekly-menu-planner?mock=${mock}`
       if (!browserState.loaded) {
         await browser(['open', base])
@@ -152,7 +152,7 @@ try {
         )
       }
       await wait(
-        "document.querySelector('.planner-actions .planner-primary-btn:not(:disabled)') !== null",
+        `Array.from(document.querySelectorAll('button')).some(button => button.textContent.trim() === ${JSON.stringify(generateButtonLabel)} && !button.disabled)`,
       )
     }
     const accounting = async () => ({

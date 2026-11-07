@@ -47,7 +47,7 @@ export function MenuTab({
 
   if (isGenerating) {
     return (
-      <div className="planner-empty-state" role="status" aria-live="polite">
+      <div className="empty-state" role="status" aria-live="polite">
         <SparkleIcon aria-hidden="true" />
         <h2>{t('planner.buildingTitle')}</h2>
         <p>{t('planner.buildingBody')}</p>
@@ -57,13 +57,13 @@ export function MenuTab({
 
   if (!menu) {
     return (
-      <div className="planner-empty-state">
+      <div className="empty-state">
         <SparkleIcon aria-hidden="true" />
         <h2>{t('planner.emptyTitle')}</h2>
         <p>{t('planner.emptyBody')}</p>
         {!isSignedIn && <p>{t('planner.aiSignInRequired')}</p>}
         <button
-          className="planner-primary-btn"
+          className="btn btn-primary"
           type="button"
           onClick={onGenerateMenu}
         >

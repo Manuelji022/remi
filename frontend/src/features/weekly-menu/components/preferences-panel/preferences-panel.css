@@ -72,6 +72,10 @@
     gap: var(--gap-inline);
   }
 
+  .panel-header-actions a.btn-secondary:active {
+    transform: none;
+  }
+
   .panel-tablist {
     flex: none;
     display: flex;
@@ -324,8 +328,8 @@
     gap: var(--gap-inline);
   }
 
-  .panel-footer-actions .panel-primary-btn,
-  .panel-footer-actions .panel-secondary-btn {
+  .panel-footer-actions .btn-primary,
+  .panel-footer-actions .btn-secondary {
     flex: 1;
   }
 
@@ -342,7 +346,7 @@
   }
 
   @media (min-width: 48rem) {
-    .panel-footer-actions .panel-secondary-btn {
+    .panel-footer-actions .btn-secondary {
       flex: none;
     }
   }
