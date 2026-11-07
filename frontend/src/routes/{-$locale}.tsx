@@ -8,13 +8,20 @@ export const Route = createFileRoute('/{-$locale}')({
       throw notFound()
     }
   },
-  head: ({ params }) => ({
-    meta: [
-      {
-        title: messages[params.locale === 'es' ? 'es' : 'en']['app.title'],
-      },
-    ],
-  }),
+  head: ({ params }) => {
+    const locale =
+      params.locale !== undefined && isLocale(params.locale)
+        ? params.locale
+        : 'en'
+
+    return {
+      meta: [
+        {
+          title: messages[locale]['app.title'],
+        },
+      ],
+    }
+  },
   component: LocaleLayout,
 })
 
