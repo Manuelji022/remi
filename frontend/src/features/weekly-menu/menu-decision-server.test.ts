@@ -8,17 +8,41 @@ import type { AiMenuContext } from '#/features/weekly-menu/ai-generator'
 
 const mock = vi.hoisted(() => ({
   requireSession: vi.fn(),
+  setResponseStatus: vi.fn(),
   load: vi.fn(),
   guard: vi.fn(),
   stale: vi.fn(),
 }))
 vi.mock('@tanstack/react-start', () => ({
+  createMiddleware: () => ({ server: (fn: unknown) => fn }),
   createServerFn: () => ({
-    validator: () => ({ handler: (fn: unknown) => fn }),
+    middleware: (
+      middlewares: Array<
+        (args: {
+          next: (options: { context: { userId: string } }) => unknown
+        }) => unknown
+      >,
+    ) => ({
+      validator: () => ({
+        handler:
+          (fn: (args: { data: object; context: object }) => unknown) =>
+          ({ data }: { data: object }) => {
+            const run = (index: number, context: object): unknown => {
+              if (index >= middlewares.length) return fn({ data, context })
+              return middlewares[index]({
+                next: (options) =>
+                  run(index + 1, { ...context, ...options.context }),
+              })
+            }
+            return run(0, {})
+          },
+      }),
+    }),
   }),
 }))
 vi.mock('@tanstack/react-start/server', () => ({
   getRequest: () => ({ headers: new Headers() }),
+  setResponseStatus: mock.setResponseStatus,
 }))
 vi.mock('#/features/auth/auth', () => ({
   auth: { api: { getSession: mock.requireSession } },
@@ -114,6 +138,7 @@ it('guards a local singleton once with no credentials, and retains the post-gene
 it('does not convert auth, stale, database, configuration or guard errors into previews', async () => {
   mock.requireSession.mockResolvedValueOnce(null)
   await expect(run()).rejects.toThrow('Unauthorized')
+  expect(mock.setResponseStatus).toHaveBeenCalledExactlyOnceWith(401)
   expect(mock.load).not.toHaveBeenCalled()
   mock.stale.mockReturnValueOnce('2026-11-16')
   expect(await run()).toMatchObject(stale)

@@ -1,7 +1,6 @@
 import { createServerFn } from '@tanstack/react-start'
 import { z } from 'zod'
-import { getRequest } from '@tanstack/react-start/server'
-import { auth } from '#/features/auth/auth'
+import { authMiddleware } from '#/features/auth/middleware'
 import {
   loadMenuWeekForUser,
   saveMenuWeekForUser,
@@ -38,20 +37,21 @@ import {
 } from '#/features/weekly-menu/ai-schedule'
 
 export const loadWeeklyMenu = createServerFn({ method: 'GET' })
+  .middleware([authMiddleware])
   .validator(z.object({ weekStart: weekStartSchema }))
-  .handler(async ({ data }) => {
-    const userId = await requireUserId()
-    return loadMenuWeekForUser(userId, data.weekStart)
+  .handler(async ({ data, context }) => {
+    return loadMenuWeekForUser(context.userId, data.weekStart)
   })
 
 export const saveWeeklyMenu = createServerFn({ method: 'POST' })
+  .middleware([authMiddleware])
   .validator(parseCalendarWeek)
-  .handler(async ({ data }) => {
-    const userId = await requireUserId()
-    return saveMenuWeekForUser(userId, data)
+  .handler(async ({ data, context }) => {
+    return saveMenuWeekForUser(context.userId, data)
   })
 
 export const generateNextWeeklyMenu = createServerFn({ method: 'POST' })
+  .middleware([authMiddleware])
   .validator(
     z.object({
       targetWeekStart: weekStartSchema,
@@ -61,8 +61,7 @@ export const generateNextWeeklyMenu = createServerFn({ method: 'POST' })
       previousMenu: calendarWeekSchema.optional(),
     }),
   )
-  .handler(async ({ data }) => {
-    const userId = await requireUserId()
+  .handler(async ({ data, context: { userId } }) => {
     const mockScenario = isAiMockEnabled() ? data.mockScenario : undefined
     try {
       if (mockScenario === 'error') {
@@ -148,11 +147,3 @@ export const generateNextWeeklyMenu = createServerFn({ method: 'POST' })
       throw error
     }
   })
-
-async function requireUserId(): Promise<string> {
-  const session = await auth.api.getSession({
-    headers: getRequest().headers,
-  })
-  if (!session?.user.id) throw new Error('Unauthorized')
-  return session.user.id
-}
