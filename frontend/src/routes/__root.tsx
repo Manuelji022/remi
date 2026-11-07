@@ -7,10 +7,10 @@ import {
 import Footer from '#/app/layout/Footer'
 import Header from '#/app/layout/Header'
 import { I18nProvider, getLocaleFromPathname, useI18n } from '#/shared/i18n'
-import { messages } from '#/shared/i18n/messages'
-import { useEffect } from 'react'
 
 import appCss from '../app/styles.css?url'
+
+const THEME_COLOR = '#F5F5F7' // must match --bg-page in shared/styles/tokens.css
 
 export const Route = createRootRoute({
   head: () => ({
@@ -28,10 +28,7 @@ export const Route = createRootRoute({
       },
       {
         name: 'theme-color',
-        content: '#F5F5F7',
-      },
-      {
-        title: 'Remi - Your weekly meal planner',
+        content: THEME_COLOR,
       },
     ],
     links: [
@@ -58,15 +55,10 @@ function RootDocument({ children }: { children: React.ReactNode }) {
   const location = useLocation()
   const locale = getLocaleFromPathname(location.pathname)
 
-  useEffect(() => {
-    document.title = messages[locale]['app.title']
-  }, [locale])
-
   return (
     <html lang={locale} suppressHydrationWarning>
       <head>
         <HeadContent />
-        <title>{messages[locale]['app.title']}</title>
       </head>
       <body>
         <I18nProvider locale={locale}>
