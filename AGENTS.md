@@ -23,10 +23,11 @@ pnpx react-doctor@latest
 - **Path aliases**: `#/*` and `@/*` both map to `./src/*`.
 - **Router**: `src/router.tsx` defines the router instance.
 - **Server functions**: use `createServerFn` from `@tanstack/react-start` for server-side logic.
+- **Data loading**: the weekly planner loads its data client-side through hooks (`usePlannerWeek`), because it depends on browser-only state (guest data in localStorage, the browser's IANA time zone, AI previews). Put new server-only page data in a route `loader` instead.
 
 ## Tech stack
 
-- TanStack Start, TanStack Router, TanStack Query
+- TanStack Start, TanStack Router
 - React 19, TypeScript strict mode, Vite
 - Nitro for SSR/production server
 - Vitest for testing
