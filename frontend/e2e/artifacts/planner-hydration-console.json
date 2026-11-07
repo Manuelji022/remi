@@ -1,0 +1,10 @@
+{
+  "url": "http://127.0.0.1:3101/weekly-menu-planner?scenario=ready",
+  "syntheticSignedInUserId": "ai-menu-test-user",
+  "completedTourLocalStorageValue": "done",
+  "savedMenuRendered": true,
+  "consoleMessages": [],
+  "pageErrors": [],
+  "hydrationWarnings": [],
+  "verdict": "PASS"
+}

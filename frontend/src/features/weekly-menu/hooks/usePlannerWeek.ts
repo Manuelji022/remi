@@ -28,6 +28,11 @@ export type PlannerAction = PlannerWeekIdentity & {
   kind: 'save' | 'accept'
   status: 'pending' | 'error' | 'success'
 }
+type ScopedPlannerAction = {
+  identity: PlannerWeekIdentity & { enabled: boolean }
+  writeScope: number
+  value: PlannerAction
+}
 
 export function usePlannerWeek({
   userId,
@@ -41,7 +46,7 @@ export function usePlannerWeek({
   preferencesOpen: boolean
 }) {
   const [data, setData] = useState<PlannerWeekData | null>(null)
-  const [action, setAction] = useState<PlannerAction | null>(null)
+  const [action, setAction] = useState<ScopedPlannerAction | null>(null)
   const [loadAttempt, setLoadAttempt] = useState(0)
   const generationRef = useRef(0)
   const writeScopeRef = useRef(0)
@@ -51,7 +56,6 @@ export function usePlannerWeek({
   useLayoutEffect(() => {
     identityRef.current = { userId, weekStart, enabled }
     ++writeScopeRef.current
-    setAction(null)
   }, [userId, weekStart, enabled])
 
   const load = useCallback(async (setLoading: boolean) => {
@@ -177,7 +181,15 @@ export function usePlannerWeek({
         )
       }
       writeInFlightRef.current = operation
-      setAction(operation)
+      setAction({
+        identity: {
+          userId: operation.userId,
+          weekStart: operation.weekStart,
+          enabled: identity.enabled,
+        },
+        writeScope,
+        value: operation,
+      })
       try {
         const week = await saveWeeklyMenu({ data: menu })
         // A completed write remains successful even if its view was invalidated.
@@ -192,13 +204,22 @@ export function usePlannerWeek({
               : [])
           return { ...operation, status: 'ready', week, recipes: catalog }
         })
-        setAction({ ...operation, status: 'success' })
+        setAction((current) =>
+          current?.value === operation
+            ? { ...current, value: { ...operation, status: 'success' } }
+            : current,
+        )
         return true
       } catch {
-        if (matches()) setAction({ ...operation, status: 'error' })
+        if (matches())
+          setAction((current) =>
+            current?.value === operation
+              ? { ...current, value: { ...operation, status: 'error' } }
+              : current,
+          )
         return false
       } finally {
-        setAction((current) => (current === operation ? null : current))
+        setAction((current) => (current?.value === operation ? null : current))
         if (writeInFlightRef.current === operation)
           writeInFlightRef.current = null
       }
@@ -218,8 +239,12 @@ export function usePlannerWeek({
   const dataForView =
     data && data.userId === userId && data.weekStart === weekStart ? data : null
   const actionForView =
-    action && action.userId === userId && action.weekStart === weekStart
-      ? action
+    action &&
+    action.writeScope === writeScopeRef.current &&
+    action.identity.userId === userId &&
+    action.identity.weekStart === weekStart &&
+    action.identity.enabled === enabled
+      ? action.value
       : null
   return {
     data: dataForView,
