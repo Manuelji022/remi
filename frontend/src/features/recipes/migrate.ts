@@ -12,6 +12,7 @@ export async function importLegacyRecipes(
   const missing = recipesMissingFromCatalog(catalog, legacy)
 
   for (const recipe of missing) {
+    // react-doctor-disable-next-line react-doctor/async-await-in-loop -- Serial writes let cancellation stop an abandoned import between recipes.
     await createRecipe({ data: recipe })
     if (isCancelled()) return false
   }

@@ -85,9 +85,10 @@ async function readMenu(
   if (!row) return { menu: emptyMenu(weekStart), hasSavedMenu: false }
 
   const days = {} as CalendarWeekMenu['days']
+  const storedDays = new Map(row.days.map((stored) => [stored.day, stored]))
 
   for (const day of DAYS) {
-    const stored = row.days.find((item) => item.day === day)
+    const stored = storedDays.get(day)
     if (!stored) throw new Error('Invalid menu day')
     days[day] = storedDay(stored)
   }
