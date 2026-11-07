@@ -21,10 +21,7 @@ export function ForgotPasswordPage() {
     setError(null)
     setIsSubmitting(true)
 
-    const origin =
-      typeof window !== 'undefined'
-        ? window.location.origin
-        : (process.env.BETTER_AUTH_URL ?? '')
+    const origin = window.location.origin
     const redirectTo = `${origin}${getLocalizedPath('/reset-password', locale)}`
 
     const result = await authClient.requestPasswordReset({
