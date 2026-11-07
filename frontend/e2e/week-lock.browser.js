@@ -4,11 +4,13 @@ const lock = `document.querySelector('.week-lock-button')`
 const f = 'window.weekLockFixture'
 const wait = condition => ['wait', '--fn', `Boolean(${condition})`]
 const click = name => ['find', 'role', 'button', 'click', '--name', name, '--exact']
+const saveButton = `Array.from(document.querySelector('[role="dialog"]').querySelectorAll('button')).find(button => button.textContent.includes('Save preferences'))`
+const acceptButton = `Array.from(document.querySelector('.planner-ai-preview-actions').querySelectorAll('button')).find(button => button.textContent.includes('Accept and save menu'))`
 const ev = code => ['eval', `(async () => { ${code}; return true })()`]
 const check = (condition, message) => ev(`if (!(${condition})) throw new Error(${JSON.stringify(message)})`)
 const open = (fixtureScenario = 'ready', locale = '') => [
   ['open', `${base}${locale}/weekly-menu-planner?scenario=${fixtureScenario}`],
-  wait(`${f} && document.querySelector('.planner-shell') && !document.querySelector('.planner-empty-state[role="status"]')`),
+  wait(`${f} && document.querySelector('.planner-shell') && !document.querySelector('[role="status"]')?.textContent.trim()`),
 ]
 const locked = () => wait(`${lock} !== null`)
 const unlocked = () => wait(`${lock} === null`)
@@ -68,7 +70,7 @@ for (const value of ['Enter', ' ']) {
     ...open(), locked(), ['focus', '.week-lock-button'],
     ev(`const b=${lock}; const started=performance.now(); window.holdElapsed=null; const observer=new MutationObserver(() => { if (!${lock} && window.holdElapsed===null) { window.holdElapsed=performance.now()-started; observer.disconnect() } }); observer.observe(b.parentElement, { childList:true }); ${key('keydown', value)}; ${sleep(500)}; ${key('keydown', value, true)}; if (!${lock} || !document.querySelector('.week-lock-progress')) throw new Error('unlocked before 500ms or no ring'); ${sleep(600)}; if (${lock}) { observer.disconnect(); throw new Error('repeat delayed confirmation') } ${key('keydown', value, true)}; ${key('keyup', value)}`),
     unlocked(), check(`window.holdElapsed>=990 && window.holdElapsed<1500`, 'actual lock removal occurs near 1000ms, never at 600ms'),
-    check(`document.activeElement===document.querySelector('.planner-actions .planner-secondary-btn')`, 'keyboard unlock focuses Preferences'),
+    check(`document.activeElement?.textContent.includes('Preferences') || document.activeElement?.textContent.includes('Preferencias')`, 'keyboard unlock focuses Preferences'),
   ])
   await scenario(`${JSON.stringify(value)} keyup and blur cancel`, [
     ...open(), locked(), ['focus', '.week-lock-button'],
@@ -87,8 +89,8 @@ await scenario('reload discards unlock', [
 ])
 await scenario('locked schedule cannot edit or save; recipe controls remain usable', [
   ...open(), locked(), click('Preferences'), wait(`document.querySelector('#preferences-schedule-panel')`),
-  check(`document.querySelector('.panel-content').disabled && document.querySelector('.panel-primary-btn').disabled && document.querySelector('[role="note"]').textContent.includes('locked')`, 'schedule fieldset and save are disabled with note'),
-  ev(`document.querySelector('.panel-day-card button').click(); document.querySelector('.panel-primary-btn').click()`),
+  check(`document.querySelector('.panel-content').disabled && ${saveButton}.disabled && document.querySelector('[role="note"]').textContent.includes('locked')`, 'schedule fieldset and save are disabled with note'),
+  ev(`document.querySelector('.panel-day-card button').click()`), click('Save preferences'),
   check(`${f}.saveRequests.length===0`, 'disabled save makes no transport request'),
   ['click', '#preferences-recipes-tab'], wait(`document.querySelector('#preferences-recipes-tab[aria-selected="true"]')`),
   check(`!document.querySelector('.panel-content').disabled`, 'recipes fieldset stays enabled'),
@@ -98,15 +100,15 @@ await scenario('locked schedule cannot edit or save; recipe controls remain usab
 await scenario('unlocked schedule can edit and save', [
   ...open(), locked(), hold(), unlocked(), click('Preferences'),
   wait(`document.querySelector('.panel-day-card button') !== null`),
-  ['click', '.panel-day-card:first-child .panel-context-pill:first-child'], ['click', '.panel-primary-btn'],
+  ['click', '.panel-day-card:first-child .panel-context-pill:first-child'], click('Save preferences'),
   wait(`${f}.saveRequests.length===1`), check(`JSON.stringify(${f}.saveRequests[0]).includes('office')`, 'unlocked edit is persisted'),
 ])
 await scenario('already-open Sunday schedule cannot save its now-current target on Monday', [
   ...open('rollover'), locked(), click('Next week'), unlocked(), click('Preferences'),
   wait(`document.querySelector('.panel-day-card button') !== null`),
   ['click', '.panel-day-card:first-child .panel-context-pill:first-child'],
-  check(`!document.querySelector('.panel-primary-btn').disabled`, 'future schedule starts editable'),
-  ev(`${f}.advanceClock(120000); document.querySelector('.panel-primary-btn').click(); ${sleep(300)}`),
+  check(`!${saveButton}.disabled`, 'future schedule starts editable'),
+  ev(`${f}.advanceClock(120000); ${sleep(300)}`), click('Save preferences'),
   check(`new Date().getDay()===1 && ${f}.saveRequests.length===0`, 'fresh save-boundary date rejects the stale enabled Save action'),
 ])
 await scenario('AI Generate from a locked week still opens next-week schedule', [
@@ -125,17 +127,17 @@ await scenario('Sunday pinned preview stays editable and acceptable on Monday wi
   wait(`document.querySelector('.planner-ai-preview-menu') !== null`), unlocked(),
   ev(`${f}.advanceClock(120000)`),
   check(`new Date().getDay()===1`, 'controlled local Sunday to Monday'),
-  wait(`document.querySelector('.planner-ai-preview-actions .planner-primary-btn:not(:disabled)')`),
+  wait(`${acceptButton} && !${acceptButton}.disabled`),
   check(`document.querySelector('.planner-ai-preview-menu select:not(:disabled)') && !${lock}`, 'preview recipes editable despite current target week'),
   click('Accept and save menu'), wait(`${f}.saveRequests.length===1 && !document.querySelector('.planner-ai-preview')`), locked(),
 ])
 await scenario('empty weeks do not show a lock', [
-  ...open('empty'), wait(`document.querySelector('.planner-empty-state')`), unlocked(),
+  ...open('empty'), wait(`document.querySelector('.planner-shell')?.innerText.includes('No Weekly Menu yet')`), unlocked(),
 ])
 await scenario('guests use the same current, past, future and navigation locks', [
   ...open('guest'), click('Generate menu'), locked(), click('Preferences'),
-  check(`document.querySelector('.panel-content').disabled && document.querySelector('.panel-primary-btn').disabled`, 'guest schedule is also read-only'),
-  ['click', '.panel-close-btn'], hold(), unlocked(), click('Previous week'), locked(),
+  check(`document.querySelector('.panel-content').disabled && ${saveButton}.disabled`, 'guest schedule is also read-only'),
+  click('Close preferences panel'), hold(), unlocked(), click('Previous week'), locked(),
   click('Next week'), locked(), click('Next week'), unlocked(),
   check(`${f}.generationRequests.length===0 && ${f}.saveRequests.length===0`, 'guest lock remains entirely local'),
 ])

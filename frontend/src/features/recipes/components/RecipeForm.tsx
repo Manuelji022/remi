@@ -201,7 +201,7 @@ export function RecipeForm({ isAddingRecipe, onAddRecipe }: RecipeFormProps) {
                 </label>
 
                 <button
-                  className="panel-icon-btn panel-ingredient-delete-btn"
+                  className="icon-btn icon-btn-destructive panel-ingredient-delete-btn"
                   type="button"
                   aria-label={t('preferences.deleteIngredient')}
                   onClick={() => deleteRecipeIngredientRow(ingredientIndex)}
@@ -218,7 +218,7 @@ export function RecipeForm({ isAddingRecipe, onAddRecipe }: RecipeFormProps) {
           </p>
         )}
         <button
-          className="panel-add-ingredient-btn"
+          className="text-link panel-add-ingredient-btn"
           type="button"
           onClick={addRecipeIngredientRow}
         >
@@ -228,7 +228,7 @@ export function RecipeForm({ isAddingRecipe, onAddRecipe }: RecipeFormProps) {
       </div>
 
       <button
-        className="panel-add-btn"
+        className="btn btn-secondary panel-add-btn"
         type="button"
         disabled={
           isAddingRecipe || !recipeName.trim() || hasInvalidIngredientQuantity

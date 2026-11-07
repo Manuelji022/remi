@@ -5,9 +5,22 @@ export default async function scenario({ assert, browser, evaluate, wait, click,
   const preview = "document.querySelector('.planner-ai-preview')"
   const skeleton = "document.querySelector('.planner-ai-skeleton')"
   const dialog = "document.querySelector('dialog[aria-labelledby=\"ai-generation-title\"][open]')"
+  const textButton = (scope, labels) =>
+    `Array.from(${scope}.querySelectorAll('button')).find(button => ${JSON.stringify(labels)}.some(label => button.textContent.includes(label)))`
+  const readyButton = textButton('document', [
+    'Generate menu',
+    'Regenerate menu',
+  ])
+  const clickGeneration = async () => {
+    try {
+      await click('Generate menu')
+    } catch {
+      await click('Regenerate menu')
+    }
+  }
   async function generate(mock, first = false) {
     await open(mock)
-    await browser(['click', '.planner-actions .planner-primary-btn'])
+    await clickGeneration()
     await wait(`${dialog} !== null`)
     if (first) emit('authenticated planner: Generate opens schedule dialog')
     await click('Confirm schedule and generate')
@@ -15,7 +28,8 @@ export default async function scenario({ assert, browser, evaluate, wait, click,
       await wait(`${dialog} === null`)
       if (first) emit('confirmation closes dialog and settles to preview')
       await wait(`${preview} !== null`)
-      await wait(`${preview}.querySelector('.planner-primary-btn:not(:disabled)') !== null`)
+      const acceptButton = textButton(preview, ['Accept and save menu'])
+      await wait(`${acceptButton} && !${acceptButton}.disabled`)
     }
   }
   await generate('ok', true)
@@ -61,7 +75,7 @@ export default async function scenario({ assert, browser, evaluate, wait, click,
     emit(`${mock}: real server feedback, zero attempts, no lease, saved week unchanged`)
   }
   await open('ok')
-  await browser(['click', '.planner-actions .planner-primary-btn'])
+  await clickGeneration()
   await wait(`${dialog} !== null`)
   await withRecipeTableHidden(async () => {
     await click('Confirm schedule and generate')
@@ -78,7 +92,7 @@ export default async function scenario({ assert, browser, evaluate, wait, click,
     emit(`guarded ok generation ${attempts}: attempt recorded and lease released`)
   }
   await open('ok')
-  await browser(['click', '.planner-actions .planner-primary-btn'])
+  await clickGeneration()
   await wait(`${dialog} !== null`)
   await click('Confirm schedule and generate')
   await browser(['wait', '--text', errors['rate-limited']])
@@ -108,13 +122,13 @@ export default async function scenario({ assert, browser, evaluate, wait, click,
   const setMock = (m) => evaluate(`history.replaceState(null, '', location.pathname + '?mock=${m}'); true`)
   const origin = await evaluate('location.origin')
   const pageUrl = `${origin}/weekly-menu-planner?mock=ok`
-  const ready = "document.querySelector('.planner-actions .planner-primary-btn:not(:disabled)') !== null"
+  const ready = `${readyButton} && !${readyButton}.disabled`
   let result = { scenario: 'decisions-real-stack-mock-transport', verdict: 'FAIL' }
   try {
     // A: initial generation through the real adapter, SDK and HTTP transport code.
     await browser(['open', pageUrl])
     await wait(ready)
-    await browser(['click', '.planner-actions .planner-primary-btn'])
+    await clickGeneration()
     await wait(`${dialog} !== null`)
     // Office on Monday: lunch becomes a covered slot without a recipe.
     await evaluate(`Array.from(document.querySelectorAll('dialog .panel-day-card')[0].querySelectorAll('button')).find(b => b.textContent.includes('Office')).click(); true`)
@@ -166,7 +180,7 @@ export default async function scenario({ assert, browser, evaluate, wait, click,
     await setMock('decision-invalid')
     await click('Generate another')
     await wait(`${genAnother} !== null`)
-    await evaluate(`${genAnother}.querySelector('.panel-primary-btn').click(); true`)
+    await evaluate(`${textButton(genAnother, ['Generate another'])}.click(); true`)
     await browser(['wait', '--text', errors.error])
     await wait(`${skeleton} === null && ${preview} !== null && ${preview}.querySelector('select') !== null`)
     const restored = await read()
@@ -223,7 +237,7 @@ export default async function scenario({ assert, browser, evaluate, wait, click,
     const before = { acc: await accounting(), calls: (await transportLog()).length }
     await browser(['open', `${origin}/weekly-menu-planner?mock=decision-invalid`])
     await wait(ready)
-    await browser(['click', '.planner-actions .planner-primary-btn'])
+    await clickGeneration()
     await wait(`${dialog} !== null`)
     await click('Confirm schedule and generate')
     await wait(`${preview} !== null && ${preview}.querySelector('select') !== null`)

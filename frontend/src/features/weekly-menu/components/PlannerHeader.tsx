@@ -35,7 +35,7 @@ export function PlannerHeader(props: PlannerHeaderProps) {
           aria-label={t('planner.weekNavigationLabel')}
         >
           <button
-            className="planner-week-nav-btn"
+            className="icon-btn"
             type="button"
             aria-label={t('planner.previousWeek')}
             disabled={props.weekOffset <= -1 || props.isWriting}
@@ -56,7 +56,7 @@ export function PlannerHeader(props: PlannerHeaderProps) {
             </span>
           )}
           <button
-            className="planner-week-nav-btn"
+            className="icon-btn"
             type="button"
             aria-label={t('planner.nextWeek')}
             disabled={props.weekOffset >= 1 || props.isWriting}
@@ -68,7 +68,7 @@ export function PlannerHeader(props: PlannerHeaderProps) {
       </div>
       <div className="planner-actions" aria-label={t('planner.actionsLabel')}>
         <button
-          className="planner-secondary-btn"
+          className="btn btn-secondary"
           type="button"
           onClick={props.onOpenPreferences}
           disabled={!props.canWrite || props.isWriting || props.hasPreview}
@@ -81,7 +81,7 @@ export function PlannerHeader(props: PlannerHeaderProps) {
         </button>
         <button
           ref={props.onGenerateButtonRef}
-          className="planner-primary-btn"
+          className="btn btn-primary"
           type="button"
           onClick={props.onGenerateMenu}
           disabled={!props.canWrite || props.isWriting || props.hasPreview}

@@ -24,10 +24,10 @@ export function TourCallout({
       <strong id={titleId}>{title}</strong>
       <p>{body}</p>
       <div className="planner-tour-actions">
-        <button type="button" className="panel-primary-btn" onClick={onNext}>
+        <button type="button" className="btn btn-primary" onClick={onNext}>
           {t(isLast ? 'planner.tourDone' : 'planner.tourNext')}
         </button>
-        <button type="button" className="panel-secondary-btn" onClick={onSkip}>
+        <button type="button" className="btn btn-secondary" onClick={onSkip}>
           {t('planner.tourSkip')}
         </button>
       </div>

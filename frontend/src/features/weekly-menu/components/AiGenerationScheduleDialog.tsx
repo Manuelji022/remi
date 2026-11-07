@@ -93,7 +93,7 @@ export function AiGenerationScheduleDialog({
             )}
           </p>
           <button
-            className="planner-secondary-btn"
+            className="btn btn-secondary"
             type="button"
             onClick={onAddRecipes}
           >
@@ -106,7 +106,7 @@ export function AiGenerationScheduleDialog({
       )}
       <footer className="planner-ai-dialog-footer">
         <button
-          className="panel-secondary-btn"
+          className="btn btn-secondary"
           disabled={isPending}
           type="button"
           onClick={onCancel}
@@ -114,7 +114,7 @@ export function AiGenerationScheduleDialog({
           {t('common.cancel')}
         </button>
         <button
-          className="panel-primary-btn"
+          className="btn btn-primary"
           disabled={isPending}
           type="button"
           onClick={onConfirm}

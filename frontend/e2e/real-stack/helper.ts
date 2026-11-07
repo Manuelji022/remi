@@ -152,7 +152,7 @@ try {
         )
       }
       await wait(
-        "document.querySelector('.planner-actions .planner-primary-btn:not(:disabled)') !== null",
+        "Array.from(document.querySelectorAll('button')).some(button => ['Generate menu', 'Regenerate menu'].some(label => button.textContent.includes(label)) && !button.disabled)",
       )
     }
     const accounting = async () => ({

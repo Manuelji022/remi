@@ -552,7 +552,7 @@ export function WeeklyMenuPlanner() {
           <div className="planner-feedback" role="alert">
             <p>{t('planner.aiScheduleLoadError')}</p>
             <button
-              className="planner-secondary-btn"
+              className="btn btn-secondary"
               type="button"
               onClick={() => {
                 void openGenerationSchedule(
@@ -574,7 +574,7 @@ export function WeeklyMenuPlanner() {
             <p>{generationErrorMessage}</p>
             {currentGeneration?.reason !== 'rate-limited' && (
               <button
-                className="planner-secondary-btn"
+                className="btn btn-secondary"
                 type="button"
                 onClick={handleRetryGeneration}
                 disabled={!canWrite || isWriting}
@@ -593,7 +593,7 @@ export function WeeklyMenuPlanner() {
           <div className="planner-feedback" role="alert">
             <p>{previewSaveError}</p>
             <button
-              className="planner-secondary-btn"
+              className="btn btn-secondary"
               type="button"
               onClick={() => void acceptPreview()}
               disabled={!canAcceptPreview}
@@ -616,15 +616,15 @@ export function WeeklyMenuPlanner() {
         {generatingTargetWeek ? (
           <AiMenuSkeleton />
         ) : isLoading && !currentPreview ? (
-          <div className="planner-empty-state" role="status">
+          <div className="empty-state" role="status">
             <p>{t('planner.loadingWeek')}</p>
           </div>
         ) : loadFailed && !currentPreview ? (
-          <div className="planner-empty-state" role="alert">
+          <div className="empty-state" role="alert">
             <h2>{t('planner.loadErrorTitle')}</h2>
             <p>{t('planner.loadErrorBody')}</p>
             <button
-              className="planner-secondary-btn"
+              className="btn btn-secondary"
               type="button"
               onClick={handleRetryLoad}
             >
@@ -674,7 +674,7 @@ export function WeeklyMenuPlanner() {
                     setUnlockedWeek(viewedWeek)
                     document
                       .querySelector<HTMLButtonElement>(
-                        '.planner-actions .planner-secondary-btn',
+                        '.planner-actions .btn-secondary',
                       )
                       ?.focus()
                   }}

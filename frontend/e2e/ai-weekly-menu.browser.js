@@ -9,15 +9,27 @@ const preview = `document.querySelector(${JSON.stringify(previewSelector)})`
 const generateAnotherButton = `[...${preview}.querySelectorAll('.planner-ai-preview-actions button')].find(button => /Generate another|Generar otra/.test(button.textContent))`
 const firstDayDinnerSelector = `${previewSelector} .delay-1 .meal-recipe-editor select[aria-label="Choose a saved dinner recipe"]`
 const noticeDialog = `document.querySelector('dialog[aria-labelledby="ai-recipes-needed-title"]')`
+const discardDialog = `document.querySelector('dialog[aria-labelledby="ai-preview-discard-title"]')`
 const skeleton = `document.querySelector('.planner-ai-skeleton')`
 const shell = 'document.querySelector(".planner-shell")'
 const generationCount = `${fixture}.generationRequests.length`
 const saveCount = `${fixture}.saveRequests.length`
 const click = (name) => ['find', 'role', 'button', 'click', '--name', name, '--exact']
+const textButton = (scope, labels) =>
+  `Array.from(${scope}.querySelectorAll('button')).find(button => ${JSON.stringify(labels)}.some(label => button.textContent.includes(label)))`
+const acceptButton = textButton(preview, [
+  'Accept and save menu',
+  'Aceptar y guardar menú',
+])
+const discardButton = textButton(discardDialog, [
+  'Discard generated preview',
+  'Descartar la vista previa generada',
+])
+const confirmScheduleButton = `Array.from(${dialog}.querySelectorAll('button')).find(button => button.textContent.includes('Confirm schedule and generate'))`
 const wait = (condition) => ['wait', '--fn', condition]
 const text = (value) => ['wait', '--text', value]
 const waitPreviewAcceptable = () =>
-  wait(`${preview} && !${preview}.querySelector('.planner-ai-preview-actions .planner-primary-btn').disabled`)
+  wait(`${preview} && ${acceptButton} && !${acceptButton}.disabled`)
 // CDP eval serializes the completion value; returning a React-owned DOM node can
 // overflow its object graph. Harness steps are side effects/assertions, so return
 // a JSON-safe scalar while allowing thrown assertion errors to propagate.
@@ -104,8 +116,8 @@ await scenario('generation retry restores Escape focus to the stable schedule he
   click('Regenerate menu'),
   click('Confirm schedule and generate'),
   text('Could not generate next week’s menu'),
-  wait(`document.querySelector('[role="alert"] .planner-secondary-btn') && !document.querySelector('[role="alert"] .planner-secondary-btn').disabled`),
-  evaluate(`${fixture}.failGeneration=false; window.__retryTrigger = document.querySelector('[role="alert"] .planner-secondary-btn')`),
+  wait(`document.querySelector('[role="alert"] button') && !document.querySelector('[role="alert"] button').disabled`),
+  evaluate(`${fixture}.failGeneration=false; window.__retryTrigger = document.querySelector('[role="alert"] button')`),
   click('Retry generation'),
   text("Review next week’s schedule"),
   assert(`!window.__retryTrigger.isConnected && ${dialog}`, 'retry trigger is removed while its schedule dialog is open'),
@@ -158,7 +170,7 @@ await scenario('accept waits for the saved target menu and owned recipe catalog'
   click('Confirm schedule and generate'),
   wait(`${preview} !== null && ${fixture}.pendingTargetLoad`),
   assert(
-    `${preview}.querySelector('.planner-ai-preview-actions .planner-primary-btn').disabled && ${saveCount}===0`,
+    `${acceptButton}.disabled && ${saveCount}===0`,
     'acceptance remains disabled while the target week and catalog are loading',
   ),
   evaluate(`(() => { ${fixture}.holdTargetLoad=false; ${fixture}.releaseTargetLoad(); return true })()`),
@@ -341,7 +353,7 @@ for (const fail of [false, true]) {
     wait(`${fixture}.pendingSave`),
     ['find', 'role', 'link', 'click', '--name', 'Remi home', '--exact'],
     text('Wait for saving to finish before leaving or discarding this preview.'),
-    assert(`document.querySelector('dialog[aria-labelledby="ai-preview-discard-title"] .panel-primary-btn').disabled`, 'Discard cannot proceed during acceptance'),
+    assert(`${discardButton}.disabled`, 'Discard cannot proceed during acceptance'),
     ['press', 'Escape'],
     assert(`!document.querySelector('dialog[aria-labelledby="ai-preview-discard-title"]') && location.pathname.endsWith('/weekly-menu-planner')`, 'Escape cancels navigation during acceptance'),
     ['find', 'role', 'link', 'click', '--name', 'Remi home', '--exact'],
@@ -349,11 +361,11 @@ for (const fail of [false, true]) {
     assert(`location.pathname.endsWith('/weekly-menu-planner') && ${preview}!==null`, 'Keep cancels navigation and retains pending preview'),
     ['find', 'role', 'link', 'click', '--name', 'Remi home', '--exact'],
     text('Wait for saving to finish before leaving or discarding this preview.'),
-    evaluate(`document.querySelector('dialog[aria-labelledby="ai-preview-discard-title"] .panel-primary-btn').click()`),
+    evaluate(`${discardButton}.click()`),
     assert(`location.pathname.endsWith('/weekly-menu-planner') && ${preview}!==null`, 'disabled Discard does not navigate or remove the saving preview'),
     evaluate(`(() => { ${fixture}.holdSave=false; ${fixture}.releaseSave(); return true })()`),
     text(fail ? 'Could not confirm the preview was saved.' : 'Weekly Menu saved.'),
-    assert(fail ? `${preview}!==null && !document.querySelector('dialog[aria-labelledby="ai-preview-discard-title"] .panel-primary-btn').disabled` : `${preview}===null && !document.querySelector('dialog[aria-labelledby="ai-preview-discard-title"]')`, 'failure retains preview and enables explicit discard; success cancels pending navigation'),
+    assert(fail ? `${preview}!==null && !${discardButton}.disabled` : `${preview}===null && !${discardDialog}`, 'failure retains preview and enables explicit discard; success cancels pending navigation'),
     ...(fail ? [click('Discard generated preview'), ['wait', '--url', `${base}/`]] : [
       ['find', 'role', 'link', 'click', '--name', 'Remi home', '--exact'],
       ['wait', '--url', `${base}/`],
@@ -395,7 +407,7 @@ for (const reason of ['in-progress']) {
     ['click', `${dialogSelector} .panel-day-card:first-child .panel-context-pill:first-child`],
     evaluate(`${fixture}.generationRejection=${JSON.stringify(reason)}`),
     click('Confirm schedule and generate'),
-    wait(`document.querySelector('[role="alert"] .planner-secondary-btn') && !document.querySelector('[role="alert"] .planner-secondary-btn').disabled`),
+    wait(`document.querySelector('[role="alert"] button') && !document.querySelector('[role="alert"] button').disabled`),
     click('Retry generation'),
     text('Review next week’s schedule'),
     assert(`${dialog}.querySelector('.panel-day-card:first-child .panel-context-pill[aria-pressed="true"]')?.textContent.includes('Office')`, 'non-stale rejection retry retains Office draft'),
@@ -413,7 +425,7 @@ await scenario('retry after a failed generation across Monday loads the new targ
   click('Confirm schedule and generate'),
   text('Could not generate next week’s menu'),
   assert(`${fixture}.retryRolledOver && ${generationCount}===1`, 'ordinary generation failure arrived after the controlled Sunday-to-Monday rollover'),
-  wait(`document.querySelector('[role="alert"] .planner-secondary-btn') && !document.querySelector('[role="alert"] .planner-secondary-btn').disabled`),
+  wait(`document.querySelector('[role="alert"] button') && !document.querySelector('[role="alert"] button').disabled`),
   evaluate(`${fixture}.failGeneration=false`),
   click('Retry generation'),
   text("Review next week’s schedule"),
@@ -538,7 +550,7 @@ await scenario('a week rollover returns an explicit reconfirmation target', [
   click('Confirm schedule and generate'),
   text('The Calendar Week changed.'),
   assert(`${preview}===null && ${saveCount}===0 && ${generationCount}===1`, 'stale target is rejected without preview or save'),
-  wait(`document.querySelector('[role="alert"] .planner-secondary-btn') && !document.querySelector('[role="alert"] .planner-secondary-btn').disabled`),
+  wait(`document.querySelector('[role="alert"] button') && !document.querySelector('[role="alert"] button').disabled`),
   click('Review schedule and retry'),
   text("Review next week’s schedule"),
   assert(
@@ -724,7 +736,7 @@ await scenario('URL mock error is serialized on generation and retry', [
   click('Confirm schedule and generate'),
   text('Could not generate next week’s menu'),
   assert(`${generationCount}===1 && ${fixture}.generationRequests[0].mockScenario==='error' && ${saveCount}===0`, 'decoded generation request carries URL-selected error scenario'),
-  wait(`document.querySelector('[role="alert"] .planner-secondary-btn') && !document.querySelector('[role="alert"] .planner-secondary-btn').disabled`),
+  wait(`document.querySelector('[role="alert"] button') && !document.querySelector('[role="alert"] button').disabled`),
   click('Retry generation'),
   click('Confirm schedule and generate'),
   text('Could not generate next week’s menu'),
@@ -908,7 +920,7 @@ await scenario('rate-limited Generate another keeps the proposal; retry after a 
   click('Confirm schedule and generate'),
   text('Could not generate next week’s menu'),
   evaluate(`${fixture}.failGeneration=false`),
-  wait(`document.querySelector('[role="alert"] .planner-secondary-btn') && !document.querySelector('[role="alert"] .planner-secondary-btn').disabled`),
+  wait(`document.querySelector('[role="alert"] button') && !document.querySelector('[role="alert"] button').disabled`),
   click('Retry generation'),
   click('Confirm schedule and generate'),
   wait(`${preview} !== null`),
@@ -990,7 +1002,7 @@ await scenario('first-run tour follows generation through Done without blocking 
   assert(`${tour}?.textContent.includes('Step 1 of 3') && !${tour}.contains(document.activeElement) && ${generationCount}===0`, 'step 1 is a named note and does not take initial dialog focus'),
   assert(`${tour}.getAttribute('role')==='note' && ${tour}.getAttribute('aria-labelledby') && !${tour}.closest('[aria-live]') && document.querySelectorAll('.planner-tour').length===1`, 'one accessible note without a live region'),
   click('Next'),
-  assert(`!${tour} && ${dialog}.open && !${dialog}.querySelector('fieldset').disabled && !${dialog}.querySelector('.panel-primary-btn').disabled`, 'Next leaves schedule controls usable and step 2 waits for a preview'),
+  assert(`!${tour} && ${dialog}.open && !${dialog}.querySelector('fieldset').disabled && !${confirmScheduleButton}.disabled`, 'Next leaves schedule controls usable and step 2 waits for a preview'),
   evaluate(`${fixture}.holdGeneration=true`),
   click('Confirm schedule and generate'),
   wait(`${fixture}.pendingGeneration`),

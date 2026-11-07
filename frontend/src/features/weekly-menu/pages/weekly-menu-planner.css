@@ -43,8 +43,8 @@
     inline-size: 100%;
   }
 
-  .planner-actions .planner-secondary-btn,
-  .planner-actions .planner-primary-btn {
+  .planner-actions .btn-secondary,
+  .planner-actions .btn-primary {
     flex: 1;
   }
 
@@ -60,32 +60,6 @@
     gap: var(--gap-inline-lg);
     flex-wrap: wrap;
     margin-block-end: var(--section-gap-sm);
-  }
-
-  .planner-empty-state {
-    text-align: center;
-    padding-block: var(--pad-empty-block);
-    padding-inline: var(--pad-card);
-    display: grid;
-    justify-items: center;
-    gap: var(--gap-stack-md);
-    background: var(--bg-surface);
-    border-radius: var(--radius-card);
-    box-shadow: var(--shadow-card);
-  }
-
-  .planner-empty-state > svg {
-    inline-size: var(--icon-empty);
-    block-size: var(--icon-empty);
-    color: var(--accent-solid);
-  }
-
-  .planner-empty-state p {
-    max-inline-size: var(--measure);
-    color: var(--text-secondary);
-    font-size: var(--type-body-size);
-    line-height: var(--type-body-lh);
-    font-weight: var(--weight-regular);
   }
 
   .planner-feedback {
@@ -273,8 +247,8 @@
       inline-size: auto;
     }
 
-    .planner-actions .planner-secondary-btn,
-    .planner-actions .planner-primary-btn {
+    .planner-actions .btn-secondary,
+    .planner-actions .btn-primary {
       flex: none;
     }
   }

@@ -4,9 +4,10 @@
 const base = 'http://127.0.0.1:3101'
 const fixture = 'window.plannerReliability'
 const shell = 'document.querySelector(".planner-shell")'
-const primary = 'document.querySelector(".planner-actions .planner-primary-btn")'
+const primary = "Array.from(document.querySelectorAll('button')).find(button => ['Generate menu', 'Regenerate menu', 'Generar menú', 'Regenerar menú'].some(label => button.textContent.includes(label)))"
 const grid = 'document.querySelector(".planner-day-grid")'
 const dialog = 'document.querySelector("[role=dialog]")'
+const save = `Array.from(${dialog}.querySelectorAll('button')).find(button => ['Save preferences', 'Guardar preferencias'].some(label => button.textContent.includes(label)))`
 const currentDinner = `${grid}?.innerText.includes('Saved dinner ' + ${fixture}.reads.find(r=>r.kind==='load').weekStart)`
 const click = (name) => ['find', 'role', 'button', 'click', '--name', name, '--exact']
 const evaluate = (source) => ['eval', source]
@@ -107,7 +108,7 @@ await scenario('schedule failure retains draft; pending retry is guarded and suc
   click('Save preferences'),
   wait(`Boolean(${fixture}.release.save)`),
   assert(
-    `${dialog}.querySelector('.panel-primary-btn').disabled && ${dialog}.querySelector('fieldset').disabled && ${dialog}.innerText.includes('Saving preferences...') && ${fixture}.writes.length===2`,
+    `${save}.disabled && ${dialog}.querySelector('fieldset').disabled && ${dialog}.innerText.includes('Saving preferences...') && ${fixture}.writes.length===2`,
     'pending schedule save is visible and guarded',
   ),
   evaluate(`${fixture}.hold.save=false;${fixture}.release.save()`),
@@ -166,7 +167,7 @@ await scenario('successful empty read permits first generation', [
   open('empty'),
   wait(`!${primary}.disabled`),
   assert(`${shell}.innerText.includes('No Weekly Menu yet') && ${fixture}.writes.length===0`, 'successful absence is distinct from read failure'),
-  ['click', '.planner-actions .planner-primary-btn'],
+  click('Generate menu'),
   text('Weekly Menu saved.'),
   assert(`Boolean(${grid}) && ${fixture}.writes.length===1`, 'first generation succeeds'),
 ])

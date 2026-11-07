@@ -140,10 +140,7 @@ export function RecipesTab({
         <div className="panel-empty-recipes">
           <p>{t('preferences.signInToSaveRecipes')}</p>
           <p>
-            <Link
-              className="panel-text-link"
-              to={getLocalizedPath('/login', locale)}
-            >
+            <Link className="text-link" to={getLocalizedPath('/login', locale)}>
               {t('auth.login')}
             </Link>
           </p>

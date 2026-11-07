@@ -19,7 +19,23 @@ const check = async (condition, message) =>
     })()`,
   )
 
+const textButton = (scope, labels) =>
+  `Array.from(${scope}.querySelectorAll('button')).find(button => ${JSON.stringify(labels)}.some(label => button.textContent.includes(label)))`
+const dialog = 'document.querySelector("[role=dialog]")'
+const saveButton = textButton(dialog, [
+  'Save preferences',
+  'Guardar preferencias',
+])
+const cancelButton = textButton(dialog, ['Cancel', 'Cancelar'])
+
 await run(['wait', '--text', 'Assigned dinner'])
+await run(['eval', '--stdin'], 'window.recipeConsistency.initialWeekHeader = document.querySelector(".planner-week-pill").textContent')
+await run(['find', 'role', 'button', 'click', '--name', 'Next week', '--exact'])
+await run([
+  'wait',
+  '--fn',
+  `document.querySelector('.planner-week-pill')?.textContent !== window.recipeConsistency.initialWeekHeader && window.recipeConsistency.requests.filter(r=>r.kind==='menu-read').length >= 2`,
+])
 await run(['find', 'role', 'button', 'click', '--name', 'Preferences', '--exact'])
 await run(['find', 'role', 'tab', 'click', '--name', 'My Recipes', '--exact'])
 await check(
@@ -40,7 +56,7 @@ await run(
   [
     'wait',
     '--fn',
-    `window.recipeConsistency.requests.filter(r=>r.kind==='menu-read').length >= 2 && Object.values(window.recipeConsistency.menus)[0].days.Monday.dinnerRecipeId === null && document.querySelector('[role=dialog]')?.getAttribute('aria-busy') === 'false' && document.querySelector('[role=tab][aria-selected=true]')?.innerText === 'My Recipes' && !document.querySelector('[role=dialog]')?.querySelector('.panel-primary-btn').disabled`,
+    `window.recipeConsistency.requests.filter(r=>r.kind==='menu-read').length >= 2 && Object.values(window.recipeConsistency.menus)[0].days.Monday.dinnerRecipeId === null && document.querySelector('[role=dialog]')?.getAttribute('aria-busy') === 'false' && document.querySelector('[role=tab][aria-selected=true]')?.innerText === 'My Recipes' && !${saveButton}.disabled`,
   ],
 )
 
@@ -64,7 +80,7 @@ await run(['find', 'role', 'button', 'click', '--name', 'Add recipe', '--exact']
 await run([
   'wait',
   '--fn',
-  `Boolean(window.recipeConsistency.release.create) && window.recipeConsistency.posts.filter(post=>post.kind==='recipe-create').length === 1 && document.querySelector('[role=dialog]')?.getAttribute('aria-busy') === 'true' && document.querySelector('[role=dialog] .panel-add-btn')?.disabled && document.querySelector('[role=dialog] .panel-secondary-btn')?.disabled && document.querySelector('[role=dialog] .panel-primary-btn')?.disabled`,
+  `Boolean(window.recipeConsistency.release.create) && window.recipeConsistency.posts.filter(post=>post.kind==='recipe-create').length === 1 && document.querySelector('[role=dialog]')?.getAttribute('aria-busy') === 'true' && document.querySelector('[role=dialog] .panel-add-btn')?.disabled && ${cancelButton}.disabled && ${saveButton}.disabled`,
 ])
 await run(
   ['eval', '--stdin'],

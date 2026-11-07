@@ -26,11 +26,11 @@ export function RecipesNeededDialog({
         {t('planner.aiRecipesNeededBody')}
       </p>
       <footer className="planner-ai-dialog-footer">
-        <button className="panel-secondary-btn" type="button" onClick={onClose}>
+        <button className="btn btn-secondary" type="button" onClick={onClose}>
           {t('common.close')}
         </button>
         <button
-          className="panel-primary-btn"
+          className="btn btn-primary"
           type="button"
           onClick={onAddRecipes}
         >
