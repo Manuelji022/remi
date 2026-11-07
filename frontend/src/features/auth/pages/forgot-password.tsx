@@ -20,22 +20,26 @@ export function ForgotPasswordPage() {
     setError(null)
     setIsSubmitting(true)
 
-    const origin = window.location.origin
-    const redirectTo = `${origin}${getLocalizedPath('/reset-password', locale)}`
+    try {
+      const origin = window.location.origin
+      const redirectTo = `${origin}${getLocalizedPath('/reset-password', locale)}`
 
-    const result = await authClient.requestPasswordReset({
-      email,
-      redirectTo,
-    })
+      const result = await authClient.requestPasswordReset({
+        email,
+        redirectTo,
+      })
 
-    if (result.error) {
+      if (result.error) {
+        setError(result.error.message ?? t('auth.resetPasswordError'))
+        return
+      }
+
+      setSent(true)
+    } catch {
+      setError(t('auth.resetPasswordError'))
+    } finally {
       setIsSubmitting(false)
-      setError(result.error.message ?? t('auth.resetPasswordError'))
-      return
     }
-
-    setIsSubmitting(false)
-    setSent(true)
   }
 
   return (

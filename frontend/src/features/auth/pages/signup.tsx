@@ -24,40 +24,48 @@ export function SignupPage() {
     setError(null)
     setIsSubmitting(true)
 
-    const result = await authClient.signUp.email({
-      name,
-      email,
-      password,
-    })
+    try {
+      const result = await authClient.signUp.email({
+        name,
+        email,
+        password,
+      })
 
-    if (result.error) {
+      if (result.error) {
+        setError(result.error.message ?? t('auth.signupError'))
+        return
+      }
+
+      await authClient.signOut()
+
+      let loginResult
+      try {
+        loginResult = await authClient.signIn.email({ email, password })
+      } catch {
+        setError(t('auth.signupOtpStartError'))
+        return
+      }
+
+      if (loginResult.error) {
+        setError(loginResult.error.message ?? t('auth.signupOtpStartError'))
+        return
+      }
+
+      const data = loginResult.data as SignInData
+
+      if (data?.twoFactorRedirect) {
+        window.sessionStorage.setItem('remi:signupOtpPending', 'true')
+        await navigate({ to: getLocalizedPath('/two-factor', locale) })
+        return
+      }
+
+      await authClient.signOut()
+      setError(t('auth.twoFactorRequiredError'))
+    } catch {
+      setError(t('auth.signupError'))
+    } finally {
       setIsSubmitting(false)
-      setError(result.error.message ?? t('auth.signupError'))
-      return
     }
-
-    await authClient.signOut()
-
-    const loginResult = await authClient.signIn.email({ email, password })
-
-    if (loginResult.error) {
-      setIsSubmitting(false)
-      setError(loginResult.error.message ?? t('auth.signupOtpStartError'))
-      return
-    }
-
-    const data = loginResult.data as SignInData
-
-    if (data?.twoFactorRedirect) {
-      window.sessionStorage.setItem('remi:signupOtpPending', 'true')
-      setIsSubmitting(false)
-      await navigate({ to: getLocalizedPath('/two-factor', locale) })
-      return
-    }
-
-    await authClient.signOut()
-    setIsSubmitting(false)
-    setError(t('auth.twoFactorRequiredError'))
   }
 
   return (
