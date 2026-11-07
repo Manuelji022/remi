@@ -222,6 +222,7 @@
      ===================================================================== */
 
     /* --- Color: surfaces --- */
+    /* Mirrored by THEME_COLOR in routes/__root.tsx. */
     --bg-page: var(--gray-50);
     --bg-surface: var(--gray-0);
     --bg-fill: var(--gray-100);
