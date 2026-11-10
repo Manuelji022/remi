@@ -4,7 +4,7 @@ const lock = `document.querySelector('.week-lock-button')`
 const f = 'window.weekLockFixture'
 const wait = condition => ['wait', '--fn', `Boolean(${condition})`]
 const click = name => ['find', 'role', 'button', 'click', '--name', name, '--exact']
-const saveButton = `Array.from(document.querySelector('[role="dialog"]').querySelectorAll('button')).find(button => button.textContent.includes('Save preferences'))`
+const saveButton = `Array.from(document.querySelector('dialog[aria-labelledby=preferences-panel-title]').querySelectorAll('button')).find(button => button.textContent.includes('Save preferences'))`
 const acceptButton = `Array.from(document.querySelector('.planner-ai-preview-actions').querySelectorAll('button')).find(button => button.textContent.includes('Accept and save menu'))`
 const ev = code => ['eval', `(async () => { ${code}; return true })()`]
 const check = (condition, message) => ev(`if (!(${condition})) throw new Error(${JSON.stringify(message)})`)

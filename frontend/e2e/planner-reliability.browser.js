@@ -7,7 +7,7 @@ const shell = 'document.querySelector(".planner-shell")'
 const primary = (label) =>
   `Array.from(document.querySelectorAll('button')).find(button => button.textContent.trim() === ${JSON.stringify(label)})`
 const grid = 'document.querySelector(".planner-day-grid")'
-const dialog = 'document.querySelector("[role=dialog]")'
+const dialog = 'document.querySelector("dialog[aria-labelledby=preferences-panel-title]")'
 const save = `Array.from(${dialog}.querySelectorAll('button')).find(button => button.textContent.trim() === 'Save preferences')`
 const currentDinner = `${grid}?.innerText.includes('Saved dinner ' + ${fixture}.reads.find(r=>r.kind==='load').weekStart)`
 const click = (name) => ['find', 'role', 'button', 'click', '--name', name, '--exact']
