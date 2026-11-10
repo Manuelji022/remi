@@ -1,0 +1,46 @@
+[
+  {
+    "verdict": "PASS",
+    "scenarios": [
+      "immediate recipe persistence note",
+      "assigned recipe deletion refreshes menu and names before writes",
+      "schedule save omits deleted recipe ID",
+      "pending create is single-submit and blocks conflicting actions",
+      "cancel retains created recipe"
+    ],
+    "posts": {
+      "success": true,
+      "data": {
+        "lifecycle": {
+          "effectiveLaunch": {
+            "browserLaunched": true,
+            "engine": "chrome",
+            "launchHash": 12074676255799724000
+          },
+          "launched": false,
+          "relaunchedBrowser": false,
+          "restartedBackground": false,
+          "restoreStatus": "not_configured",
+          "reused": true,
+          "saveStatus": "not_attempted"
+        },
+        "origin": "http://127.0.0.1:3101/weekly-menu-planner",
+        "result": [
+          {
+            "deletedId": "assigned-dinner",
+            "kind": "recipe-delete"
+          },
+          {
+            "kind": "menu-save",
+            "scheduledDinnerId": null
+          },
+          {
+            "kind": "recipe-create",
+            "name": "Persistent recipe"
+          }
+        ]
+      },
+      "error": null
+    }
+  }
+]
