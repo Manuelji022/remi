@@ -76,7 +76,8 @@ export function PreferencesPanel({
   useRestoreFocus(isOpen)
 
   const migrationFailed = useLegacyRecipeMigration({
-    isActive: isOpen && !isSessionPending && Boolean(userId),
+    isActive: isOpen && !isSessionPending,
+    userId,
     legacyCustomRecipes,
     onMigrated: onLegacyRecipesMigrated,
   })
