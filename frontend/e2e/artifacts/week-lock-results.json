@@ -22,7 +22,7 @@
 {"scenario":"touch context menu and selection suppressed","verdict":"PASS"},
 {"scenario":"reduced-motion hold still unlocks without animation","verdict":"PASS"},
 {"scenario":"unmount cancels pending confirmation instead of unlocking another week","verdict":"PASS"},
-{"scenario":"DST Sunday uses local civil Monday; subsequent Monday relocks next week","verdict":"PASS"},
+{"scenario":"DST Sunday uses local civil Monday; subsequent Monday relocks next week","verdict":"FAIL","error":"Error: \"Evaluation error: Error: DST calendar boundaries are Mondays\\n    at <anonymous>:1:212\\n    at <anonymous>:1:276\""},
 {"scenario":"Spanish label, instructions, and unlocked announcement","verdict":"PASS"},
-{"suite":"week-lock","passed":25,"failed":0,"verdict":"PASS","limitations":["HTTP fixture: no real account, DB or provider calls.","Detailed key repeat and cancellation use DOM events; native pointer hold and keyboard taps also exercised.","Touch checks cover DOM contextmenu prevention and CSS, not a physical device.","Live-region semantics checked; no screen-reader audio verification.","Unmount regression checks no stale unlock; not a heap/timer profiler.","Calendar transition reevaluates on rerender; no midnight relock timer is introduced."]}
+{"suite":"week-lock","passed":24,"failed":1,"verdict":"FAIL","limitations":["HTTP fixture: no real account, DB or provider calls.","Detailed key repeat and cancellation use DOM events; native pointer hold and keyboard taps also exercised.","Touch checks cover DOM contextmenu prevention and CSS, not a physical device.","Live-region semantics checked; no screen-reader audio verification.","Unmount regression checks no stale unlock; not a heap/timer profiler.","Calendar transition reevaluates on rerender; no midnight relock timer is introduced."]}
 ]
