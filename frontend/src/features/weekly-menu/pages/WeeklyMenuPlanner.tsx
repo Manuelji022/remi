@@ -8,14 +8,12 @@ import { MainTab } from '../components/MainTab'
 import { PreferencesPanel } from '../components/preferences-panel'
 import type { PreferencesPanelTab } from '../components/preferences-panel/types'
 import { AiMenuSkeleton } from '../components/AiMenuSkeleton'
-import { RecipesNeededDialog } from '../components/RecipesNeededDialog'
-import { AiGenerationScheduleDialog } from '../components/AiGenerationScheduleDialog'
-import { DiscardPreviewDialog } from '../components/DiscardPreviewDialog'
-import { GenerateAnotherDialog } from '../components/GenerateAnotherDialog'
+import { PlannerDialogs } from '../components/PlannerDialogs'
+import { PlannerFeedback } from '../components/PlannerFeedback'
+import { ShoppingTab, useCheckedIngredients } from '../components/ShoppingTab'
 import type { Day } from '#/features/weekly-menu/constants'
-import { formatRecipeIngredient } from '#/features/recipes/format'
-import { getActivePreferencesBadgeCount } from '#/features/weekly-menu/types'
 import type { Preferences } from '#/features/weekly-menu/types'
+import { getActivePreferencesBadgeCount } from '#/features/weekly-menu/types'
 import { authClient } from '#/features/auth/auth-client'
 import { useAiMenuGeneration } from '#/features/weekly-menu/hooks/useAiMenuGeneration'
 import { useFirstRunTour } from '#/features/weekly-menu/hooks/useFirstRunTour'
@@ -26,9 +24,8 @@ import {
   usePreviewDiscardGuard,
 } from '#/features/weekly-menu/hooks/usePlannerWeekNavigation'
 import { usePlannerGeneration } from '#/features/weekly-menu/hooks/usePlannerGeneration'
-import { usePlannerWeek } from '#/features/weekly-menu/hooks/usePlannerWeek'
 import { shoppingList } from '#/features/weekly-menu/shopping'
-import type { ShoppingLine } from '#/features/weekly-menu/shopping'
+import { usePlannerWeek } from '#/features/weekly-menu/hooks/usePlannerWeek'
 import {
   applySchedule,
   assignRecipesToWeek,
@@ -45,9 +42,7 @@ type MainTabId = 'menu' | 'ingredients'
 export function WeeklyMenuPlanner() {
   const { t, formatWeekRange } = useI18n()
   const [activeTab, setActiveTab] = useState<MainTabId>('menu')
-  const [checkedIngredients, setCheckedIngredients] = useState<Set<string>>(
-    () => new Set(),
-  )
+  const { checkedIngredients, toggleIngredient } = useCheckedIngredients()
   const [isPreferencesOpen, setIsPreferencesOpen] = useState(false)
   const {
     weekOffset,
@@ -109,7 +104,6 @@ export function WeeklyMenuPlanner() {
       ? aiGeneration.state.targetWeekStart
       : null
   const isPreparingSchedule = aiGeneration.isPreparing
-  const schedulePreparationError = currentGeneration?.reason === 'prepare'
   const isGenerating = aiGeneration.isGenerating
   const isSavingPreferences =
     currentAction?.kind === 'save' && currentAction.status === 'pending'
@@ -200,6 +194,7 @@ export function WeeklyMenuPlanner() {
   const canGenerateAnother = Boolean(
     canAcceptPreview && aiGeneration.canRegenerate,
   )
+
   const {
     isDiscardDialogOpen,
     openDiscardConfirmation,
@@ -314,17 +309,6 @@ export function WeeklyMenuPlanner() {
   const targetWeekRange = scheduleDialog
     ? formatWeekRange(dateFromWeekStart(scheduleDialog.targetWeekStart))
     : { start: '', end: '' }
-  const generationErrorMessage =
-    currentGeneration?.reason === 'stale-week'
-      ? t('planner.aiStaleWeekError')
-      : currentGeneration?.reason === 'rate-limited'
-        ? t('planner.aiRateLimitError')
-        : currentGeneration?.reason === 'in-progress'
-          ? t('planner.aiInProgressError')
-          : currentGeneration?.reason === 'generate'
-            ? t('planner.aiGenerateError')
-            : null
-
   return (
     <main className="planner-page" id="main">
       <section className="planner-shell" aria-labelledby="planner-title">
@@ -358,70 +342,26 @@ export function WeeklyMenuPlanner() {
           />
         </div>
 
-        {schedulePreparationError && (
-          <div className="planner-feedback" role="alert">
-            <p>{t('planner.aiScheduleLoadError')}</p>
-            <button
-              className="btn btn-secondary"
-              type="button"
-              onClick={() => {
-                void generation.openGenerationSchedule(
-                  undefined,
-                  'new',
-                  currentGeneration.targetWeekStart,
-                  undefined,
-                  generation.scheduleHeaderButtonRef.current,
-                )
-              }}
-            >
-              {t('planner.aiRetryScheduleLoad')}
-            </button>
-          </div>
-        )}
-
-        {generationErrorMessage && (
-          <div className="planner-feedback" role="alert">
-            <p>{generationErrorMessage}</p>
-            {currentGeneration?.reason !== 'rate-limited' && (
-              <button
-                className="btn btn-secondary"
-                type="button"
-                onClick={generation.handleRetryGeneration}
-                disabled={!canWrite || isWriting}
-              >
-                {t(
-                  currentGeneration?.reason === 'stale-week'
-                    ? 'planner.aiReconfirmSchedule'
-                    : 'planner.retryGenerate',
-                )}
-              </button>
-            )}
-          </div>
-        )}
-
-        {previewSaveError && (
-          <div className="planner-feedback" role="alert">
-            <p>{previewSaveError}</p>
-            <button
-              className="btn btn-secondary"
-              type="button"
-              onClick={() => void acceptPreview()}
-              disabled={!canAcceptPreview}
-            >
-              {t('planner.retryPreviewSave')}
-            </button>
-          </div>
-        )}
-
-        {currentAction?.status === 'success' && (
-          <p className="planner-feedback" role="status">
-            {t(
-              currentAction.kind === 'save'
-                ? 'planner.preferencesSaved'
-                : 'planner.menuSaved',
-            )}
-          </p>
-        )}
+        <PlannerFeedback
+          generationReason={currentGeneration?.reason}
+          retryGenerationDisabled={!canWrite || isWriting}
+          onRetrySchedule={() => {
+            void generation.openGenerationSchedule(
+              undefined,
+              'new',
+              currentGeneration?.targetWeekStart,
+              undefined,
+              generation.scheduleHeaderButtonRef.current,
+            )
+          }}
+          onRetryGeneration={generation.handleRetryGeneration}
+          previewSaveError={previewSaveError}
+          canAcceptPreview={canAcceptPreview}
+          onRetryPreviewSave={() => void acceptPreview()}
+          actionSuccess={
+            currentAction?.status === 'success' ? currentAction.kind : null
+          }
+        />
 
         {generatingTargetWeek ? (
           <AiMenuSkeleton />
@@ -504,59 +444,30 @@ export function WeeklyMenuPlanner() {
             lines={lines}
             checklistId={JSON.stringify([userId, viewedWeek])}
             checkedIngredients={checkedIngredients}
-            onToggleIngredient={(key) => {
-              setCheckedIngredients((previous) => {
-                const next = new Set(previous)
-                if (next.has(key)) next.delete(key)
-                else next.add(key)
-                return next
-              })
-            }}
+            onToggleIngredient={toggleIngredient}
           />
         ) : null}
       </section>
 
-      {scheduleDialog && scheduleDraft && !isGenerating && (
-        <AiGenerationScheduleDialog
-          tour={tour}
-          isPending={false}
-          missingRecipeSlots={generation.missingRecipeSlots}
-          replacesSavedMenu={scheduleDialog.replacesSavedMenu}
-          onAddRecipes={generation.openRecipes}
-          preferences={scheduleDraft}
-          targetWeekRange={targetWeekRange}
-          returnFocusTo={generation.scheduleOpenerRef.current}
-          onCancel={generation.cancelScheduleConfirmation}
-          onConfirm={() => void generation.confirmGenerationSchedule()}
-          onUpdateDayContext={generation.updateScheduleDayContext}
-          onUpdatePlanningScope={generation.updateSchedulePlanningScope}
-        />
-      )}
-
-      {generation.showRecipesNotice && (
-        <RecipesNeededDialog
-          returnFocusTo={generation.scheduleOpenerRef.current}
-          onAddRecipes={generation.openRecipes}
-          onClose={generation.closeRecipesNotice}
-        />
-      )}
-
-      {generation.showGenerateAnother && currentPreview && (
-        <GenerateAnotherDialog
-          returnFocusTo={generation.generateAnotherOpenerRef.current}
-          onCancel={generation.cancelGenerateAnother}
-          onConfirm={generation.startGenerateAnother}
-        />
-      )}
-
-      {isDiscardDialogOpen && hasUnsavedPreview && (
-        <DiscardPreviewDialog
-          onKeep={keepPreview}
-          onDiscard={discardPreview}
-          isSaving={aiGeneration.isSaving || isAcceptingPreview}
-          isSaveUnconfirmed={Boolean(previewSaveError)}
-        />
-      )}
+      <PlannerDialogs
+        generation={generation}
+        tour={tour}
+        schedule={
+          scheduleDialog && scheduleDraft && !isGenerating
+            ? {
+                draft: scheduleDraft,
+                replacesSavedMenu: scheduleDialog.replacesSavedMenu,
+              }
+            : null
+        }
+        targetWeekRange={targetWeekRange}
+        hasPreview={Boolean(currentPreview)}
+        showDiscard={isDiscardDialogOpen && hasUnsavedPreview}
+        onKeepPreview={keepPreview}
+        onDiscardPreview={discardPreview}
+        isDiscardSaving={aiGeneration.isSaving || isAcceptingPreview}
+        isSaveUnconfirmed={Boolean(previewSaveError)}
+      />
 
       <PreferencesPanel
         isOpen={isPreferencesOpen}
@@ -585,54 +496,4 @@ export function WeeklyMenuPlanner() {
 function dateFromWeekStart(weekStart: string): Date {
   const [year, month, day] = weekStart.split('-').map(Number)
   return new Date(year, month - 1, day, 12)
-}
-
-function ShoppingTab({
-  lines,
-  checklistId,
-  checkedIngredients,
-  onToggleIngredient,
-}: {
-  lines: readonly ShoppingLine[]
-  checklistId: string
-  checkedIngredients: ReadonlySet<string>
-  onToggleIngredient: (key: string) => void
-}) {
-  const { t } = useI18n()
-
-  return (
-    <div className="planner-shopping-tab">
-      <h2>{t('tabs.ingredients')}</h2>
-      <p className="planner-shopping-helper">{t('planner.shoppingHelper')}</p>
-      {lines.length === 0 ? (
-        <p>{t('planner.shoppingEmpty')}</p>
-      ) : (
-        <ul>
-          {lines.map((line) => {
-            const key = JSON.stringify([
-              checklistId,
-              line.name,
-              line.unit,
-              line.quantity,
-            ])
-
-            return (
-              <li key={key}>
-                <label className="planner-shopping-item">
-                  <input
-                    type="checkbox"
-                    checked={checkedIngredients.has(key)}
-                    onChange={() => onToggleIngredient(key)}
-                  />
-                  <span>
-                    {formatRecipeIngredient(line, (unit) => t(`units.${unit}`))}
-                  </span>
-                </label>
-              </li>
-            )
-          })}
-        </ul>
-      )}
-    </div>
-  )
 }
