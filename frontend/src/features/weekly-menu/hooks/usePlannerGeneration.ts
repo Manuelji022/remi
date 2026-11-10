@@ -111,6 +111,16 @@ export function usePlannerGeneration({
     })
   }
 
+  function editSchedule() {
+    if (!currentPreview) return
+    void openGenerationSchedule(
+      undefined,
+      'edit',
+      currentPreview.menu.weekStart,
+      currentPreview,
+    )
+  }
+
   function handleGenerateMenu() {
     if (!canWrite || isWriting || currentPreview) return
     setActiveTab('menu')
@@ -208,6 +218,7 @@ export function usePlannerGeneration({
     scheduleHeaderButtonRef,
     openRecipes,
     openGenerationSchedule,
+    editSchedule,
     handleGenerateMenu,
     updateScheduleDayContext,
     updateSchedulePlanningScope,

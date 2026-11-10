@@ -63,7 +63,8 @@ export function usePreviewDiscardGuard({
     withResolver: true,
   })
   const isDiscardDialogOpen =
-    showDiscardConfirmation || routeBlocker.status === 'blocked'
+    (showDiscardConfirmation || routeBlocker.status === 'blocked') &&
+    hasUnsavedPreview
 
   // Nothing left to discard: close the confirmation during render instead of
   // in an effect, so it never paints a frame after the preview is gone.

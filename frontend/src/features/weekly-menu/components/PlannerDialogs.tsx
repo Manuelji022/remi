@@ -1,5 +1,7 @@
 import type { ComponentProps } from 'react'
 import type { usePlannerGeneration } from '#/features/weekly-menu/hooks/usePlannerGeneration'
+import { dateFromWeekStart } from '#/features/weekly-menu/planner-view'
+import { useI18n } from '#/shared/i18n'
 import { AiGenerationScheduleDialog } from './AiGenerationScheduleDialog'
 import { DiscardPreviewDialog } from './DiscardPreviewDialog'
 import { GenerateAnotherDialog } from './GenerateAnotherDialog'
@@ -10,12 +12,13 @@ type ScheduleDialogProps = ComponentProps<typeof AiGenerationScheduleDialog>
 interface PlannerDialogsProps {
   generation: ReturnType<typeof usePlannerGeneration>
   tour: ScheduleDialogProps['tour']
-  // Set while the schedule dialog should show (confirming or generating).
-  schedule: {
+  // Set while a schedule is being confirmed or generated.
+  scheduleDialog: {
     draft: ScheduleDialogProps['preferences']
     replacesSavedMenu: boolean
+    targetWeekStart: string
   } | null
-  targetWeekRange: ScheduleDialogProps['targetWeekRange']
+  isGenerating: boolean
   hasPreview: boolean
   showDiscard: boolean
   onKeepPreview: () => void
@@ -27,8 +30,8 @@ interface PlannerDialogsProps {
 export function PlannerDialogs({
   generation,
   tour,
-  schedule,
-  targetWeekRange,
+  scheduleDialog,
+  isGenerating,
   hasPreview,
   showDiscard,
   onKeepPreview,
@@ -36,6 +39,8 @@ export function PlannerDialogs({
   isDiscardSaving,
   isSaveUnconfirmed,
 }: PlannerDialogsProps) {
+  const { formatWeekRange } = useI18n()
+  const schedule = isGenerating ? null : scheduleDialog
   return (
     <>
       {schedule && (
@@ -46,7 +51,9 @@ export function PlannerDialogs({
           replacesSavedMenu={schedule.replacesSavedMenu}
           onAddRecipes={generation.openRecipes}
           preferences={schedule.draft}
-          targetWeekRange={targetWeekRange}
+          targetWeekRange={formatWeekRange(
+            dateFromWeekStart(schedule.targetWeekStart),
+          )}
           returnFocusTo={generation.scheduleOpenerRef.current}
           onCancel={generation.cancelScheduleConfirmation}
           onConfirm={() => void generation.confirmGenerationSchedule()}

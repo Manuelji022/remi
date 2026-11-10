@@ -17,24 +17,26 @@ const GENERATION_ERROR_KEYS = {
 
 interface PlannerFeedbackProps {
   generationReason: GenerationReason | undefined
-  retryGenerationDisabled: boolean
+  canWrite: boolean
+  isWriting: boolean
   onRetrySchedule: () => void
   onRetryGeneration: () => void
   previewSaveError: string | null
   canAcceptPreview: boolean
   onRetryPreviewSave: () => void
-  actionSuccess: 'save' | 'accept' | null
+  action: { kind: 'save' | 'accept'; status: string } | null
 }
 
 export function PlannerFeedback({
   generationReason,
-  retryGenerationDisabled,
+  canWrite,
+  isWriting,
   onRetrySchedule,
   onRetryGeneration,
   previewSaveError,
   canAcceptPreview,
   onRetryPreviewSave,
-  actionSuccess,
+  action,
 }: PlannerFeedbackProps) {
   const { t } = useI18n()
   const errorMessageKey =
@@ -68,7 +70,7 @@ export function PlannerFeedback({
               className="btn btn-secondary"
               type="button"
               onClick={onRetryGeneration}
-              disabled={retryGenerationDisabled}
+              disabled={!canWrite || isWriting}
             >
               {t(
                 generationReason === 'stale-week'
@@ -94,10 +96,10 @@ export function PlannerFeedback({
         </div>
       )}
 
-      {actionSuccess && (
+      {action?.status === 'success' && (
         <p className="planner-feedback" role="status">
           {t(
-            actionSuccess === 'save'
+            action.kind === 'save'
               ? 'planner.preferencesSaved'
               : 'planner.menuSaved',
           )}
