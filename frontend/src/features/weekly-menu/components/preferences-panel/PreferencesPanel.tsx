@@ -1,6 +1,5 @@
 import './preferences-panel.css'
 import { useEffect, useEffectEvent, useState } from 'react'
-import { CheckIcon } from '#/components/primitives'
 import type { Day } from '#/features/weekly-menu/constants'
 import type {
   DayContext,
@@ -10,10 +9,10 @@ import type {
 import { useI18n } from '#/shared/i18n'
 import { authClient } from '#/features/auth/auth-client'
 import type { RecipeInput } from '#/features/recipes/recipe'
-import { RecipesTab } from '#/features/recipes/components/RecipesTab'
+import { PanelFooter } from './PanelFooter'
 import { PanelHeader } from './PanelHeader'
+import { PanelTabContent } from './PanelTabContent'
 import { PanelTabButton } from './Pills'
-import { ScheduleTab } from './ScheduleTab'
 import { useLegacyRecipeMigration } from './useLegacyRecipeMigration'
 import { useRestoreFocus } from './useRestoreFocus'
 import { usePanelScrollLock } from './usePanelScrollLock'
@@ -137,62 +136,29 @@ export function PreferencesPanel({
           />
         </div>
 
-        <fieldset
-          className="panel-content panel-edit-fields"
-          disabled={
-            isSaving ||
-            isRecipeMutationPending ||
-            (activeTab === 'schedule' && scheduleLocked)
-          }
-        >
-          {activeTab === 'schedule' ? (
-            <>
-              {scheduleLocked && (
-                <p role="note">{t('planner.lockedScheduleNote')}</p>
-              )}
-              <ScheduleTab
-                dayContexts={draftPrefs.dayContexts}
-                planningScopes={draftPrefs.planningScopes}
-                onUpdateDayContext={updateDayContext}
-                onUpdatePlanningScope={updatePlanningScope}
-              />
-            </>
-          ) : (
-            <RecipesTab
-              legacyPending={legacyCustomRecipes.length > 0}
-              migrationFailed={migrationFailed}
-              onRecipeMutation={onRecipeMutation}
-              onRecipeMutationPendingChange={onRecipeMutationPendingChange}
-            />
-          )}
-        </fieldset>
+        <PanelTabContent
+          activeTab={activeTab}
+          draftPrefs={draftPrefs}
+          isSaving={isSaving}
+          isRecipeMutationPending={isRecipeMutationPending}
+          legacyPending={legacyCustomRecipes.length > 0}
+          migrationFailed={migrationFailed}
+          onRecipeMutation={onRecipeMutation}
+          onRecipeMutationPendingChange={onRecipeMutationPendingChange}
+          onUpdateDayContext={updateDayContext}
+          onUpdatePlanningScope={updatePlanningScope}
+          scheduleLocked={scheduleLocked}
+        />
 
-        <div className="panel-footer">
-          {saveError && (
-            <p className="panel-field-error" role="alert">
-              {saveError}
-            </p>
-          )}
-          <div className="panel-footer-actions">
-            <button
-              className="btn btn-secondary"
-              disabled={isSaving || isRecipeMutationPending}
-              type="button"
-              onClick={onClose}
-            >
-              {t('common.cancel')}
-            </button>
-            <button
-              className="btn btn-primary"
-              disabled={saveDisabled || isRecipeMutationPending}
-              type="button"
-              onClick={() => onSave(draftPrefs)}
-            >
-              <CheckIcon aria-hidden="true" />
-              {t(isSaving ? 'preferences.saving' : 'preferences.save')}
-            </button>
-          </div>
-        </div>
+        <PanelFooter
+          draftPrefs={draftPrefs}
+          isSaving={isSaving}
+          isRecipeMutationPending={isRecipeMutationPending}
+          onClose={onClose}
+          onSave={onSave}
+          saveDisabled={saveDisabled}
+          saveError={saveError}
+        />
       </div>
     </Dialog>
   )
