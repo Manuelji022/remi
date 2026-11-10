@@ -8,12 +8,14 @@ const primary = (label) =>
   `Array.from(document.querySelectorAll('button')).find(button => button.textContent.trim() === ${JSON.stringify(label)})`
 const grid = 'document.querySelector(".planner-day-grid")'
 const dialog = 'document.querySelector("dialog[aria-labelledby=preferences-panel-title]")'
-const save = `Array.from(${dialog}.querySelectorAll('button')).find(button => button.textContent.trim() === 'Save preferences')`
+const save = `Array.from(${dialog}.querySelectorAll('button')).find(button => ['Save preferences', 'Saving preferences...'].includes(button.textContent.trim()))`
+const retryButton = `document.querySelector('[role="alert"] button')`
 const currentDinner = `${grid}?.innerText.includes('Saved dinner ' + ${fixture}.reads.find(r=>r.kind==='load').weekStart)`
 const click = (name) => ['find', 'role', 'button', 'click', '--name', name, '--exact']
 const evaluate = (source) => ['eval', source]
 const wait = (condition) => ['wait', '--fn', condition]
 const text = (value) => ['wait', '--text', value]
+const confirmSchedule = [text('Review next week’s schedule'), click('Confirm schedule and generate')]
 const open = (fixtureScenario, locale = '') => [
   'open',
   `${base}${locale}/weekly-menu-planner?scenario=${fixtureScenario}`,
@@ -22,6 +24,15 @@ const assert = (condition, message) =>
   evaluate(`(() => {
     if (!(${condition})) throw new Error(${JSON.stringify(message)});
     return { verdict: 'PASS', check: ${JSON.stringify(message)} };
+  })()`)
+const assertNoUnknownServerFunctions = () =>
+  evaluate(`(() => {
+    const unknown = ${fixture}.unknown
+    if (!(${fixture}.unknown.length === 0)) {
+      const requests = unknown.map(({ method, url }) => method + ' ' + url).join(', ')
+      throw new Error('Unknown planner server-function requests: ' + requests)
+    }
+    return { verdict: 'PASS', check: 'no unknown planner server-function requests' }
   })()`)
 
 async function scenario(name, steps) {
@@ -34,6 +45,19 @@ async function scenario(name, steps) {
     stdin: JSON.stringify(commands),
     timeoutMs: 60000,
   })
+  const unknownResult = await browser({
+    args: assertNoUnknownServerFunctions(),
+    timeoutMs: 60000,
+  })
+  if (!unknownResult.success) {
+    emit({
+      scenario: name,
+      verdict: 'FAIL',
+      error: unknownResult.error,
+      data: unknownResult.data,
+    })
+    throw new Error(name)
+  }
   if (!result.success) {
     emit({ scenario: name, verdict: 'FAIL', error: result.error, data: result.data })
     throw new Error(name)
@@ -70,32 +94,61 @@ for (const kind of ['auth', 'load']) {
 }
 
 for (const flag of ['failRecipes', 'failLoad']) {
-  await scenario(`generation ${flag} fails before any POST`, [
+  await scenario(`generation ${flag} fails before any save POST`, [
     open('ready'),
     wait(currentDinner),
-    evaluate(`${fixture}.${flag}=true`),
     click('Regenerate menu'),
-    text('Could not finish generating and saving your menu.'),
-    assert(`${currentDinner} && ${fixture}.writes.length===0`, 'dependency failure retains menu without writing'),
+    text('Review next week’s schedule'),
+    evaluate(`${fixture}.${flag}=true`),
+    click('Confirm schedule and generate'),
+    text('Could not generate next week’s menu'),
+    wait(`${retryButton} && !${retryButton}.disabled`),
+    assert(
+      `${currentDinner} && ${fixture}.generations===1 && ${fixture}.writes.length===0`,
+      'dependency failure retains the menu, offers retry, and does not save',
+    ),
   ])
 }
 
-await scenario('failed generation POST retains menu and retry succeeds', [
+await scenario('failed generation retains menu and retry reaches a preview', [
   open('ready'),
   wait(currentDinner),
-  evaluate(`${fixture}.failSave=true`),
+  evaluate(`${fixture}.failGeneration=true`),
   click('Regenerate menu'),
-  text('Could not finish generating and saving your menu.'),
-  assert(`${currentDinner} && ${fixture}.writes.length===1`, 'generation failure retains loaded data'),
-  evaluate(`${fixture}.failSave=false`),
+  ...confirmSchedule,
+  text('Could not generate next week’s menu'),
+  wait(`${retryButton} && !${retryButton}.disabled`),
+  assert(
+    `${currentDinner} && ${fixture}.generations===1 && ${fixture}.writes.length===0`,
+    'generation failure retains loaded data without saving',
+  ),
+  evaluate(`${fixture}.failGeneration=false`),
   click('Retry generation'),
-  text('Weekly Menu saved.'),
-  assert(`${currentDinner} && ${fixture}.writes.length===2`, 'generation retry confirms success'),
+  text('Review next week’s schedule'),
+  evaluate(`${fixture}.hold.generation=true`),
+  click('Confirm schedule and generate'),
+  wait(`Boolean(${fixture}.release.generation)`),
+  assert(
+    `Array.from(document.querySelectorAll('button')).some(button => button.textContent.includes('Generating') && button.disabled) && ${fixture}.generations===2 && ${fixture}.writes.length===0`,
+    'pending generation is visible and cannot be duplicated',
+  ),
+  evaluate(`${fixture}.hold.generation=false;${fixture}.release.generation()`),
+  text('Review and tweak'),
+  assert(
+    `${fixture}.generations===2 && ${fixture}.writes.length===0`,
+    'generation retry reaches an editable preview without saving',
+  ),
+  click('Discard preview'),
+  click('Discard generated preview'),
+  text('Saved dinner'),
+  assert(`${grid}.innerText.includes('Saved dinner') && ${fixture}.writes.length===0`, 'discard restores the saved menu without persistence'),
 ])
 
 await scenario('schedule failure retains draft; pending retry is guarded and succeeds', [
   open('ready'),
   wait(currentDinner),
+  click('Next week'),
+  wait(`${grid}.innerText.includes('Saved dinner')`),
   click('Preferences'),
   ['click', '#preferences-schedule-panel .panel-day-card:first-child .panel-context-pill:first-child'],
   evaluate(`${fixture}.failSave=true`),
@@ -114,7 +167,7 @@ await scenario('schedule failure retains draft; pending retry is guarded and suc
   ),
   evaluate(`${fixture}.hold.save=false;${fixture}.release.save()`),
   text('Preferences saved.'),
-  assert(`!${dialog} && ${currentDinner} && document.querySelector('.day-context-badge')?.textContent==='Office'`, 'retry confirms saved schedule'),
+  assert(`!${dialog} && ${grid}.innerText.includes('Saved dinner') && document.querySelector('.day-context-badge')?.textContent==='Office'`, 'retry confirms saved schedule'),
 ])
 
 for (const failed of [false, true]) {
@@ -133,21 +186,26 @@ for (const failed of [false, true]) {
   ])
 }
 
-for (const kind of ['save', 'load']) {
+for (const kind of ['generation', 'load']) {
   await scenario(`sign-out invalidates pending generation ${kind}`, [
     open('ready'),
     wait(currentDinner),
-    evaluate(`${fixture}.hold.${kind}=true`),
     click('Regenerate menu'),
+    text('Review next week’s schedule'),
+    evaluate(`${fixture}.hold.${kind}=true`),
+    click('Confirm schedule and generate'),
     wait(`Boolean(${fixture}.release.${kind})`),
-    assert(`${primary('Regenerate menu')}.disabled && ${shell}.innerText.includes('Generating')`, 'generation pending state is visible'),
+    assert(
+      `Array.from(document.querySelectorAll('button')).some(button => button.textContent.includes('Generating') && button.disabled) && ${fixture}.generations===1 && ${fixture}.writes.length===0`,
+      'generation pending state is visible and cannot be duplicated',
+    ),
     click('Log out'),
     text('Log in'),
     evaluate(`${fixture}.hold.${kind}=false;${fixture}.release.${kind}()`),
-    wait(`${fixture}.completed.filter(r=>r.kind==='${kind}').length===${kind === 'load' ? 2 : 1}`),
+    wait(`${fixture}.completed.filter(r=>r.kind==='generation').length===1`),
     assert(
-      `!${shell}.innerText.includes('Saved dinner') && !${shell}.innerText.includes('Weekly Menu saved.') && !${shell}.querySelector('[role=alert]') && ${fixture}.writes.length===${kind === 'save' ? 1 : 0}`,
-      'stale operation neither leaks into guest UI nor starts a post-signout write',
+      `!document.body.innerText.includes('Saved dinner') && !document.body.innerText.includes('Weekly Menu saved.') && !document.body.querySelector('[role=alert]') && ${fixture}.generations===1 && ${fixture}.writes.length===0`,
+      'stale generation neither leaks into guest UI nor persists after sign-out',
     ),
   ])
 }
@@ -169,8 +227,12 @@ await scenario('successful empty read permits first generation', [
   wait(`!${primary('Generate menu')}.disabled`),
   assert(`${shell}.innerText.includes('No Weekly Menu yet') && ${fixture}.writes.length===0`, 'successful absence is distinct from read failure'),
   click('Generate menu'),
-  text('Weekly Menu saved.'),
-  assert(`Boolean(${grid}) && ${fixture}.writes.length===1`, 'first generation succeeds'),
+  ...confirmSchedule,
+  text('Review and tweak'),
+  assert(`Boolean(${grid}) && ${fixture}.generations===1 && ${fixture}.writes.length===0`, 'first generation reaches a preview without saving'),
+  click('Discard preview'),
+  click('Discard generated preview'),
+  text('No Weekly Menu yet'),
 ])
 
 await scenario('Spanish load/save failures and recovery are localized', [
@@ -179,6 +241,8 @@ await scenario('Spanish load/save failures and recovery are localized', [
   evaluate(`${fixture}.failLoad=false`),
   click('Volver a cargar'),
   wait(currentDinner),
+  click('Semana siguiente'),
+  wait(`${grid}.innerText.includes('Saved dinner')`),
   click('Preferencias'),
   ['click', '#preferences-schedule-panel .panel-day-card:first-child .panel-context-pill:first-child'],
   evaluate(`${fixture}.failSave=true`),
