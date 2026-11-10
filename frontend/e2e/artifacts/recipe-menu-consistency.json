@@ -1,38 +1,46 @@
-{
-  "verdict": "PASS",
-  "scenarios": [
-    "immediate recipe persistence note",
-    "assigned recipe deletion refreshes menu and names before writes",
-    "schedule save omits deleted recipe ID",
-    "pending create is single-submit and blocks conflicting actions",
-    "cancel retains created recipe"
-  ],
-  "posts": {
-    "success": true,
-    "resultCategory": "success",
-    "data": {
-      "origin": "http://127.0.0.1:3211/weekly-menu-planner",
-      "result": [
-        {
-          "deletedId": "assigned-dinner",
-          "kind": "recipe-delete"
+[
+  {
+    "verdict": "PASS",
+    "scenarios": [
+      "immediate recipe persistence note",
+      "assigned recipe deletion refreshes menu and names before writes",
+      "schedule save omits deleted recipe ID",
+      "pending create is single-submit and blocks conflicting actions",
+      "cancel retains created recipe"
+    ],
+    "posts": {
+      "success": true,
+      "data": {
+        "lifecycle": {
+          "effectiveLaunch": {
+            "browserLaunched": true,
+            "engine": "chrome",
+            "launchHash": 7098013196307096000
+          },
+          "launched": false,
+          "relaunchedBrowser": false,
+          "restartedBackground": false,
+          "restoreStatus": "not_configured",
+          "reused": true,
+          "saveStatus": "not_attempted"
         },
-        {
-          "kind": "menu-save",
-          "scheduledDinnerId": null
-        },
-        {
-          "kind": "recipe-create",
-          "name": "Persistent recipe"
-        }
-      ]
-    },
-    "error": null,
-    "summary": "Eval result: recipe/menu mutation summary",
-    "successCategory": "completed",
-    "nextActions": [],
-    "sessionName": "recipe-menu-consistency-4d2f7a74906d",
-    "namespace": ""
-  },
-  "steps": 32
-}
+        "origin": "http://127.0.0.1:3101/weekly-menu-planner?scenario=ready",
+        "result": [
+          {
+            "deletedId": "assigned-dinner",
+            "kind": "recipe-delete"
+          },
+          {
+            "kind": "menu-save",
+            "scheduledDinnerId": null
+          },
+          {
+            "kind": "recipe-create",
+            "name": "Persistent recipe"
+          }
+        ]
+      },
+      "error": null
+    }
+  }
+]

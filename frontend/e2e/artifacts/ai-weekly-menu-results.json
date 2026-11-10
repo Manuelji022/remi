@@ -225,7 +225,7 @@
           "effectiveLaunch": {
             "browserLaunched": true,
             "engine": "chrome",
-            "launchHash": 9080092452093981000
+            "launchHash": 5856132107922167000
           },
           "launched": false,
           "relaunchedBrowser": false,
@@ -239,7 +239,7 @@
           "fixture": "guest",
           "generationRequests": 0,
           "saveRequests": 0,
-          "targetWeekStart": "2026-11-09"
+          "targetWeekStart": "2026-11-16"
         }
       },
       "error": null

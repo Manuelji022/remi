@@ -1,0 +1,10 @@
+{
+  "build": "branch Manuelji022/planner-split-state, production build, http://127.0.0.1:3101/weekly-menu-planner",
+  "cases": [
+    { "case": "guest, empty storage, 1440px and 375px first load", "consoleMessages": [], "pageErrors": [] },
+    { "case": "guest, seeded storage (Monday office, Tuesday dinner), reload", "consoleMessages": [], "pageErrors": [], "preferencesBadge": 2, "storageRoundTrip": "unchanged", "sameAsMain": true }
+  ],
+  "screenshots": "before-*/after-* PNGs in this folder are byte-identical (cmp) for guest and synthetic signed-in at 1440 and 375px",
+  "hydrationWarnings": [],
+  "verdict": "PASS"
+}
