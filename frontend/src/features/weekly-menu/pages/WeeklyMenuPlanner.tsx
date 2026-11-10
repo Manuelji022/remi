@@ -1,6 +1,5 @@
 import './weekly-menu-planner.css'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useBlocker } from '@tanstack/react-router'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { AiMenuPreview } from '../components/AiMenuPreview'
 import { WeekLockButton } from '../components/WeekLockButton'
 import { MenuTab } from '../components/MenuTab'
@@ -16,10 +15,7 @@ import { GenerateAnotherDialog } from '../components/GenerateAnotherDialog'
 import type { Day } from '#/features/weekly-menu/constants'
 import { formatRecipeIngredient } from '#/features/recipes/format'
 import { listRecipes } from '#/features/recipes/functions'
-import {
-  getActivePreferencesBadgeCount,
-  getDefaultPreferences,
-} from '#/features/weekly-menu/types'
+import { getActivePreferencesBadgeCount } from '#/features/weekly-menu/types'
 import type {
   DayContext,
   PlanningScope,
@@ -31,6 +27,12 @@ import {
   useAiMenuGeneration,
 } from '#/features/weekly-menu/hooks/useAiMenuGeneration'
 import { useFirstRunTour } from '#/features/weekly-menu/hooks/useFirstRunTour'
+import { useGuestPlannerState } from '#/features/weekly-menu/hooks/useGuestPlannerState'
+import {
+  calendarWeekOffset,
+  usePlannerWeekNavigation,
+  usePreviewDiscardGuard,
+} from '#/features/weekly-menu/hooks/usePlannerWeekNavigation'
 import { usePlannerWeek } from '#/features/weekly-menu/hooks/usePlannerWeek'
 import { shoppingList } from '#/features/weekly-menu/shopping'
 import type { ShoppingLine } from '#/features/weekly-menu/shopping'
@@ -42,15 +44,9 @@ import {
   isWeekLocked,
   scheduleFromMenu,
   viewWeekStart,
-  weekStartFromDate,
 } from '#/features/weekly-menu/week'
-import type { MealSlot, Recipe, RecipeInput } from '#/features/recipes/recipe'
+import type { MealSlot, Recipe } from '#/features/recipes/recipe'
 import { useI18n } from '#/shared/i18n'
-import {
-  getBrowserStorage,
-  readWeeklyMenuPlannerState,
-  writeWeeklyMenuPlannerState,
-} from '#/features/weekly-menu/planner-storage'
 
 type MainTabId = 'menu' | 'ingredients'
 
@@ -61,21 +57,22 @@ export function WeeklyMenuPlanner() {
     () => new Set(),
   )
   const [isPreferencesOpen, setIsPreferencesOpen] = useState(false)
-  const [weekOffset, setWeekOffset] = useState(0)
-  const [unlockedWeek, setUnlockedWeek] = useState<string | null>(null)
-  const [guestPreferences, setGuestPreferences] = useState<Preferences>(() =>
-    getDefaultPreferences(),
-  )
-  const [legacyCustomRecipes, setLegacyCustomRecipes] = useState<RecipeInput[]>(
-    [],
-  )
+  const {
+    weekOffset,
+    setWeekOffset,
+    unlockedWeek,
+    setUnlockedWeek,
+    onPreviewWeek,
+  } = usePlannerWeekNavigation()
+  const {
+    isHydrated,
+    guestPreferences,
+    setGuestPreferences,
+    legacyCustomRecipes,
+    clearLegacyCustomRecipes,
+  } = useGuestPlannerState()
   const [isRecipeMutationPending, setIsRecipeMutationPending] = useState(false)
   const [guestGridOpen, setGuestGridOpen] = useState(false)
-  const [isHydrated, setIsHydrated] = useState(false)
-  const [showDiscardConfirmation, setShowDiscardConfirmation] = useState(false)
-  const [discardWeekOffset, setDiscardWeekOffset] = useState<number | null>(
-    null,
-  )
   const [preferencesTab, setPreferencesTab] =
     useState<PreferencesPanelTab>('schedule')
   const [showRecipesNotice, setShowRecipesNotice] = useState(false)
@@ -83,16 +80,11 @@ export function WeeklyMenuPlanner() {
   const [showGenerateAnother, setShowGenerateAnother] = useState(false)
   const precheckPendingRef = useRef(false)
   const generateAnotherOpenerRef = useRef<HTMLElement | null>(null)
-  const hasLoadedRef = useRef(false)
   const scheduleOpenerRef = useRef<HTMLElement | null>(null)
   const scheduleHeaderButtonRef = useRef<HTMLButtonElement | null>(null)
   const { data: session, isPending: isSessionPending } = authClient.useSession()
   const userId = session?.user.id
   const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone
-  const onPreviewWeek = useCallback((target: string) => {
-    setUnlockedWeek(null)
-    setWeekOffset(calendarWeekOffset(target))
-  }, [])
   const aiGeneration = useAiMenuGeneration({ userId, timeZone, onPreviewWeek })
   const currentPreview =
     aiGeneration.preview?.userId === userId ? aiGeneration.preview : null
@@ -211,39 +203,21 @@ export function WeeklyMenuPlanner() {
       : null
   const previewSaveError =
     currentGeneration?.reason === 'save' ? t('planner.previewSaveError') : null
-  const routeBlocker = useBlocker({
-    shouldBlockFn: () => hasUnsavedPreview,
-    enableBeforeUnload: () => hasUnsavedPreview,
-    withResolver: true,
+  const {
+    isDiscardDialogOpen,
+    openDiscardConfirmation,
+    handleWeekNavigation,
+    keepPreview,
+    discardPreview,
+  } = usePreviewDiscardGuard({
+    hasUnsavedPreview,
+    previewWeekStart: currentPreview?.menu.weekStart ?? null,
+    isSavingPreview: aiGeneration.isSaving || isAcceptingPreview,
+    discardPreview: aiGeneration.discard,
+    weekOffset,
+    setWeekOffset,
+    setUnlockedWeek,
   })
-  const isDiscardDialogOpen =
-    showDiscardConfirmation || routeBlocker.status === 'blocked'
-
-  useEffect(() => {
-    if (hasUnsavedPreview) return
-    setShowDiscardConfirmation(false)
-    setDiscardWeekOffset(null)
-    if (routeBlocker.status === 'blocked') routeBlocker.reset()
-  }, [hasUnsavedPreview, routeBlocker])
-
-  useEffect(() => {
-    if (hasLoadedRef.current) return
-    hasLoadedRef.current = true
-    const stored = readWeeklyMenuPlannerState(getBrowserStorage())
-    if (stored) {
-      setGuestPreferences(stored.savedPreferences)
-      setLegacyCustomRecipes(stored.legacyCustomRecipes)
-    }
-    setIsHydrated(true)
-  }, [])
-
-  useEffect(() => {
-    if (!isHydrated) return
-    writeWeeklyMenuPlannerState(getBrowserStorage(), {
-      savedPreferences: guestPreferences,
-      legacyCustomRecipes,
-    })
-  }, [isHydrated, legacyCustomRecipes, guestPreferences])
 
   useEffect(() => {
     if (aiGeneration.state.phase !== 'confirming') setMissingRecipeSlots([])
@@ -455,40 +429,6 @@ export function WeeklyMenuPlanner() {
     aiGeneration.updateRecipe(day, slot, recipeId, readyData?.recipes ?? [])
   }
 
-  function handleWeekNavigation(nextOffset: number) {
-    const clamped = Math.max(-1, Math.min(1, nextOffset))
-    if (currentPreview) {
-      setDiscardWeekOffset(clamped)
-      setShowDiscardConfirmation(true)
-      return
-    }
-    if (clamped !== weekOffset) setUnlockedWeek(null)
-    setWeekOffset(clamped)
-  }
-
-  function keepPreview() {
-    setShowDiscardConfirmation(false)
-    setDiscardWeekOffset(null)
-    if (routeBlocker.status === 'blocked') routeBlocker.reset()
-  }
-
-  function discardPreview() {
-    if (aiGeneration.isSaving || isAcceptingPreview) return
-    aiGeneration.discard()
-    setShowDiscardConfirmation(false)
-    const nextOffset = discardWeekOffset
-    setDiscardWeekOffset(null)
-    if (nextOffset !== null) setWeekOffset(nextOffset)
-    else if (routeBlocker.status !== 'blocked' && currentPreview) {
-      setWeekOffset(calendarWeekOffset(currentPreview.menu.weekStart))
-    }
-    if (routeBlocker.status === 'blocked') routeBlocker.proceed()
-  }
-
-  const handleLegacyRecipesMigrated = useCallback(() => {
-    setLegacyCustomRecipes([])
-  }, [])
-
   const targetWeekRange = scheduleDialog
     ? formatWeekRange(dateFromWeekStart(scheduleDialog.targetWeekStart))
     : { start: '', end: '' }
@@ -658,7 +598,7 @@ export function WeeklyMenuPlanner() {
                   currentPreview,
                 )
               }
-              onDiscard={() => setShowDiscardConfirmation(true)}
+              onDiscard={openDiscardConfirmation}
               onAccept={() => void acceptPreview()}
               onRetryCatalog={handleRetryLoad}
               onGenerateMenu={handleGenerateMenu}
@@ -764,7 +704,7 @@ export function WeeklyMenuPlanner() {
         onClose={() => {
           if (!isSavingPreferences) setIsPreferencesOpen(false)
         }}
-        onLegacyRecipesMigrated={handleLegacyRecipesMigrated}
+        onLegacyRecipesMigrated={clearLegacyCustomRecipes}
         onSave={handleSavePreferences}
         savedPrefs={savedPreferences}
       />
@@ -775,18 +715,6 @@ export function WeeklyMenuPlanner() {
 function dateFromWeekStart(weekStart: string): Date {
   const [year, month, day] = weekStart.split('-').map(Number)
   return new Date(year, month - 1, day, 12)
-}
-
-function calendarWeekOffset(targetWeekStart: string): number {
-  const currentWeekStart = weekStartFromDate(new Date())
-  const dateNumber = (value: string) => {
-    const [year, month, day] = value.split('-').map(Number)
-    return Date.UTC(year, month - 1, day)
-  }
-  return Math.round(
-    (dateNumber(targetWeekStart) - dateNumber(currentWeekStart)) /
-      (7 * 24 * 60 * 60 * 1000),
-  )
 }
 
 function ShoppingTab({
