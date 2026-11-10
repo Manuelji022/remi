@@ -25,6 +25,15 @@ const assert = (condition, message) =>
     if (!(${condition})) throw new Error(${JSON.stringify(message)});
     return { verdict: 'PASS', check: ${JSON.stringify(message)} };
   })()`)
+const assertNoUnknownServerFunctions = () =>
+  evaluate(`(() => {
+    const unknown = ${fixture}.unknown
+    if (!(${fixture}.unknown.length === 0)) {
+      const requests = unknown.map(({ method, url }) => method + ' ' + url).join(', ')
+      throw new Error('Unknown planner server-function requests: ' + requests)
+    }
+    return { verdict: 'PASS', check: 'no unknown planner server-function requests' }
+  })()`)
 
 async function scenario(name, steps) {
   // Eval and navigation are explicit context boundaries in the native wrapper.
@@ -36,6 +45,19 @@ async function scenario(name, steps) {
     stdin: JSON.stringify(commands),
     timeoutMs: 60000,
   })
+  const unknownResult = await browser({
+    args: assertNoUnknownServerFunctions(),
+    timeoutMs: 60000,
+  })
+  if (!unknownResult.success) {
+    emit({
+      scenario: name,
+      verdict: 'FAIL',
+      error: unknownResult.error,
+      data: unknownResult.data,
+    })
+    throw new Error(name)
+  }
   if (!result.success) {
     emit({ scenario: name, verdict: 'FAIL', error: result.error, data: result.data })
     throw new Error(name)

@@ -12,6 +12,11 @@
     'Sunday',
   ]
   const scenario = new URLSearchParams(window.location.search).get('scenario')
+  // Built server-function ids for loadWeeklyMenu, listRecipes, generateNextWeeklyMenu,
+  // and saveWeeklyMenu. To refresh them, run `pnpm build` from frontend/, then search
+  // `.output/server` for `name: "<function>"` and copy the adjacent `id` field. Or
+  // open a fresh build, filter the browser Network panel to `/_serverFn/`, and record
+  // the URLs for page load (load/list), Confirm schedule and generate, and Save preferences.
   const serverFunctions = {
     load: '/_serverFn/1f656ac1cee7da8b247b8ca1af6ebd86aeee64191d0500aa2b5a6cf8279f3290',
     recipes: '/_serverFn/69ce94eac4cfe29326de41e874fcb343a821cf3efd97d95b2f45c8cd0c3ff17e',
@@ -33,6 +38,7 @@
     release: {},
     reads: [],
     writes: [],
+    unknown: [],
     completed: [],
   }
   window.plannerReliability = fixture
@@ -117,11 +123,11 @@
             ? 'load'
             : url.pathname === serverFunctions.recipes
               ? 'recipes'
-              : request.method === 'POST'
-                ? 'mutation'
-                : weekStart
-                  ? 'load'
-                  : 'recipes'
+              : null
+    if (!kind) {
+      fixture.unknown.push({ method: request.method, url: request.url })
+      throw new TypeError(`Unknown planner server function: ${request.method} ${request.url}`)
+    }
     const generationFailure =
       fixture.failRecipes
         ? 'recipes'
@@ -137,13 +143,11 @@
           ? fixture.failSave
           : kind === 'load'
             ? fixture.failLoad
-            : kind === 'recipes'
-              ? fixture.failRecipes
-              : false
+            : fixture.failRecipes
     const log = { kind, weekStart, payload, userId: fixture.userId }
     if (kind === 'generation') fixture.generations += 1
     else if (kind === 'save') fixture.writes.push(log)
-    else if (kind !== 'mutation') fixture.reads.push(log)
+    else fixture.reads.push(log)
     if (kind === 'generation') {
       await pause('generation')
       await pause('load')
