@@ -11,7 +11,7 @@
     "success": true,
     "resultCategory": "success",
     "data": {
-      "origin": "http://127.0.0.1:3101/weekly-menu-planner",
+      "origin": "http://127.0.0.1:3211/weekly-menu-planner",
       "result": [
         {
           "deletedId": "assigned-dinner",
@@ -28,27 +28,11 @@
       ]
     },
     "error": null,
-    "summary": "Eval result: [",
+    "summary": "Eval result: recipe/menu mutation summary",
     "successCategory": "completed",
-    "nextActions": [
-      {
-        "id": "inspect-after-mutation",
-        "params": {
-          "args": [
-            "--namespace",
-            "",
-            "--session",
-            "piab-tiamat-186c541f89e1-7b2a42f0-fresh-51b05107c8",
-            "snapshot",
-            "-i"
-          ]
-        },
-        "reason": "Refresh interactive refs after a browser mutation, navigation, scroll, or rerender.",
-        "safety": "Do not reuse prior @refs until a fresh snapshot confirms they still exist.",
-        "tool": "agent_browser"
-      }
-    ],
-    "sessionName": "piab-tiamat-186c541f89e1-7b2a42f0-fresh-51b05107c8",
+    "nextActions": [],
+    "sessionName": "recipe-menu-consistency-4d2f7a74906d",
     "namespace": ""
-  }
+  },
+  "steps": 32
 }

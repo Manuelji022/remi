@@ -16,8 +16,8 @@
   "manualChange": {
     "day": "Tuesday",
     "slot": "dinner",
-    "from": "dec-dinner-6",
-    "to": "dec-dinner-0"
+    "from": "dec-dinner-2",
+    "to": "dec-dinner-4"
   },
   "attempts": 2,
   "localFallback": {
