@@ -21,7 +21,7 @@ const check = async (condition, message) =>
 
 const textButton = (scope, labels) =>
   `Array.from(${scope}.querySelectorAll('button')).find(button => ${JSON.stringify(labels)}.some(label => button.textContent.includes(label)))`
-const dialog = 'document.querySelector("[role=dialog]")'
+const dialog = 'document.querySelector("dialog[aria-labelledby=preferences-panel-title]")'
 const saveButton = textButton(dialog, [
   'Save preferences',
   'Guardar preferencias',
@@ -56,7 +56,7 @@ await run(
   [
     'wait',
     '--fn',
-    `window.recipeConsistency.requests.filter(r=>r.kind==='menu-read').length >= 2 && Object.values(window.recipeConsistency.menus)[0].days.Monday.dinnerRecipeId === null && document.querySelector('[role=dialog]')?.getAttribute('aria-busy') === 'false' && document.querySelector('[role=tab][aria-selected=true]')?.innerText === 'My Recipes' && !${saveButton}.disabled`,
+    `window.recipeConsistency.requests.filter(r=>r.kind==='menu-read').length >= 2 && Object.values(window.recipeConsistency.menus)[0].days.Monday.dinnerRecipeId === null && document.querySelector('dialog[aria-labelledby=preferences-panel-title] .panel-drawer')?.getAttribute('aria-busy') === 'false' && document.querySelector('[role=tab][aria-selected=true]')?.innerText === 'My Recipes' && !${saveButton}.disabled`,
   ],
 )
 
@@ -80,7 +80,7 @@ await run(['find', 'role', 'button', 'click', '--name', 'Add recipe', '--exact']
 await run([
   'wait',
   '--fn',
-  `Boolean(window.recipeConsistency.release.create) && window.recipeConsistency.posts.filter(post=>post.kind==='recipe-create').length === 1 && document.querySelector('[role=dialog]')?.getAttribute('aria-busy') === 'true' && document.querySelector('[role=dialog] .panel-add-btn')?.disabled && ${cancelButton}.disabled && ${saveButton}.disabled`,
+  `Boolean(window.recipeConsistency.release.create) && window.recipeConsistency.posts.filter(post=>post.kind==='recipe-create').length === 1 && document.querySelector('dialog[aria-labelledby=preferences-panel-title] .panel-drawer')?.getAttribute('aria-busy') === 'true' && document.querySelector('dialog[aria-labelledby=preferences-panel-title] .panel-add-btn')?.disabled && ${cancelButton}.disabled && ${saveButton}.disabled`,
 ])
 await run(
   ['eval', '--stdin'],
@@ -89,7 +89,7 @@ await run(
 await run([
   'wait',
   '--fn',
-  `document.body.innerText.includes('Persistent recipe') && document.querySelector('[role=dialog]')?.getAttribute('aria-busy') === 'false' && window.recipeConsistency.requests.filter(r=>r.kind==='menu-read').length >= 3`,
+  `document.body.innerText.includes('Persistent recipe') && document.querySelector('dialog[aria-labelledby=preferences-panel-title] .panel-drawer')?.getAttribute('aria-busy') === 'false' && window.recipeConsistency.requests.filter(r=>r.kind==='menu-read').length >= 3`,
 ])
 await run(['find', 'role', 'button', 'click', '--name', 'Cancel', '--exact'])
 await run(['find', 'role', 'button', 'click', '--name', 'Preferences'])

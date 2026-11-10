@@ -1,21 +1,23 @@
-import { Link, useLocation } from '@tanstack/react-router'
 import './preferences-panel.css'
-import { Globe2 } from 'lucide-react'
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { CheckIcon, CloseIcon, SettingsIcon } from '#/components/primitives'
+import { useEffect, useEffectEvent, useState } from 'react'
+import { CheckIcon } from '#/components/primitives'
 import type { Day } from '#/features/weekly-menu/constants'
 import type {
   DayContext,
   PlanningScope,
   Preferences,
 } from '#/features/weekly-menu/types'
-import { getLocalizedPath, useI18n } from '#/shared/i18n'
+import { useI18n } from '#/shared/i18n'
 import { authClient } from '#/features/auth/auth-client'
-import { importLegacyRecipes } from '#/features/recipes/migrate'
 import type { RecipeInput } from '#/features/recipes/recipe'
 import { RecipesTab } from '#/features/recipes/components/RecipesTab'
+import { PanelHeader } from './PanelHeader'
 import { PanelTabButton } from './Pills'
 import { ScheduleTab } from './ScheduleTab'
+import { useLegacyRecipeMigration } from './useLegacyRecipeMigration'
+import { useRestoreFocus } from './useRestoreFocus'
+import { usePanelScrollLock } from './usePanelScrollLock'
+import { Dialog } from '#/components/primitives/Dialog'
 import type { PreferencesPanelTab } from './types'
 import {
   updateScheduleDayContext as transitionScheduleDayContext,
@@ -55,99 +57,30 @@ export function PreferencesPanel({
   legacyCustomRecipes,
   onLegacyRecipesMigrated,
 }: PreferencesPanelProps) {
-  const { locale, t } = useI18n()
-  const location = useLocation()
+  const { t } = useI18n()
   const { data: session, isPending: isSessionPending } = authClient.useSession()
-  const alternateLocale = locale === 'en' ? 'es' : 'en'
   const [draftPrefs, setDraftPrefs] = useState<Preferences>(savedPrefs)
   const [activeTab, setActiveTab] = useState<PreferencesPanelTab>('schedule')
-  const [migrationFailed, setMigrationFailed] = useState(false)
   const userId = session?.user.id
-  const savedPrefsRef = useRef(savedPrefs)
-  const scrollYRef = useRef<number | null>(null)
 
-  if (typeof window !== 'undefined') {
-    if (isOpen) {
-      if (scrollYRef.current === null) scrollYRef.current = window.scrollY
-    } else {
-      scrollYRef.current = null
-    }
-  }
-
-  useLayoutEffect(() => {
-    savedPrefsRef.current = savedPrefs
-  }, [savedPrefs])
-
-  useEffect(() => {
-    if (!isOpen) return
-
-    setDraftPrefs(savedPrefsRef.current)
+  const resetDraft = useEffectEvent(() => {
+    setDraftPrefs(savedPrefs)
     setActiveTab(initialTab)
-  }, [isOpen])
-
-  useLayoutEffect(() => {
-    if (!isOpen || scrollYRef.current === null) return
-
-    const scrollY = scrollYRef.current
-    const root = document.documentElement
-    const body = document.body
-    const previous = {
-      rootOverflow: root.style.overflow,
-      bodyPosition: body.style.position,
-      bodyInsetBlockStart: body.style.insetBlockStart,
-      bodyInlineSize: body.style.inlineSize,
-      bodyOverflow: body.style.overflow,
-    }
-
-    root.style.overflow = 'hidden'
-    body.style.position = 'fixed'
-    body.style.insetBlockStart = `-${scrollY}px`
-    body.style.inlineSize = '100%'
-    body.style.overflow = 'hidden'
-
-    return () => {
-      root.style.overflow = previous.rootOverflow
-      body.style.position = previous.bodyPosition
-      body.style.insetBlockStart = previous.bodyInsetBlockStart
-      body.style.inlineSize = previous.bodyInlineSize
-      body.style.overflow = previous.bodyOverflow
-      window.scrollTo(0, scrollY)
-    }
-  }, [isOpen])
+  })
 
   useEffect(() => {
-    if (
-      !isOpen ||
-      isSessionPending ||
-      !userId ||
-      legacyCustomRecipes.length === 0
-    ) {
-      return
-    }
+    if (isOpen) resetDraft()
+  }, [isOpen])
 
-    const controller = { cancelled: false }
+  usePanelScrollLock(isOpen)
+  useRestoreFocus(isOpen)
 
-    void importLegacyRecipes(legacyCustomRecipes, () => controller.cancelled)
-      .then((imported) => {
-        if (!imported || controller.cancelled) return
-        setMigrationFailed(false)
-        onLegacyRecipesMigrated()
-      })
-      .catch(() => {
-        if (controller.cancelled) return
-        setMigrationFailed(true)
-      })
-
-    return () => {
-      controller.cancelled = true
-    }
-  }, [
-    isOpen,
-    isSessionPending,
-    legacyCustomRecipes,
-    onLegacyRecipesMigrated,
+  const migrationFailed = useLegacyRecipeMigration({
+    isActive: isOpen && !isSessionPending,
     userId,
-  ])
+    legacyCustomRecipes,
+    onMigrated: onLegacyRecipesMigrated,
+  })
 
   if (!isOpen) return null
 
@@ -160,7 +93,12 @@ export function PreferencesPanel({
   }
 
   return (
-    <div className="panel-root" aria-hidden={!isOpen}>
+    <Dialog
+      className="panel-root"
+      dismissDisabled={isSaving || isRecipeMutationPending}
+      labelledBy="preferences-panel-title"
+      onDismiss={onClose}
+    >
       <button
         className="panel-overlay"
         disabled={isSaving || isRecipeMutationPending}
@@ -169,45 +107,14 @@ export function PreferencesPanel({
         onClick={onClose}
       />
 
-      <aside
-        aria-labelledby="preferences-panel-title"
-        aria-modal="true"
+      <div
         aria-busy={isSaving || isRecipeMutationPending}
         className="panel-drawer"
-        role="dialog"
       >
-        <div className="panel-header">
-          <div>
-            <p className="panel-kicker">
-              <SettingsIcon aria-hidden="true" />
-              {t('preferences.kicker')}
-            </p>
-            <h2 id="preferences-panel-title">{t('preferences.title')}</h2>
-          </div>
-          <div className="panel-header-actions">
-            <Link
-              aria-label={`${t('header.languageLabel')}: ${
-                alternateLocale === 'en'
-                  ? t('header.languageEn')
-                  : t('header.languageEs')
-              }`}
-              className="btn btn-secondary"
-              to={getLocalizedPath(location.pathname, alternateLocale)}
-            >
-              <Globe2 aria-hidden="true" />
-              <span>{locale === 'en' ? 'ES' : 'EN'}</span>
-            </Link>
-            <button
-              className="icon-btn icon-btn-filled"
-              disabled={isSaving || isRecipeMutationPending}
-              type="button"
-              aria-label={t('preferences.close')}
-              onClick={onClose}
-            >
-              <CloseIcon aria-hidden="true" />
-            </button>
-          </div>
-        </div>
+        <PanelHeader
+          closeDisabled={isSaving || isRecipeMutationPending}
+          onClose={onClose}
+        />
 
         <div
           className="panel-tablist"
@@ -286,7 +193,7 @@ export function PreferencesPanel({
             </button>
           </div>
         </div>
-      </aside>
-    </div>
+      </div>
+    </Dialog>
   )
 }
