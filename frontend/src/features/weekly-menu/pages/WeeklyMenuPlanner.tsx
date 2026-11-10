@@ -11,14 +11,11 @@ import { AiMenuSkeleton } from '../components/AiMenuSkeleton'
 import { PlannerDialogs } from '../components/PlannerDialogs'
 import { PlannerFeedback } from '../components/PlannerFeedback'
 import { ShoppingTab, useCheckedIngredients } from '../components/ShoppingTab'
-import type { Day } from '#/features/weekly-menu/constants'
-import type { Preferences } from '#/features/weekly-menu/types'
 import { authClient } from '#/features/auth/auth-client'
 import { useAiMenuGeneration } from '#/features/weekly-menu/hooks/useAiMenuGeneration'
 import { useFirstRunTour } from '#/features/weekly-menu/hooks/useFirstRunTour'
 import { useGuestPlannerState } from '#/features/weekly-menu/hooks/useGuestPlannerState'
 import {
-  calendarWeekOffset,
   usePlannerWeekNavigation,
   usePreviewDiscardGuard,
 } from '#/features/weekly-menu/hooks/usePlannerWeekNavigation'
@@ -28,9 +25,9 @@ import {
   usePlannerWeekView,
 } from '#/features/weekly-menu/hooks/usePlannerViewState'
 import { dateFromWeekStart } from '#/features/weekly-menu/planner-view'
+import { usePlannerActions } from '#/features/weekly-menu/hooks/usePlannerActions'
 import { usePlannerWeek } from '#/features/weekly-menu/hooks/usePlannerWeek'
-import { isWeekLocked, viewWeekStart } from '#/features/weekly-menu/week'
-import type { MealSlot } from '#/features/recipes/recipe'
+import { viewWeekStart } from '#/features/weekly-menu/week'
 import { useI18n } from '#/shared/i18n'
 
 type MainTabId = 'menu' | 'ingredients'
@@ -163,79 +160,28 @@ export function WeeklyMenuPlanner() {
     setActiveTab('menu')
   }, [userId, viewedWeek])
 
-  function handleRetryLoad() {
-    if (!isWriting) plannerWeek.retry()
-  }
-
-  const handleRecipeMutation = plannerWeek.refreshAfterRecipeMutation
-
-  function handleOpenPreferences() {
-    if (!canWrite || isWriting || currentPreview) return
-    plannerWeek.clearAction()
-    setPreferencesTab('schedule')
-    setIsPreferencesOpen(true)
-  }
-
-  async function acceptPreview() {
-    const current = currentPreview
-    const catalog = readyData
-    if (
-      !current ||
-      !userId ||
-      !catalog ||
-      catalog.weekStart !== current.weekStart ||
-      isWriting ||
-      plannerWeek.ownsAccept({ userId, weekStart: current.weekStart })
-    )
-      return
-    const accepted = await aiGeneration.accept((menu) =>
-      plannerWeek.acceptPreview(menu, catalog.recipes),
-    )
-    if (accepted) setWeekOffset(calendarWeekOffset(current.weekStart))
-  }
-
-  async function writeMenu(preferences?: Preferences) {
-    if (!canWrite || !readyData || !preferences) return
-    const saved = await plannerWeek.savePreferences(
-      preferences,
-      readyData.week.menu,
-    )
-    if (saved) setIsPreferencesOpen(false)
-  }
-
-  function handleSavePreferences(preferences: Preferences) {
-    if (!canWrite || isWriting || currentPreview) return
-    const targetWeek = readyData?.week.menu.weekStart ?? viewedWeek
-    if (
-      visibleMenu &&
-      isWeekLocked(targetWeek, new Date()) &&
-      unlockedWeek !== targetWeek
-    )
-      return
-    if (!userId) {
-      setGuestPreferences(preferences)
-      setIsPreferencesOpen(false)
-      return
-    }
-    void writeMenu(preferences)
-  }
-
-  function handlePreviewRecipeChange(
-    day: Day,
-    slot: MealSlot,
-    recipeId: string | null,
-  ) {
-    if (
-      userId &&
-      currentPreview &&
-      plannerWeek.ownsAccept({
-        userId,
-        weekStart: currentPreview.menu.weekStart,
-      })
-    )
-      return
-    aiGeneration.updateRecipe(day, slot, recipeId, readyData?.recipes ?? [])
-  }
+  const {
+    handleRetryLoad,
+    handleOpenPreferences,
+    acceptPreview,
+    handleSavePreferences,
+    handlePreviewRecipeChange,
+  } = usePlannerActions({
+    userId,
+    plannerWeek,
+    aiGeneration,
+    readyData,
+    currentPreview,
+    hasVisibleMenu: Boolean(visibleMenu),
+    viewedWeek,
+    unlockedWeek,
+    canWrite,
+    isWriting,
+    setWeekOffset,
+    setPreferencesTab,
+    setIsPreferencesOpen,
+    setGuestPreferences,
+  })
 
   const targetWeekRange = scheduleDialog
     ? formatWeekRange(dateFromWeekStart(scheduleDialog.targetWeekStart))
@@ -405,7 +351,7 @@ export function WeeklyMenuPlanner() {
         initialTab={preferencesTab}
         isSaving={isSavingPreferences}
         isRecipeMutationPending={isRecipeMutationPending}
-        onRecipeMutation={handleRecipeMutation}
+        onRecipeMutation={plannerWeek.refreshAfterRecipeMutation}
         onRecipeMutationPendingChange={setIsRecipeMutationPending}
         scheduleLocked={isLocked}
         saveDisabled={
