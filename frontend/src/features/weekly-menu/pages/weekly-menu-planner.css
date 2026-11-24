@@ -143,29 +143,18 @@
     border-radius: var(--radius-surface);
   }
 
-  .planner-ai-dialog,
-  .planner-ai-discard-dialog {
-    position: fixed;
-    inset: 50% auto auto 50%;
-    transform: translate(-50%, -50%);
-    margin: 0;
-    inline-size: min(calc(100% - 2rem), 58rem);
-    max-block-size: min(92dvh, 58rem);
-    overflow-y: auto;
-    padding: var(--spacing-card-pad);
-    background: var(--color-bg-page);
-    border-radius: var(--radius-surface);
-    box-shadow: 0 0 0 1px var(--color-border-subtle);
-  }
-
-  .planner-ai-dialog::backdrop,
-  .planner-ai-discard-dialog::backdrop {
-    background: rgb(24 31 28 / 58%);
+  /* Surface, scrim and motion come from the Dialog primitive. */
+  .planner-ai-dialog {
+    --dialog-width: 58rem;
   }
 
   .planner-ai-dialog-header h2,
   .planner-ai-discard-dialog h2 {
+    margin: 0;
+    font-family: var(--font-display);
     font-size: var(--text-title);
+    font-weight: var(--font-weight-bold);
+    letter-spacing: var(--tracking-title);
     line-height: var(--leading-title);
   }
 
@@ -190,16 +179,13 @@
     display: flex;
     justify-content: flex-end;
     gap: var(--spacing-2);
-    margin-block-start: var(--spacing-stack-md);
-  }
-
-  .planner-ai-discard-dialog {
-    inline-size: min(100%, 32rem);
+    margin-block-start: var(--spacing-6);
   }
 
   .planner-ai-discard-dialog p {
-    margin-block-start: var(--spacing-2);
+    margin-block: var(--spacing-2) 0;
     color: var(--color-text-secondary);
+    font-size: var(--text-body);
     line-height: var(--leading-body);
   }
 

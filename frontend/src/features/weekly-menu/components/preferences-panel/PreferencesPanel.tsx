@@ -93,6 +93,7 @@ export function PreferencesPanel({
 
   return (
     <Dialog
+      bare
       className="panel-root"
       dismissDisabled={isSaving || isRecipeMutationPending}
       labelledBy="preferences-panel-title"

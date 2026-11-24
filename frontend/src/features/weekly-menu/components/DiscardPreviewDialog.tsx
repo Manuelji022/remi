@@ -1,4 +1,4 @@
-import { Dialog } from '#/components/primitives/Dialog'
+import { Button, Dialog } from '#/components/primitives'
 import { useI18n } from '#/shared/i18n'
 
 interface DiscardPreviewDialogProps {
@@ -17,33 +17,26 @@ export function DiscardPreviewDialog({
   const { t } = useI18n()
   return (
     <Dialog
-      labelledBy="ai-preview-discard-title"
-      className="planner-ai-discard-dialog"
+      id="ai-preview-discard"
+      title={t('planner.aiDiscardTitle')}
+      description={t(
+        isSaving
+          ? 'planner.aiDiscardSaving'
+          : isSaveUnconfirmed
+            ? 'planner.aiDiscardSaveUnconfirmed'
+            : 'planner.aiDiscardBody',
+      )}
       onDismiss={onKeep}
-    >
-      <h2 id="ai-preview-discard-title">{t('planner.aiDiscardTitle')}</h2>
-      <p>
-        {t(
-          isSaving
-            ? 'planner.aiDiscardSaving'
-            : isSaveUnconfirmed
-              ? 'planner.aiDiscardSaveUnconfirmed'
-              : 'planner.aiDiscardBody',
-        )}
-      </p>
-      <div className="planner-ai-dialog-footer">
-        <button className="btn btn-secondary" type="button" onClick={onKeep}>
-          {t('planner.aiKeepPreview')}
-        </button>
-        <button
-          className="btn btn-primary"
-          type="button"
-          onClick={onDiscard}
-          disabled={isSaving}
-        >
-          {t('planner.aiConfirmDiscardPreview')}
-        </button>
-      </div>
-    </Dialog>
+      actions={
+        <>
+          <Button variant="secondary" onClick={onKeep}>
+            {t('planner.aiKeepPreview')}
+          </Button>
+          <Button variant="brand" onClick={onDiscard} disabled={isSaving}>
+            {t('planner.aiConfirmDiscardPreview')}
+          </Button>
+        </>
+      }
+    />
   )
 }

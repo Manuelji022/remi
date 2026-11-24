@@ -1,0 +1,108 @@
+/* Dialog primitive. Semantic tokens only. Paper: Design System / Dialog. */
+@layer components {
+  /* A 520 surface centered over the scrim. The native dialog already centers
+     itself with `margin: auto`; `--dialog-width` lets a wide form opt out. */
+  .dialog {
+    box-sizing: border-box;
+    inline-size: min(
+      calc(100% - var(--spacing-8)),
+      var(--dialog-width, var(--container-dialog))
+    );
+    /* The browser's own max-inline-size would leave 19 on a 390 phone, not 16. */
+    max-inline-size: none;
+    max-block-size: calc(100dvh - var(--spacing-8));
+    margin: auto;
+    padding: var(--spacing-6);
+    overflow-y: auto;
+    border: 0;
+    border-radius: var(--radius-surface);
+    background: var(--color-bg-surface);
+    color: var(--color-text-primary);
+    /* Paper has no shadow token: value from the Dialog artboard. */
+    box-shadow:
+      0 8px 24px color-mix(in srgb, var(--color-ink) 12%, transparent),
+      0 0 0 1px color-mix(in srgb, var(--color-ink) 6%, transparent);
+    animation: dialog-in var(--duration-slow) var(--ease-out) both;
+  }
+
+  .dialog::backdrop {
+    background: var(--color-bg-overlay);
+    animation: dialog-fade var(--duration-slow) var(--ease-out) both;
+  }
+
+  /* Title, body and actions sit 24 apart. Applied on [open] so the native
+     closed state keeps its `display: none`. */
+  .dialog-stack[open] {
+    display: grid;
+    gap: var(--spacing-6);
+  }
+
+  .dialog-header {
+    display: grid;
+    gap: var(--spacing-2);
+  }
+
+  .dialog-title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--text-title);
+    font-weight: var(--font-weight-bold);
+    letter-spacing: var(--tracking-title);
+    line-height: var(--leading-title);
+  }
+
+  .dialog-description {
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: var(--text-body);
+    line-height: var(--leading-body);
+  }
+
+  .dialog-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--spacing-2);
+  }
+
+  @keyframes dialog-in {
+    from {
+      opacity: 0;
+      scale: 0.96;
+    }
+  }
+
+  @keyframes dialog-fade {
+    from {
+      opacity: 0;
+    }
+  }
+
+  /* Phone: the verb stacks on top as a block at lg, the way out below as ghost.
+     The DOM keeps Cancel first so focus still starts on it. */
+  @media (max-width: 47.99rem) {
+    .dialog-footer {
+      flex-direction: column-reverse;
+    }
+
+    .dialog-footer > .button {
+      --button-size: var(--size-control-lg);
+      --button-text: var(--text-body);
+
+      inline-size: 100%;
+    }
+
+    .dialog-footer > .button-secondary {
+      --button-bg: transparent;
+      --button-fg: var(--color-text-secondary);
+
+      border-color: transparent;
+    }
+  }
+
+  /* Reduced motion: fade only. The duration tokens already drop to 0. */
+  @media (prefers-reduced-motion: reduce) {
+    .dialog {
+      animation-name: dialog-fade;
+    }
+  }
+}
