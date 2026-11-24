@@ -2,9 +2,8 @@ import { useNavigate, useSearch } from '@tanstack/react-router'
 import '../auth.css'
 import type { ComponentProps } from 'react'
 import { useState } from 'react'
-import { Banner } from '#/components/primitives'
+import { Banner, Card  } from '#/components/primitives'
 import { getLocalizedPath, useI18n } from '#/shared/i18n'
-import { Card } from '#/components/primitives'
 import { authClient } from '#/features/auth/auth-client'
 
 type FormSubmitEvent = Parameters<
