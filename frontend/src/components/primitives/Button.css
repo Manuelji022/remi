@@ -131,15 +131,20 @@
     --button-gap: var(--spacing-3);
   }
 
-  /* sm looks 32, the tap area stays 44. */
+  /* sm looks 32, the tap area stays 44. Inset is measured from the padding
+     edge, which sits 1px inside the border, so that 1px is added. */
   .button-sm::after {
+    --button-hit-extra: calc(
+      (var(--size-hit) - var(--size-control-sm)) / -2 - 1px
+    );
+
     content: '';
     position: absolute;
-    inset: calc((var(--size-hit) - var(--size-control-sm)) / -2) 0;
+    inset: var(--button-hit-extra) 0;
   }
 
   .button-sm.button-icon-only::after {
-    inset-inline: calc((var(--size-hit) - var(--size-control-sm)) / -2);
+    inset-inline: var(--button-hit-extra);
   }
 
   /* The side with the icon loses 4 of padding so the pill looks balanced. */
