@@ -1,4 +1,5 @@
 import './header.css'
+import { TextLink } from '#/components/primitives'
 import { LocalizedLink, useI18n } from '#/shared/i18n'
 import { authClient } from '#/features/auth/auth-client'
 import { useSignOut } from '#/features/auth/use-sign-out'
@@ -45,9 +46,9 @@ export function Header() {
             </>
           ) : (
             <>
-              <LocalizedLink className="text-link" nav to="/login">
+              <TextLink nav to="/login">
                 {t('auth.login')}
-              </LocalizedLink>
+              </TextLink>
               <LocalizedLink className="btn btn-secondary" nav to="/signup">
                 {t('auth.signup')}
               </LocalizedLink>

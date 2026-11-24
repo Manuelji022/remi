@@ -2,7 +2,8 @@ import { useNavigate } from '@tanstack/react-router'
 import '../auth.css'
 import type { ComponentProps } from 'react'
 import { useState } from 'react'
-import { LocalizedLink, getLocalizedPath, useI18n } from '#/shared/i18n'
+import { TextLink } from '#/components/primitives'
+import { getLocalizedPath, useI18n } from '#/shared/i18n'
 import { authClient } from '#/features/auth/auth-client'
 
 type FormSubmitEvent = Parameters<
@@ -95,16 +96,16 @@ export function LoginPage() {
         </form>
 
         <p className="auth-forgot">
-          <LocalizedLink className="text-link" to="/forgot-password">
+          <TextLink to="/forgot-password">
             {t('auth.forgotPasswordLink')}
-          </LocalizedLink>
+          </TextLink>
         </p>
 
         <p className="auth-switch">
           {t('auth.noAccount')}{' '}
-          <LocalizedLink className="text-link" to="/signup">
+          <TextLink variant="inline" to="/signup">
             {t('auth.createOne')}
-          </LocalizedLink>
+          </TextLink>
         </p>
       </section>
     </main>

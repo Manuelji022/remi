@@ -1,4 +1,4 @@
-import { Icon } from '#/components/primitives'
+import { Icon, TextLink } from '#/components/primitives'
 import type { IconName } from '#/components/primitives'
 import { LocalizedLink, useI18n } from '#/shared/i18n'
 import './home.css'
@@ -27,9 +27,7 @@ export function HomePage() {
               {t('home.start')}
               <Icon name="next" />
             </LocalizedLink>
-            <LocalizedLink className="text-link" to="/signup">
-              {t('auth.createAccount')}
-            </LocalizedLink>
+            <TextLink to="/signup">{t('auth.createAccount')}</TextLink>
           </div>
           <p className="home-note">{t('home.note')}</p>
         </div>
