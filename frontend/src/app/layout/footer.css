@@ -23,12 +23,14 @@
     gap: var(--spacing-2);
   }
 
+  /* Looks 32 tall (Paper), taps 44 tall. */
   .footer-language {
+    position: relative;
     display: inline-flex;
     align-items: center;
     gap: var(--spacing-1-5);
-    min-block-size: var(--size-hit);
-    padding-inline: var(--spacing-3);
+    block-size: var(--size-control-sm);
+    padding-inline: var(--spacing-3) calc(var(--spacing-2) + var(--spacing-0-5));
     border: 1px solid var(--color-border-subtle);
     border-radius: var(--radius-pill);
     background: var(--color-bg-surface);
@@ -37,6 +39,12 @@
     font-weight: var(--font-weight-semibold);
     line-height: var(--leading-caption);
     text-decoration: none;
+  }
+
+  .footer-language::after {
+    content: '';
+    position: absolute;
+    inset: calc((var(--size-hit) - var(--size-control-sm)) / -2 - 1px) 0;
   }
 
   .footer-signup {
