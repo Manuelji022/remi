@@ -1,4 +1,4 @@
-import { Icon } from '#/components/primitives'
+import { Chip, Icon } from '#/components/primitives'
 import { useI18n } from '#/shared/i18n'
 import type { PreferencesPanelTab } from './types'
 
@@ -48,16 +48,14 @@ export function DayContextPill({
   const label = t(`contexts.${context}`)
 
   return (
-    <button
-      aria-pressed={isSelected}
-      className={`panel-context-pill ${isSelected ? 'selected' : ''}`}
-      type="button"
+    <Chip
+      pressed={isSelected}
+      variant="context"
+      icon={context === 'office' ? 'office' : 'eating-out'}
       onClick={onClick}
     >
-      {isSelected ? <Icon name="done" size="sm" /> : null}
-      <Icon name={context === 'office' ? 'office' : 'eating-out'} size="sm" />
       {label}
-    </button>
+    </Chip>
   )
 }
 

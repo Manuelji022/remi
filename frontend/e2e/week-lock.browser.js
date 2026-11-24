@@ -100,13 +100,13 @@ await scenario('locked schedule cannot edit or save; recipe controls remain usab
 await scenario('unlocked schedule can edit and save', [
   ...open(), locked(), hold(), unlocked(), click('Preferences'),
   wait(`document.querySelector('.panel-day-card button') !== null`),
-  ['click', '.panel-day-card:first-child .panel-context-pill:first-child'], click('Save preferences'),
+  ['click', '.panel-day-card:first-child .chip-context:first-child'], click('Save preferences'),
   wait(`${f}.saveRequests.length===1`), check(`JSON.stringify(${f}.saveRequests[0]).includes('office')`, 'unlocked edit is persisted'),
 ])
 await scenario('already-open Sunday schedule cannot save its now-current target on Monday', [
   ...open('rollover'), locked(), click('Next week'), unlocked(), click('Preferences'),
   wait(`document.querySelector('.panel-day-card button') !== null`),
-  ['click', '.panel-day-card:first-child .panel-context-pill:first-child'],
+  ['click', '.panel-day-card:first-child .chip-context:first-child'],
   check(`!${saveButton}.disabled`, 'future schedule starts editable'),
   ev(`${f}.advanceClock(120000); ${sleep(300)}`), click('Save preferences'),
   check(`new Date().getDay()===1 && ${f}.saveRequests.length===0`, 'fresh save-boundary date rejects the stale enabled Save action'),
