@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { DayCard } from './DayCard'
-import { SparkleIcon } from '#/components/primitives'
+import { Icon } from '#/components/primitives'
 import { DAYS, isWeekend } from '#/features/weekly-menu/constants'
 import type { Day } from '#/features/weekly-menu/constants'
 import { showMenuDay } from '#/features/weekly-menu/week'
@@ -48,7 +48,7 @@ export function MenuTab({
   if (isGenerating) {
     return (
       <div className="empty-state" role="status" aria-live="polite">
-        <SparkleIcon aria-hidden="true" />
+        <Icon name="let-remi-choose" size="xl" />
         <h2>{t('planner.buildingTitle')}</h2>
         <p>{t('planner.buildingBody')}</p>
       </div>
@@ -58,7 +58,7 @@ export function MenuTab({
   if (!menu) {
     return (
       <div className="empty-state">
-        <SparkleIcon aria-hidden="true" />
+        <Icon name="let-remi-choose" size="xl" />
         <h2>{t('planner.emptyTitle')}</h2>
         <p>{t('planner.emptyBody')}</p>
         {!isSignedIn && <p>{t('planner.aiSignInRequired')}</p>}
@@ -67,7 +67,7 @@ export function MenuTab({
           type="button"
           onClick={onGenerateMenu}
         >
-          <SparkleIcon aria-hidden="true" />
+          <Icon name="let-remi-choose" />
           {t('planner.generateMenu')}
         </button>
       </div>

@@ -1,4 +1,4 @@
-import { CalendarIcon } from '#/components/primitives'
+import { Icon } from '#/components/primitives'
 import type { Preferences } from '#/features/weekly-menu/types'
 import { useI18n } from '#/shared/i18n'
 import type {
@@ -25,7 +25,7 @@ export function ScheduleTab(props: ScheduleTabProps) {
     >
       <div className="panel-section-copy">
         <p className="panel-section-kicker">
-          <CalendarIcon aria-hidden="true" />
+          <Icon name="week" size="sm" />
           {t('preferences.scheduleKicker')}
         </p>
         <h3 id="preferences-schedule-title">

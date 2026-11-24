@@ -1,4 +1,4 @@
-import { PlusIcon } from '#/components/primitives'
+import { Icon } from '#/components/primitives'
 import { LocalizedLink, useI18n } from '#/shared/i18n'
 import { authClient } from '#/features/auth/auth-client'
 import { useRecipeCatalog } from '#/features/recipes/hooks/useRecipeCatalog'
@@ -40,7 +40,7 @@ export function RecipesTab({
     >
       <div className="panel-section-copy">
         <p className="panel-section-kicker">
-          <PlusIcon aria-hidden="true" />
+          <Icon name="add" size="sm" />
           {t('preferences.recipesKicker')}
         </p>
         <h3 id="preferences-recipes-title">{t('preferences.recipesTitle')}</h3>

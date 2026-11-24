@@ -1,4 +1,4 @@
-import { CalendarIcon, CheckIcon, UtensilsIcon } from '#/components/primitives'
+import { Icon } from '#/components/primitives'
 import { useI18n } from '#/shared/i18n'
 import type { PreferencesPanelTab } from './types'
 
@@ -46,7 +46,6 @@ export function DayContextPill({
 }: DayContextPillProps) {
   const { t } = useI18n()
   const label = t(`contexts.${context}`)
-  const Icon = context === 'office' ? CalendarIcon : UtensilsIcon
 
   return (
     <button
@@ -55,10 +54,8 @@ export function DayContextPill({
       type="button"
       onClick={onClick}
     >
-      {isSelected ? (
-        <CheckIcon aria-hidden="true" className="panel-pill-check" />
-      ) : null}
-      <Icon aria-hidden="true" />
+      {isSelected ? <Icon name="done" size="sm" /> : null}
+      <Icon name={context === 'office' ? 'office' : 'eating-out'} size="sm" />
       {label}
     </button>
   )
@@ -85,9 +82,7 @@ export function PlanningScopePill({
       type="button"
       onClick={onClick}
     >
-      {isSelected ? (
-        <CheckIcon aria-hidden="true" className="panel-pill-check" />
-      ) : null}
+      {isSelected ? <Icon name="done" size="sm" /> : null}
       {label}
     </button>
   )

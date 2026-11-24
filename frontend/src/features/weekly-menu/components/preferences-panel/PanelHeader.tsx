@@ -1,6 +1,5 @@
 import { Link, useLocation } from '@tanstack/react-router'
-import { Globe2 } from 'lucide-react'
-import { CloseIcon, SettingsIcon } from '#/components/primitives'
+import { Icon } from '#/components/primitives'
 import { getLocalizedPath, useI18n } from '#/shared/i18n'
 
 interface PanelHeaderProps {
@@ -17,7 +16,7 @@ export function PanelHeader({ closeDisabled, onClose }: PanelHeaderProps) {
     <div className="panel-header">
       <div>
         <p className="panel-kicker">
-          <SettingsIcon aria-hidden="true" />
+          <Icon name="settings" size="sm" />
           {t('preferences.kicker')}
         </p>
         <h2 id="preferences-panel-title">{t('preferences.title')}</h2>
@@ -32,7 +31,7 @@ export function PanelHeader({ closeDisabled, onClose }: PanelHeaderProps) {
           className="btn btn-secondary"
           to={getLocalizedPath(location.pathname, alternateLocale)}
         >
-          <Globe2 aria-hidden="true" />
+          <Icon name="language" />
           <span>{locale === 'en' ? 'ES' : 'EN'}</span>
         </Link>
         <button
@@ -42,7 +41,7 @@ export function PanelHeader({ closeDisabled, onClose }: PanelHeaderProps) {
           aria-label={t('preferences.close')}
           onClick={onClose}
         >
-          <CloseIcon aria-hidden="true" />
+          <Icon name="close" />
         </button>
       </div>
     </div>

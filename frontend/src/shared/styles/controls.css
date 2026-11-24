@@ -1,9 +1,29 @@
 /* Shared controls. Semantic tokens only. */
 @layer components {
-  svg {
-    inline-size: 1rem;
-    block-size: 1rem;
+  /* <Icon>: size and stroke come from data-size, color from currentColor.
+     Stroke is in the 24-unit grid, so it scales with the icon. */
+  .icon {
     flex: none;
+    stroke-width: var(--stroke-icon);
+    inline-size: var(--size-icon-md);
+    block-size: var(--size-icon-md);
+  }
+
+  .icon[data-size='sm'] {
+    stroke-width: var(--stroke-icon-bold);
+    inline-size: var(--size-icon-sm);
+    block-size: var(--size-icon-sm);
+  }
+
+  .icon[data-size='lg'] {
+    inline-size: var(--size-icon-lg);
+    block-size: var(--size-icon-lg);
+  }
+
+  .icon[data-size='xl'] {
+    stroke-width: var(--stroke-icon-xl);
+    inline-size: var(--size-icon-xl);
+    block-size: var(--size-icon-xl);
   }
 
   h1,
@@ -69,9 +89,7 @@
     box-shadow: 0 0 0 1px var(--color-border-subtle);
   }
 
-  .empty-state > svg {
-    inline-size: 3rem;
-    block-size: 3rem;
+  .empty-state > .icon {
     color: var(--color-action);
   }
 
