@@ -64,7 +64,7 @@
   .text-link-standalone svg {
     inline-size: var(--spacing-5);
     block-size: var(--spacing-5);
-    stroke-width: 2.2;
+    stroke-width: var(--stroke-icon);
   }
 
   .text-link-standalone:hover:not(:disabled, [aria-disabled='true']) {
