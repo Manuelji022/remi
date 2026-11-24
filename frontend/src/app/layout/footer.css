@@ -1,16 +1,16 @@
 @layer components {
   .footer {
-    border-block-start: var(--border-width) solid var(--border-subtle);
+    border-block-start: 1px solid var(--color-border-subtle);
     background: transparent;
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
   }
 
   .footer-inner {
-    max-inline-size: var(--content-max);
+    max-inline-size: 75rem;
     margin-inline: auto;
-    padding-block: var(--pad-card);
-    padding-inline: var(--pad-page-inline);
-    font-size: var(--type-caption-size);
-    line-height: var(--type-caption-lh);
+    padding-block: var(--spacing-card-pad);
+    padding-inline: clamp(var(--spacing-4), 4vw, var(--spacing-6));
+    font-size: var(--text-caption);
+    line-height: var(--leading-caption);
   }
 }

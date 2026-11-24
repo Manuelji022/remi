@@ -12,7 +12,7 @@ import { I18nProvider, getLocaleFromPathname, useI18n } from '#/shared/i18n'
 
 import appCss from '../app/styles.css?url'
 
-const THEME_COLOR = '#F5F5F7' // must match --bg-page in shared/styles/tokens.css
+const THEME_COLOR = '#F8F8F8' // must match --color-theme in shared/styles/design-tokens.css
 
 export const Route = createRootRoute({
   head: () => ({

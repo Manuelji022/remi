@@ -1,19 +1,19 @@
 @layer components {
   .planner-ai-skeleton {
     display: grid;
-    gap: var(--gap-stack-md);
+    gap: var(--spacing-stack-md);
   }
 
   .ai-skeleton-block {
     display: block;
     block-size: 1.25rem;
     inline-size: 70%;
-    border-radius: var(--radius-card);
+    border-radius: var(--radius-surface);
     background: linear-gradient(
       90deg,
-      var(--border-subtle) 25%,
-      var(--bg-page) 50%,
-      var(--border-subtle) 75%
+      var(--color-border-subtle) 25%,
+      var(--color-bg-page) 50%,
+      var(--color-border-subtle) 75%
     );
     background-size: 200% 100%;
     animation: ai-skeleton-shimmer 1.4s ease-in-out infinite;
@@ -31,7 +31,7 @@
   @media (prefers-reduced-motion: reduce) {
     .ai-skeleton-block {
       animation: none;
-      background: var(--border-subtle);
+      background: var(--color-border-subtle);
     }
   }
 }

@@ -2,7 +2,8 @@
    cannot reorder the cascade. */
 @layer tokens, base, components;
 
-@import '../shared/styles/tokens.css';
+@import '../shared/styles/fonts.css';
+@import '../shared/styles/design-tokens.css';
 @import '../shared/styles/controls.css';
 
 @layer base {
@@ -13,7 +14,7 @@
   }
 
   html {
-    background: var(--bg-page);
+    background: var(--color-bg-page);
     -webkit-tap-highlight-color: transparent;
   }
 
@@ -26,14 +27,14 @@
   body {
     display: flex;
     flex-direction: column;
-    min-block-size: var(--page-min-height);
-    margin: var(--gap-none);
-    font-family: var(--font-sans);
-    font-size: var(--type-body-size);
-    line-height: var(--type-body-lh);
-    font-weight: var(--weight-regular);
-    color: var(--text-primary);
-    background: var(--bg-page);
+    min-block-size: 100vh;
+    margin: 0;
+    font-family: var(--font-text);
+    font-size: var(--text-body);
+    line-height: var(--leading-body);
+    font-weight: var(--font-weight-regular);
+    color: var(--color-text-primary);
+    background: var(--color-bg-page);
     -webkit-font-smoothing: antialiased;
   }
 
@@ -44,7 +45,7 @@
   h5,
   h6,
   p {
-    margin: var(--gap-none);
+    margin: 0;
   }
 
   h1,
@@ -54,7 +55,7 @@
   h5,
   h6 {
     font-family: inherit;
-    font-weight: var(--weight-semibold);
+    font-weight: var(--font-weight-semibold);
     overflow-wrap: break-word;
     text-wrap: balance;
   }
@@ -72,28 +73,29 @@
   }
 
   button {
-    border: var(--gap-none);
+    border: 0;
     background: transparent;
-    padding: var(--gap-none);
+    padding: 0;
     cursor: pointer;
     touch-action: manipulation;
   }
 
   a {
-    color: var(--accent-text);
+    color: var(--color-text-primary);
   }
 
   :focus-visible {
-    outline: var(--focus-ring-width) solid var(--focus-ring-color);
-    outline-offset: var(--focus-ring-offset);
+    outline: 2px solid var(--color-focus-ring);
+    outline-offset: 2px;
   }
 
   main {
     flex: 1;
     inline-size: 100%;
-    max-inline-size: var(--content-max);
+    max-inline-size: 75rem;
     margin-inline: auto;
-    padding-block: var(--pad-page-block-start) var(--pad-page-block-end);
-    padding-inline: var(--pad-page-inline);
+    padding-block: clamp(var(--spacing-6), 3vw, var(--spacing-10))
+      clamp(var(--spacing-12), 5vw, var(--spacing-16));
+    padding-inline: clamp(var(--spacing-4), 4vw, var(--spacing-6));
   }
 }

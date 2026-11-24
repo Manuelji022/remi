@@ -5,19 +5,19 @@
   }
 
   .panel-root {
-    margin: var(--gap-none);
-    padding: var(--gap-none);
-    border: var(--gap-none);
+    margin: 0;
+    padding: 0;
+    border: 0;
     background: transparent;
     color: inherit;
     inline-size: 100%;
     max-inline-size: none;
     position: fixed;
-    inset: var(--inset-none);
-    block-size: var(--drawer-height);
-    max-block-size: var(--drawer-height);
+    inset: 0;
+    block-size: 100dvh;
+    max-block-size: 100dvh;
     overflow: hidden;
-    z-index: var(--z-overlay);
+    z-index: 20;
   }
 
   .panel-root::backdrop {
@@ -26,42 +26,42 @@
 
   .panel-overlay {
     position: absolute;
-    inset: var(--inset-none);
-    background: var(--bg-overlay);
-    border: var(--gap-none);
-    padding: var(--gap-none);
+    inset: 0;
+    background: var(--color-bg-overlay);
+    border: 0;
+    padding: 0;
     cursor: pointer;
   }
 
   .panel-drawer {
     position: absolute;
-    inset-block: var(--inset-none);
-    inset-inline-end: var(--inset-none);
-    inline-size: min(var(--drawer-width), 100%);
-    block-size: var(--drawer-height);
-    max-block-size: var(--drawer-height);
-    background: var(--bg-page);
-    z-index: var(--z-drawer);
+    inset-block: 0;
+    inset-inline-end: 0;
+    inline-size: min(var(--container-sheet), 100%);
+    block-size: 100dvh;
+    max-block-size: 100dvh;
+    background: var(--color-bg-page);
+    z-index: 30;
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    box-shadow: var(--shadow-raised);
+    box-shadow: 0 0 0 1px var(--color-border-subtle);
     overscroll-behavior: contain;
   }
 
   .panel-header {
     flex: none;
-    padding-block: var(--pad-card) var(--pad-card-compact);
-    padding-inline: var(--pad-card);
+    padding-block: var(--spacing-card-pad) var(--spacing-card-pad-compact);
+    padding-inline: var(--spacing-card-pad);
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    gap: var(--gap-inline-lg);
+    gap: var(--spacing-4);
   }
 
   .panel-header > div:first-child {
     display: grid;
-    gap: var(--gap-stack-sm);
+    gap: var(--spacing-2);
   }
 
   .panel-kicker,
@@ -69,18 +69,18 @@
   .panel-control-label {
     display: flex;
     align-items: center;
-    gap: var(--gap-inline);
-    margin: var(--gap-none);
-    font-size: var(--type-caption-size);
-    line-height: var(--type-caption-lh);
-    font-weight: var(--weight-semibold);
-    color: var(--text-secondary);
+    gap: var(--spacing-2);
+    margin: 0;
+    font-size: var(--text-caption);
+    line-height: var(--leading-caption);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-secondary);
   }
 
   .panel-header-actions {
     display: flex;
     align-items: center;
-    gap: var(--gap-inline);
+    gap: var(--spacing-2);
   }
 
   .panel-header-actions a.btn-secondary:active {
@@ -90,38 +90,38 @@
   .panel-tablist {
     flex: none;
     display: flex;
-    padding: var(--pad-track);
-    margin-inline: var(--pad-card);
-    margin-block-end: var(--section-gap-sm);
-    background: var(--bg-fill);
-    border-radius: var(--radius-segment-track);
-    gap: var(--gap-inline-xs);
+    padding: var(--spacing-1);
+    margin-inline: var(--spacing-card-pad);
+    margin-block-end: var(--spacing-6);
+    background: var(--color-bg-fill);
+    border-radius: var(--radius-pill);
+    gap: var(--spacing-1);
   }
 
   .panel-tab-btn {
     font: inherit;
-    font-size: var(--type-callout-size);
-    font-weight: var(--weight-semibold);
-    line-height: var(--type-callout-lh);
-    color: var(--text-secondary);
-    border: var(--gap-none);
+    font-size: var(--text-callout);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--leading-callout);
+    color: var(--color-text-secondary);
+    border: 0;
     background: transparent;
-    min-block-size: var(--segment-thumb-height);
-    padding-inline: var(--pad-control-inline);
-    border-radius: var(--radius-segment-thumb);
+    min-block-size: calc(var(--size-control) - var(--spacing-1) * 2);
+    padding-inline: var(--spacing-4);
+    border-radius: var(--radius-pill);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: var(--gap-inline);
+    gap: var(--spacing-2);
     cursor: pointer;
     touch-action: manipulation;
     flex: 1;
   }
 
   .panel-tab-btn.active {
-    background: var(--bg-surface);
-    color: var(--text-primary);
-    box-shadow: var(--shadow-thumb);
+    background: var(--color-bg-surface);
+    color: var(--color-text-primary);
+    box-shadow: 0 0 0 1px var(--color-border-subtle);
   }
 
   .panel-edit-fields {
@@ -133,112 +133,112 @@
   .panel-content {
     container: drawer / inline-size;
     flex: 1;
-    min-block-size: var(--inset-none);
+    min-block-size: 0;
     overflow: auto;
-    padding-block: var(--gap-none) var(--pad-card);
-    padding-inline: var(--pad-card);
+    padding-block: 0 var(--spacing-card-pad);
+    padding-inline: var(--spacing-card-pad);
   }
 
   .panel-section {
     display: grid;
-    gap: var(--gap-stack-lg);
+    gap: var(--spacing-6);
   }
 
   .panel-section-copy {
     display: grid;
-    gap: var(--gap-stack-sm);
+    gap: var(--spacing-2);
   }
 
   .panel-section-copy p,
   .panel-day-header p {
-    color: var(--text-secondary);
-    font-size: var(--type-callout-size);
-    line-height: var(--type-callout-lh);
-    font-weight: var(--weight-regular);
+    color: var(--color-text-secondary);
+    font-size: var(--text-callout);
+    line-height: var(--leading-callout);
+    font-weight: var(--font-weight-regular);
   }
 
   .panel-day-list {
     display: grid;
-    gap: var(--gap-stack-lg);
+    gap: var(--spacing-6);
   }
 
   .panel-day-card,
   .panel-recipe-form,
   .panel-recipe-card,
   .panel-empty-recipes {
-    background: var(--bg-surface);
-    border-radius: var(--radius-card);
-    box-shadow: var(--shadow-card);
+    background: var(--color-bg-surface);
+    border-radius: var(--radius-surface);
+    box-shadow: 0 0 0 1px var(--color-border-subtle);
   }
 
   .panel-day-card,
   .panel-recipe-form {
-    padding: var(--pad-card);
+    padding: var(--spacing-card-pad);
     display: grid;
-    gap: var(--gap-stack-lg);
+    gap: var(--spacing-6);
   }
 
   .panel-day-header {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    gap: var(--gap-inline);
+    gap: var(--spacing-2);
   }
 
   .panel-day-header > div {
     display: grid;
-    gap: var(--gap-stack-xs);
+    gap: var(--spacing-1);
   }
 
   .panel-control-group {
     display: grid;
-    gap: var(--gap-stack-sm);
+    gap: var(--spacing-2);
   }
 
   .panel-pill-row,
   .panel-ingredient-list {
     display: flex;
-    gap: var(--gap-inline);
+    gap: var(--spacing-2);
     flex-wrap: wrap;
-    margin: var(--gap-none);
-    padding: var(--gap-none);
+    margin: 0;
+    padding: 0;
     list-style: none;
   }
 
   .panel-field {
     display: grid;
-    gap: var(--gap-stack-sm);
+    gap: var(--spacing-2);
   }
 
   .panel-field > span,
   .panel-ingredient-name-field > span,
   .panel-ingredient-quantity-field > span,
   .panel-ingredient-unit-field > span {
-    font-size: var(--type-callout-size);
-    font-weight: var(--weight-semibold);
-    line-height: var(--type-callout-lh);
+    font-size: var(--text-callout);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--leading-callout);
   }
 
   .panel-ingredient-name-field > span,
   .panel-ingredient-quantity-field > span,
   .panel-ingredient-unit-field > span {
-    font-size: var(--type-caption-size);
-    line-height: var(--type-caption-lh);
-    color: var(--text-secondary);
-    font-weight: var(--weight-regular);
+    font-size: var(--text-caption);
+    line-height: var(--leading-caption);
+    color: var(--color-text-secondary);
+    font-weight: var(--font-weight-regular);
   }
 
   .panel-ingredient-rows {
     display: grid;
-    gap: var(--gap-inline);
+    gap: var(--spacing-2);
   }
 
   .panel-ingredient-row {
     display: grid;
     grid-template-columns:
-      minmax(var(--ingredient-col-min), 1fr) var(--qty-col)
-      var(--hit-min);
-    gap: var(--gap-inline);
+      minmax(0, 1fr) 5rem
+      var(--size-hit);
+    gap: var(--spacing-2);
     align-items: end;
   }
 
@@ -246,8 +246,8 @@
   .panel-ingredient-quantity-field,
   .panel-ingredient-unit-field {
     display: grid;
-    gap: var(--gap-stack-sm);
-    min-inline-size: var(--ingredient-col-min);
+    gap: var(--spacing-2);
+    min-inline-size: 0;
   }
 
   .panel-ingredient-unit-field {
@@ -268,59 +268,59 @@
 
   .panel-add-hint,
   .panel-field-error {
-    margin: var(--gap-none);
-    font-size: var(--type-caption-size);
-    line-height: var(--type-caption-lh);
-    color: var(--text-secondary);
+    margin: 0;
+    font-size: var(--text-caption);
+    line-height: var(--leading-caption);
+    color: var(--color-text-secondary);
   }
 
   .panel-field-error {
-    color: var(--text-primary);
-    font-weight: var(--weight-semibold);
+    color: var(--color-text-primary);
+    font-weight: var(--font-weight-semibold);
   }
 
   .panel-empty-recipes {
     text-align: center;
-    padding-block: var(--pad-empty-inline-block);
-    padding-inline: var(--pad-card-compact);
-    color: var(--text-secondary);
-    font-size: var(--type-callout-size);
-    line-height: var(--type-callout-lh);
+    padding-block: var(--spacing-8);
+    padding-inline: var(--spacing-card-pad-compact);
+    color: var(--color-text-secondary);
+    font-size: var(--text-callout);
+    line-height: var(--leading-callout);
   }
 
   .panel-recipe-list {
     display: grid;
-    gap: var(--gap-stack-md);
+    gap: var(--spacing-stack-md);
   }
 
   .panel-recipe-card {
-    padding: var(--pad-card);
+    padding: var(--spacing-card-pad);
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    gap: var(--gap-inline-lg);
+    gap: var(--spacing-4);
   }
 
   .panel-recipe-copy {
     display: grid;
-    gap: var(--gap-stack-sm);
-    min-inline-size: var(--ingredient-col-min);
+    gap: var(--spacing-2);
+    min-inline-size: 0;
   }
 
   .panel-recipe-slot {
-    color: var(--text-secondary);
-    font-size: var(--type-caption-size);
-    line-height: var(--type-caption-lh);
+    color: var(--color-text-secondary);
+    font-size: var(--text-caption);
+    line-height: var(--leading-caption);
   }
 
   .panel-ingredient-chip {
-    font-size: var(--type-caption-size);
-    line-height: var(--type-caption-lh);
-    min-block-size: var(--badge-min);
-    padding-inline: var(--pad-control-inline-tight);
+    font-size: var(--text-caption);
+    line-height: var(--leading-caption);
+    min-block-size: var(--size-badge);
+    padding-inline: var(--spacing-2);
     border-radius: var(--radius-pill);
-    background: var(--bg-fill);
-    color: var(--text-primary);
+    background: var(--color-bg-fill);
+    color: var(--color-text-primary);
     display: inline-flex;
     align-items: center;
   }
@@ -328,15 +328,15 @@
   .panel-footer {
     flex: none;
     margin-block-start: auto;
-    padding-block: var(--pad-card-compact);
-    padding-inline: var(--pad-card);
-    border-block-start: var(--border-width) solid var(--border-subtle);
-    background: var(--bg-surface);
+    padding-block: var(--spacing-card-pad-compact);
+    padding-inline: var(--spacing-card-pad);
+    border-block-start: 1px solid var(--color-border-subtle);
+    background: var(--color-bg-surface);
   }
 
   .panel-footer-actions {
     display: flex;
-    gap: var(--gap-inline);
+    gap: var(--spacing-2);
   }
 
   .panel-footer-actions .btn-primary,
@@ -347,8 +347,8 @@
   @container drawer (min-width: 28rem) {
     .panel-ingredient-row {
       grid-template-columns:
-        minmax(var(--ingredient-col-min), 1fr) var(--qty-col)
-        var(--unit-col) var(--hit-min);
+        minmax(0, 1fr) 5rem
+        7.5rem var(--size-hit);
     }
 
     .panel-ingredient-unit-field {

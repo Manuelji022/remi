@@ -1,14 +1,14 @@
 @layer components {
   .loading-dots {
     display: inline-flex;
-    gap: var(--gap-inline-xs);
+    gap: var(--spacing-1);
     align-items: center;
   }
 
   .loading-dots > span {
     display: inline-block;
-    inline-size: var(--loader-dot);
-    block-size: var(--loader-dot);
+    inline-size: var(--spacing-2);
+    block-size: var(--spacing-2);
     border-radius: var(--radius-pill);
     background-color: currentColor;
     animation: loadingPulse var(--duration-loader) var(--ease-standard) infinite

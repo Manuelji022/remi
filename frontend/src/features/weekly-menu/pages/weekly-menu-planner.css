@@ -7,39 +7,39 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: var(--gap-inline-lg);
+    gap: var(--spacing-4);
     flex-wrap: wrap;
-    margin-block-end: var(--section-gap);
+    margin-block-end: var(--spacing-8);
   }
 
   .planner-week-nav {
     display: inline-flex;
     align-items: center;
-    gap: var(--gap-inline-xs);
+    gap: var(--spacing-1);
   }
 
   .planner-week-pill {
-    font-weight: var(--weight-semibold);
-    font-size: var(--type-body-size);
-    line-height: var(--type-body-lh);
-    padding-inline: var(--pad-control-inline-tight);
+    font-weight: var(--font-weight-semibold);
+    font-size: var(--text-body);
+    line-height: var(--leading-body);
+    padding-inline: var(--spacing-2);
   }
 
   .planner-current-week-label {
-    padding: var(--space-half) var(--pad-control-inline-tight);
+    padding: var(--spacing-1) var(--spacing-2);
     border-radius: var(--radius-pill);
-    background: var(--bg-selected-soft);
-    color: var(--accent-text);
-    font-size: var(--type-caption-size);
-    font-weight: var(--weight-semibold);
-    line-height: var(--type-caption-lh);
+    background: var(--color-bg-fill-hover);
+    color: var(--color-text-primary);
+    font-size: var(--text-caption);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--leading-caption);
     white-space: nowrap;
   }
 
   .planner-actions {
     display: flex;
     align-items: center;
-    gap: var(--gap-inline);
+    gap: var(--spacing-2);
     inline-size: 100%;
   }
 
@@ -57,9 +57,9 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: var(--gap-inline-lg);
+    gap: var(--spacing-4);
     flex-wrap: wrap;
-    margin-block-end: var(--section-gap-sm);
+    margin-block-end: var(--spacing-6);
   }
 
   .planner-feedback {
@@ -67,58 +67,58 @@
     align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
-    gap: var(--gap-inline);
-    padding: var(--pad-card);
-    margin-block-end: var(--section-gap-sm);
-    background: var(--bg-surface);
-    border-radius: var(--radius-card);
-    box-shadow: var(--shadow-card);
+    gap: var(--spacing-2);
+    padding: var(--spacing-card-pad);
+    margin-block-end: var(--spacing-6);
+    background: var(--color-bg-surface);
+    border-radius: var(--radius-surface);
+    box-shadow: 0 0 0 1px var(--color-border-subtle);
   }
 
   .planner-day-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(var(--day-col-min), 1fr));
-    gap: var(--gap-stack-md);
+    grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+    gap: var(--spacing-stack-md);
   }
 
   .planner-ai-preview {
     display: grid;
-    gap: var(--gap-stack-md);
+    gap: var(--spacing-stack-md);
   }
 
   .planner-ai-preview-banner {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: var(--gap-inline-lg);
+    gap: var(--spacing-4);
     flex-wrap: wrap;
-    padding: var(--pad-card);
-    background: var(--bg-surface);
-    border-radius: var(--radius-card);
-    box-shadow: var(--shadow-card);
+    padding: var(--spacing-card-pad);
+    background: var(--color-bg-surface);
+    border-radius: var(--radius-surface);
+    box-shadow: 0 0 0 1px var(--color-border-subtle);
   }
 
   .planner-ai-preview-banner > div:first-child {
     display: grid;
-    gap: var(--gap-stack-xs);
+    gap: var(--spacing-1);
   }
 
   .planner-ai-preview-banner p {
-    color: var(--text-secondary);
-    font-size: var(--type-body-size);
-    line-height: var(--type-body-lh);
+    color: var(--color-text-secondary);
+    font-size: var(--text-body);
+    line-height: var(--leading-body);
   }
 
   .planner-ai-preview-kicker {
-    color: var(--text-primary) !important;
-    font-weight: var(--weight-semibold);
+    color: var(--color-text-primary) !important;
+    font-weight: var(--font-weight-semibold);
   }
 
   .planner-ai-replace-note {
-    margin-block-start: var(--gap-stack-sm);
-    color: var(--text-secondary);
-    font-size: var(--type-body-size);
-    line-height: var(--type-body-lh);
+    margin-block-start: var(--spacing-2);
+    color: var(--color-text-secondary);
+    font-size: var(--text-body);
+    line-height: var(--leading-body);
   }
 
   .planner-ai-preview-banner .planner-ai-replace-note {
@@ -128,16 +128,16 @@
   .planner-ai-preview-actions {
     display: flex;
     align-items: center;
-    gap: var(--gap-inline);
+    gap: var(--spacing-2);
     flex-wrap: wrap;
   }
 
   .planner-ai-shortage {
-    padding: var(--pad-card-compact);
-    color: var(--text-secondary);
-    background: var(--bg-surface);
-    border-inline-start: var(--border-width-control) solid var(--accent-solid);
-    border-radius: var(--radius-card);
+    padding: var(--spacing-card-pad-compact);
+    color: var(--color-text-secondary);
+    background: var(--color-bg-surface);
+    border-inline-start: 1px solid var(--color-action);
+    border-radius: var(--radius-surface);
   }
 
   .planner-ai-dialog,
@@ -149,10 +149,10 @@
     inline-size: min(calc(100% - 2rem), 58rem);
     max-block-size: min(92dvh, 58rem);
     overflow-y: auto;
-    padding: var(--pad-card);
-    background: var(--bg-page);
-    border-radius: var(--radius-card);
-    box-shadow: var(--shadow-raised);
+    padding: var(--spacing-card-pad);
+    background: var(--color-bg-page);
+    border-radius: var(--radius-surface);
+    box-shadow: 0 0 0 1px var(--color-border-subtle);
   }
 
   .planner-ai-dialog::backdrop,
@@ -162,18 +162,18 @@
 
   .planner-ai-dialog-header h2,
   .planner-ai-discard-dialog h2 {
-    font-size: var(--type-title-size);
-    line-height: var(--type-title-lh);
+    font-size: var(--text-title);
+    line-height: var(--leading-title);
   }
 
   .planner-ai-dialog-range {
-    margin-block-start: var(--gap-stack-xs);
-    color: var(--text-secondary);
+    margin-block-start: var(--spacing-1);
+    color: var(--color-text-secondary);
   }
 
   .planner-ai-dialog-copy {
-    margin-block: var(--gap-stack-md);
-    color: var(--text-secondary);
+    margin-block: var(--spacing-stack-md);
+    color: var(--color-text-secondary);
   }
 
   .planner-ai-schedule-fields {
@@ -186,8 +186,8 @@
   .planner-ai-dialog-footer {
     display: flex;
     justify-content: flex-end;
-    gap: var(--gap-inline);
-    margin-block-start: var(--gap-stack-md);
+    gap: var(--spacing-2);
+    margin-block-start: var(--spacing-stack-md);
   }
 
   .planner-ai-discard-dialog {
@@ -195,51 +195,51 @@
   }
 
   .planner-ai-discard-dialog p {
-    margin-block-start: var(--gap-stack-sm);
-    color: var(--text-secondary);
-    line-height: var(--type-body-lh);
+    margin-block-start: var(--spacing-2);
+    color: var(--color-text-secondary);
+    line-height: var(--leading-body);
   }
 
   .planner-shopping-tab {
     display: grid;
-    gap: var(--gap-stack-md);
+    gap: var(--spacing-stack-md);
   }
 
   .planner-shopping-helper {
-    color: var(--text-secondary);
-    font-size: var(--type-body-size);
-    line-height: var(--type-body-lh);
+    color: var(--color-text-secondary);
+    font-size: var(--text-body);
+    line-height: var(--leading-body);
   }
 
   .planner-shopping-tab ul {
     list-style: none;
-    margin: var(--gap-none);
-    padding: var(--gap-none);
-    background: var(--bg-surface);
-    border-radius: var(--radius-card);
-    box-shadow: var(--shadow-card);
+    margin: 0;
+    padding: 0;
+    background: var(--color-bg-surface);
+    border-radius: var(--radius-surface);
+    box-shadow: 0 0 0 1px var(--color-border-subtle);
     overflow: hidden;
   }
 
   .planner-shopping-item {
-    min-block-size: var(--hit-min);
-    padding-block: var(--pad-control-block);
-    padding-inline: var(--pad-card);
+    min-block-size: var(--size-hit);
+    padding-block: var(--spacing-2);
+    padding-inline: var(--spacing-card-pad);
     display: flex;
     align-items: center;
-    gap: var(--gap-inline);
+    gap: var(--spacing-2);
     cursor: pointer;
-    font-size: var(--type-callout-size);
-    line-height: var(--type-callout-lh);
+    font-size: var(--text-callout);
+    line-height: var(--leading-callout);
   }
 
   .planner-shopping-item input:checked + span {
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     text-decoration: line-through;
   }
 
   .planner-shopping-tab li + li {
-    border-block-start: var(--border-width) solid var(--border-subtle);
+    border-block-start: 1px solid var(--color-border-subtle);
   }
 
   @media (min-width: 48rem) {
@@ -258,9 +258,9 @@
   flex: 1 1 100%;
   min-width: 0;
   padding: 1rem;
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--color-border-subtle);
   border-radius: 1rem;
-  background: var(--bg-surface);
+  background: var(--color-bg-surface);
 }
 
 .planner-tour p {
