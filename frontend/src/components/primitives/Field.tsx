@@ -13,13 +13,11 @@ export function Field({
   label,
   hint,
   error,
-  optional,
   children,
 }: {
   label: ReactNode
   hint?: ReactNode
   error?: ReactNode
-  optional?: boolean
   children: ReactElement<ControlProps>
 }) {
   const generatedId = useId()
@@ -34,7 +32,6 @@ export function Field({
     <div className="field">
       <label className="field-label" htmlFor={id}>
         {label}
-        {optional && <span className="field-optional"> (optional)</span>}
       </label>
       {cloneElement(children, {
         id,
