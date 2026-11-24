@@ -160,7 +160,6 @@
   .btn-primary:disabled,
   .btn-secondary:disabled,
   .icon-btn:disabled:not(.icon-btn-filled):not(.icon-btn-destructive),
-  .tab-btn:disabled,
   .panel-scope-pill:disabled {
     background: var(--color-bg-fill);
     color: var(--color-text-dimmed);
