@@ -1,3 +1,4 @@
+import { Banner, TextLink } from '#/components/primitives'
 import { useI18n } from '#/shared/i18n'
 
 type GenerationReason =
@@ -50,50 +51,57 @@ export function PlannerFeedback({
   return (
     <>
       {generationReason === 'prepare' && (
-        <div className="planner-feedback" role="alert">
-          <p>{t('planner.aiScheduleLoadError')}</p>
-          <button
-            className="btn btn-secondary"
-            type="button"
-            onClick={onRetrySchedule}
-          >
-            {t('planner.aiRetryScheduleLoad')}
-          </button>
-        </div>
+        <Banner
+          tone="error"
+          announce
+          className="planner-banner"
+          action={
+            <TextLink onClick={onRetrySchedule}>
+              {t('planner.aiRetryScheduleLoad')}
+            </TextLink>
+          }
+        >
+          {t('planner.aiScheduleLoadError')}
+        </Banner>
       )}
 
       {generationErrorMessage && (
-        <div className="planner-feedback" role="alert">
-          <p>{generationErrorMessage}</p>
-          {generationReason !== 'rate-limited' && (
-            <button
-              className="btn btn-secondary"
-              type="button"
-              onClick={onRetryGeneration}
-              disabled={!canWrite || isWriting}
-            >
-              {t(
-                generationReason === 'stale-week'
-                  ? 'planner.aiReconfirmSchedule'
-                  : 'planner.retryGenerate',
-              )}
-            </button>
-          )}
-        </div>
+        <Banner
+          tone="error"
+          announce
+          className="planner-banner"
+          action={
+            generationReason !== 'rate-limited' && (
+              <TextLink
+                onClick={onRetryGeneration}
+                disabled={!canWrite || isWriting}
+              >
+                {t(
+                  generationReason === 'stale-week'
+                    ? 'planner.aiReconfirmSchedule'
+                    : 'planner.retryGenerate',
+                )}
+              </TextLink>
+            )
+          }
+        >
+          {generationErrorMessage}
+        </Banner>
       )}
 
       {previewSaveError && (
-        <div className="planner-feedback" role="alert">
-          <p>{previewSaveError}</p>
-          <button
-            className="btn btn-secondary"
-            type="button"
-            onClick={onRetryPreviewSave}
-            disabled={!canAcceptPreview}
-          >
-            {t('planner.retryPreviewSave')}
-          </button>
-        </div>
+        <Banner
+          tone="error"
+          announce
+          className="planner-banner"
+          action={
+            <TextLink onClick={onRetryPreviewSave} disabled={!canAcceptPreview}>
+              {t('planner.retryPreviewSave')}
+            </TextLink>
+          }
+        >
+          {previewSaveError}
+        </Banner>
       )}
 
       {action?.status === 'success' && (

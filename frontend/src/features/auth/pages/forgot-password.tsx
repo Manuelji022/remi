@@ -1,7 +1,7 @@
 import '../auth.css'
 import type { ComponentProps } from 'react'
 import { useState } from 'react'
-import { Card, TextLink } from '#/components/primitives'
+import { Banner, Card, TextLink } from '#/components/primitives'
 import { getLocalizedPath, useI18n } from '#/shared/i18n'
 import { authClient } from '#/features/auth/auth-client'
 
@@ -50,7 +50,9 @@ export function ForgotPasswordPage() {
         <p className="auth-copy">{t('auth.forgotPasswordCopy')}</p>
 
         {sent ? (
-          <p className="auth-success">{t('auth.resetPasswordSent')}</p>
+          <Banner tone="success" announce>
+            {t('auth.resetPasswordSent')}
+          </Banner>
         ) : (
           <form className="auth-form" onSubmit={handleSubmit}>
             <label className="auth-field">
@@ -66,7 +68,11 @@ export function ForgotPasswordPage() {
               />
             </label>
 
-            {error ? <p className="auth-error">{error}</p> : null}
+            {error ? (
+              <Banner tone="error" announce>
+                {error}
+              </Banner>
+            ) : null}
 
             <button
               className="btn btn-primary"

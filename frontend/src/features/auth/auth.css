@@ -40,21 +40,6 @@
     inline-size: 100%;
   }
 
-  .auth-error,
-  .auth-success {
-    padding-block: var(--spacing-card-pad-compact);
-    padding-inline: var(--spacing-card-pad-compact);
-    border-radius: var(--radius-pill);
-    background: var(--color-bg-fill);
-    color: var(--color-text-primary);
-    font-size: var(--text-callout);
-    line-height: var(--leading-callout);
-  }
-
-  .auth-success {
-    color: var(--color-status-success-text);
-  }
-
   .auth-forgot,
   .auth-switch {
     text-align: center;

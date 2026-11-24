@@ -75,6 +75,10 @@
     box-shadow: 0 0 0 1px var(--color-border-subtle);
   }
 
+  .planner-banner {
+    margin-block-end: var(--spacing-6);
+  }
+
   .planner-day-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
