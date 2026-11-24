@@ -211,7 +211,7 @@ export default async function scenario({ assert, browser, evaluate, wait, click,
       assert.equal(reloaded.length, 7)
       reloaded.forEach((day, d) => day.forEach((n, i) => { if (expectedNames[d][i]) assert.equal(n, expectedNames[d][i]) }))
     })
-    await evaluate("Array.from(document.querySelectorAll('.tab-btn')).find((b) => b.textContent.startsWith('Shopping List')).click(); true")
+    await evaluate("Array.from(document.querySelectorAll('[role=tab]')).find((b) => b.textContent.startsWith('Shopping List')).click(); true")
     await wait("document.querySelector('.planner-shopping-item') !== null")
     const lines = await evaluate(`Array.from(document.querySelectorAll('.planner-shopping-item span'), s => s.textContent)`)
     const expectedIngredients = [...new Set(edited.flat().filter(Boolean))].map((id) => `Ingredient ${id.slice(4).replace('-', ' ')}`).sort()

@@ -1,0 +1,58 @@
+/* SegmentedControl primitive. Semantic tokens only. Paper: Design System / Chip & Segmented control. */
+@layer components {
+  /* A 44 tall track with a 3px inset; the segments sit inside it. */
+  .segmented-control {
+    box-sizing: border-box;
+    display: inline-flex;
+    max-inline-size: 100%;
+    block-size: var(--size-control);
+    padding: calc(var(--spacing-0-5) + 1px);
+    background: var(--color-gray-200);
+    border-radius: var(--radius-pill);
+  }
+
+  .segmented-control > button {
+    flex: 1 1 0;
+    min-inline-size: var(--size-hit);
+    padding-inline: var(--spacing-4);
+    border: 0;
+    border-radius: var(--radius-pill);
+    background: transparent;
+    color: var(--color-text-secondary);
+    font: inherit;
+    font-size: var(--text-callout);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--leading-callout);
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+
+  .segmented-control > button[aria-selected='true'],
+  .segmented-control > button[aria-checked='true'] {
+    background: var(--color-bg-surface);
+    color: var(--color-text-primary);
+    font-weight: var(--font-weight-semibold);
+  }
+
+  @media (hover: hover) {
+    .segmented-control
+      > button:hover:not(
+        :disabled,
+        [aria-selected='true'],
+        [aria-checked='true']
+      ) {
+      background: var(--color-gray-300);
+      color: var(--color-text-primary);
+    }
+  }
+
+  .segmented-control > button:focus-visible {
+    outline: 2px solid var(--color-focus-ring);
+    outline-offset: 2px;
+  }
+
+  .segmented-control > button:disabled {
+    opacity: var(--opacity-disabled);
+    cursor: not-allowed;
+  }
+}
