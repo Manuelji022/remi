@@ -1,8 +1,8 @@
 /* Shared controls. Semantic tokens only. */
 @layer components {
   svg {
-    inline-size: var(--icon-sm);
-    block-size: var(--icon-sm);
+    inline-size: 1rem;
+    block-size: 1rem;
     flex: none;
   }
 
@@ -10,43 +10,43 @@
   .home-title,
   .panel-header h2,
   .planner-shopping-tab h2 {
-    font-size: var(--type-large-title-size);
-    line-height: var(--type-large-title-lh);
-    letter-spacing: var(--type-large-title-track);
-    font-weight: var(--weight-bold);
+    font-size: var(--text-large-title);
+    line-height: var(--leading-large-title);
+    letter-spacing: var(--tracking-title);
+    font-weight: var(--font-weight-bold);
   }
 
   h2,
   h3,
   .empty-state h2 {
-    font-size: var(--type-title-size);
-    line-height: var(--type-title-lh);
-    letter-spacing: var(--type-title-track);
-    font-weight: var(--weight-semibold);
+    font-size: var(--text-title);
+    line-height: var(--leading-title);
+    letter-spacing: var(--tracking-title);
+    font-weight: var(--font-weight-semibold);
   }
 
   h4,
   .day-name {
-    font-size: var(--type-headline-size);
-    line-height: var(--type-headline-lh);
-    font-weight: var(--weight-semibold);
+    font-size: var(--text-headline);
+    line-height: var(--leading-headline);
+    font-weight: var(--font-weight-semibold);
   }
 
   .skip {
     position: absolute;
-    inset-inline-start: var(--offset-skip);
-    inset-block-start: var(--inset-none);
-    z-index: var(--z-drawer);
+    inset-inline-start: var(--spacing-4);
+    inset-block-start: 0;
+    z-index: 30;
     transform: translateY(-200%);
-    font-size: var(--type-callout-size);
-    font-weight: var(--weight-semibold);
-    line-height: var(--type-callout-lh);
-    min-block-size: var(--control-height);
-    min-inline-size: var(--hit-min);
-    padding-inline: var(--pad-control-inline);
-    border-radius: var(--radius-control);
-    background: var(--bg-fill);
-    color: var(--text-primary);
+    font-size: var(--text-callout);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--leading-callout);
+    min-block-size: var(--size-control);
+    min-inline-size: var(--size-hit);
+    padding-inline: var(--spacing-4);
+    border-radius: var(--radius-pill);
+    background: var(--color-bg-fill);
+    color: var(--color-text-primary);
     text-decoration: none;
     display: inline-flex;
     align-items: center;
@@ -59,41 +59,41 @@
 
   .empty-state {
     text-align: center;
-    padding-block: var(--pad-empty-block);
-    padding-inline: var(--pad-card);
+    padding-block: var(--spacing-16);
+    padding-inline: var(--spacing-card-pad);
     display: grid;
     justify-items: center;
-    gap: var(--gap-stack-md);
-    background: var(--bg-surface);
-    border-radius: var(--radius-card);
-    box-shadow: var(--shadow-card);
+    gap: var(--spacing-stack-md);
+    background: var(--color-bg-surface);
+    border-radius: var(--radius-surface);
+    box-shadow: 0 0 0 1px var(--color-border-subtle);
   }
 
   .empty-state > svg {
-    inline-size: var(--icon-empty);
-    block-size: var(--icon-empty);
-    color: var(--accent-solid);
+    inline-size: 3rem;
+    block-size: 3rem;
+    color: var(--color-action);
   }
 
   .empty-state p {
-    max-inline-size: var(--measure);
-    color: var(--text-secondary);
-    font-size: var(--type-body-size);
-    line-height: var(--type-body-lh);
-    font-weight: var(--weight-regular);
+    max-inline-size: 32em;
+    color: var(--color-text-secondary);
+    font-size: var(--text-body);
+    line-height: var(--leading-body);
+    font-weight: var(--font-weight-regular);
   }
 
   .btn {
-    font-size: var(--type-callout-size);
-    font-weight: var(--weight-semibold);
-    line-height: var(--type-callout-lh);
-    min-block-size: var(--control-height);
-    min-inline-size: var(--hit-min);
-    border-radius: var(--radius-control);
+    font-size: var(--text-callout);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--leading-callout);
+    min-block-size: var(--size-control);
+    min-inline-size: var(--size-hit);
+    border-radius: var(--radius-pill);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: var(--gap-inline);
+    gap: var(--spacing-2);
     text-decoration: none;
     touch-action: manipulation;
     white-space: nowrap;
@@ -103,28 +103,28 @@
   }
 
   .btn-primary {
-    padding-inline: var(--pad-control-inline);
-    background: var(--accent-solid);
-    color: var(--on-accent);
+    padding-inline: var(--spacing-4);
+    background: var(--color-action);
+    color: var(--color-text-on-brand);
   }
 
   .btn-primary:hover {
-    background: var(--accent-solid-hover);
+    background: var(--color-action-hover);
   }
 
   .btn-primary:active {
-    background: var(--accent-solid-pressed);
+    background: var(--color-action-pressed);
     transform: scale(var(--press-scale));
   }
 
   .btn-secondary {
-    padding-inline: var(--pad-control-inline-tight);
-    background: var(--bg-fill);
-    color: var(--text-primary);
+    padding-inline: var(--spacing-2);
+    background: var(--color-bg-fill);
+    color: var(--color-text-primary);
   }
 
   .btn-secondary:hover {
-    background: var(--bg-fill-hover);
+    background: var(--color-bg-fill-hover);
   }
 
   .btn-secondary:active {
@@ -132,57 +132,57 @@
   }
 
   .text-link {
-    font-size: var(--type-callout-size);
-    font-weight: var(--weight-semibold);
-    line-height: var(--type-callout-lh);
-    min-block-size: var(--control-height);
-    min-inline-size: var(--hit-min);
-    padding-inline: var(--pad-control-inline-tight);
-    border-radius: var(--radius-link);
+    font-size: var(--text-callout);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--leading-callout);
+    min-block-size: var(--size-control);
+    min-inline-size: var(--size-hit);
+    padding-inline: var(--spacing-2);
+    border-radius: var(--radius-mark);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: var(--gap-inline);
+    gap: var(--spacing-2);
     text-decoration: none;
-    color: var(--accent-text);
+    color: var(--color-text-primary);
     background: transparent;
     touch-action: manipulation;
   }
 
   .text-link:hover {
-    background: var(--bg-selected-soft);
+    background: var(--color-bg-fill-hover);
     text-decoration: underline;
   }
 
   .icon-btn {
-    inline-size: var(--hit-min);
-    block-size: var(--hit-min);
-    min-inline-size: var(--hit-min);
-    min-block-size: var(--hit-min);
+    inline-size: var(--size-hit);
+    block-size: var(--size-hit);
+    min-inline-size: var(--size-hit);
+    min-block-size: var(--size-hit);
     border-radius: var(--radius-pill);
     display: inline-flex;
     align-items: center;
     justify-content: center;
     background: transparent;
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
     transition:
       background-color var(--duration-fast) var(--ease-standard),
       transform var(--duration-fast) var(--ease-standard);
   }
 
   .icon-btn-filled {
-    background: var(--bg-fill);
-    color: var(--text-primary);
+    background: var(--color-bg-fill);
+    color: var(--color-text-primary);
   }
 
   .icon-btn:hover:not(.icon-btn-destructive) {
-    background: var(--bg-fill-hover);
-    color: var(--text-primary);
+    background: var(--color-bg-fill-hover);
+    color: var(--color-text-primary);
   }
 
   .icon-btn-destructive:hover {
-    background: var(--bg-fill);
-    color: var(--destructive);
+    background: var(--color-bg-fill);
+    color: var(--color-status-error-text);
   }
 
   .icon-btn:active {
@@ -194,8 +194,8 @@
   .icon-btn:disabled:not(.icon-btn-filled):not(.icon-btn-destructive),
   .tab-btn:disabled,
   .panel-scope-pill:disabled {
-    background: var(--bg-disabled);
-    color: var(--text-disabled);
+    background: var(--color-bg-fill);
+    color: var(--color-text-dimmed);
     cursor: not-allowed;
     transform: none;
     box-shadow: none;
@@ -205,17 +205,17 @@
   .planner-btn-badge,
   .day-context-badge,
   .panel-day-badge {
-    font-size: var(--type-caption-size);
-    font-weight: var(--weight-semibold);
-    line-height: var(--type-caption-lh);
-    min-inline-size: var(--badge-min);
-    min-block-size: var(--badge-min);
-    padding-inline: var(--pad-control-inline-tight);
+    font-size: var(--text-caption);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--leading-caption);
+    min-inline-size: var(--size-badge);
+    min-block-size: var(--size-badge);
+    padding-inline: var(--spacing-2);
     border-radius: var(--radius-pill);
-    background: var(--bg-fill-hover);
-    color: var(--text-primary);
+    background: var(--color-bg-fill-hover);
+    color: var(--color-text-primary);
     text-align: center;
-    font-variant-numeric: var(--numeric);
+    font-variant-numeric: tabular-nums;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -224,18 +224,18 @@
   .panel-context-pill,
   .panel-scope-pill {
     font: inherit;
-    font-size: var(--type-callout-size);
-    font-weight: var(--weight-semibold);
-    line-height: var(--type-callout-lh);
-    min-block-size: var(--hit-min);
-    padding-inline: var(--pad-control-inline);
+    font-size: var(--text-callout);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--leading-callout);
+    min-block-size: var(--size-hit);
+    padding-inline: var(--spacing-4);
     border-radius: var(--radius-pill);
-    border: var(--gap-none);
-    background: var(--bg-fill);
-    color: var(--text-primary);
+    border: 0;
+    background: var(--color-bg-fill);
+    color: var(--color-text-primary);
     display: inline-flex;
     align-items: center;
-    gap: var(--gap-inline);
+    gap: var(--spacing-2);
     cursor: pointer;
     touch-action: manipulation;
     transition:
@@ -245,23 +245,23 @@
 
   .panel-context-pill:hover,
   .panel-scope-pill:hover:not(:disabled) {
-    background: var(--bg-fill-hover);
+    background: var(--color-bg-fill-hover);
   }
 
   .panel-context-pill[aria-pressed='true'],
   .panel-scope-pill[aria-pressed='true'] {
-    background: var(--accent-solid);
-    color: var(--on-accent);
+    background: var(--color-action);
+    color: var(--color-text-on-brand);
   }
 
   .panel-context-pill[aria-pressed='true']:hover,
   .panel-scope-pill[aria-pressed='true']:hover:not(:disabled) {
-    background: var(--accent-solid-hover);
+    background: var(--color-action-hover);
   }
 
   .panel-scope-pill:disabled[aria-pressed='true'] {
-    background: var(--bg-disabled);
-    color: var(--text-disabled);
+    background: var(--color-bg-fill);
+    color: var(--color-text-dimmed);
   }
 
   .panel-context-pill:active,
@@ -273,36 +273,36 @@
   .panel-recipe-form input,
   .panel-recipe-form select {
     font: inherit;
-    font-size: var(--type-body-size);
-    line-height: var(--type-body-lh);
-    min-block-size: var(--control-height);
+    font-size: var(--text-body);
+    line-height: var(--leading-body);
+    min-block-size: var(--size-control);
     inline-size: 100%;
-    padding-inline: var(--pad-control-inline);
-    border-radius: var(--radius-control);
-    border: var(--border-width-control) solid var(--border-control);
-    background-color: var(--bg-surface);
-    color: var(--text-primary);
+    padding-inline: var(--spacing-4);
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--color-border-control);
+    background-color: var(--color-bg-surface);
+    color: var(--color-text-primary);
   }
 
   .auth-field input::placeholder,
   .panel-recipe-form input::placeholder {
-    color: var(--text-secondary);
+    color: var(--color-text-secondary);
   }
 
   .panel-ingredient-quantity-field input,
   .planner-week-pill,
   .planner-shopping-tab li,
   .panel-ingredient-chip {
-    font-variant-numeric: var(--numeric);
+    font-variant-numeric: tabular-nums;
   }
 
   @media (min-width: 48rem) {
     .btn-secondary {
-      padding-inline: var(--pad-control-inline);
+      padding-inline: var(--spacing-4);
     }
 
     .text-link {
-      padding-inline: var(--pad-control-inline-tight);
+      padding-inline: var(--spacing-2);
     }
   }
 }

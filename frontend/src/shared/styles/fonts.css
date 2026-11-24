@@ -1,0 +1,93 @@
+/* Self-hosted Inter (latin, 400/600/700). Chrome treats -apple-system and
+   BlinkMacSystemFont as the platform UI font on non-Apple devices, so those
+   names have to be faced here or the stack never reaches Inter. local() keeps
+   real SF Pro on Apple; the woff2 is the fallback. */
+@font-face {
+  font-family: -apple-system;
+  src:
+    local('.SF NS Text'),
+    local('SF Pro Text'),
+    url('/fonts/inter-latin-400-normal.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: -apple-system;
+  src:
+    local('.SF NS Text'),
+    local('SF Pro Text'),
+    url('/fonts/inter-latin-600-normal.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: -apple-system;
+  src:
+    local('.SF NS Text'),
+    local('SF Pro Text'),
+    url('/fonts/inter-latin-700-normal.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: BlinkMacSystemFont;
+  src:
+    local('.SF NS Text'),
+    local('SF Pro Text'),
+    url('/fonts/inter-latin-400-normal.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: BlinkMacSystemFont;
+  src:
+    local('.SF NS Text'),
+    local('SF Pro Text'),
+    url('/fonts/inter-latin-600-normal.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: BlinkMacSystemFont;
+  src:
+    local('.SF NS Text'),
+    local('SF Pro Text'),
+    url('/fonts/inter-latin-700-normal.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: Inter;
+  src: url('/fonts/inter-latin-400-normal.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: Inter;
+  src: url('/fonts/inter-latin-600-normal.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: Inter;
+  src: url('/fonts/inter-latin-700-normal.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}

@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest'
 
 const tokensPath = resolve(
   dirname(fileURLToPath(import.meta.url)),
-  'tokens.css',
+  'design-tokens.css',
 )
 const tokens = readFileSync(tokensPath, 'utf8')
 
@@ -38,69 +38,52 @@ function token(name: string) {
 }
 
 describe('contrast tokens', () => {
-  it('keeps primary text at 4.5:1 on page, surface, and fill', () => {
-    const text = token('--gray-900')
-    expect(contrast(text, token('--gray-50'))).toBeGreaterThanOrEqual(4.5)
-    expect(contrast(text, token('--gray-0'))).toBeGreaterThanOrEqual(4.5)
-    expect(contrast(text, token('--gray-100'))).toBeGreaterThanOrEqual(4.5)
-    expect(contrast(text, token('--gray-200'))).toBeGreaterThanOrEqual(4.5)
-    expect(contrast(text, token('--blue-50'))).toBeGreaterThanOrEqual(4.5)
+  const ink = token('--color-ink')
+  const white = token('--color-white')
+
+  it('keeps ink text at 4.5:1 on page, surface, fill and notes', () => {
+    for (const bg of [
+      '--color-white',
+      '--color-gray-50',
+      '--color-gray-100',
+      '--color-gray-200',
+      '--color-tomato-50',
+      '--color-tomato-500',
+      '--color-butter-400',
+      '--color-lilac-300',
+      '--color-mint-300',
+    ]) {
+      expect(contrast(ink, token(bg))).toBeGreaterThanOrEqual(4.5)
+    }
   })
 
-  it('keeps secondary text at 4.5:1 on page and surface', () => {
-    const text = token('--gray-600')
-    expect(contrast(text, token('--gray-0'))).toBeGreaterThanOrEqual(4.5)
-    expect(contrast(text, token('--gray-50'))).toBeGreaterThanOrEqual(4.5)
+  it('keeps secondary text at 4.5:1 on page, surface and fill', () => {
+    const text = token('--color-gray-700')
+    for (const bg of ['--color-white', '--color-gray-50', '--color-gray-100']) {
+      expect(contrast(text, token(bg))).toBeGreaterThanOrEqual(4.5)
+    }
   })
 
-  it('keeps accent text and filled buttons at 4.5:1', () => {
-    expect(
-      contrast(token('--gray-0'), token('--blue-500')),
-    ).toBeGreaterThanOrEqual(4.5)
-    expect(
-      contrast(token('--gray-0'), token('--blue-600')),
-    ).toBeGreaterThanOrEqual(4.5)
-    expect(
-      contrast(token('--gray-0'), token('--blue-700')),
-    ).toBeGreaterThanOrEqual(4.5)
-    expect(
-      contrast(token('--blue-600'), token('--gray-0')),
-    ).toBeGreaterThanOrEqual(4.5)
-    expect(
-      contrast(token('--blue-600'), token('--gray-50')),
-    ).toBeGreaterThanOrEqual(4.5)
-    expect(
-      contrast(token('--blue-600'), token('--blue-50')),
-    ).toBeGreaterThanOrEqual(4.5)
+  it('keeps white on ink and on destructive buttons at 4.5:1', () => {
+    expect(contrast(white, ink)).toBeGreaterThanOrEqual(4.5)
+    expect(contrast(white, token('--color-tomato-700'))).toBeGreaterThanOrEqual(
+      4.5,
+    )
   })
 
-  it('keeps disabled text at 3:1 and destructive text readable', () => {
-    expect(
-      contrast(token('--gray-600'), token('--gray-100')),
-    ).toBeGreaterThanOrEqual(3)
-    expect(
-      contrast(token('--red-600'), token('--gray-0')),
-    ).toBeGreaterThanOrEqual(4.5)
-    expect(
-      contrast(token('--red-600'), token('--gray-100')),
-    ).toBeGreaterThanOrEqual(3)
-    expect(
-      contrast(token('--green-700'), token('--gray-0')),
-    ).toBeGreaterThanOrEqual(4.5)
-    expect(
-      contrast(token('--green-700'), token('--gray-100')),
-    ).toBeGreaterThanOrEqual(4.5)
+  it('keeps status and brand text at 4.5:1 on their backgrounds', () => {
+    const pairs = [
+      ['--color-tomato-700', '--color-tomato-50'],
+      ['--color-tomato-700', '--color-white'],
+      ['--color-basil-700', '--color-basil-50'],
+      ['--color-butter-800', '--color-butter-100'],
+    ] as const
+    for (const [fg, bg] of pairs) {
+      expect(contrast(token(fg), token(bg))).toBeGreaterThanOrEqual(4.5)
+    }
   })
 
-  it('keeps the focus ring and control border at 3:1', () => {
-    expect(
-      contrast(token('--blue-500'), token('--gray-0')),
-    ).toBeGreaterThanOrEqual(3)
-    expect(
-      contrast(token('--blue-500'), token('--gray-50')),
-    ).toBeGreaterThanOrEqual(3)
-    expect(
-      contrast(token('--gray-400'), token('--gray-0')),
-    ).toBeGreaterThanOrEqual(3)
+  it('keeps dimmed text and control borders at 3:1 on white', () => {
+    expect(contrast(token('--color-gray-600'), white)).toBeGreaterThanOrEqual(3)
   })
 })
