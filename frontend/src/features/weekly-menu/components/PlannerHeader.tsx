@@ -1,4 +1,4 @@
-import { Icon } from '#/components/primitives'
+import { Badge, Icon } from '#/components/primitives'
 import { LoadingDots } from './LoadingDots'
 import { getWeekNumber } from '#/features/weekly-menu/constants'
 import { useI18n } from '#/shared/i18n'
@@ -70,9 +70,7 @@ export function PlannerHeader(props: PlannerHeaderProps) {
         >
           <Icon name="settings" />
           {t('planner.preferences')}
-          {props.preferenceCount > 0 && (
-            <span className="planner-btn-badge">{props.preferenceCount}</span>
-          )}
+          <Badge count={props.preferenceCount} />
         </button>
         <button
           ref={props.onGenerateButtonRef}

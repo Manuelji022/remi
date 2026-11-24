@@ -1,0 +1,72 @@
+/* Badge primitive. Semantic tokens only. Paper: Design System / Badge. */
+@layer components {
+  .badge {
+    /* Tone, set by .badge-{tone}. */
+    --badge-bg: var(--color-bg-fill-hover);
+    --badge-fg: var(--color-text-primary);
+
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    border-radius: var(--radius-pill);
+    background: var(--badge-bg);
+    color: var(--badge-fg);
+    font-size: var(--text-caption);
+    font-weight: var(--font-weight-semibold);
+    white-space: nowrap;
+  }
+
+  .badge-count {
+    block-size: var(--size-badge);
+    min-inline-size: var(--size-badge);
+    padding-inline: var(--spacing-1-5);
+    line-height: var(--spacing-4);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .badge-label {
+    block-size: var(--spacing-6);
+    gap: var(--spacing-1-5);
+    padding-inline: var(--spacing-2);
+    line-height: var(--leading-caption);
+  }
+
+  .badge-square {
+    border-radius: var(--radius-mark);
+  }
+
+  .badge-dot {
+    inline-size: var(--size-dot);
+    block-size: var(--size-dot);
+    flex-shrink: 0;
+    border-radius: var(--radius-pill);
+    background: var(--badge-fg);
+  }
+
+  .badge-brand {
+    --badge-bg: var(--color-action);
+    --badge-fg: var(--color-text-on-brand);
+  }
+
+  .badge-info {
+    --badge-bg: var(--color-status-info-bg);
+    --badge-fg: var(--color-status-info-text);
+  }
+
+  .badge-success {
+    --badge-bg: var(--color-status-success-bg);
+    --badge-fg: var(--color-status-success-text);
+  }
+
+  .badge-warning {
+    --badge-bg: var(--color-status-warning-bg);
+    --badge-fg: var(--color-status-warning-text);
+  }
+
+  .badge-error {
+    --badge-bg: var(--color-status-error-bg);
+    --badge-fg: var(--color-status-error-text);
+  }
+}

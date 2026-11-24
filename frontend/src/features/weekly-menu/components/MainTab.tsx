@@ -1,3 +1,4 @@
+import { Badge } from '#/components/primitives'
 import { useI18n } from '#/shared/i18n'
 import './main-tab.css'
 
@@ -32,7 +33,7 @@ export function MainTab({
         onClick={() => onTabChange('ingredients')}
       >
         {t('tabs.ingredients')}
-        {neededItems > 0 && <span className="badge">{neededItems}</span>}
+        <Badge count={neededItems} />
       </button>
     </div>
   )
