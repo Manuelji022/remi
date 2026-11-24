@@ -1,7 +1,5 @@
-import { Icon } from './Icon'
-import { LocalizedLink } from '#/shared/i18n'
 import './Card.css'
-import type { ComponentProps, ReactNode } from 'react'
+import type { ComponentProps } from 'react'
 
 type CardVariant = 'default' | 'compact' | 'current'
 
@@ -28,54 +26,4 @@ export function Card({
   ...rest
 }: CardProps) {
   return <Tag {...rest} className={cardClass(variant, className)} />
-}
-
-interface CardLinkBaseProps {
-  /** Title and meta. The title is the link's accessible name. */
-  children: ReactNode
-  variant?: CardVariant
-  className?: string
-}
-
-type CardLinkRouteProps = CardLinkBaseProps &
-  Omit<ComponentProps<typeof LocalizedLink>, keyof CardLinkBaseProps> & {
-    to: string
-  }
-
-type CardLinkAnchorProps = CardLinkBaseProps &
-  Omit<ComponentProps<'a'>, keyof CardLinkBaseProps> & {
-    href: string
-    to?: never
-  }
-
-export type CardLinkProps = CardLinkRouteProps | CardLinkAnchorProps
-
-/** Interactive card: the whole card is one link, with a chevron and nothing
- *  else clickable inside. Pads 16 unless told otherwise. */
-export function CardLink(props: CardLinkProps) {
-  const { children, variant = 'compact', className, ...rest } = props
-  const classes = cardClass(variant, 'card-link', className)
-  const content = (
-    <>
-      <span>{children}</span>
-      <Icon className="card-link-chevron" name="next" />
-    </>
-  )
-
-  if ('to' in rest && rest.to !== undefined) {
-    return (
-      <LocalizedLink
-        {...(rest as ComponentProps<typeof LocalizedLink>)}
-        className={classes}
-      >
-        {content}
-      </LocalizedLink>
-    )
-  }
-
-  return (
-    <a {...rest} className={classes}>
-      {content}
-    </a>
-  )
 }
