@@ -9,7 +9,7 @@ interface TextLinkBaseProps {
   /** `inline` sits in a sentence and is underlined. `standalone` has its own
    *  line and a 44 tall hit area. */
   variant?: TextLinkVariant
-  /** Standalone only. Pass an existing icon component, e.g. `<PlusIcon />`. */
+  /** Standalone only. Pass an `<Icon />`, e.g. `<Icon name="add" />`. */
   icon?: ReactNode
   iconPosition?: 'start' | 'end'
   disabled?: boolean

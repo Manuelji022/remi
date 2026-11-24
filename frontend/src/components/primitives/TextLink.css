@@ -61,12 +61,6 @@
     font-family: inherit;
   }
 
-  .text-link-standalone svg {
-    inline-size: var(--spacing-5);
-    block-size: var(--spacing-5);
-    stroke-width: var(--stroke-icon);
-  }
-
   .text-link-standalone:hover:not(:disabled, [aria-disabled='true']) {
     text-decoration: underline 1px;
     text-underline-position: from-font;
