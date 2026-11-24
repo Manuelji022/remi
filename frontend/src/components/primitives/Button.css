@@ -1,0 +1,236 @@
+/* Button primitive. Semantic tokens only. Paper: Design System / Button. */
+@layer components {
+  .button {
+    /* Size, set by .button-{size}. */
+    --button-pad: calc(var(--spacing-4) + var(--spacing-0-5));
+    --button-pad-icon: calc(var(--button-pad) - var(--spacing-1));
+    /* Variant, set by .button-{variant}. */
+    --button-bg: var(--color-bg-surface);
+    --button-bg-hover: var(--color-bg-fill);
+    --button-bg-active: var(--color-bg-fill-hover);
+    --button-fg: var(--color-text-primary);
+
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--button-gap, var(--spacing-2));
+    block-size: var(--button-size, var(--size-control));
+    padding-inline: var(--button-pad);
+    border: 1px solid transparent;
+    border-radius: var(--radius-pill);
+    background: var(--button-bg);
+    color: var(--button-fg);
+    font: inherit;
+    font-size: var(--button-text, var(--text-callout));
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--leading-callout);
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    touch-action: manipulation;
+    transition:
+      background-color var(--duration-fast) var(--ease-standard),
+      transform var(--duration-fast) var(--ease-standard);
+  }
+
+  .button-content {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: inherit;
+  }
+
+  /* Variants. Hover is one step darker, pressed two. */
+  .button-brand {
+    --button-bg: var(--color-action);
+    --button-bg-hover: var(--color-action-hover);
+    --button-bg-active: var(--color-action-pressed);
+    --button-fg: var(--color-text-on-brand);
+  }
+
+  .button-primary {
+    --button-bg: var(--color-text-primary);
+    --button-bg-hover: var(--color-action-hover);
+    --button-bg-active: var(--color-action-pressed);
+    --button-fg: var(--color-text-on-brand);
+  }
+
+  .button-secondary {
+    border-color: var(--color-gray-300);
+  }
+
+  .button-soft {
+    --button-bg: var(--color-bg-brand-soft);
+    --button-bg-hover: color-mix(
+      in srgb,
+      var(--color-bg-brand-soft),
+      var(--color-text-brand) 8%
+    );
+    --button-bg-active: color-mix(
+      in srgb,
+      var(--color-bg-brand-soft),
+      var(--color-text-brand) 16%
+    );
+    --button-fg: var(--color-text-brand);
+  }
+
+  .button-danger {
+    --button-bg: var(--color-status-error-text);
+    --button-bg-hover: color-mix(
+      in srgb,
+      var(--color-status-error-text),
+      var(--color-ink) 15%
+    );
+    --button-bg-active: color-mix(
+      in srgb,
+      var(--color-status-error-text),
+      var(--color-ink) 30%
+    );
+    --button-fg: var(--color-text-on-brand);
+  }
+
+  .button-danger-subtle {
+    --button-bg: var(--color-status-error-bg);
+    --button-bg-hover: color-mix(
+      in srgb,
+      var(--color-status-error-bg),
+      var(--color-status-error-text) 8%
+    );
+    --button-bg-active: color-mix(
+      in srgb,
+      var(--color-status-error-bg),
+      var(--color-status-error-text) 16%
+    );
+    --button-fg: var(--color-status-error-text);
+  }
+
+  .button-ghost {
+    --button-bg: transparent;
+    --button-fg: var(--color-text-secondary);
+  }
+
+  /* Sizes. */
+  .button-sm {
+    --button-size: var(--size-control-sm);
+    --button-pad: var(--spacing-3);
+    --button-text: var(--text-caption);
+    --button-gap: var(--spacing-1-5);
+  }
+
+  .button-lg {
+    --button-size: var(--size-control-lg);
+    --button-pad: calc(var(--spacing-5) + var(--spacing-0-5));
+    --button-text: var(--text-body);
+  }
+
+  .button-xl {
+    --button-size: var(--size-control-xl);
+    --button-pad: calc(var(--spacing-6) + var(--spacing-1));
+    --button-text: var(--text-headline);
+    --button-gap: var(--spacing-3);
+  }
+
+  /* sm looks 32, the tap area stays 44. */
+  .button-sm::after {
+    content: '';
+    position: absolute;
+    inset: calc((var(--size-hit) - var(--size-control-sm)) / -2) 0;
+  }
+
+  .button-sm.button-icon-only::after {
+    inset-inline: calc((var(--size-hit) - var(--size-control-sm)) / -2);
+  }
+
+  /* The side with the icon loses 4 of padding so the pill looks balanced. */
+  .button-leading-icon {
+    padding-inline-start: var(--button-pad-icon);
+  }
+
+  .button-trailing-icon {
+    padding-inline-end: var(--button-pad-icon);
+  }
+
+  .button-has-count {
+    padding-inline-end: var(--spacing-2);
+  }
+
+  .button-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    block-size: calc(var(--size-control-sm) - var(--spacing-1));
+    min-inline-size: calc(var(--size-control-sm) - var(--spacing-1));
+    padding-inline: var(--spacing-2);
+    border-radius: var(--radius-pill);
+    background: var(--color-bg-fill-hover);
+    color: var(--color-text-primary);
+    font-size: var(--text-caption);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .button-icon-only {
+    inline-size: var(--button-size, var(--size-control));
+    padding-inline: 0;
+  }
+
+  /* No label carries the edge, so secondary takes the stronger one. */
+  .button-secondary.button-icon-only {
+    border-color: var(--color-border-control);
+  }
+
+  .button-block {
+    display: flex;
+    inline-size: 100%;
+  }
+
+  /* Pending: the label keeps its width but gives way to three dots. */
+  .button[aria-busy='true'] {
+    cursor: progress;
+  }
+
+  .button[aria-busy='true'] .button-content {
+    visibility: hidden;
+  }
+
+  .button-dots {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-1);
+  }
+
+  .button-dots > span {
+    inline-size: var(--size-dot);
+    block-size: var(--size-dot);
+    border-radius: var(--radius-pill);
+    background: currentColor;
+  }
+
+  .button-dots > span:nth-child(2) {
+    opacity: 0.7;
+  }
+
+  .button-dots > span:nth-child(3) {
+    opacity: var(--opacity-disabled);
+  }
+
+  @media (hover: hover) {
+    .button:hover:not(:disabled, [aria-disabled='true']) {
+      background: var(--button-bg-hover);
+    }
+  }
+
+  .button:active:not(:disabled, [aria-disabled='true']) {
+    background: var(--button-bg-active);
+    transform: scale(var(--press-scale));
+  }
+
+  .button:disabled,
+  .button[aria-disabled='true']:not([aria-busy='true']) {
+    opacity: var(--opacity-disabled);
+    cursor: not-allowed;
+  }
+}
