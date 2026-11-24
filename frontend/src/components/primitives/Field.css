@@ -1,0 +1,68 @@
+/* Field and Input primitives. Semantic tokens only. Paper: Design System / Input & Field. */
+@layer components {
+  .field {
+    display: flex;
+    flex-direction: column;
+  }
+  .field-label {
+    margin-bottom: var(--spacing-2);
+    color: var(--color-text-primary);
+    font-size: var(--text-callout);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--leading-callout);
+  }
+  .field-control {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: var(--size-control);
+    padding-inline: calc(var(--spacing-3) + var(--spacing-0-5));
+    border: 1px solid var(--color-border-control);
+    border-radius: var(--radius-mark);
+    background: var(--color-bg-surface);
+    color: var(--color-text-primary);
+    font: inherit;
+    font-size: var(--text-body);
+    line-height: var(--leading-body);
+  }
+  .field-control::placeholder {
+    color: var(--color-text-secondary);
+    opacity: 1;
+  }
+  .field-control:hover:not(:disabled, :read-only) {
+    border-color: var(--color-text-secondary);
+  }
+  .field-control:focus-visible {
+    border-color: var(--color-focus-ring);
+    outline: 2px solid var(--color-focus-ring);
+    outline-offset: 2px;
+  }
+  .field-control:read-only:not(:disabled) {
+    border-color: var(--color-bg-fill);
+    background: var(--color-bg-fill);
+  }
+  .field-control[aria-invalid='true'] {
+    border-color: var(--color-status-error-text);
+    box-shadow: inset 0 0 0 1px var(--color-status-error-text);
+  }
+  .field-control:disabled {
+    background: var(--color-bg-fill);
+    opacity: var(--opacity-disabled);
+    cursor: not-allowed;
+  }
+  .field-message {
+    display: flex;
+    align-items: start;
+    gap: var(--spacing-1-5);
+    margin-top: var(--spacing-1-5);
+    color: var(--color-text-secondary);
+    font-size: var(--text-caption);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--leading-caption);
+  }
+  .field-message .icon {
+    margin-block-start: 1px;
+  }
+  .field-error {
+    color: var(--color-status-error-text);
+  }
+}
