@@ -2,7 +2,7 @@ import { useNavigate } from '@tanstack/react-router'
 import '../auth.css'
 import type { ComponentProps } from 'react'
 import { useState } from 'react'
-import { TextLink } from '#/components/primitives'
+import { Field, Input, TextLink } from '#/components/primitives'
 import { getLocalizedPath, useI18n } from '#/shared/i18n'
 import { authClient } from '#/features/auth/auth-client'
 
@@ -58,9 +58,8 @@ export function LoginPage() {
         <p className="auth-copy">{t('auth.loginCopy')}</p>
 
         <form className="auth-form" onSubmit={handleSubmit}>
-          <label className="auth-field">
-            {t('auth.email')}
-            <input
+          <Field label={t('auth.email')}>
+            <Input
               autoComplete="email"
               name="email"
               spellCheck={false}
@@ -69,11 +68,10 @@ export function LoginPage() {
               type="email"
               value={email}
             />
-          </label>
+          </Field>
 
-          <label className="auth-field">
-            {t('auth.password')}
-            <input
+          <Field label={t('auth.password')}>
+            <Input
               autoComplete="current-password"
               minLength={8}
               name="password"
@@ -82,7 +80,7 @@ export function LoginPage() {
               type="password"
               value={password}
             />
-          </label>
+          </Field>
 
           {error ? <p className="auth-error">{error}</p> : null}
 
