@@ -196,14 +196,14 @@ await scenario('an unsaved target schedule starts all-at-home, not from current 
   ),
   ['click', `${dialogSelector} .panel-day-card:first-child .panel-context-pill:first-child`],
   assert(
-    `${dialog}.querySelector('.panel-day-card:first-child .panel-context-pill:first-child').getAttribute('aria-pressed')==='true' && ${dialog}.querySelector('.panel-day-card:first-child .panel-scope-pill[aria-pressed="true"]').textContent.includes('Dinner')`,
+    `${dialog}.querySelector('.panel-day-card:first-child .panel-context-pill:first-child').getAttribute('aria-pressed')==='true' && ${dialog}.querySelector('.panel-day-card:first-child [role="radio"][aria-checked="true"]').textContent.includes('Dinner')`,
     'Office covers lunch and leaves Dinner planned at home',
   ),
   ['click', `${dialogSelector} .panel-day-card:nth-child(2) .panel-context-pill:nth-child(2)`],
   wait(`${dialog}.querySelector('.panel-day-card:nth-child(2) .panel-context-pill:nth-child(2)').getAttribute('aria-pressed')==='true'`),
-  ['click', `${dialogSelector} .panel-day-card:nth-child(2) .panel-scope-pill:nth-child(2)`],
+  ['click', `${dialogSelector} .panel-day-card:nth-child(2) [role="radio"]:nth-child(2)`],
   assert(
-    `${dialog}.querySelector('.panel-day-card:nth-child(2) .panel-context-pill[aria-pressed="true"]').textContent.includes('Eat out') && ${dialog}.querySelector('.panel-day-card:nth-child(2) .panel-scope-pill[aria-pressed="true"]').textContent.includes('Dinner')`,
+    `${dialog}.querySelector('.panel-day-card:nth-child(2) .panel-context-pill[aria-pressed="true"]').textContent.includes('Eat out') && ${dialog}.querySelector('.panel-day-card:nth-child(2) [role="radio"][aria-checked="true"]').textContent.includes('Dinner')`,
     'Eat Out keeps the chosen home planning scope without packed-lunch behavior',
   ),
   click('Cancel'),
@@ -216,7 +216,7 @@ await scenario('saved target-week schedule is prefilled for all seven-day confir
   click('Regenerate menu'),
   text("Review next week’s schedule"),
   assert(
-    `${dialog}.querySelector('.panel-day-card:first-child .panel-context-pill[aria-pressed="true"]')?.textContent.includes('Office') && ${dialog}.querySelector('.panel-day-card:nth-child(2) .panel-context-pill[aria-pressed="true"]')?.textContent.includes('Eat out') && ${dialog}.querySelector('.panel-day-card:nth-child(2) .panel-scope-pill[aria-pressed="true"]')?.textContent.includes('Lunch')`,
+    `${dialog}.querySelector('.panel-day-card:first-child .panel-context-pill[aria-pressed="true"]')?.textContent.includes('Office') && ${dialog}.querySelector('.panel-day-card:nth-child(2) .panel-context-pill[aria-pressed="true"]')?.textContent.includes('Eat out') && ${dialog}.querySelector('.panel-day-card:nth-child(2) [role="radio"][aria-checked="true"]')?.textContent.includes('Lunch')`,
     'target week schedule, including Eat Out home scope, is prefilled from target week only',
   ),
   assert(`${generationCount}===0 && ${saveCount}===0`, 'opening confirmation itself does not generate or persist'),
@@ -327,7 +327,7 @@ await scenario('unchanged selected scope and failed regeneration preserve manual
   ['select', firstDayDinnerSelector, 'saved-dinner-alternative'],
   click('Edit target schedule'),
   text('Review next week’s schedule'),
-  ['click', `${dialogSelector} .panel-day-card:first-child .panel-scope-pill[aria-pressed="true"]`],
+  ['click', `${dialogSelector} .panel-day-card:first-child [role="radio"][aria-checked="true"]`],
   click('Cancel'),
   assert(`${preview}?.querySelector(${JSON.stringify(firstDayDinnerSelector)}).value==='saved-dinner-alternative'`, 'selecting the effective scope and cancelling retains manual edits'),
   click('Edit target schedule'),
@@ -430,7 +430,7 @@ await scenario('retry after a failed generation across Monday loads the new targ
   click('Retry generation'),
   text("Review next week’s schedule"),
   assert(
-    `${dialog}.querySelector('.panel-day-card:first-child .panel-context-pill[aria-pressed="true"]')===null && ${dialog}.querySelector('.panel-day-card:nth-child(2) .panel-context-pill[aria-pressed="true"]')?.textContent.includes('Eat out') && ${dialog}.querySelector('.panel-day-card:nth-child(2) .panel-scope-pill[aria-pressed="true"]')?.textContent.includes('Lunch')`,
+    `${dialog}.querySelector('.panel-day-card:first-child .panel-context-pill[aria-pressed="true"]')===null && ${dialog}.querySelector('.panel-day-card:nth-child(2) .panel-context-pill[aria-pressed="true"]')?.textContent.includes('Eat out') && ${dialog}.querySelector('.panel-day-card:nth-child(2) [role="radio"][aria-checked="true"]')?.textContent.includes('Lunch')`,
     'retry uses the newly targeted saved schedule instead of the prior target draft',
   ),
   assert(
@@ -621,7 +621,7 @@ await scenario('partial catalog blocks only the missing type, per confirmed sche
   ),
   ...[1, 2, 3, 4, 5, 6, 7].flatMap((n) => [
     ['click', `${dialogSelector} .panel-day-card:nth-child(${n}) .panel-context-pill:nth-child(2)`],
-    ['click', `${dialogSelector} .panel-day-card:nth-child(${n}) .panel-scope-pill:nth-child(1)`],
+    ['click', `${dialogSelector} .panel-day-card:nth-child(${n}) [role="radio"]:nth-child(1)`],
   ]),
   assert(`!${dialog}.querySelector('[role="alert"]')`, 'editing the schedule clears the alert'),
   click('Confirm schedule and generate'),

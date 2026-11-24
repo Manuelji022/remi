@@ -74,57 +74,6 @@
     transform: none;
   }
 
-  .panel-scope-pill:disabled {
-    background: var(--color-bg-fill);
-    color: var(--color-text-dimmed);
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-  }
-
-  .panel-scope-pill {
-    font: inherit;
-    font-size: var(--text-callout);
-    font-weight: var(--font-weight-semibold);
-    line-height: var(--leading-callout);
-    min-block-size: var(--size-hit);
-    padding-inline: var(--spacing-4);
-    border-radius: var(--radius-pill);
-    border: 0;
-    background: var(--color-bg-fill);
-    color: var(--color-text-primary);
-    display: inline-flex;
-    align-items: center;
-    gap: var(--spacing-2);
-    cursor: pointer;
-    touch-action: manipulation;
-    transition:
-      background-color var(--duration-fast) var(--ease-standard),
-      transform var(--duration-fast) var(--ease-standard);
-  }
-
-  .panel-scope-pill:hover:not(:disabled) {
-    background: var(--color-bg-fill-hover);
-  }
-
-  .panel-scope-pill[aria-pressed='true'] {
-    background: var(--color-action);
-    color: var(--color-text-on-brand);
-  }
-
-  .panel-scope-pill[aria-pressed='true']:hover:not(:disabled) {
-    background: var(--color-action-hover);
-  }
-
-  .panel-scope-pill:disabled[aria-pressed='true'] {
-    background: var(--color-bg-fill);
-    color: var(--color-text-dimmed);
-  }
-
-  .panel-scope-pill:active:not(:disabled) {
-    transform: scale(var(--press-scale));
-  }
-
   .panel-ingredient-quantity-field .field-control,
   .planner-week-pill,
   .planner-shopping-tab li,
