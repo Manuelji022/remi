@@ -81,9 +81,9 @@
 
   .menu-identity-name {
     color: var(--color-text-primary);
-    font-size: 17px;
+    font-size: var(--text-headline);
     font-weight: var(--font-weight-semibold);
-    line-height: 22px;
+    line-height: var(--leading-headline);
   }
 
   .menu-identity-detail {
