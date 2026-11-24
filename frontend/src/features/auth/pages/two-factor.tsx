@@ -2,7 +2,14 @@ import { useNavigate } from '@tanstack/react-router'
 import '../auth.css'
 import type { ComponentProps } from 'react'
 import { useEffect, useEffectEvent, useRef, useState } from 'react'
-import { Banner, Button, Card, TextLink } from '#/components/primitives'
+import {
+  Banner,
+  Button,
+  Card,
+  Field,
+  Input,
+  TextLink,
+} from '#/components/primitives'
 import { getLocalizedPath, useI18n } from '#/shared/i18n'
 import { authClient } from '#/features/auth/auth-client'
 
@@ -90,9 +97,8 @@ export function TwoFactorPage() {
         ) : null}
 
         <form className="auth-form" onSubmit={handleSubmit}>
-          <label className="auth-field">
-            {t('auth.otpCode')}
-            <input
+          <Field label={t('auth.otpCode')}>
+            <Input
               autoComplete="one-time-code"
               inputMode="numeric"
               maxLength={6}
@@ -103,7 +109,7 @@ export function TwoFactorPage() {
               type="text"
               value={code}
             />
-          </label>
+          </Field>
 
           {error ? (
             <Banner tone="error" announce>

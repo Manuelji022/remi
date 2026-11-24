@@ -9,7 +9,7 @@ export { Icon } from './Icon'
 export type { IconName, IconSize } from './Icon'
 export { TextLink } from './TextLink'
 export { Field } from './Field'
-export { Input } from './Input'
+export { Input, Select } from './Input'
 export { Chip } from './Chip'
 export type { ChipProps } from './Chip'
 

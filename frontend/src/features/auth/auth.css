@@ -28,14 +28,6 @@
     gap: var(--spacing-6);
   }
 
-  .auth-field {
-    display: grid;
-    gap: var(--spacing-2);
-    font-size: var(--text-callout);
-    font-weight: var(--font-weight-semibold);
-    line-height: var(--leading-callout);
-  }
-
   .auth-forgot,
   .auth-switch {
     text-align: center;

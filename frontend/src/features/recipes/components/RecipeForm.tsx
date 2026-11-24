@@ -1,5 +1,5 @@
 import { useId, useRef, useState } from 'react'
-import { Button, Icon } from '#/components/primitives'
+import { Button, Field, Icon, Input, Select } from '#/components/primitives'
 import { useI18n } from '#/shared/i18n'
 import {
   INGREDIENT_UNITS,
@@ -88,9 +88,8 @@ export function RecipeForm({ isAddingRecipe, onAddRecipe }: RecipeFormProps) {
 
   return (
     <div className="panel-recipe-form">
-      <label className="panel-field">
-        <span>{t('preferences.recipeName')}</span>
-        <input
+      <Field label={t('preferences.recipeName')}>
+        <Input
           id={recipeNameId}
           name="recipeName"
           onChange={(event) => setRecipeName(event.target.value)}
@@ -98,7 +97,7 @@ export function RecipeForm({ isAddingRecipe, onAddRecipe }: RecipeFormProps) {
           type="text"
           value={recipeName}
         />
-      </label>
+      </Field>
 
       <div className="panel-field">
         <span>{t('preferences.recipeSlot')}</span>
@@ -135,9 +134,11 @@ export function RecipeForm({ isAddingRecipe, onAddRecipe }: RecipeFormProps) {
 
             return (
               <div className="panel-ingredient-row" key={ingredientIndex}>
-                <label className="panel-ingredient-name-field">
-                  <span>{t('preferences.ingredientName')}</span>
-                  <input
+                <Field
+                  className="panel-ingredient-name-field"
+                  label={t('preferences.ingredientName')}
+                >
+                  <Input
                     id={ingredientNameId}
                     name={ingredientNameId}
                     onChange={(event) =>
@@ -151,11 +152,13 @@ export function RecipeForm({ isAddingRecipe, onAddRecipe }: RecipeFormProps) {
                     type="text"
                     value={ingredient.name}
                   />
-                </label>
+                </Field>
 
-                <label className="panel-ingredient-quantity-field">
-                  <span>{t('preferences.ingredientQuantity')}</span>
-                  <input
+                <Field
+                  className="panel-ingredient-quantity-field"
+                  label={t('preferences.ingredientQuantity')}
+                >
+                  <Input
                     aria-invalid={hasInvalidQuantity}
                     id={ingredientQuantityId}
                     min="0"
@@ -171,11 +174,13 @@ export function RecipeForm({ isAddingRecipe, onAddRecipe }: RecipeFormProps) {
                     type="number"
                     value={ingredient.quantity}
                   />
-                </label>
+                </Field>
 
-                <label className="panel-ingredient-unit-field">
-                  <span>{t('preferences.ingredientUnit')}</span>
-                  <select
+                <Field
+                  className="panel-ingredient-unit-field"
+                  label={t('preferences.ingredientUnit')}
+                >
+                  <Select
                     id={ingredientUnitId}
                     name={ingredientUnitId}
                     onChange={(event) =>
@@ -195,8 +200,8 @@ export function RecipeForm({ isAddingRecipe, onAddRecipe }: RecipeFormProps) {
                         {t(`units.${unit}`)}
                       </option>
                     ))}
-                  </select>
-                </label>
+                  </Select>
+                </Field>
 
                 <Button
                   iconOnly

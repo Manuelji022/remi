@@ -1,7 +1,14 @@
 import '../auth.css'
 import type { ComponentProps } from 'react'
 import { useState } from 'react'
-import { Banner, Button, Card, TextLink } from '#/components/primitives'
+import {
+  Banner,
+  Button,
+  Card,
+  Field,
+  Input,
+  TextLink,
+} from '#/components/primitives'
 import { getLocalizedPath, useI18n } from '#/shared/i18n'
 import { authClient } from '#/features/auth/auth-client'
 
@@ -55,9 +62,8 @@ export function ForgotPasswordPage() {
           </Banner>
         ) : (
           <form className="auth-form" onSubmit={handleSubmit}>
-            <label className="auth-field">
-              {t('auth.email')}
-              <input
+            <Field label={t('auth.email')}>
+              <Input
                 autoComplete="email"
                 name="email"
                 spellCheck={false}
@@ -66,7 +72,7 @@ export function ForgotPasswordPage() {
                 type="email"
                 value={email}
               />
-            </label>
+            </Field>
 
             {error ? (
               <Banner tone="error" announce>

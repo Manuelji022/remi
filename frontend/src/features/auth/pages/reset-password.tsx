@@ -2,7 +2,7 @@ import { useNavigate, useSearch } from '@tanstack/react-router'
 import '../auth.css'
 import type { ComponentProps } from 'react'
 import { useState } from 'react'
-import { Banner, Button, Card } from '#/components/primitives'
+import { Banner, Button, Card, Field, Input } from '#/components/primitives'
 import { getLocalizedPath, useI18n } from '#/shared/i18n'
 import { authClient } from '#/features/auth/auth-client'
 
@@ -82,9 +82,8 @@ export function ResetPasswordPage() {
         <p className="auth-copy">{t('auth.resetPasswordCopy')}</p>
 
         <form className="auth-form" onSubmit={handleSubmit}>
-          <label className="auth-field">
-            {t('auth.newPassword')}
-            <input
+          <Field label={t('auth.newPassword')}>
+            <Input
               autoComplete="new-password"
               minLength={8}
               name="password"
@@ -93,7 +92,7 @@ export function ResetPasswordPage() {
               type="password"
               value={password}
             />
-          </label>
+          </Field>
 
           {error ? (
             <Banner tone="error" announce>

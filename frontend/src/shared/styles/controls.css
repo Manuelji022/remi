@@ -125,27 +125,7 @@
     transform: scale(var(--press-scale));
   }
 
-  .auth-field input,
-  .panel-recipe-form input,
-  .panel-recipe-form select {
-    font: inherit;
-    font-size: var(--text-body);
-    line-height: var(--leading-body);
-    min-block-size: var(--size-control);
-    inline-size: 100%;
-    padding-inline: var(--spacing-4);
-    border-radius: var(--radius-pill);
-    border: 1px solid var(--color-border-control);
-    background-color: var(--color-bg-surface);
-    color: var(--color-text-primary);
-  }
-
-  .auth-field input::placeholder,
-  .panel-recipe-form input::placeholder {
-    color: var(--color-text-secondary);
-  }
-
-  .panel-ingredient-quantity-field input,
+  .panel-ingredient-quantity-field .field-control,
   .planner-week-pill,
   .planner-shopping-tab li,
   .panel-ingredient-chip {
