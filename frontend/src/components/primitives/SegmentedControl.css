@@ -36,7 +36,11 @@
 
   @media (hover: hover) {
     .segmented-control
-      > button:hover:not(:disabled, [aria-selected='true'], [aria-checked='true']) {
+      > button:hover:not(
+        :disabled,
+        [aria-selected='true'],
+        [aria-checked='true']
+      ) {
       background: var(--color-gray-300);
       color: var(--color-text-primary);
     }
