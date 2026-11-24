@@ -1,42 +1,52 @@
+/* SegmentedControl primitive. Semantic tokens only. Paper: Design System / Chip & Segmented control. */
 @layer components {
+  /* A 44 tall track with a 3px inset; the segments sit inside it. */
   .segmented-control {
+    box-sizing: border-box;
     display: inline-flex;
     max-inline-size: 100%;
-    background: var(--color-bg-fill-hover);
+    block-size: var(--size-control);
+    padding: calc(var(--spacing-0-5) + 1px);
+    background: var(--color-gray-200);
     border-radius: var(--radius-pill);
   }
+
   .segmented-control > button {
     flex: 1 1 0;
-    min-block-size: var(--size-hit);
     min-inline-size: var(--size-hit);
-    padding: var(--spacing-1) var(--spacing-4);
+    padding-inline: var(--spacing-4);
     border: 0;
     border-radius: var(--radius-pill);
     background: transparent;
     color: var(--color-text-secondary);
-    font: var(--font-weight-medium) var(--text-callout) / var(--leading-callout)
-      var(--font-text);
+    font: inherit;
+    font-size: var(--text-callout);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--leading-callout);
     cursor: pointer;
+    touch-action: manipulation;
   }
+
   .segmented-control > button[aria-selected='true'],
   .segmented-control > button[aria-checked='true'] {
     background: var(--color-bg-surface);
     color: var(--color-text-primary);
-    box-shadow: inset 0 0 0 var(--spacing-1) var(--color-bg-fill-hover);
     font-weight: var(--font-weight-semibold);
   }
-  .segmented-control
-    > button:hover:not(:disabled):not([aria-selected='true']):not(
-      [aria-checked='true']
-    ) {
-    background: var(--color-border-control);
-    color: var(--color-text-primary);
+
+  @media (hover: hover) {
+    .segmented-control
+      > button:hover:not(:disabled, [aria-selected='true'], [aria-checked='true']) {
+      background: var(--color-gray-300);
+      color: var(--color-text-primary);
+    }
   }
 
   .segmented-control > button:focus-visible {
-    outline: var(--spacing-0-5) solid var(--color-focus-ring);
-    outline-offset: var(--spacing-0-5);
+    outline: 2px solid var(--color-focus-ring);
+    outline-offset: 2px;
   }
+
   .segmented-control > button:disabled {
     opacity: var(--opacity-disabled);
     cursor: not-allowed;
