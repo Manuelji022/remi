@@ -22,7 +22,7 @@
     gap: var(--spacing-1-5);
     min-height: var(--size-chip);
     padding-inline: calc(var(--spacing-3) + var(--spacing-0-5));
-    border: 1px solid var(--color-chip-border);
+    border: 1px solid var(--color-gray-300);
     border-radius: var(--radius-pill);
     background: var(--color-bg-surface);
     color: var(--color-text-primary);
@@ -53,7 +53,7 @@
   }
   .chip-context[aria-pressed='true'] .chip-surface {
     background: var(--color-status-warning-bg);
-    border-color: var(--color-chip-context-border);
+    border-color: var(--color-butter-400);
     color: var(--color-status-warning-text);
   }
   .chip-context[aria-pressed='true']:hover:not(:disabled) .chip-surface {
