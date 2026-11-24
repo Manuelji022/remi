@@ -1,0 +1,28 @@
+/* Card primitive. Semantic tokens only. Paper: Design System / Card. */
+@layer components {
+  .card {
+    --card-ground: var(--color-bg-page);
+    --card-edge: var(--color-border-subtle);
+
+    display: grid;
+    gap: var(--card-gap, var(--spacing-4));
+    min-inline-size: 0;
+    padding: var(--card-pad, var(--spacing-card-pad));
+    border: 1px solid var(--card-edge);
+    border-radius: var(--radius-surface);
+    background: var(--color-bg-surface);
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .card-compact {
+    --card-pad: var(--spacing-card-pad-compact);
+  }
+
+  /* The one card that is "now": a 2px ring instead of the hairline. */
+  .card-current {
+    --card-edge: transparent;
+
+    box-shadow: 0 0 0 2px var(--color-border-current);
+  }
+}

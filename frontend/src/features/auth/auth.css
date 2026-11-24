@@ -7,13 +7,8 @@
   .auth-card {
     inline-size: 100%;
     max-inline-size: 25rem;
-    padding-block: clamp(var(--spacing-8), 3vw, var(--spacing-10));
-    padding-inline: clamp(var(--spacing-6), 2.5vw, var(--spacing-8));
-    background: var(--color-bg-surface);
-    border-radius: var(--radius-surface);
-    box-shadow: 0 0 0 1px var(--color-border-subtle);
-    display: grid;
-    gap: var(--spacing-6);
+    --card-pad: var(--spacing-8);
+    --card-gap: var(--spacing-6);
   }
 
   .auth-card h1,
