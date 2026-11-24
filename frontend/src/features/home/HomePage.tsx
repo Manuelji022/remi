@@ -1,18 +1,13 @@
-import {
-  CalendarIcon,
-  ChevronRightIcon,
-  LeafIcon,
-  ShoppingCartIcon,
-  UtensilsIcon,
-} from '#/components/primitives/icons'
+import { Icon } from '#/components/primitives'
+import type { IconName } from '#/components/primitives'
 import { LocalizedLink, useI18n } from '#/shared/i18n'
 import './home.css'
 
 const features = [
-  { key: 'schedule', Icon: CalendarIcon },
-  { key: 'recipes', Icon: UtensilsIcon },
-  { key: 'shopping', Icon: ShoppingCartIcon },
-] as const
+  { key: 'schedule', icon: 'week' },
+  { key: 'recipes', icon: 'recipes' },
+  { key: 'shopping', icon: 'shopping-list' },
+] as const satisfies readonly { key: string; icon: IconName }[]
 
 export function HomePage() {
   const { t } = useI18n()
@@ -30,7 +25,7 @@ export function HomePage() {
               to="/weekly-menu-planner"
             >
               {t('home.start')}
-              <ChevronRightIcon aria-hidden="true" />
+              <Icon name="next" />
             </LocalizedLink>
             <LocalizedLink className="text-link" to="/signup">
               {t('auth.createAccount')}
@@ -42,7 +37,7 @@ export function HomePage() {
         <aside className="home-preview" aria-labelledby="home-preview-title">
           <div className="home-preview-heading">
             <span className="home-icon">
-              <CalendarIcon aria-hidden="true" />
+              <Icon name="week" />
             </span>
             <span className="home-example-label">{t('home.example')}</span>
           </div>
@@ -64,7 +59,7 @@ export function HomePage() {
             </dl>
           </div>
           <p className="home-preview-footer">
-            <LeafIcon aria-hidden="true" />
+            <Icon name="vegetarian" size="sm" />
             {t('home.previewFooter')}
           </p>
         </aside>
@@ -76,10 +71,10 @@ export function HomePage() {
           <p>{t('home.featuresCopy')}</p>
         </div>
         <div className="home-feature-grid">
-          {features.map(({ key, Icon }) => (
+          {features.map(({ key, icon }) => (
             <article className="home-feature" key={key}>
               <span className="home-icon">
-                <Icon aria-hidden="true" />
+                <Icon name={icon} />
               </span>
               <h3>{t(`home.${key}Title`)}</h3>
               <p>{t(`home.${key}Copy`)}</p>

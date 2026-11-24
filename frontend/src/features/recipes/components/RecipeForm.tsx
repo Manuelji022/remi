@@ -1,5 +1,5 @@
 import { useId, useRef, useState } from 'react'
-import { CheckIcon, PlusIcon, TrashIcon } from '#/components/primitives'
+import { Icon } from '#/components/primitives'
 import { useI18n } from '#/shared/i18n'
 import {
   INGREDIENT_UNITS,
@@ -115,9 +115,7 @@ export function RecipeForm({ isAddingRecipe, onAddRecipe }: RecipeFormProps) {
               type="button"
               onClick={() => setRecipeSlot(slot)}
             >
-              {recipeSlot === slot ? (
-                <CheckIcon aria-hidden="true" className="panel-pill-check" />
-              ) : null}
+              {recipeSlot === slot ? <Icon name="done" size="sm" /> : null}
               {t(`slots.${slot}`)}
             </button>
           ))}
@@ -206,7 +204,7 @@ export function RecipeForm({ isAddingRecipe, onAddRecipe }: RecipeFormProps) {
                   aria-label={t('preferences.deleteIngredient')}
                   onClick={() => deleteRecipeIngredientRow(ingredientIndex)}
                 >
-                  <TrashIcon aria-hidden="true" />
+                  <Icon name="remove" />
                 </button>
               </div>
             )
@@ -222,7 +220,7 @@ export function RecipeForm({ isAddingRecipe, onAddRecipe }: RecipeFormProps) {
           type="button"
           onClick={addRecipeIngredientRow}
         >
-          <PlusIcon aria-hidden="true" />
+          <Icon name="add" />
           {t('preferences.addIngredient')}
         </button>
       </div>
@@ -235,7 +233,7 @@ export function RecipeForm({ isAddingRecipe, onAddRecipe }: RecipeFormProps) {
         }
         onClick={handleAddRecipe}
       >
-        <PlusIcon aria-hidden="true" />
+        <Icon name="add" />
         {t(
           isAddingRecipe ? 'preferences.addingRecipe' : 'preferences.addRecipe',
         )}

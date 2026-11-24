@@ -1,4 +1,4 @@
-import { TrashIcon } from '#/components/primitives'
+import { Icon } from '#/components/primitives'
 import { useI18n } from '#/shared/i18n'
 import type { Recipe } from '#/features/recipes/recipe'
 import { formatRecipeIngredient } from '../format'
@@ -38,7 +38,7 @@ export function RecipeCard({ recipe, onDelete }: RecipeCardProps) {
         aria-label={t('preferences.deleteRecipe', { name: recipe.name })}
         onClick={onDelete}
       >
-        <TrashIcon aria-hidden="true" />
+        <Icon name="remove" />
       </button>
     </article>
   )

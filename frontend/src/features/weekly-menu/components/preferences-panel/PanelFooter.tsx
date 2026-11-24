@@ -1,4 +1,4 @@
-import { CheckIcon } from '#/components/primitives'
+import { Icon } from '#/components/primitives'
 import type { Preferences } from '#/features/weekly-menu/types'
 import { useI18n } from '#/shared/i18n'
 
@@ -45,7 +45,7 @@ export function PanelFooter({
           type="button"
           onClick={() => onSave(draftPrefs)}
         >
-          <CheckIcon aria-hidden="true" />
+          <Icon name="done" />
           {t(isSaving ? 'preferences.saving' : 'preferences.save')}
         </button>
       </div>

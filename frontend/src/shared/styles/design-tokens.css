@@ -144,6 +144,11 @@
     --size-chip: var(--size-control-sm);
     --stroke-icon: 2.2px;
     --stroke-icon-bold: 2.75px; /* 16px icons only */
+    --stroke-icon-xl: 1.5px; /* 48px icons only: 3px drawn */
+    --size-icon-sm: 16px; /* chips, sm buttons, captions, field errors */
+    --size-icon-md: 20px; /* buttons, menu rows, links, inputs */
+    --size-icon-lg: 24px; /* 17px list rows, nav pill */
+    --size-icon-xl: 48px; /* empty states only */
 
     /* --- Containers & breakpoints (documentation: queries write the value) --- */
     --container-sheet: 480px;
