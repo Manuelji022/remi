@@ -1,5 +1,5 @@
 import { useId, useRef, useState } from 'react'
-import { Icon } from '#/components/primitives'
+import { Icon, TextLink } from '#/components/primitives'
 import { useI18n } from '#/shared/i18n'
 import {
   INGREDIENT_UNITS,
@@ -215,14 +215,13 @@ export function RecipeForm({ isAddingRecipe, onAddRecipe }: RecipeFormProps) {
             {t('preferences.invalidIngredientQuantity')}
           </p>
         )}
-        <button
-          className="text-link panel-add-ingredient-btn"
-          type="button"
+        <TextLink
+          className="panel-add-ingredient-btn"
+          icon={<Icon name="add" />}
           onClick={addRecipeIngredientRow}
         >
-          <Icon name="add" />
           {t('preferences.addIngredient')}
-        </button>
+        </TextLink>
       </div>
 
       <button

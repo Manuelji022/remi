@@ -149,29 +149,6 @@
     transform: scale(var(--press-scale));
   }
 
-  .text-link {
-    font-size: var(--text-callout);
-    font-weight: var(--font-weight-semibold);
-    line-height: var(--leading-callout);
-    min-block-size: var(--size-control);
-    min-inline-size: var(--size-hit);
-    padding-inline: var(--spacing-2);
-    border-radius: var(--radius-mark);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--spacing-2);
-    text-decoration: none;
-    color: var(--color-text-primary);
-    background: transparent;
-    touch-action: manipulation;
-  }
-
-  .text-link:hover {
-    background: var(--color-bg-fill-hover);
-    text-decoration: underline;
-  }
-
   .icon-btn {
     inline-size: var(--size-hit);
     block-size: var(--size-hit);
@@ -317,10 +294,6 @@
   @media (min-width: 48rem) {
     .btn-secondary {
       padding-inline: var(--spacing-4);
-    }
-
-    .text-link {
-      padding-inline: var(--spacing-2);
     }
   }
 }

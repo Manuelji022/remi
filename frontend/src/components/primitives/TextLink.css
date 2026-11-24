@@ -1,0 +1,89 @@
+/* TextLink primitive. Semantic tokens only. Paper: Design System / Text link. */
+@layer components {
+  .text-link {
+    color: var(--color-text-brand);
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+
+  .text-link:hover:not(:disabled, [aria-disabled='true']) {
+    color: var(--color-action-hover);
+  }
+
+  .text-link:active:not(:disabled, [aria-disabled='true']) {
+    color: var(--color-action-pressed);
+    text-decoration: underline 1px;
+    text-underline-position: from-font;
+  }
+
+  .text-link:focus-visible {
+    outline: 2px solid var(--color-focus-ring);
+    outline-offset: 2px;
+  }
+
+  .text-link:disabled,
+  .text-link[aria-disabled='true'] {
+    opacity: var(--opacity-disabled);
+    cursor: not-allowed;
+  }
+
+  /* Inline: sits in a sentence, takes its size, always underlined. The padding
+     is cancelled by the margin so the wash on hover does not move the text. */
+  .text-link-inline {
+    font: inherit;
+    padding-inline: var(--spacing-1);
+    margin-inline: calc(-1 * var(--spacing-1));
+    border-radius: var(--radius-mark);
+    text-decoration: underline 1px;
+    text-underline-position: from-font;
+  }
+
+  .text-link-inline:hover:not(:disabled, [aria-disabled='true']) {
+    background: var(--color-bg-brand-soft);
+  }
+
+  /* Standalone: its own line, 44 tall hit area (pad the box, not the text). */
+  .text-link-standalone {
+    font-size: var(--text-callout);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--leading-callout);
+    min-block-size: var(--size-hit);
+    padding-inline: var(--spacing-3);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-2);
+    position: relative;
+    text-decoration: none;
+    white-space: nowrap;
+    background: none;
+    border: 0;
+    font-family: inherit;
+  }
+
+  .text-link-standalone svg {
+    inline-size: var(--spacing-5);
+    block-size: var(--spacing-5);
+    stroke-width: 2.2;
+  }
+
+  .text-link-standalone:hover:not(:disabled, [aria-disabled='true']) {
+    text-decoration: underline 1px;
+    text-underline-position: from-font;
+  }
+
+  /* The focus ring hugs the label, not the whole 44 tall box. */
+  .text-link-standalone:focus-visible {
+    outline: 0;
+  }
+
+  .text-link-standalone:focus-visible::before {
+    content: '';
+    position: absolute;
+    inset-block: calc(50% - var(--spacing-3));
+    inset-inline: var(--spacing-2);
+    border-radius: var(--radius-mark);
+    outline: 2px solid var(--color-focus-ring);
+    outline-offset: 2px;
+  }
+}

@@ -2,7 +2,8 @@ import { useNavigate } from '@tanstack/react-router'
 import '../auth.css'
 import type { ComponentProps } from 'react'
 import { useEffect, useEffectEvent, useRef, useState } from 'react'
-import { LocalizedLink, getLocalizedPath, useI18n } from '#/shared/i18n'
+import { TextLink } from '#/components/primitives'
+import { getLocalizedPath, useI18n } from '#/shared/i18n'
 import { authClient } from '#/features/auth/auth-client'
 
 type FormSubmitEvent = Parameters<
@@ -121,9 +122,7 @@ export function TwoFactorPage() {
         </button>
 
         <p className="auth-switch">
-          <LocalizedLink className="text-link" to="/login">
-            {t('auth.backToLogin')}
-          </LocalizedLink>
+          <TextLink to="/login">{t('auth.backToLogin')}</TextLink>
         </p>
       </section>
     </main>

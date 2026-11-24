@@ -2,7 +2,8 @@ import { useNavigate } from '@tanstack/react-router'
 import '../auth.css'
 import type { ComponentProps } from 'react'
 import { useState } from 'react'
-import { LocalizedLink, getLocalizedPath, useI18n } from '#/shared/i18n'
+import { TextLink } from '#/components/primitives'
+import { getLocalizedPath, useI18n } from '#/shared/i18n'
 import { authClient } from '#/features/auth/auth-client'
 
 type FormSubmitEvent = Parameters<
@@ -126,9 +127,9 @@ export function SignupPage() {
 
         <p className="auth-switch">
           {t('auth.alreadyHaveAccount')}{' '}
-          <LocalizedLink className="text-link" to="/login">
+          <TextLink variant="inline" to="/login">
             {t('auth.login')}
-          </LocalizedLink>
+          </TextLink>
         </p>
       </section>
     </main>

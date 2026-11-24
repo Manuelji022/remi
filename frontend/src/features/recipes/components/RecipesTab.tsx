@@ -1,5 +1,5 @@
-import { Icon } from '#/components/primitives'
-import { LocalizedLink, useI18n } from '#/shared/i18n'
+import { Icon, TextLink } from '#/components/primitives'
+import { useI18n } from '#/shared/i18n'
 import { authClient } from '#/features/auth/auth-client'
 import { useRecipeCatalog } from '#/features/recipes/hooks/useRecipeCatalog'
 import type { Recipe, RecipeInput } from '#/features/recipes/recipe'
@@ -88,9 +88,7 @@ function RecipeCatalogContent({
       <div className="panel-empty-recipes">
         <p>{t('preferences.signInToSaveRecipes')}</p>
         <p>
-          <LocalizedLink className="text-link" to="/login">
-            {t('auth.login')}
-          </LocalizedLink>
+          <TextLink to="/login">{t('auth.login')}</TextLink>
         </p>
       </div>
     )
