@@ -1,0 +1,123 @@
+/* EmptyState primitive. Semantic tokens only. Paper: Design System / Empty state. */
+@layer components {
+  .empty-state {
+    --empty-state-title-size: var(--text-large-title);
+    --empty-state-title-leading: var(--leading-large-title);
+    --empty-state-body-size: var(--text-body);
+    --empty-state-body-leading: var(--leading-body);
+    --empty-state-art-gap: var(--spacing-6);
+    --empty-state-action-gap: var(--spacing-6);
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .empty-state-title {
+    font-family: var(--font-display);
+    font-size: var(--empty-state-title-size);
+    line-height: var(--empty-state-title-leading);
+    letter-spacing: var(--tracking-title);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-primary);
+    text-wrap: balance;
+  }
+
+  .empty-state-body {
+    display: grid;
+    gap: var(--spacing-2);
+    max-inline-size: var(--empty-state-body-max, 22.5rem);
+    margin-block-start: var(--spacing-2);
+    color: var(--color-text-secondary);
+    font-size: var(--empty-state-body-size);
+    line-height: var(--empty-state-body-leading);
+    font-weight: var(--font-weight-regular);
+  }
+
+  .empty-state-art {
+    display: flex;
+    margin-block-end: var(--empty-state-art-gap);
+    color: var(--color-action);
+  }
+
+  .empty-state-action {
+    display: flex;
+    margin-block-start: var(--empty-state-action-gap);
+  }
+
+  /* Page: centred in the space under the header, a little above the middle.
+     A <main> that holds one lets it fill the space. */
+  main:has(> .empty-state-page) {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .empty-state-page {
+    flex: 1;
+    justify-content: center;
+    padding-block-start: var(--spacing-10);
+    padding-block-end: calc(var(--spacing-10) + var(--spacing-10));
+    padding-inline: var(--spacing-6);
+  }
+
+  /* Card: one region is empty and the rest is not. */
+  .empty-state-card {
+    --empty-state-title-size: var(--text-title);
+    --empty-state-title-leading: var(--leading-title);
+    --empty-state-body-size: var(--text-callout);
+    --empty-state-body-leading: var(--leading-callout);
+    --empty-state-body-max: 20rem;
+    --empty-state-art-gap: var(--spacing-5);
+    --empty-state-action-gap: var(--spacing-5);
+
+    padding-block: var(--spacing-10);
+    padding-inline: var(--spacing-8);
+    background: var(--color-bg-surface);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--radius-surface);
+  }
+
+  /* Compact: one row, nested, so it sits on a fill. */
+  .empty-state-compact {
+    flex-direction: row;
+    gap: var(--spacing-4);
+    padding: var(--spacing-4);
+    background: var(--color-bg-fill);
+    border-radius: var(--radius-inner);
+    text-align: start;
+  }
+
+  .empty-state-compact .empty-state-art {
+    flex-shrink: 0;
+    margin: 0;
+    color: var(--color-text-secondary);
+  }
+
+  .empty-state-compact .empty-state-text {
+    flex: 1;
+    display: grid;
+    gap: var(--spacing-0-5);
+    min-inline-size: 0;
+  }
+
+  .empty-state-compact .empty-state-title {
+    font-family: var(--font-text);
+    font-size: var(--text-headline);
+    line-height: var(--leading-headline);
+    letter-spacing: var(--tracking-normal);
+    font-weight: var(--font-weight-semibold);
+  }
+
+  .empty-state-compact .empty-state-body {
+    margin: 0;
+    max-inline-size: none;
+    font-size: var(--text-callout);
+    line-height: var(--leading-callout);
+  }
+
+  .empty-state-compact .empty-state-action {
+    flex-shrink: 0;
+    margin: 0;
+  }
+}

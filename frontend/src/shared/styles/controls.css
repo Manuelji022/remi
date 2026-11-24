@@ -35,8 +35,7 @@
   }
 
   h2,
-  h3,
-  .empty-state h2 {
+  h3 {
     font-size: var(--text-title);
     line-height: var(--leading-title);
     letter-spacing: var(--tracking-title);
@@ -73,30 +72,6 @@
 
   .skip:focus-visible {
     transform: none;
-  }
-
-  .empty-state {
-    text-align: center;
-    padding-block: var(--spacing-16);
-    padding-inline: var(--spacing-card-pad);
-    display: grid;
-    justify-items: center;
-    gap: var(--spacing-stack-md);
-    background: var(--color-bg-surface);
-    border-radius: var(--radius-surface);
-    box-shadow: 0 0 0 1px var(--color-border-subtle);
-  }
-
-  .empty-state > .icon {
-    color: var(--color-action);
-  }
-
-  .empty-state p {
-    max-inline-size: 32em;
-    color: var(--color-text-secondary);
-    font-size: var(--text-body);
-    line-height: var(--leading-body);
-    font-weight: var(--font-weight-regular);
   }
 
   .btn {
