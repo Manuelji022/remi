@@ -1,5 +1,5 @@
 import './header.css'
-import { TextLink } from '#/components/primitives'
+import { Button, TextLink } from '#/components/primitives'
 import { LocalizedLink, useI18n } from '#/shared/i18n'
 import { authClient } from '#/features/auth/auth-client'
 import { useSignOut } from '#/features/auth/use-sign-out'
@@ -36,22 +36,16 @@ export function Header() {
           {isSessionPending ? null : session ? (
             <>
               <span className="header-user">{session.user.name}</span>
-              <button
-                className="btn btn-secondary"
-                onClick={() => void signOut()}
-                type="button"
-              >
-                {t('auth.logout')}
-              </button>
+              <Button onClick={() => void signOut()}>{t('auth.logout')}</Button>
             </>
           ) : (
             <>
               <TextLink nav to="/login">
                 {t('auth.login')}
               </TextLink>
-              <LocalizedLink className="btn btn-secondary" nav to="/signup">
+              <Button nav to="/signup">
                 {t('auth.signup')}
-              </LocalizedLink>
+              </Button>
             </>
           )}
         </div>

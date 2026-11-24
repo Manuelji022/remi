@@ -1,6 +1,6 @@
-import { Icon, TextLink } from '#/components/primitives'
+import { Button, Icon, TextLink } from '#/components/primitives'
 import type { IconName } from '#/components/primitives'
-import { LocalizedLink, useI18n } from '#/shared/i18n'
+import { useI18n } from '#/shared/i18n'
 import './home.css'
 
 const features = [
@@ -20,13 +20,13 @@ export function HomePage() {
           <h1 id="home-title">{t('home.title')}</h1>
           <p className="home-description">{t('home.copy')}</p>
           <div className="home-actions">
-            <LocalizedLink
-              className="btn btn-primary"
+            <Button
+              variant="brand"
               to="/weekly-menu-planner"
+              trailingIcon="next"
             >
               {t('home.start')}
-              <Icon name="next" />
-            </LocalizedLink>
+            </Button>
             <TextLink to="/signup">{t('auth.createAccount')}</TextLink>
           </div>
           <p className="home-note">{t('home.note')}</p>
