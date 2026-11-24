@@ -2,8 +2,8 @@ import { useNavigate, useSearch } from '@tanstack/react-router'
 import '../auth.css'
 import type { ComponentProps } from 'react'
 import { useState } from 'react'
+import { Banner, Card } from '#/components/primitives'
 import { getLocalizedPath, useI18n } from '#/shared/i18n'
-import { Card } from '#/components/primitives'
 import { authClient } from '#/features/auth/auth-client'
 
 type FormSubmitEvent = Parameters<
@@ -95,7 +95,11 @@ export function ResetPasswordPage() {
             />
           </label>
 
-          {error ? <p className="auth-error">{error}</p> : null}
+          {error ? (
+            <Banner tone="error" announce>
+              {error}
+            </Banner>
+          ) : null}
 
           <button
             className="btn btn-primary"

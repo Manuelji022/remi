@@ -1,0 +1,157 @@
+/* Banner primitive. Semantic tokens only. Paper: Design System / Banner. */
+@layer components {
+  .banner {
+    /* Tone, set by .banner-{tone}. Every part uses these two and nothing else. */
+    --banner-bg: var(--color-status-info-bg);
+    --banner-fg: var(--color-status-info-text);
+
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-3);
+    padding-block: var(--spacing-1);
+    padding-inline: var(--spacing-4);
+    border-radius: var(--radius-inner);
+    background: var(--banner-bg);
+    color: var(--banner-fg);
+    font-size: var(--text-callout);
+    line-height: var(--leading-callout);
+  }
+
+  .banner-info {
+    --banner-bg: var(--color-status-info-bg);
+    --banner-fg: var(--color-status-info-text);
+  }
+
+  .banner-success {
+    --banner-bg: var(--color-status-success-bg);
+    --banner-fg: var(--color-status-success-text);
+  }
+
+  .banner-warning {
+    --banner-bg: var(--color-status-warning-bg);
+    --banner-fg: var(--color-status-warning-text);
+  }
+
+  .banner-error {
+    --banner-bg: var(--color-status-error-bg);
+    --banner-fg: var(--color-status-error-text);
+  }
+
+  .banner-dismissible {
+    padding-inline-end: var(--spacing-1);
+  }
+
+  .banner-icon {
+    display: flex;
+    flex: none;
+    padding-block-start: var(--spacing-3);
+  }
+
+  .banner-body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: var(--spacing-0-5);
+    min-inline-size: 0;
+    padding-block: var(--spacing-3);
+  }
+
+  .banner-title {
+    font-weight: var(--font-weight-semibold);
+  }
+
+  /* Error summary: a list of links to the fields. */
+  .banner-errors {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-1);
+    margin-block: var(--spacing-1) 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .banner-action {
+    display: flex;
+    margin-block-start: var(--spacing-2);
+  }
+
+  /* Links and the ✕ wear the tone's text color, never the brand color. The
+     link is 20 tall to the eye, 44 to a finger. */
+  .banner .text-link,
+  .banner .text-link:hover:not(:disabled, [aria-disabled='true']),
+  .banner .text-link:active:not(:disabled, [aria-disabled='true']) {
+    color: var(--banner-fg);
+  }
+
+  .banner .text-link-standalone {
+    justify-content: flex-start;
+    margin-block: calc((var(--leading-callout) - var(--size-hit)) / 2);
+    padding-inline: 0;
+    text-decoration: underline 1px;
+    text-underline-position: from-font;
+  }
+
+  .banner .text-link-standalone:focus-visible::before {
+    inset-inline: calc(-1 * var(--spacing-0-5));
+    box-shadow: 0 0 0 2px var(--banner-bg);
+  }
+
+  .banner .text-link-inline:hover:not(:disabled, [aria-disabled='true']) {
+    background: color-mix(in srgb, var(--banner-fg) 10%, transparent);
+  }
+
+  .banner-dismiss {
+    --button-fg: var(--banner-fg);
+    --button-bg-hover: color-mix(in srgb, var(--banner-fg) 10%, transparent);
+    --button-bg-active: color-mix(in srgb, var(--banner-fg) 16%, transparent);
+
+    flex: none;
+  }
+
+  .banner-dismiss:focus-visible {
+    box-shadow: 0 0 0 2px var(--banner-bg);
+  }
+
+  /* The error summary takes focus once, with the usual 2 + 2 ring. */
+  .banner:focus {
+    outline: 2px solid var(--color-focus-ring);
+    outline-offset: 2px;
+  }
+
+  /* Page-level: full-bleed band under the header, square, one line of text
+     that wraps. Content lines up with the page gutter. */
+  .banner-page {
+    padding-block: var(--spacing-3);
+    padding-inline: clamp(var(--spacing-4), 4vw, var(--spacing-10));
+    border-radius: 0;
+  }
+
+  .banner-page .banner-icon,
+  .banner-page .banner-body {
+    padding-block: 0;
+  }
+
+  .banner-page .banner-body {
+    display: block;
+  }
+
+  .banner-page .banner-title,
+  .banner-page .banner-text {
+    display: inline;
+  }
+
+  .banner-page .banner-title::after {
+    content: ' ';
+  }
+
+  /* A banner that shows up later fades in. Reduced motion zeroes the duration. */
+  .banner-live {
+    animation: banner-in var(--duration-base) var(--ease-standard);
+  }
+
+  @keyframes banner-in {
+    from {
+      opacity: 0;
+    }
+  }
+}
