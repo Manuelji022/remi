@@ -25,7 +25,10 @@
     border-radius: var(--radius-surface);
     background: var(--color-text-primary);
     color: var(--color-text-on-brand);
-    box-shadow: var(--shadow-popover);
+    /* Paper has no shadow token: value from the Toast artboard. */
+    box-shadow:
+      0 8px 24px color-mix(in srgb, var(--color-ink) 12%, transparent),
+      0 0 0 1px color-mix(in srgb, var(--color-ink) 6%, transparent);
     font-size: var(--text-callout);
     font-weight: var(--font-weight-medium);
     line-height: var(--leading-callout);

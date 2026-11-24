@@ -161,12 +161,6 @@
     /* --- Opacity --- */
     --opacity-disabled: 40%;
 
-    /* --- Elevation (Paper has no shadow token yet: value from the Toast
-       artboard, a soft drop plus a 1px ring) --- */
-    --shadow-popover:
-      0 8px 24px color-mix(in srgb, var(--color-ink) 12%, transparent),
-      0 0 0 1px color-mix(in srgb, var(--color-ink) 6%, transparent);
-
     /* --- Motion --- */
     --duration-fast: 120ms; /* hover, press, tick */
     --duration-base: 200ms; /* menus, tabs, reduced-motion fades */
