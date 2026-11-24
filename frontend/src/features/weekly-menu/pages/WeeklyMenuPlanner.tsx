@@ -226,38 +226,44 @@ export function WeeklyMenuPlanner() {
           onRetryPreviewSave={() => void acceptPreview()}
         />
 
-        <PlannerContent
-          activeTab={activeTab}
-          generatingTargetWeek={generatingTargetWeek}
-          isLoading={isLoading}
-          loadFailed={loadFailed}
-          onRetryLoad={handleRetryLoad}
-          tour={tour}
-          currentPreview={currentPreview}
-          readyData={readyData}
-          previewCatalogReady={previewCatalogReady}
-          isWriting={isWriting}
-          isAcceptingPreview={isAcceptingPreview}
-          previewSaveError={previewSaveError}
-          canAcceptPreview={canAcceptPreview}
-          canGenerateAnother={canGenerateAnother}
-          userId={userId}
-          isGenerating={isGenerating}
-          visibleMenu={visibleMenu}
-          viewedWeek={viewedWeek}
-          isLocked={isLocked}
-          shoppingEnabled={shoppingEnabled}
-          shoppingLines={lines}
-          checkedIngredients={checkedIngredients}
-          onToggleIngredient={toggleIngredient}
-          onGenerateAnother={generation.handleGenerateAnother}
-          onEditSchedule={generation.editSchedule}
-          onDiscard={openDiscardConfirmation}
-          onAccept={() => void acceptPreview()}
-          onGenerateMenu={generation.handleGenerateMenu}
-          onUpdateRecipe={handlePreviewRecipeChange}
-          onUnlockWeek={setUnlockedWeek}
-        />
+        <div
+          role="tabpanel"
+          id="planner-panel"
+          aria-labelledby={`planner-tab-${activeTab}`}
+        >
+          <PlannerContent
+            activeTab={activeTab}
+            generatingTargetWeek={generatingTargetWeek}
+            isLoading={isLoading}
+            loadFailed={loadFailed}
+            onRetryLoad={handleRetryLoad}
+            tour={tour}
+            currentPreview={currentPreview}
+            readyData={readyData}
+            previewCatalogReady={previewCatalogReady}
+            isWriting={isWriting}
+            isAcceptingPreview={isAcceptingPreview}
+            previewSaveError={previewSaveError}
+            canAcceptPreview={canAcceptPreview}
+            canGenerateAnother={canGenerateAnother}
+            userId={userId}
+            isGenerating={isGenerating}
+            visibleMenu={visibleMenu}
+            viewedWeek={viewedWeek}
+            isLocked={isLocked}
+            shoppingEnabled={shoppingEnabled}
+            shoppingLines={lines}
+            checkedIngredients={checkedIngredients}
+            onToggleIngredient={toggleIngredient}
+            onGenerateAnother={generation.handleGenerateAnother}
+            onEditSchedule={generation.editSchedule}
+            onDiscard={openDiscardConfirmation}
+            onAccept={() => void acceptPreview()}
+            onGenerateMenu={generation.handleGenerateMenu}
+            onUpdateRecipe={handlePreviewRecipeChange}
+            onUnlockWeek={setUnlockedWeek}
+          />
+        </div>
       </section>
 
       <PlannerDialogs

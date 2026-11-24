@@ -1,6 +1,5 @@
-import { Badge } from '#/components/primitives'
+import { Badge, SegmentedControl } from '#/components/primitives'
 import { useI18n } from '#/shared/i18n'
-import './main-tab.css'
 
 interface MainTabProps {
   activeTab: 'menu' | 'ingredients'
@@ -8,7 +7,6 @@ interface MainTabProps {
   neededItems: number
   isIngredientsDisabled?: boolean
 }
-
 export function MainTab({
   activeTab,
   onTabChange,
@@ -16,25 +14,32 @@ export function MainTab({
   isIngredientsDisabled = false,
 }: MainTabProps) {
   const { t } = useI18n()
-
   return (
-    <div className="main-tab">
-      <button
-        className={`tab-btn ${activeTab === 'menu' ? 'active' : ''}`}
-        type="button"
-        onClick={() => onTabChange('menu')}
-      >
-        {t('tabs.menu')}
-      </button>
-      <button
-        className={`tab-btn ${activeTab === 'ingredients' ? 'active' : ''}`}
-        type="button"
-        disabled={isIngredientsDisabled}
-        onClick={() => onTabChange('ingredients')}
-      >
-        {t('tabs.ingredients')}
-        <Badge count={neededItems} />
-      </button>
-    </div>
+    <SegmentedControl
+      mode="tabs"
+      label={t('tabs.menu')}
+      value={activeTab}
+      onChange={onTabChange}
+      options={[
+        {
+          value: 'menu',
+          label: t('tabs.menu'),
+          id: 'planner-tab-menu',
+          controls: 'planner-panel',
+        },
+        {
+          value: 'ingredients',
+          label: (
+            <>
+              {t('tabs.ingredients')}
+              <Badge count={neededItems} />
+            </>
+          ),
+          id: 'planner-tab-ingredients',
+          controls: 'planner-panel',
+          disabled: isIngredientsDisabled,
+        },
+      ]}
+    />
   )
 }
