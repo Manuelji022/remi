@@ -8,6 +8,7 @@ import { Footer } from '#/app/layout/Footer'
 import { Header } from '#/app/layout/Header'
 import { NotFound } from '#/app/layout/NotFound'
 import { RouteError } from '#/app/layout/RouteError'
+import { ToastProvider } from '#/components/primitives'
 import { I18nProvider, getLocaleFromPathname, useI18n } from '#/shared/i18n'
 
 import appCss from '../app/styles.css?url'
@@ -66,10 +67,12 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <I18nProvider locale={locale}>
-          <SkipLink />
-          <Header />
-          {children}
-          <Footer />
+          <ToastProvider>
+            <SkipLink />
+            <Header />
+            {children}
+            <Footer />
+          </ToastProvider>
         </I18nProvider>
         <Scripts />
       </body>

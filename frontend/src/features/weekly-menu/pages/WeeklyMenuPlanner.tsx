@@ -66,7 +66,6 @@ export function WeeklyMenuPlanner() {
   })
   const {
     readyData,
-    currentAction,
     currentGeneration,
     scheduleDialog,
     generatingTargetWeek,
@@ -225,7 +224,6 @@ export function WeeklyMenuPlanner() {
           previewSaveError={previewSaveError}
           canAcceptPreview={canAcceptPreview}
           onRetryPreviewSave={() => void acceptPreview()}
-          action={currentAction}
         />
 
         <PlannerContent
