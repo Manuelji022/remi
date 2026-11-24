@@ -12,16 +12,19 @@ export default async function scenario({
 
   await open('ok', 'Generate menu')
   const base = await evaluate('location.origin')
-  await wait(
-    `${auth}?.innerText.includes('Synthetic E2E') && ${auth}?.innerText.includes('Log out')`,
+  await wait(`${auth}?.innerText.includes('Synthetic E2E')`)
+  // The account menu is a popover: Log out is only on screen once it opens.
+  await evaluate(`${auth}.querySelector('[aria-haspopup="menu"]').click()`)
+  await wait(`document.querySelector('.menu:popover-open')?.innerText.includes('Log out')`)
+  const signedIn = await evaluate(
+    `${auth}.innerText + '\\n' + document.querySelector('.menu').innerText`,
   )
-  const signedIn = await evaluate(`${auth}.innerText`)
   assert.match(signedIn, /Synthetic E2E/)
   assert.match(signedIn, /Log out/)
   await browser(['screenshot', artifact.replace(/\.json$/, '-signed-in.png')])
   emit('signed-in header shows the current user and Log out', signedIn)
 
-  await click('Log out')
+  await browser(['find', 'role', 'menuitem', 'click', '--name', 'Log out', '--exact'])
   await wait(
     `location.pathname === '/' && ${auth}?.innerText.includes('Log in') && ${auth}?.innerText.includes('Sign up')`,
   )
