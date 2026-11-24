@@ -8,11 +8,11 @@
   }
 
   .divider-horizontal {
-    block-size: var(--border-hairline);
+    block-size: 1px;
   }
 
   .divider-vertical {
-    inline-size: var(--border-hairline);
+    inline-size: 1px;
     block-size: var(--size-control-sm);
     align-self: center;
   }
@@ -32,7 +32,7 @@
 
   .divider-line {
     flex: 1;
-    block-size: var(--border-hairline);
+    block-size: 1px;
     background: var(--color-border-subtle);
   }
 

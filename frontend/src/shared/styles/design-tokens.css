@@ -142,7 +142,6 @@
     --size-control-lg: 48px;
     --size-control-xl: 60px;
     --size-chip: var(--size-control-sm);
-    --border-hairline: 1px; /* dividers, row separators */
     --stroke-icon: 2.2px;
     --stroke-icon-bold: 2.75px; /* 16px icons only */
     --stroke-icon-xl: 1.5px; /* 48px icons only: 3px drawn */
