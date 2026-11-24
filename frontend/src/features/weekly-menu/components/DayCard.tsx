@@ -1,3 +1,4 @@
+import { Badge } from '#/components/primitives'
 import type { Day } from '#/features/weekly-menu/constants'
 import './day-card.css'
 import type { DayContext } from '#/features/weekly-menu/types'
@@ -36,9 +37,7 @@ export function DayCard({
     <article className={`day-card ${isWeekend ? 'weekend' : ''}`}>
       <div className="day-card-header">
         <div className="day-name">{t(`days.${day}`)}</div>
-        {dayContextLabel && (
-          <span className="day-context-badge">{dayContextLabel}</span>
-        )}
+        {dayContextLabel && <Badge shape="square">{dayContextLabel}</Badge>}
       </div>
       <div className="day-meals">
         <MealSlotDisplay

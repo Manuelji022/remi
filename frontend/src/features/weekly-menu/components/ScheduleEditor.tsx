@@ -1,3 +1,4 @@
+import { Badge } from '#/components/primitives'
 import { DAYS, isWeekend } from '#/features/weekly-menu/constants'
 import type { Preferences } from '#/features/weekly-menu/types'
 import { useI18n } from '#/shared/i18n'
@@ -46,7 +47,7 @@ export function ScheduleEditor({
                 </p>
               </div>
               {isWeekend(day) && (
-                <span className="panel-day-badge">{t('common.weekend')}</span>
+                <Badge shape="square">{t('common.weekend')}</Badge>
               )}
             </div>
             <div className="panel-control-group">
