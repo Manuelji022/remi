@@ -80,7 +80,7 @@ await run(['find', 'role', 'button', 'click', '--name', 'Add recipe', '--exact']
 await run([
   'wait',
   '--fn',
-  `Boolean(window.recipeConsistency.release.create) && window.recipeConsistency.posts.filter(post=>post.kind==='recipe-create').length === 1 && document.querySelector('dialog[aria-labelledby=preferences-panel-title] .panel-drawer')?.getAttribute('aria-busy') === 'true' && document.querySelector('dialog[aria-labelledby=preferences-panel-title] .panel-add-btn')?.disabled && ${cancelButton}.disabled && ${saveButton}.disabled`,
+  `Boolean(window.recipeConsistency.release.create) && window.recipeConsistency.posts.filter(post=>post.kind==='recipe-create').length === 1 && document.querySelector('dialog[aria-labelledby=preferences-panel-title] .panel-drawer')?.getAttribute('aria-busy') === 'true' && document.querySelector('dialog[aria-labelledby=preferences-panel-title] [data-testid=panel-add-recipe]')?.disabled && ${cancelButton}.disabled && ${saveButton}.disabled`,
 ])
 await run(
   ['eval', '--stdin'],

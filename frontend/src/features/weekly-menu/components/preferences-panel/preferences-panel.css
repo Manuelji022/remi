@@ -83,10 +83,6 @@
     gap: var(--spacing-2);
   }
 
-  .panel-header-actions a.btn-secondary:active {
-    transform: none;
-  }
-
   .panel-tablist {
     flex: none;
     display: flex;
@@ -261,10 +257,6 @@
     justify-self: start;
   }
 
-  .panel-add-btn {
-    inline-size: 100%;
-  }
-
   .panel-add-hint,
   .panel-field-error {
     margin: 0;
@@ -329,8 +321,7 @@
     gap: var(--spacing-2);
   }
 
-  .panel-footer-actions .btn-primary,
-  .panel-footer-actions .btn-secondary {
+  .panel-footer-actions .button {
     flex: 1;
   }
 
@@ -347,7 +338,7 @@
   }
 
   @media (min-width: 48rem) {
-    .panel-footer-actions .btn-secondary {
+    .panel-footer-actions .button-secondary {
       flex: none;
     }
   }

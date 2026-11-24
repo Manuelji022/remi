@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { DayCard } from './DayCard'
-import { EmptyState, Icon } from '#/components/primitives'
+import { Button, EmptyState } from '#/components/primitives'
 import { DAYS, isWeekend } from '#/features/weekly-menu/constants'
 import type { Day } from '#/features/weekly-menu/constants'
 import { showMenuDay } from '#/features/weekly-menu/week'
@@ -64,14 +64,13 @@ export function MenuTab({
         icon="let-remi-choose"
         title={t('planner.emptyTitle')}
         action={
-          <button
-            className="btn btn-primary"
-            type="button"
+          <Button
+            variant="brand"
+            leadingIcon="let-remi-choose"
             onClick={onGenerateMenu}
           >
-            <Icon name="let-remi-choose" />
             {t('planner.generateMenu')}
-          </button>
+          </Button>
         }
       >
         <p>{t('planner.emptyBody')}</p>

@@ -5,7 +5,7 @@ import { MenuTab } from './MenuTab'
 import { ShoppingTab } from './ShoppingTab'
 import { WeekLockButton } from './WeekLockButton'
 import type { ShoppingLine } from '#/features/weekly-menu/shopping'
-import { EmptyState } from '#/components/primitives'
+import { Button, EmptyState } from '#/components/primitives'
 import { useI18n } from '#/shared/i18n'
 
 type PreviewProps = ComponentProps<typeof AiMenuPreview>
@@ -71,13 +71,9 @@ export function PlannerContent(props: PlannerContentProps) {
         title={t('planner.loadErrorTitle')}
         role="alert"
         action={
-          <button
-            className="btn btn-secondary"
-            type="button"
-            onClick={props.onRetryLoad}
-          >
+          <Button variant="secondary" onClick={props.onRetryLoad}>
             {t('planner.retryLoad')}
-          </button>
+          </Button>
         }
       >
         <p>{t('planner.loadErrorBody')}</p>
@@ -133,7 +129,7 @@ export function PlannerContent(props: PlannerContentProps) {
             props.onUnlockWeek(props.viewedWeek)
             document
               .querySelector<HTMLButtonElement>(
-                '.planner-actions .btn-secondary',
+                '.planner-actions .button-secondary',
               )
               ?.focus()
           }}

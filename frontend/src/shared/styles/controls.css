@@ -74,92 +74,6 @@
     transform: none;
   }
 
-  .btn {
-    font-size: var(--text-callout);
-    font-weight: var(--font-weight-semibold);
-    line-height: var(--leading-callout);
-    min-block-size: var(--size-control);
-    min-inline-size: var(--size-hit);
-    border-radius: var(--radius-pill);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--spacing-2);
-    text-decoration: none;
-    touch-action: manipulation;
-    white-space: nowrap;
-    transition:
-      background-color var(--duration-fast) var(--ease-standard),
-      transform var(--duration-fast) var(--ease-standard);
-  }
-
-  .btn-primary {
-    padding-inline: var(--spacing-4);
-    background: var(--color-action);
-    color: var(--color-text-on-brand);
-  }
-
-  .btn-primary:hover {
-    background: var(--color-action-hover);
-  }
-
-  .btn-primary:active {
-    background: var(--color-action-pressed);
-    transform: scale(var(--press-scale));
-  }
-
-  .btn-secondary {
-    padding-inline: var(--spacing-2);
-    background: var(--color-bg-fill);
-    color: var(--color-text-primary);
-  }
-
-  .btn-secondary:hover {
-    background: var(--color-bg-fill-hover);
-  }
-
-  .btn-secondary:active {
-    transform: scale(var(--press-scale));
-  }
-
-  .icon-btn {
-    inline-size: var(--size-hit);
-    block-size: var(--size-hit);
-    min-inline-size: var(--size-hit);
-    min-block-size: var(--size-hit);
-    border-radius: var(--radius-pill);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: transparent;
-    color: var(--color-text-secondary);
-    transition:
-      background-color var(--duration-fast) var(--ease-standard),
-      transform var(--duration-fast) var(--ease-standard);
-  }
-
-  .icon-btn-filled {
-    background: var(--color-bg-fill);
-    color: var(--color-text-primary);
-  }
-
-  .icon-btn:hover:not(.icon-btn-destructive) {
-    background: var(--color-bg-fill-hover);
-    color: var(--color-text-primary);
-  }
-
-  .icon-btn-destructive:hover {
-    background: var(--color-bg-fill);
-    color: var(--color-status-error-text);
-  }
-
-  .icon-btn:active {
-    transform: scale(var(--press-scale));
-  }
-
-  .btn-primary:disabled,
-  .btn-secondary:disabled,
-  .icon-btn:disabled:not(.icon-btn-filled):not(.icon-btn-destructive),
   .panel-scope-pill:disabled {
     background: var(--color-bg-fill);
     color: var(--color-text-dimmed);
@@ -236,11 +150,5 @@
   .planner-shopping-tab li,
   .panel-ingredient-chip {
     font-variant-numeric: tabular-nums;
-  }
-
-  @media (min-width: 48rem) {
-    .btn-secondary {
-      padding-inline: var(--spacing-4);
-    }
   }
 }

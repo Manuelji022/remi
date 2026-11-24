@@ -36,10 +36,6 @@
     line-height: var(--leading-callout);
   }
 
-  .auth-page .btn {
-    inline-size: 100%;
-  }
-
   .auth-forgot,
   .auth-switch {
     text-align: center;

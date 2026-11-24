@@ -1,5 +1,5 @@
 import { useId, useRef, useState } from 'react'
-import { Icon, TextLink } from '#/components/primitives'
+import { Button, Icon } from '#/components/primitives'
 import { useI18n } from '#/shared/i18n'
 import {
   INGREDIENT_UNITS,
@@ -198,14 +198,14 @@ export function RecipeForm({ isAddingRecipe, onAddRecipe }: RecipeFormProps) {
                   </select>
                 </label>
 
-                <button
-                  className="icon-btn icon-btn-destructive panel-ingredient-delete-btn"
-                  type="button"
+                <Button
+                  iconOnly
+                  icon="remove"
+                  variant="ghost"
+                  className="panel-ingredient-delete-btn"
                   aria-label={t('preferences.deleteIngredient')}
                   onClick={() => deleteRecipeIngredientRow(ingredientIndex)}
-                >
-                  <Icon name="remove" />
-                </button>
+                />
               </div>
             )
           })}
@@ -215,28 +215,31 @@ export function RecipeForm({ isAddingRecipe, onAddRecipe }: RecipeFormProps) {
             {t('preferences.invalidIngredientQuantity')}
           </p>
         )}
-        <TextLink
+        <Button
+          size="sm"
+          variant="ghost"
+          leadingIcon="add"
           className="panel-add-ingredient-btn"
-          icon={<Icon name="add" />}
           onClick={addRecipeIngredientRow}
         >
           {t('preferences.addIngredient')}
-        </TextLink>
+        </Button>
       </div>
 
-      <button
-        className="btn btn-secondary panel-add-btn"
-        type="button"
+      <Button
+        block
+        variant="secondary"
+        leadingIcon="add"
+        data-testid="panel-add-recipe"
         disabled={
           isAddingRecipe || !recipeName.trim() || hasInvalidIngredientQuantity
         }
         onClick={handleAddRecipe}
       >
-        <Icon name="add" />
         {t(
           isAddingRecipe ? 'preferences.addingRecipe' : 'preferences.addRecipe',
         )}
-      </button>
+      </Button>
       {!recipeName.trim() ? (
         <p className="panel-add-hint">{t('preferences.addRecipeHint')}</p>
       ) : null}

@@ -2,7 +2,14 @@ import { useNavigate } from '@tanstack/react-router'
 import '../auth.css'
 import type { ComponentProps } from 'react'
 import { useState } from 'react'
-import { Banner, Card, Field, Input, TextLink } from '#/components/primitives'
+import {
+  Banner,
+  Button,
+  Card,
+  Field,
+  Input,
+  TextLink,
+} from '#/components/primitives'
 import { getLocalizedPath, useI18n } from '#/shared/i18n'
 import { authClient } from '#/features/auth/auth-client'
 
@@ -117,13 +124,9 @@ export function SignupPage() {
             </Banner>
           ) : null}
 
-          <button
-            className="btn btn-primary"
-            disabled={isSubmitting}
-            type="submit"
-          >
+          <Button block variant="brand" disabled={isSubmitting} type="submit">
             {isSubmitting ? t('auth.creatingAccount') : t('auth.createAccount')}
-          </button>
+          </Button>
         </form>
 
         <p className="auth-switch">

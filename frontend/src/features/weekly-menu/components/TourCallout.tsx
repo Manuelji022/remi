@@ -1,4 +1,5 @@
 import { useId } from 'react'
+import { Button } from '#/components/primitives'
 import { useI18n } from '#/shared/i18n'
 
 export function TourCallout({
@@ -24,12 +25,12 @@ export function TourCallout({
       <strong id={titleId}>{title}</strong>
       <p>{body}</p>
       <div className="planner-tour-actions">
-        <button type="button" className="btn btn-primary" onClick={onNext}>
+        <Button variant="brand" onClick={onNext}>
           {t(isLast ? 'planner.tourDone' : 'planner.tourNext')}
-        </button>
-        <button type="button" className="btn btn-secondary" onClick={onSkip}>
+        </Button>
+        <Button variant="secondary" onClick={onSkip}>
           {t('planner.tourSkip')}
-        </button>
+        </Button>
       </div>
     </aside>
   )

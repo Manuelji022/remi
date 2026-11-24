@@ -1,3 +1,4 @@
+import { Button } from '#/components/primitives'
 import { Dialog } from '#/components/primitives/Dialog'
 import { useI18n } from '#/shared/i18n'
 
@@ -28,12 +29,12 @@ export function GenerateAnotherDialog({
         {t('planner.aiGenerateAnotherBody')}
       </p>
       <div className="planner-ai-dialog-footer">
-        <button className="btn btn-secondary" type="button" onClick={onCancel}>
+        <Button variant="secondary" onClick={onCancel}>
           {t('common.cancel')}
-        </button>
-        <button className="btn btn-primary" type="button" onClick={onConfirm}>
+        </Button>
+        <Button variant="brand" onClick={onConfirm}>
           {t('planner.aiGenerateAnother')}
-        </button>
+        </Button>
       </div>
     </Dialog>
   )

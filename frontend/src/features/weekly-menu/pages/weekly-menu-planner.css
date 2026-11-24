@@ -43,8 +43,7 @@
     inline-size: 100%;
   }
 
-  .planner-actions .btn-secondary,
-  .planner-actions .btn-primary {
+  .planner-actions .button {
     flex: 1;
   }
 
@@ -211,8 +210,7 @@
       inline-size: auto;
     }
 
-    .planner-actions .btn-secondary,
-    .planner-actions .btn-primary {
+    .planner-actions .button {
       flex: none;
     }
   }

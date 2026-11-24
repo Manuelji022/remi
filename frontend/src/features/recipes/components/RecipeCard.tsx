@@ -1,4 +1,4 @@
-import { Icon } from '#/components/primitives'
+import { Button } from '#/components/primitives'
 import { useI18n } from '#/shared/i18n'
 import type { Recipe } from '#/features/recipes/recipe'
 import { formatRecipeIngredient } from '../format'
@@ -32,14 +32,13 @@ export function RecipeCard({ recipe, onDelete }: RecipeCardProps) {
         )}
       </div>
 
-      <button
-        className="icon-btn icon-btn-destructive"
-        type="button"
+      <Button
+        iconOnly
+        icon="remove"
+        variant="ghost"
         aria-label={t('preferences.deleteRecipe', { name: recipe.name })}
         onClick={onDelete}
-      >
-        <Icon name="remove" />
-      </button>
+      />
     </article>
   )
 }
