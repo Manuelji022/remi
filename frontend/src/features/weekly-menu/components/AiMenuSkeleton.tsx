@@ -1,4 +1,5 @@
 import './ai-menu-skeleton.css'
+import { Skeleton } from '#/components/primitives'
 import { DAYS } from '#/features/weekly-menu/constants'
 import { useI18n } from '#/shared/i18n'
 
@@ -19,18 +20,18 @@ export function AiMenuSkeleton() {
       </div>
       <div className="planner-day-grid" aria-hidden="true">
         {DAYS.map((day) => (
-          <article className="day-card ai-skeleton-card" key={day}>
+          <article className="day-card" key={day}>
             <div className="day-card-header">
               <div className="day-name">{t(`days.${day}`)}</div>
             </div>
             <div className="day-meals">
               <div className="meal-slot">
                 <span className="meal-label">{t('slots.lunch')}</span>
-                <span className="ai-skeleton-block" />
+                <Skeleton height="1.25rem" width="70%" />
               </div>
               <div className="meal-slot">
                 <span className="meal-label">{t('slots.dinner')}</span>
-                <span className="ai-skeleton-block" />
+                <Skeleton height="1.25rem" width="70%" />
               </div>
             </div>
           </article>

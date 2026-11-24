@@ -1,0 +1,50 @@
+/* Skeleton primitive. Semantic tokens only. Paper: Design System / Loading. */
+@layer components {
+  .skeleton {
+    display: block;
+    flex-shrink: 0;
+    animation: skeleton-pulse var(--duration-loader) var(--ease-standard)
+      infinite;
+  }
+
+  .skeleton-surface {
+    background: var(--color-bg-fill-hover);
+  }
+
+  /* sand-200 on the sand page is 1.1:1, so text there steps up to sand-300. */
+  .skeleton-page {
+    background: var(--color-gray-300);
+  }
+
+  .skeleton-line {
+    inline-size: 100%;
+    block-size: var(--spacing-3);
+    border-radius: var(--radius-pill);
+  }
+
+  .skeleton-block {
+    border-radius: var(--radius-mark);
+  }
+
+  .skeleton-circle {
+    border-radius: var(--radius-pill);
+  }
+
+  @keyframes skeleton-pulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+
+    50% {
+      opacity: 0.7;
+    }
+  }
+
+  /* Reduced motion: a static fill, no pulse. */
+  @media (prefers-reduced-motion: reduce) {
+    .skeleton {
+      animation: none;
+    }
+  }
+}

@@ -1,5 +1,4 @@
-import { Badge, Icon } from '#/components/primitives'
-import { LoadingDots } from './LoadingDots'
+import { Badge, Dots, Icon } from '#/components/primitives'
 import { getWeekNumber } from '#/features/weekly-menu/constants'
 import { useI18n } from '#/shared/i18n'
 
@@ -86,7 +85,7 @@ export function PlannerHeader(props: PlannerHeaderProps) {
                   ? 'planner.aiPreparingSchedule'
                   : 'planner.generating',
               )}{' '}
-              <LoadingDots />
+              <Dots />
             </>
           ) : (
             <>

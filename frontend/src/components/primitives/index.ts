@@ -12,3 +12,5 @@ export type { ChipProps } from './Chip'
 
 export { Checkbox } from './Checkbox'
 export type { CheckboxProps } from './Checkbox'
+export { Dots } from './Dots'
+export { Skeleton } from './Skeleton'
