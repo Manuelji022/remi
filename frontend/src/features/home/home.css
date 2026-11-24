@@ -43,18 +43,8 @@
     line-height: var(--leading-caption);
   }
 
-  .home-preview,
-  .home-feature {
-    min-inline-size: 0;
-    background: var(--color-bg-surface);
-    border-radius: var(--radius-surface);
-    box-shadow: 0 0 0 1px var(--color-border-subtle);
-    padding: var(--spacing-card-pad);
-  }
-
   .home-preview {
-    display: grid;
-    gap: var(--spacing-6);
+    --card-gap: var(--spacing-6);
   }
 
   .home-preview-heading {
@@ -136,10 +126,8 @@
   }
 
   .home-feature {
-    display: grid;
     align-content: start;
     justify-items: start;
-    gap: var(--spacing-stack-md);
   }
 
   .home-feature h3 {

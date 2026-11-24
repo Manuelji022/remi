@@ -1,0 +1,64 @@
+/* Card primitive. Semantic tokens only. Paper: Design System / Card. */
+@layer components {
+  .card {
+    --card-ground: var(--color-bg-page);
+    --card-edge: var(--color-border-subtle);
+
+    display: grid;
+    gap: var(--card-gap, var(--spacing-4));
+    min-inline-size: 0;
+    padding: var(--card-pad, var(--spacing-card-pad));
+    border: 1px solid var(--card-edge);
+    border-radius: var(--radius-surface);
+    background: var(--color-bg-surface);
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .card-compact {
+    --card-pad: var(--spacing-card-pad-compact);
+  }
+
+  /* The one card that is "now": a 2px ring instead of the hairline. */
+  .card-current {
+    --card-edge: transparent;
+
+    box-shadow: 0 0 0 2px var(--color-border-current);
+  }
+
+  /* Interactive: the card is the one link. Chevron says it opens. */
+  .card-link {
+    grid-auto-flow: column;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--spacing-3);
+    cursor: pointer;
+    touch-action: manipulation;
+    transition:
+      border-color var(--duration-fast) var(--ease-standard),
+      background-color var(--duration-fast) var(--ease-standard),
+      transform var(--duration-fast) var(--ease-standard);
+  }
+
+  .card-link-chevron {
+    color: var(--color-text-secondary);
+  }
+
+  @media (hover: hover) {
+    .card-link:hover {
+      --card-edge: var(--color-gray-300);
+    }
+  }
+
+  .card-link:active {
+    background: var(--color-bg-fill-hover);
+    transform: scale(0.99);
+  }
+
+  .card-link:focus-visible {
+    outline: none;
+    box-shadow:
+      0 0 0 2px var(--card-ground),
+      0 0 0 4px var(--color-focus-ring);
+  }
+}

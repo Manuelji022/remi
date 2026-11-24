@@ -1,4 +1,4 @@
-import { Button, Icon, TextLink } from '#/components/primitives'
+import { Button, Card, Icon, TextLink } from '#/components/primitives'
 import type { IconName } from '#/components/primitives'
 import { useI18n } from '#/shared/i18n'
 import './home.css'
@@ -32,7 +32,11 @@ export function HomePage() {
           <p className="home-note">{t('home.note')}</p>
         </div>
 
-        <aside className="home-preview" aria-labelledby="home-preview-title">
+        <Card
+          as="aside"
+          className="home-preview"
+          aria-labelledby="home-preview-title"
+        >
           <div className="home-preview-heading">
             <span className="home-icon">
               <Icon name="week" />
@@ -60,7 +64,7 @@ export function HomePage() {
             <Icon name="vegetarian" size="sm" />
             {t('home.previewFooter')}
           </p>
-        </aside>
+        </Card>
       </section>
 
       <section className="home-features" aria-labelledby="home-features-title">
@@ -70,13 +74,13 @@ export function HomePage() {
         </div>
         <div className="home-feature-grid">
           {features.map(({ key, icon }) => (
-            <article className="home-feature" key={key}>
+            <Card as="article" className="home-feature" key={key}>
               <span className="home-icon">
                 <Icon name={icon} />
               </span>
               <h3>{t(`home.${key}Title`)}</h3>
               <p>{t(`home.${key}Copy`)}</p>
-            </article>
+            </Card>
           ))}
         </div>
       </section>

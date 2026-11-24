@@ -2,7 +2,7 @@ import { useNavigate } from '@tanstack/react-router'
 import '../auth.css'
 import type { ComponentProps } from 'react'
 import { useState } from 'react'
-import { Field, Input, TextLink } from '#/components/primitives'
+import { Card, Field, Input, TextLink } from '#/components/primitives'
 import { getLocalizedPath, useI18n } from '#/shared/i18n'
 import { authClient } from '#/features/auth/auth-client'
 
@@ -71,7 +71,7 @@ export function SignupPage() {
 
   return (
     <main className="auth-page" id="main">
-      <section className="auth-card" aria-labelledby="signup-title">
+      <Card as="section" className="auth-card" aria-labelledby="signup-title">
         <h1 id="signup-title">{t('auth.signupTitle')}</h1>
         <p className="auth-copy">{t('auth.signupCopy')}</p>
 
@@ -128,7 +128,7 @@ export function SignupPage() {
             {t('auth.login')}
           </TextLink>
         </p>
-      </section>
+      </Card>
     </main>
   )
 }

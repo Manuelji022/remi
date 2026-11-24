@@ -2,7 +2,7 @@ import { useNavigate } from '@tanstack/react-router'
 import '../auth.css'
 import type { ComponentProps } from 'react'
 import { useEffect, useEffectEvent, useRef, useState } from 'react'
-import { TextLink } from '#/components/primitives'
+import { Card, TextLink } from '#/components/primitives'
 import { getLocalizedPath, useI18n } from '#/shared/i18n'
 import { authClient } from '#/features/auth/auth-client'
 
@@ -78,7 +78,11 @@ export function TwoFactorPage() {
 
   return (
     <main className="auth-page" id="main">
-      <section className="auth-card" aria-labelledby="two-factor-title">
+      <Card
+        as="section"
+        className="auth-card"
+        aria-labelledby="two-factor-title"
+      >
         <h1 id="two-factor-title">{t('auth.otpTitle')}</h1>
         <p className="auth-copy">{t('auth.otpCopy')}</p>
         {showSignupMessage ? (
@@ -124,7 +128,7 @@ export function TwoFactorPage() {
         <p className="auth-switch">
           <TextLink to="/login">{t('auth.backToLogin')}</TextLink>
         </p>
-      </section>
+      </Card>
     </main>
   )
 }

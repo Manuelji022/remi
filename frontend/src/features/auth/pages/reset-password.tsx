@@ -3,6 +3,7 @@ import '../auth.css'
 import type { ComponentProps } from 'react'
 import { useState } from 'react'
 import { getLocalizedPath, useI18n } from '#/shared/i18n'
+import { Card } from '#/components/primitives'
 import { authClient } from '#/features/auth/auth-client'
 
 type FormSubmitEvent = Parameters<
@@ -55,7 +56,11 @@ export function ResetPasswordPage() {
   if (done) {
     return (
       <main className="auth-page" id="main">
-        <section className="auth-card" aria-labelledby="reset-done-title">
+        <Card
+          as="section"
+          className="auth-card"
+          aria-labelledby="reset-done-title"
+        >
           <h1 id="reset-done-title">{t('auth.resetPasswordDoneTitle')}</h1>
           <p className="auth-copy">{t('auth.resetPasswordDoneCopy')}</p>
           <button
@@ -65,14 +70,14 @@ export function ResetPasswordPage() {
           >
             {t('auth.login')}
           </button>
-        </section>
+        </Card>
       </main>
     )
   }
 
   return (
     <main className="auth-page" id="main">
-      <section className="auth-card" aria-labelledby="reset-title">
+      <Card as="section" className="auth-card" aria-labelledby="reset-title">
         <h1 id="reset-title">{t('auth.resetPasswordTitle')}</h1>
         <p className="auth-copy">{t('auth.resetPasswordCopy')}</p>
 
@@ -102,7 +107,7 @@ export function ResetPasswordPage() {
               : t('auth.resetPassword')}
           </button>
         </form>
-      </section>
+      </Card>
     </main>
   )
 }
