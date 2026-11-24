@@ -69,7 +69,8 @@ export const messages = {
     'auth.resetPasswordDoneCopy':
       'Your password has been reset. You can now log in with your new password.',
     'auth.alreadyHaveAccount': 'Already have an account?',
-    'footer.rights': 'Developed by Manuelji. All rights reserved.',
+    'footer.navLabel': 'Footer',
+    'footer.legal': '© {year} Remi · One less thing to think about.',
     'home.kicker': 'A little planning. A calmer week.',
     'home.title': 'Your week, on the menu.',
     'home.copy':
@@ -357,8 +358,8 @@ export const messages = {
     'auth.resetPasswordDoneCopy':
       'Tu contraseña se ha restablecido. Ya puedes iniciar sesión con tu nueva contraseña.',
     'auth.alreadyHaveAccount': '¿Ya tienes cuenta?',
-    'footer.rights':
-      'Desarrollado por Manuelji. Todos los derechos reservados.',
+    'footer.navLabel': 'Pie de página',
+    'footer.legal': '© {year} Remi · Una cosa menos en la que pensar.',
     'home.kicker': 'Un poco de organización. Una semana más tranquila.',
     'home.title': 'Tu semana, en el menú.',
     'home.copy':
