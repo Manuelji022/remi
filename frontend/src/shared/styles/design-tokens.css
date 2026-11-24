@@ -190,7 +190,6 @@
       --duration-base: 0ms;
       --duration-slow: 0ms;
       --duration-gesture: 0ms;
-      --duration-loader: 0ms;
       --press-scale: 1;
     }
   }

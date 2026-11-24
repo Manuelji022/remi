@@ -1,0 +1,38 @@
+/* Dots primitive. Semantic tokens only. Paper: Design System / Loading. */
+@layer components {
+  .dots {
+    display: inline-flex;
+    align-items: center;
+    gap: calc(var(--spacing-1) + 1px);
+    vertical-align: middle;
+  }
+
+  .dots > span {
+    inline-size: var(--size-dot);
+    block-size: var(--size-dot);
+    border-radius: var(--radius-pill);
+    background: currentColor;
+    opacity: 0.4;
+    animation: dots-wave var(--duration-loader) var(--ease-standard) infinite;
+  }
+
+  /* Each dot starts a third of the loop after the previous one. */
+  .dots > span:nth-child(2) {
+    animation-delay: calc(var(--duration-loader) / 3);
+  }
+
+  .dots > span:nth-child(3) {
+    animation-delay: calc(var(--duration-loader) / 3 * 2);
+  }
+
+  @keyframes dots-wave {
+    0%,
+    100% {
+      opacity: 0.4;
+    }
+
+    50% {
+      opacity: 1;
+    }
+  }
+}
