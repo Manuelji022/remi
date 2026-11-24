@@ -48,7 +48,6 @@
     flex: 1;
   }
 
-  .planner-divider,
   .planner-section-heading:empty {
     display: none;
   }
@@ -206,13 +205,6 @@
 
   .planner-shopping-tab {
     display: grid;
-    gap: var(--spacing-stack-md);
-  }
-
-  .planner-shopping-helper {
-    color: var(--color-text-secondary);
-    font-size: var(--text-body);
-    line-height: var(--leading-body);
   }
 
   .planner-shopping-tab ul {

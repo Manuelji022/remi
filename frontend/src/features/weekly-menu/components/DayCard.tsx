@@ -1,4 +1,4 @@
-import { Badge } from '#/components/primitives'
+import { Badge, Divider } from '#/components/primitives'
 import type { Day } from '#/features/weekly-menu/constants'
 import './day-card.css'
 import type { DayContext } from '#/features/weekly-menu/types'
@@ -45,6 +45,7 @@ export function DayCard({
           meal={lunch}
           slot="lunch"
         />
+        <Divider />
         <MealSlotDisplay
           editableMeal={editableMeals?.dinner}
           meal={dinner}

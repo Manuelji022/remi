@@ -199,8 +199,6 @@ export function WeeklyMenuPlanner() {
           }}
         />
 
-        <div className="planner-divider" />
-
         <div className="planner-toolbar">
           <MainTab
             activeTab={activeTab}

@@ -27,9 +27,7 @@
   }
 
   h1,
-  .home-title,
-  .panel-header h2,
-  .planner-shopping-tab h2 {
+  .panel-header h2 {
     font-size: var(--text-large-title);
     line-height: var(--leading-large-title);
     letter-spacing: var(--tracking-title);
