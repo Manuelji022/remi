@@ -5,6 +5,7 @@ import { MenuTab } from './MenuTab'
 import { ShoppingTab } from './ShoppingTab'
 import { WeekLockButton } from './WeekLockButton'
 import type { ShoppingLine } from '#/features/weekly-menu/shopping'
+import { EmptyState } from '#/components/primitives'
 import { useI18n } from '#/shared/i18n'
 
 type PreviewProps = ComponentProps<typeof AiMenuPreview>
@@ -62,25 +63,25 @@ export function PlannerContent(props: PlannerContentProps) {
 
   if (props.generatingTargetWeek) return <AiMenuSkeleton />
   if (props.isLoading && !currentPreview) {
-    return (
-      <div className="empty-state" role="status">
-        <p>{t('planner.loadingWeek')}</p>
-      </div>
-    )
+    return <EmptyState title={t('planner.loadingWeek')} role="status" />
   }
   if (props.loadFailed && !currentPreview) {
     return (
-      <div className="empty-state" role="alert">
-        <h2>{t('planner.loadErrorTitle')}</h2>
+      <EmptyState
+        title={t('planner.loadErrorTitle')}
+        role="alert"
+        action={
+          <button
+            className="btn btn-secondary"
+            type="button"
+            onClick={props.onRetryLoad}
+          >
+            {t('planner.retryLoad')}
+          </button>
+        }
+      >
         <p>{t('planner.loadErrorBody')}</p>
-        <button
-          className="btn btn-secondary"
-          type="button"
-          onClick={props.onRetryLoad}
-        >
-          {t('planner.retryLoad')}
-        </button>
-      </div>
+      </EmptyState>
     )
   }
   if (props.activeTab !== 'menu') {

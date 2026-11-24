@@ -1,5 +1,5 @@
 import type { ErrorComponentProps } from '@tanstack/react-router'
-import { Button } from '#/components/primitives'
+import { Button, EmptyState } from '#/components/primitives'
 import { useI18n } from '#/shared/i18n'
 
 export function RouteError({ reset }: ErrorComponentProps) {
@@ -7,11 +7,18 @@ export function RouteError({ reset }: ErrorComponentProps) {
 
   return (
     <main id="main">
-      <section className="empty-state">
-        <h1>{t('error.title')}</h1>
+      <EmptyState
+        variant="page"
+        headingLevel={1}
+        title={t('error.title')}
+        action={
+          <Button variant="brand" size="lg" onClick={reset}>
+            {t('error.retry')}
+          </Button>
+        }
+      >
         <p>{t('error.body')}</p>
-        <Button onClick={reset}>{t('error.retry')}</Button>
-      </section>
+      </EmptyState>
     </main>
   )
 }

@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { DayCard } from './DayCard'
-import { Icon } from '#/components/primitives'
+import { EmptyState, Icon } from '#/components/primitives'
 import { DAYS, isWeekend } from '#/features/weekly-menu/constants'
 import type { Day } from '#/features/weekly-menu/constants'
 import { showMenuDay } from '#/features/weekly-menu/week'
@@ -47,30 +47,36 @@ export function MenuTab({
 
   if (isGenerating) {
     return (
-      <div className="empty-state" role="status" aria-live="polite">
-        <Icon name="let-remi-choose" size="xl" />
-        <h2>{t('planner.buildingTitle')}</h2>
+      <EmptyState
+        icon="let-remi-choose"
+        title={t('planner.buildingTitle')}
+        role="status"
+        aria-live="polite"
+      >
         <p>{t('planner.buildingBody')}</p>
-      </div>
+      </EmptyState>
     )
   }
 
   if (!menu) {
     return (
-      <div className="empty-state">
-        <Icon name="let-remi-choose" size="xl" />
-        <h2>{t('planner.emptyTitle')}</h2>
+      <EmptyState
+        icon="let-remi-choose"
+        title={t('planner.emptyTitle')}
+        action={
+          <button
+            className="btn btn-primary"
+            type="button"
+            onClick={onGenerateMenu}
+          >
+            <Icon name="let-remi-choose" />
+            {t('planner.generateMenu')}
+          </button>
+        }
+      >
         <p>{t('planner.emptyBody')}</p>
         {!isSignedIn && <p>{t('planner.aiSignInRequired')}</p>}
-        <button
-          className="btn btn-primary"
-          type="button"
-          onClick={onGenerateMenu}
-        >
-          <Icon name="let-remi-choose" />
-          {t('planner.generateMenu')}
-        </button>
-      </div>
+      </EmptyState>
     )
   }
 

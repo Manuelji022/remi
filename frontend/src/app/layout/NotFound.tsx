@@ -1,4 +1,4 @@
-import { TextLink } from '#/components/primitives'
+import { Button, EmptyState } from '#/components/primitives'
 import { useI18n } from '#/shared/i18n'
 
 export function NotFound() {
@@ -6,11 +6,18 @@ export function NotFound() {
 
   return (
     <main id="main">
-      <section className="empty-state">
-        <h1>{t('notFound.title')}</h1>
+      <EmptyState
+        variant="page"
+        headingLevel={1}
+        title={t('notFound.title')}
+        action={
+          <Button to="/" variant="brand" size="lg">
+            {t('notFound.home')}
+          </Button>
+        }
+      >
         <p>{t('notFound.body')}</p>
-        <TextLink to="/">{t('notFound.home')}</TextLink>
-      </section>
+      </EmptyState>
     </main>
   )
 }

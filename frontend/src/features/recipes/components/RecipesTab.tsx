@@ -1,4 +1,4 @@
-import { Icon, TextLink } from '#/components/primitives'
+import { EmptyState, Icon, TextLink } from '#/components/primitives'
 import { useI18n } from '#/shared/i18n'
 import { authClient } from '#/features/auth/auth-client'
 import { useRecipeCatalog } from '#/features/recipes/hooks/useRecipeCatalog'
@@ -85,12 +85,13 @@ function RecipeCatalogContent({
 
   if (!userId) {
     return (
-      <div className="panel-empty-recipes">
-        <p>{t('preferences.signInToSaveRecipes')}</p>
-        <p>
-          <TextLink to="/login">{t('auth.login')}</TextLink>
-        </p>
-      </div>
+      <EmptyState
+        variant="compact"
+        headingLevel={3}
+        icon="recipes"
+        title={t('preferences.signInToSaveRecipes')}
+        action={<TextLink to="/login">{t('auth.login')}</TextLink>}
+      />
     )
   }
 
@@ -137,9 +138,12 @@ function RecipeCatalogList({
       )}
       <RecipeForm isAddingRecipe={isAddingRecipe} onAddRecipe={onAddRecipe} />
       {recipes.length === 0 ? (
-        <div className="panel-empty-recipes">
-          <p>{t('preferences.emptyRecipes')}</p>
-        </div>
+        <EmptyState
+          variant="compact"
+          headingLevel={3}
+          icon="recipes"
+          title={t('preferences.emptyRecipes')}
+        />
       ) : (
         <div className="panel-recipe-list">
           {recipes.map((recipe) => (
