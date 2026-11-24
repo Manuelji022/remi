@@ -1,4 +1,6 @@
 import type { Dispatch, SetStateAction } from 'react'
+import { useToast } from '#/components/primitives'
+import { useI18n } from '#/shared/i18n'
 import type { MealSlot } from '#/features/recipes/recipe'
 import type { Day } from '#/features/weekly-menu/constants'
 import type { useAiMenuGeneration } from '#/features/weekly-menu/hooks/useAiMenuGeneration'
@@ -46,6 +48,9 @@ export function usePlannerActions({
   setIsPreferencesOpen,
   setGuestPreferences,
 }: PlannerActionsOptions) {
+  const { t } = useI18n()
+  const toast = useToast()
+
   function handleRetryLoad() {
     if (!isWriting) plannerWeek.retry()
   }
@@ -72,7 +77,10 @@ export function usePlannerActions({
     const accepted = await aiGeneration.accept((menu) =>
       plannerWeek.acceptPreview(menu, catalog.recipes),
     )
-    if (accepted) setWeekOffset(calendarWeekOffset(current.weekStart))
+    if (accepted) {
+      toast({ message: t('planner.menuSaved'), tone: 'success' })
+      setWeekOffset(calendarWeekOffset(current.weekStart))
+    }
   }
 
   async function writeMenu(preferences?: Preferences) {
@@ -81,7 +89,10 @@ export function usePlannerActions({
       preferences,
       readyData.week.menu,
     )
-    if (saved) setIsPreferencesOpen(false)
+    if (saved) {
+      toast({ message: t('planner.preferencesSaved'), tone: 'success' })
+      setIsPreferencesOpen(false)
+    }
   }
 
   function handleSavePreferences(preferences: Preferences) {

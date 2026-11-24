@@ -25,7 +25,6 @@ interface PlannerFeedbackProps {
   previewSaveError: string | null
   canAcceptPreview: boolean
   onRetryPreviewSave: () => void
-  action: { kind: 'save' | 'accept'; status: string } | null
 }
 
 export function PlannerFeedback({
@@ -37,7 +36,6 @@ export function PlannerFeedback({
   previewSaveError,
   canAcceptPreview,
   onRetryPreviewSave,
-  action,
 }: PlannerFeedbackProps) {
   const { t } = useI18n()
   const errorMessageKey =
@@ -102,16 +100,6 @@ export function PlannerFeedback({
         >
           {previewSaveError}
         </Banner>
-      )}
-
-      {action?.status === 'success' && (
-        <p className="planner-feedback" role="status">
-          {t(
-            action.kind === 'save'
-              ? 'planner.preferencesSaved'
-              : 'planner.menuSaved',
-          )}
-        </p>
       )}
     </>
   )

@@ -1,0 +1,126 @@
+/* Toast primitive. Semantic tokens only. Paper: Design System / Toast. */
+@layer components {
+  /* Always mounted and click-through: only the toast takes pointer events. */
+  .toast-region {
+    position: fixed;
+    inset-inline: 0;
+    inset-block-end: calc(env(safe-area-inset-bottom) + var(--spacing-4));
+    z-index: 40;
+    display: flex;
+    justify-content: center;
+    padding-inline: var(--spacing-4);
+    pointer-events: none;
+  }
+
+  .toast {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-3);
+    box-sizing: border-box;
+    min-block-size: calc(var(--size-control) + var(--spacing-3));
+    min-inline-size: 280px;
+    max-inline-size: var(--container-sheet);
+    padding-block: var(--spacing-1-5);
+    padding-inline: var(--spacing-5) var(--spacing-1-5);
+    border-radius: var(--radius-surface);
+    background: var(--color-text-primary);
+    color: var(--color-text-on-brand);
+    box-shadow: var(--shadow-popover);
+    font-size: var(--text-callout);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--leading-callout);
+    pointer-events: auto;
+    animation: toast-in var(--duration-slow) var(--ease-out) both;
+  }
+
+  .toast[data-tone] {
+    padding-inline-start: var(--spacing-4);
+  }
+
+  .toast[data-leaving] {
+    animation: toast-out var(--duration-base) var(--ease-standard) forwards;
+  }
+
+  /* Phone and tablet fill the gutters up to the sheet width. */
+  @media (max-width: 47.99rem) {
+    .toast {
+      flex: 1;
+    }
+  }
+
+  /* Desktop: bottom centre, 32 up. */
+  @media (min-width: 64rem) {
+    .toast-region {
+      inset-block-end: var(--spacing-8);
+    }
+  }
+
+  .toast-message {
+    flex: 1;
+    /* Two lines at most. */
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+  }
+
+  .toast-disc {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    inline-size: var(--spacing-6);
+    block-size: var(--spacing-6);
+    border-radius: var(--radius-pill);
+    background: var(--color-status-success-bg);
+    color: var(--color-status-success-text);
+  }
+
+  .toast[data-tone='error'] .toast-disc {
+    background: var(--color-status-error-bg);
+    color: var(--color-status-error-text);
+  }
+
+  .toast .toast-action {
+    --button-bg: color-mix(in srgb, var(--color-white) 12%, transparent);
+    --button-bg-hover: color-mix(in srgb, var(--color-white) 20%, transparent);
+    --button-bg-active: color-mix(in srgb, var(--color-white) 28%, transparent);
+    --button-fg: var(--color-text-on-brand);
+
+    flex-shrink: 0;
+  }
+
+  /* Focus ring on ink is invisible: flip it to white. */
+  .toast :focus-visible {
+    outline-color: var(--color-white);
+  }
+
+  @keyframes toast-in {
+    from {
+      opacity: 0;
+      transform: translateY(var(--spacing-4));
+    }
+  }
+
+  @keyframes toast-out {
+    to {
+      opacity: 0;
+      transform: translateY(var(--spacing-2));
+    }
+  }
+
+  /* No travel, just the fade. */
+  @media (prefers-reduced-motion: reduce) {
+    @keyframes toast-in {
+      from {
+        opacity: 0;
+      }
+    }
+
+    @keyframes toast-out {
+      to {
+        opacity: 0;
+      }
+    }
+  }
+}
