@@ -196,7 +196,6 @@
     box-shadow: none;
   }
 
-  .panel-context-pill,
   .panel-scope-pill {
     font: inherit;
     font-size: var(--text-callout);
@@ -218,18 +217,15 @@
       transform var(--duration-fast) var(--ease-standard);
   }
 
-  .panel-context-pill:hover,
   .panel-scope-pill:hover:not(:disabled) {
     background: var(--color-bg-fill-hover);
   }
 
-  .panel-context-pill[aria-pressed='true'],
   .panel-scope-pill[aria-pressed='true'] {
     background: var(--color-action);
     color: var(--color-text-on-brand);
   }
 
-  .panel-context-pill[aria-pressed='true']:hover,
   .panel-scope-pill[aria-pressed='true']:hover:not(:disabled) {
     background: var(--color-action-hover);
   }
@@ -239,7 +235,6 @@
     color: var(--color-text-dimmed);
   }
 
-  .panel-context-pill:active,
   .panel-scope-pill:active:not(:disabled) {
     transform: scale(var(--press-scale));
   }

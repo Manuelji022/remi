@@ -1,0 +1,79 @@
+/* Paper: Design System / Chip. The button owns the 44px hit target. */
+@layer components {
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: var(--size-hit);
+    min-height: var(--size-hit);
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+
+  .chip-surface {
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-1-5);
+    min-height: var(--size-chip);
+    padding-inline: calc(var(--spacing-3) + var(--spacing-0-5));
+    border: 1px solid var(--color-chip-border);
+    border-radius: var(--radius-pill);
+    background: var(--color-bg-surface);
+    color: var(--color-text-primary);
+    font-size: var(--text-callout);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--leading-callout);
+    white-space: nowrap;
+  }
+
+  .chip-surface-icon {
+    padding-left: calc(var(--spacing-2) + var(--spacing-0-5));
+  }
+
+  .chip-context .icon {
+    color: var(--color-text-secondary);
+  }
+  .chip:hover:not(:disabled) .chip-surface {
+    background: var(--color-bg-fill);
+  }
+  .chip-filter[aria-pressed='true'] .chip-surface {
+    background: var(--color-action);
+    border-color: var(--color-action);
+    color: var(--color-text-on-brand);
+  }
+  .chip-filter[aria-pressed='true']:hover:not(:disabled) .chip-surface {
+    background: var(--color-action-hover);
+    border-color: var(--color-action-hover);
+  }
+  .chip-context[aria-pressed='true'] .chip-surface {
+    background: var(--color-status-warning-bg);
+    border-color: var(--color-chip-context-border);
+    color: var(--color-status-warning-text);
+  }
+  .chip-context[aria-pressed='true']:hover:not(:disabled) .chip-surface {
+    background: var(--color-status-warning-bg);
+  }
+  .chip-context[aria-pressed='true'] .icon {
+    color: inherit;
+  }
+  .chip:active:not(:disabled) .chip-surface {
+    transform: scale(var(--press-scale));
+  }
+  .chip:focus-visible {
+    outline: none;
+  }
+  .chip:focus-visible .chip-surface {
+    outline: 2px solid var(--color-focus-ring);
+    outline-offset: 2px;
+  }
+  .chip:disabled {
+    opacity: var(--opacity-disabled);
+    cursor: not-allowed;
+  }
+}
