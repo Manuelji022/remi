@@ -64,7 +64,6 @@ export function Checkbox({
             <path
               d="M4 15.5C6 16.5 8.5 19 10.5 22.5C14 14 19.5 7 27 2.5"
               stroke="currentColor"
-              strokeWidth="var(--stroke-icon)"
               strokeLinecap="round"
               strokeLinejoin="round"
             />

@@ -1,3 +1,4 @@
+/* Checkbox primitive. Semantic tokens only. Paper: Design System / Checkbox. */
 @layer components {
   .checkbox {
     position: relative;
@@ -114,6 +115,10 @@
     inset-block-start: calc(-1 * var(--spacing-2));
     inset-inline-start: calc(-1 * var(--spacing-0-5));
     visibility: hidden;
+  }
+  /* An SVG stroke-width attribute cannot read a custom property; CSS can. */
+  .checkbox-shopping-tick path {
+    stroke-width: var(--stroke-icon);
   }
   .checkbox-shopping input:checked + .checkbox-box .checkbox-shopping-tick {
     visibility: visible;
