@@ -9,3 +9,6 @@ export { Field } from './Field'
 export { Input } from './Input'
 export { Chip } from './Chip'
 export type { ChipProps } from './Chip'
+
+export { Checkbox } from './Checkbox'
+export type { CheckboxProps } from './Checkbox'

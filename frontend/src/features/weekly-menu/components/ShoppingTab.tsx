@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Checkbox } from '#/components/primitives'
 import { formatRecipeIngredient } from '#/features/recipes/format'
 import type { ShoppingLine } from '#/features/weekly-menu/shopping'
 import { useI18n } from '#/shared/i18n'
@@ -50,16 +51,13 @@ export function ShoppingTab({
 
             return (
               <li key={key}>
-                <label className="planner-shopping-item">
-                  <input
-                    type="checkbox"
-                    checked={checkedIngredients.has(key)}
-                    onChange={() => onToggleIngredient(key)}
-                  />
-                  <span>
-                    {formatRecipeIngredient(line, (unit) => t(`units.${unit}`))}
-                  </span>
-                </label>
+                <Checkbox
+                  variant="shopping"
+                  checked={checkedIngredients.has(key)}
+                  onChange={() => onToggleIngredient(key)}
+                >
+                  {formatRecipeIngredient(line, (unit) => t(`units.${unit}`))}
+                </Checkbox>
               </li>
             )
           })}
