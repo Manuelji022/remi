@@ -1,0 +1,176 @@
+/* Remi · new design-system tokens, exported from the Paper file (Remi, page
+   "Design tokens"). Additive: nothing consumes these yet, and the legacy
+   tokens in tokens.css are untouched. Components migrate in follow-up PRs.
+
+   Paper stores some non-length values as px (angles, ms, scale) because it
+   has no matching token type. They are written here with their real units.
+
+   NOT redefined here because tokens.css already owns the name. Reconcile
+   when the legacy tokens are retired:
+     --duration-fast 120ms · --duration-base 200ms · --duration-slow 320ms
+     --duration-loader 1400ms (same values as tokens.css)
+     --ease-standard cubic-bezier(.2, 0, 0, 1)   (legacy: .25, .1, .25, 1)
+     --ease-out      cubic-bezier(.16, 1, .3, 1) (legacy: .22, 1, .36, 1)
+     --press-scale 0.97                          (legacy: 0.98)
+     --radius-pill 999px                         (legacy: 62rem) */
+
+@layer tokens {
+  :root {
+    /* --- Color primitives --- */
+    --color-white: #ffffff;
+    --color-ink: #151515;
+    --color-gray-50: #f8f8f8; /* page ground */
+    --color-gray-100: #eeeeee; /* hairlines, neutral fill */
+    --color-gray-200: #e2e2e2; /* selected / pressed fill, past-day paper */
+    --color-gray-300: #cfcfcf; /* control borders, inactive text on ink */
+    --color-gray-500: #a3a3a3; /* decoration only, fails as text */
+    --color-gray-600: #8a8a8a; /* dimmed text (large only), control borders */
+    --color-gray-700: #5c5c5c; /* secondary text */
+    --color-gray-800: #2e2e2e; /* ink hover */
+    --color-tomato-50: #ffede6;
+    --color-tomato-500: #ff5a36; /* today, wordmark, counts. Ink on it, never white */
+    --color-tomato-600: #d93a17;
+    --color-tomato-700: #b32e12; /* error text, destructive button */
+    --color-butter-100: #fff1b8;
+    --color-butter-400: #ffd84d; /* day note, avatar, washi tape */
+    --color-butter-800: #6e5200;
+    --color-basil-50: #e8f6e5;
+    --color-basil-500: #6cc46a;
+    --color-basil-700: #2f7a33;
+    --color-lilac-300: #cbb8ff; /* day note */
+    --color-mint-300: #a6e5be; /* day note */
+    --color-blue: #2668fd;
+
+    /* --- Color: surfaces --- */
+    --color-bg-page: var(--color-gray-50);
+    --color-bg-surface: var(--color-white);
+    --color-bg-fill: var(--color-gray-100);
+    --color-bg-fill-hover: var(--color-gray-200);
+    --color-bg-brand-soft: var(--color-tomato-50);
+    --color-bg-overlay: rgb(21 21 21 / 40%);
+    --color-theme: var(
+      --color-gray-50
+    ); /* PWA theme_color / background_color */
+
+    /* --- Color: text --- */
+    --color-text-primary: var(--color-ink);
+    --color-text-secondary: var(--color-gray-700);
+    --color-text-dimmed: var(
+      --color-gray-600
+    ); /* large text and past days only */
+    --color-text-brand: var(--color-tomato-700);
+    --color-text-on-brand: var(--color-white);
+
+    /* --- Color: actions, borders, focus --- */
+    --color-action: var(--color-ink);
+    --color-action-hover: var(--color-gray-800);
+    --color-action-pressed: var(--color-ink);
+    --color-pop: var(--color-tomato-500);
+    --color-border-subtle: var(--color-gray-100);
+    --color-border-control: var(--color-gray-600);
+    --color-border-current: var(--color-ink);
+    --color-focus-ring: var(--color-ink);
+
+    /* --- Color: status --- */
+    --color-status-error-bg: var(--color-tomato-50);
+    --color-status-error-text: var(--color-tomato-700);
+    --color-status-success-bg: var(--color-basil-50);
+    --color-status-success-text: var(--color-basil-700);
+    --color-status-warning-bg: var(--color-butter-100);
+    --color-status-warning-text: var(--color-butter-800);
+    --color-status-info-bg: var(--color-gray-100);
+    --color-status-info-text: var(--color-ink);
+
+    /* --- Typography --- */
+    --font-display:
+      'Bricolage Grotesque', -apple-system, BlinkMacSystemFont, system-ui,
+      sans-serif;
+    --font-text:
+      'Geist', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    --text-caption: 13px;
+    --text-callout: 15px;
+    --text-body: 16px;
+    --text-headline: 17px;
+    --text-title: 24px;
+    --text-large-title: 32px;
+    --text-display: 44px;
+    --leading-caption: 18px;
+    --leading-callout: 20px;
+    --leading-body: 22px;
+    --leading-headline: 22px;
+    --leading-title: 28px;
+    --leading-large-title: 36px;
+    --leading-display: 44px;
+    --tracking-display: -0.02em;
+    --tracking-title: -0.01em;
+    --tracking-normal: 0em;
+    --font-weight-regular: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+    --font-weight-extrabold: 800; /* display face only */
+
+    /* --- Spacing --- */
+    --spacing-0-5: 2px;
+    --spacing-1: 4px;
+    --spacing-1-5: 6px;
+    --spacing-2: 8px;
+    --spacing-3: 12px;
+    --spacing-4: 16px;
+    --spacing-5: 20px;
+    --spacing-6: 24px;
+    --spacing-8: 32px;
+    --spacing-10: 40px;
+    --spacing-12: 48px;
+    --spacing-16: 64px;
+    --spacing-24: 96px;
+    --spacing-stack-md: var(--spacing-4);
+    --spacing-section: var(--spacing-12);
+    --spacing-card-pad: var(--spacing-5);
+    --spacing-card-pad-compact: var(--spacing-4);
+
+    /* --- Radius --- */
+    --radius-mark: 8px; /* checkbox, square badge */
+    --radius-inner: 14px; /* nested shapes: surface radius minus padding */
+    --radius-surface: 24px; /* day note, card, popover, dialog */
+    --radius-sheet: 32px; /* bottom sheet, drawer, landing cards */
+
+    /* --- Sizes --- */
+    --size-dot: 6px;
+    --size-badge: 20px;
+    --size-check: 22px;
+    --size-handle: 36px;
+    --size-hit: 44px; /* minimum tap area (WCAG 2.2 AA) */
+    --size-control-sm: 32px;
+    --size-control: 44px;
+    --size-control-lg: 48px;
+    --size-control-xl: 60px;
+    --size-chip: var(--size-control-sm);
+    --stroke-icon: 2.2px;
+    --stroke-icon-bold: 2.75px; /* 16px icons only */
+
+    /* --- Containers & breakpoints (documentation: queries write the value) --- */
+    --container-sheet: 480px;
+    --container-dialog: 520px;
+    --breakpoint-sm: 640px;
+    --breakpoint-md: 768px;
+    --breakpoint-lg: 1024px;
+    --breakpoint-xl: 1280px;
+
+    /* --- Opacity --- */
+    --opacity-disabled: 40%;
+
+    /* --- Motion --- */
+    --duration-gesture: 450ms;
+    --duration-toast: 3000ms; /* toast without an action */
+    --duration-toast-action: 5000ms; /* toast with an action (Undo) */
+    --stagger: 40ms;
+    --ease-bounce: cubic-bezier(0.17, 0.67, 0.3, 1.33);
+
+    /* --- Tilt (degrees; never on text the user must read beyond ±1.5) --- */
+    --rotate-note-phone: 0.75deg;
+    --rotate-note: 1.5deg;
+    --rotate-stack: 4deg;
+    --rotate-stack-wide: 8deg;
+  }
+}
