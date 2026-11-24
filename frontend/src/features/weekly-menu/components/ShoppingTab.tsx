@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Checkbox } from '#/components/primitives'
+import { Checkbox, PageHeader } from '#/components/primitives'
 import { formatRecipeIngredient } from '#/features/recipes/format'
 import type { ShoppingLine } from '#/features/weekly-menu/shopping'
 import { useI18n } from '#/shared/i18n'
@@ -35,8 +35,10 @@ export function ShoppingTab({
 
   return (
     <div className="planner-shopping-tab">
-      <h2>{t('tabs.ingredients')}</h2>
-      <p className="planner-shopping-helper">{t('planner.shoppingHelper')}</p>
+      <PageHeader
+        title={t('tabs.ingredients')}
+        description={t('planner.shoppingHelper')}
+      />
       {lines.length === 0 ? (
         <p>{t('planner.shoppingEmpty')}</p>
       ) : (

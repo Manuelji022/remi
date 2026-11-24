@@ -16,12 +16,7 @@
 
   .day-meals {
     display: grid;
-  }
-
-  .meal-slot + .meal-slot {
-    margin-block-start: var(--spacing-stack-md);
-    padding-block-start: var(--spacing-stack-md);
-    border-block-start: 1px solid var(--color-border-subtle);
+    gap: var(--spacing-stack-md);
   }
 
   .meal-slot {
