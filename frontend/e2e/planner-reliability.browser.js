@@ -220,8 +220,9 @@ await scenario('catalog failure is actionable and retry restores shopping', [
   wait(currentDinner),
   // The planner tabs are a SegmentedControl (role=tab); the accessible name carries the count badge, and the header also has a separate "Shopping list" button.
   ['find', 'role', 'tab', 'click', '--name', 'Shopping List 1', '--exact'],
-  text('100 g Rice'),
-  assert(`document.querySelector('.planner-shopping-tab').innerText.includes('100 g Rice') && ${fixture}.writes.length===0`, 'catalog retry restores derived shopping list'),
+  // The ticket names the item and puts its quantity in its own lane; the checkbox name reads "Rice 100 g".
+  ['find', 'role', 'checkbox', 'check', '--name', 'Rice 100 g', '--exact'],
+  assert(`document.querySelector('[aria-labelledby=shopping-ticket-title]').innerText.includes('Rice') && ${fixture}.writes.length===0`, 'catalog retry restores derived shopping list'),
 ])
 
 await scenario('successful empty read permits first generation', [

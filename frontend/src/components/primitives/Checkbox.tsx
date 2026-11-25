@@ -10,6 +10,8 @@ export interface CheckboxProps extends Omit<
   children: ReactNode
   variant?: 'form' | 'shopping'
   description?: ReactNode
+  /** A lane after the label, end-aligned (a shopping quantity). */
+  trailing?: ReactNode
   error?: ReactNode
   indeterminate?: boolean
 }
@@ -18,6 +20,7 @@ export function Checkbox({
   children,
   variant = 'form',
   description,
+  trailing,
   error,
   indeterminate = false,
   className,
@@ -104,6 +107,7 @@ export function Checkbox({
           </span>
         )}
       </span>
+      {trailing && <span className="checkbox-trailing">{trailing}</span>}
     </label>
   )
 }
