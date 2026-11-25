@@ -56,14 +56,14 @@ await run(
   [
     'wait',
     '--fn',
-    `window.recipeConsistency.requests.filter(r=>r.kind==='menu-read').length >= 2 && Object.values(window.recipeConsistency.menus)[0].days.Monday.dinnerRecipeId === null && document.querySelector('dialog[aria-labelledby=preferences-panel-title] .panel-drawer')?.getAttribute('aria-busy') === 'false' && document.querySelector('[role=tab][aria-selected=true]')?.innerText === 'My Recipes' && !${saveButton}.disabled`,
+    `window.recipeConsistency.requests.filter(r=>r.kind==='menu-read').length >= 2 && Object.values(window.recipeConsistency.menus)[0].days.Monday.dinnerRecipeId === null && document.querySelector('dialog[aria-labelledby=preferences-panel-title] .panel-drawer')?.getAttribute('aria-busy') === 'false' && document.querySelector('#preferences-recipes-tab[aria-selected=true]')?.innerText === 'My Recipes' && !${saveButton}.disabled`,
   ],
 )
 
 await run(['find', 'role', 'tab', 'click', '--name', 'Weekly Schedule', '--exact'])
 await run([
   'click',
-  '#preferences-schedule-panel .panel-day-card:first-child .panel-context-pill:first-child',
+  '#preferences-schedule-panel .panel-day-card:first-child button[aria-pressed]:first-child',
 ])
 await run(['find', 'role', 'button', 'click', '--name', 'Save preferences', '--exact'])
 await run([

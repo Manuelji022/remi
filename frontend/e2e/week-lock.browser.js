@@ -91,23 +91,27 @@ await scenario('reload discards unlock', [
 await scenario('locked schedule cannot edit or save; recipe controls remain usable', [
   ...open(), locked(), click('Preferences'), wait(`document.querySelector('#preferences-schedule-panel')`),
   check(`document.querySelector('.panel-content').disabled && ${saveButton}.disabled && document.querySelector('[role="note"]').textContent.includes('locked')`, 'schedule fieldset and save are disabled with note'),
-  ev(`document.querySelector('.panel-day-card button').click()`), click('Save preferences'),
+  ev(`document.querySelector('.panel-day-card button').click()`),
+  // agent-browser refuses to click a disabled control, so dispatch the click natively: a disabled Save must stay inert.
+  ev(`${saveButton}.click()`),
   check(`${f}.saveRequests.length===0`, 'disabled save makes no transport request'),
-  ['click', '#preferences-recipes-tab'], wait(`document.querySelector('#preferences-recipes-tab[aria-selected="true"]')`),
+  ['find', 'role', 'tab', 'click', '--name', 'My Recipes', '--exact'], wait(`document.querySelector('#preferences-recipes-tab[aria-selected="true"]')`),
   check(`!document.querySelector('.panel-content').disabled`, 'recipes fieldset stays enabled'),
-  wait(`document.querySelector('.panel-content input') !== null`),
-  check(`[...document.querySelectorAll('.panel-content input')].some(input => !input.disabled) && [...document.querySelectorAll('.panel-content button')].some(button => !button.disabled)`, 'recipe form and actions are enabled'),
+  // Recipe creation lives in a Sheet opened by "Add recipe"; it must stay usable on a locked week.
+  check(`[...document.querySelectorAll('.panel-content button')].every(button => !button.disabled)`, 'recipe actions are enabled'),
+  click('Add recipe'), ['wait', '--text', 'New recipe'],
+  check(`(() => { const label = [...document.querySelectorAll('label')].find(l => l.textContent.trim() === 'Recipe name'); return label && label.control && !label.control.disabled })()`, 'new recipe name field is enabled'),
 ])
 await scenario('unlocked schedule can edit and save', [
   ...open(), locked(), hold(), unlocked(), click('Preferences'),
   wait(`document.querySelector('.panel-day-card button') !== null`),
-  ['click', '.panel-day-card:first-child .chip-context:first-child'], click('Save preferences'),
+  ['click', '.panel-day-card:first-child button[aria-pressed]:first-child'], click('Save preferences'),
   wait(`${f}.saveRequests.length===1`), check(`JSON.stringify(${f}.saveRequests[0]).includes('office')`, 'unlocked edit is persisted'),
 ])
 await scenario('already-open Sunday schedule cannot save its now-current target on Monday', [
   ...open('rollover'), locked(), click('Next week'), unlocked(), click('Preferences'),
   wait(`document.querySelector('.panel-day-card button') !== null`),
-  ['click', '.panel-day-card:first-child .chip-context:first-child'],
+  ['click', '.panel-day-card:first-child button[aria-pressed]:first-child'],
   check(`!${saveButton}.disabled`, 'future schedule starts editable'),
   ev(`${f}.advanceClock(120000); ${sleep(300)}`), click('Save preferences'),
   check(`new Date().getDay()===1 && ${f}.saveRequests.length===0`, 'fresh save-boundary date rejects the stale enabled Save action'),

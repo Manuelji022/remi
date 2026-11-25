@@ -1,248 +1,57 @@
 [
-  {
-    "scenario": "schedule dialog contains keyboard focus and Escape restores its opener",
-    "verdict": "PASS"
-  },
-  {
-    "scenario": "schedule preparation retains the opener for Escape focus restoration",
-    "verdict": "PASS"
-  },
-  {
-    "scenario": "generation retry restores Escape focus to the stable schedule header trigger",
-    "verdict": "PASS"
-  },
-  {
-    "scenario": "schedule confirmation is required; accept alone persists next week",
-    "verdict": "PASS"
-  },
-  {
-    "scenario": "accept waits for the saved target menu and owned recipe catalog",
-    "verdict": "PASS"
-  },
-  {
-    "scenario": "an unsaved target schedule starts all-at-home, not from current week",
-    "verdict": "PASS"
-  },
-  {
-    "scenario": "saved target-week schedule is prefilled for all seven-day confirmation",
-    "verdict": "PASS"
-  },
-  {
-    "scenario": "discard and edit schedule guard the fresh preview",
-    "verdict": "PASS"
-  },
-  {
-    "scenario": "route navigation protects a preview stashed by schedule editing",
-    "verdict": "PASS"
-  },
-  {
-    "scenario": "unchanged selected scope and failed regeneration preserve manual edits",
-    "verdict": "PASS"
-  },
-  {
-    "scenario": "route discard is blocked while acceptance settles (failure=false)",
-    "verdict": "PASS"
-  },
-  {
-    "scenario": "route discard is blocked while acceptance settles (failure=true)",
-    "verdict": "PASS"
-  },
-  {
-    "scenario": "same-target retry retains the confirmed draft schedule after provider failure",
-    "verdict": "PASS"
-  },
-  {
-    "scenario": "in-progress retry keeps the confirmed schedule draft",
-    "verdict": "PASS"
-  },
-  {
-    "scenario": "retry after a failed generation across Monday loads the new target schedule",
-    "verdict": "PASS"
-  },
-  {
-    "scenario": "recipe edits are disabled and ignored while acceptance save is pending",
-    "verdict": "PASS"
-  },
-  {
-    "scenario": "a successful Sunday preview remains editable and acceptable after Monday",
-    "verdict": "PASS"
-  },
-  {
-    "scenario": "editing a Sunday preview after Monday preserves its absolute target week",
-    "verdict": "PASS"
-  },
-  {
-    "scenario": "provider completion after Monday returns stale-week instead of preview success",
-    "verdict": "PASS"
-  },
-  {
-    "scenario": "a week rollover returns an explicit reconfirmation target",
-    "verdict": "PASS"
-  },
-  {
-    "scenario": "failed acceptance keeps the preview and saved target menu retryable",
-    "verdict": "PASS"
-  },
-  {
-    "scenario": "empty catalog shows the recipes-needed notice and never generates",
-    "verdict": "PASS"
-  },
-  {
-    "scenario": "partial catalog blocks only the missing type, per confirmed schedule",
-    "verdict": "PASS"
-  },
-  {
-    "scenario": "partial catalog alert offers Add recipes",
-    "verdict": "PASS"
-  },
-  {
-    "scenario": "confirming closes the dialog and shows a target-week skeleton until the preview replaces it",
-    "verdict": "PASS"
-  },
-  {
-    "scenario": "skeleton is replaced by the existing error and Retry on failure",
-    "verdict": "PASS"
-  },
-  {
-    "scenario": "regenerating from an edited preview shows the skeleton, not the stale preview",
-    "verdict": "PASS"
-  },
-  {
-    "scenario": "schedule load failure and Cancel never show a skeleton",
-    "verdict": "PASS"
-  },
-  {
-    "scenario": "AI schedule and preview feedback are localized in Spanish",
-    "verdict": "PASS"
-  },
-  {
-    "scenario": "URL mock error is serialized on generation and retry",
-    "verdict": "PASS"
-  },
-  {
-    "scenario": "invalid URL mock value is omitted from generation",
-    "verdict": "PASS"
-  },
-  {
-    "scenario": "guest URL mock never calls generation",
-    "verdict": "PASS"
-  },
-  {
-    "scenario": "guest generation remains local and never calls the AI server function",
-    "verdict": "PASS"
-  },
-  {
-    "scenario": "replace note is absent when the target week is empty (dialog and banner)",
-    "verdict": "PASS"
-  },
-  {
-    "scenario": "replace note shows in dialog and banner for a saved target week and survives Edit schedule",
-    "verdict": "PASS"
-  },
-  {
-    "scenario": "Generate another without edits sends one request with previousMenu and shows the skeleton",
-    "verdict": "PASS"
-  },
-  {
-    "scenario": "Generate another with a manual edit confirms first; Cancel sends nothing, Confirm sends one request",
-    "verdict": "PASS"
-  },
-  {
-    "scenario": "reverting a manual edit means no confirmation; double click sends one request",
-    "verdict": "PASS"
-  },
-  {
-    "scenario": "failed Generate another keeps the previous edited proposal and Accept still saves it",
-    "verdict": "PASS"
-  },
-  {
-    "scenario": "Retry after generate preserves the edited proposal and confirmed schedule",
-    "verdict": "PASS"
-  },
-  {
-    "scenario": "Retry after in-progress preserves the edited proposal and confirmed schedule",
-    "verdict": "PASS"
-  },
-  {
-    "scenario": "rate-limited Generate another keeps the proposal; retry after a failed first generation has no previousMenu",
-    "verdict": "PASS"
-  },
-  {
-    "scenario": "Generate another after Monday targets the preview week and a stale answer keeps the proposal",
-    "verdict": "PASS"
-  },
-  {
-    "scenario": "Generate another is disabled while the preview is being saved",
-    "verdict": "PASS"
-  },
-  {
-    "scenario": "preview alternatives are alphabetical per locale, with No recipe first and the selection kept",
-    "verdict": "PASS"
-  },
-  {
-    "scenario": "Spanish selectors use the Spanish collation",
-    "verdict": "PASS"
-  },
-  {
-    "scenario": "first-run tour follows generation through Done without blocking controls",
-    "verdict": "PASS"
-  },
-  {
-    "scenario": "Skip at step 1 persists completion across reload",
-    "verdict": "PASS"
-  },
-  {
-    "scenario": "a second account has its own first-run tour",
-    "verdict": "PASS"
-  },
-  {
-    "scenario": "cancel and discard restart the incomplete tour",
-    "verdict": "PASS"
-  },
-  {
-    "scenario": "reload midway restarts at step 1 without completing",
-    "verdict": "PASS"
-  },
-  {
-    "scenario": "storage blocked still allows generation and session completion",
-    "verdict": "PASS"
-  },
-  {
-    "scenario": "storage write-blocked still allows generation and session completion",
-    "verdict": "PASS"
-  },
-  {
-    "scenario": "guests never see the first-run tour",
-    "verdict": "PASS"
-  },
-  {
-    "suite": "AI Weekly Menu browser checks",
-    "verdict": "PASS",
-    "evidence": {
-      "success": true,
-      "data": {
-        "lifecycle": {
-          "effectiveLaunch": {
-            "browserLaunched": true,
-            "engine": "chrome",
-            "launchHash": 5856132107922167000
-          },
-          "launched": false,
-          "relaunchedBrowser": false,
-          "restartedBackground": false,
-          "restoreStatus": "not_configured",
-          "reused": true,
-          "saveStatus": "not_attempted"
-        },
-        "origin": "http://127.0.0.1:3101/weekly-menu-planner?scenario=guest&tour=first",
-        "result": {
-          "fixture": "guest",
-          "generationRequests": 0,
-          "saveRequests": 0,
-          "targetWeekStart": "2026-11-16"
-        }
-      },
-      "error": null
-    }
-  }
+{"scenario":"schedule dialog contains keyboard focus and Escape restores its opener","verdict":"PASS"},
+{"scenario":"schedule preparation retains the opener for Escape focus restoration","verdict":"PASS"},
+{"scenario":"generation retry restores Escape focus to the stable schedule header trigger","verdict":"PASS"},
+{"scenario":"schedule confirmation is required; accept alone persists next week","verdict":"PASS"},
+{"scenario":"accept waits for the saved target menu and owned recipe catalog","verdict":"PASS"},
+{"scenario":"an unsaved target schedule starts all-at-home, not from current week","verdict":"PASS"},
+{"scenario":"saved target-week schedule is prefilled for all seven-day confirmation","verdict":"PASS"},
+{"scenario":"discard and edit schedule guard the fresh preview","verdict":"PASS"},
+{"scenario":"route navigation protects a preview stashed by schedule editing","verdict":"PASS"},
+{"scenario":"unchanged selected scope and failed regeneration preserve manual edits","verdict":"PASS"},
+{"scenario":"route discard is blocked while acceptance settles (failure=false)","verdict":"PASS"},
+{"scenario":"route discard is blocked while acceptance settles (failure=true)","verdict":"PASS"},
+{"scenario":"same-target retry retains the confirmed draft schedule after provider failure","verdict":"PASS"},
+{"scenario":"in-progress retry keeps the confirmed schedule draft","verdict":"PASS"},
+{"scenario":"retry after a failed generation across Monday loads the new target schedule","verdict":"PASS"},
+{"scenario":"recipe edits are disabled and ignored while acceptance save is pending","verdict":"PASS"},
+{"scenario":"a successful Sunday preview remains editable and acceptable after Monday","verdict":"PASS"},
+{"scenario":"editing a Sunday preview after Monday preserves its absolute target week","verdict":"PASS"},
+{"scenario":"provider completion after Monday returns stale-week instead of preview success","verdict":"PASS"},
+{"scenario":"a week rollover returns an explicit reconfirmation target","verdict":"PASS"},
+{"scenario":"failed acceptance keeps the preview and saved target menu retryable","verdict":"PASS"},
+{"scenario":"empty catalog shows the recipes-needed notice and never generates","verdict":"PASS"},
+{"scenario":"partial catalog blocks only the missing type, per confirmed schedule","verdict":"PASS"},
+{"scenario":"partial catalog alert offers Add recipes","verdict":"PASS"},
+{"scenario":"confirming closes the dialog and shows a target-week skeleton until the preview replaces it","verdict":"PASS"},
+{"scenario":"skeleton is replaced by the existing error and Retry on failure","verdict":"PASS"},
+{"scenario":"regenerating from an edited preview shows the skeleton, not the stale preview","verdict":"PASS"},
+{"scenario":"schedule load failure and Cancel never show a skeleton","verdict":"PASS"},
+{"scenario":"AI schedule and preview feedback are localized in Spanish","verdict":"PASS"},
+{"scenario":"URL mock error is serialized on generation and retry","verdict":"PASS"},
+{"scenario":"invalid URL mock value is omitted from generation","verdict":"PASS"},
+{"scenario":"guest URL mock never calls generation","verdict":"PASS"},
+{"scenario":"guest generation remains local and never calls the AI server function","verdict":"PASS"},
+{"scenario":"replace note is absent when the target week is empty (dialog and banner)","verdict":"PASS"},
+{"scenario":"replace note shows in dialog and banner for a saved target week and survives Edit schedule","verdict":"PASS"},
+{"scenario":"Generate another without edits sends one request with previousMenu and shows the skeleton","verdict":"PASS"},
+{"scenario":"Generate another with a manual edit confirms first; Cancel sends nothing, Confirm sends one request","verdict":"PASS"},
+{"scenario":"reverting a manual edit means no confirmation; double click sends one request","verdict":"PASS"},
+{"scenario":"failed Generate another keeps the previous edited proposal and Accept still saves it","verdict":"PASS"},
+{"scenario":"Retry after generate preserves the edited proposal and confirmed schedule","verdict":"PASS"},
+{"scenario":"Retry after in-progress preserves the edited proposal and confirmed schedule","verdict":"PASS"},
+{"scenario":"rate-limited Generate another keeps the proposal; retry after a failed first generation has no previousMenu","verdict":"PASS"},
+{"scenario":"Generate another after Monday targets the preview week and a stale answer keeps the proposal","verdict":"PASS"},
+{"scenario":"Generate another is disabled while the preview is being saved","verdict":"PASS"},
+{"scenario":"preview alternatives are alphabetical per locale, with No recipe first and the selection kept","verdict":"PASS"},
+{"scenario":"Spanish selectors use the Spanish collation","verdict":"PASS"},
+{"scenario":"first-run tour follows generation through Done without blocking controls","verdict":"PASS"},
+{"scenario":"Skip at step 1 persists completion across reload","verdict":"PASS"},
+{"scenario":"a second account has its own first-run tour","verdict":"PASS"},
+{"scenario":"cancel and discard restart the incomplete tour","verdict":"PASS"},
+{"scenario":"reload midway restarts at step 1 without completing","verdict":"PASS"},
+{"scenario":"storage blocked still allows generation and session completion","verdict":"PASS"},
+{"scenario":"storage write-blocked still allows generation and session completion","verdict":"PASS"},
+{"scenario":"guests never see the first-run tour","verdict":"PASS"},
+{"suite":"AI Weekly Menu browser checks","verdict":"PASS","evidence":{"success":true,"data":{"lifecycle":{"effectiveLaunch":{"browserLaunched":true,"engine":"chrome","launchHash":12888193764771985000},"launched":false,"relaunchedBrowser":false,"restartedBackground":false,"restoreStatus":"not_configured","reused":true,"saveStatus":"not_attempted"},"origin":"http://127.0.0.1:3101/weekly-menu-planner?scenario=guest&tour=first","result":{"fixture":"guest","generationRequests":0,"saveRequests":0,"targetWeekStart":"2026-11-30"}},"error":null}}
 ]

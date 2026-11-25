@@ -1,3 +1,28 @@
+# Running the browser harnesses
+
+All four harnesses run through the `agent-browser` CLI with `e2e/harness.runner.js`
+(`npm i -g agent-browser && agent-browser install`). From `frontend/`, after `pnpm build`,
+start a production server on the port below (`HOST=127.0.0.1 PORT=<port> BETTER_AUTH_SECRET=local-harness-not-a-real-secret BETTER_AUTH_URL=http://127.0.0.1:<port> node .output/server/index.mjs`), then for each harness:
+
+```sh
+TZ=Europe/Madrid agent-browser --session <session> --args '--no-sandbox' --init-script "$PWD/e2e/<name>.init.js" open 'http://127.0.0.1:<port><path>'
+agent-browser --session <session> set viewport 1440 1200
+node e2e/harness.runner.js e2e/<name>.browser.js <session> e2e/artifacts/<results>.json
+agent-browser --session <session> close
+```
+
+| Harness `<name>`          | Port | Path                                  | Session            | Results                        |
+| ------------------------- | ---- | ------------------------------------- | ------------------ | ------------------------------ |
+| `week-lock`               | 3102 | `/weekly-menu-planner?scenario=ready` | `remi-week-lock`   | `week-lock-results.json`       |
+| `ai-weekly-menu`          | 3101 | `/weekly-menu-planner?scenario=ready` | `remi-ai-menu`     | `ai-weekly-menu-results.json`  |
+| `planner-reliability`     | 3101 | `/weekly-menu-planner`                | `remi-reliability` | `results.json`                 |
+| `recipe-menu-consistency` | 3101 | `/weekly-menu-planner`                | `remi-recipe`      | `recipe-menu-consistency.json` |
+
+The runner exits non-zero if any scenario fails. Harnesses drive the UI by accessible role and
+name where possible (planner tabs are `role=tab`, day-context chips are `button[aria-pressed]`,
+planning scope is a `radiogroup`, "New recipe" opens in a dialog sheet); the remaining CSS
+selectors are layout hooks without an accessible equivalent.
+
 # Planner reliability verification results
 
 ## Final verification

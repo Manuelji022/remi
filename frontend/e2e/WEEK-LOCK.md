@@ -36,7 +36,7 @@ Then use a fresh session (the timezone is required for the DST scenario):
 ```sh
 TZ=Europe/Madrid agent-browser --session remi-week-lock --args '--no-sandbox' --init-script "$PWD/e2e/week-lock.init.js" open 'http://127.0.0.1:3102/weekly-menu-planner?scenario=ready'
 agent-browser --session remi-week-lock set viewport 1440 1200
-node e2e/week-lock.runner.js
+node e2e/harness.runner.js e2e/week-lock.browser.js remi-week-lock e2e/artifacts/week-lock-results.json
 agent-browser --session remi-week-lock close
 ```
 
