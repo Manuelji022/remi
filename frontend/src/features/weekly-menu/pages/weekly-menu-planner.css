@@ -129,50 +129,11 @@
     border-radius: var(--radius-surface);
   }
 
-  /* Surface, scrim and motion come from the Dialog primitive. */
-  .planner-ai-dialog {
-    --dialog-width: 58rem;
-  }
-
-  .planner-ai-dialog-header h2,
-  .planner-ai-discard-dialog h2 {
-    margin: 0;
-    font-family: var(--font-display);
-    font-size: var(--text-title);
-    font-weight: var(--font-weight-bold);
-    letter-spacing: var(--tracking-title);
-    line-height: var(--leading-title);
-  }
-
-  .planner-ai-dialog-range {
-    margin-block-start: var(--spacing-1);
-    color: var(--color-text-secondary);
-  }
-
-  .planner-ai-dialog-copy {
-    margin-block: var(--spacing-stack-md);
-    color: var(--color-text-secondary);
-  }
-
   .planner-ai-schedule-fields {
     min-inline-size: 0;
     margin: 0;
     padding: 0;
     border: 0;
-  }
-
-  .planner-ai-dialog-footer {
-    display: flex;
-    justify-content: flex-end;
-    gap: var(--spacing-2);
-    margin-block-start: var(--spacing-6);
-  }
-
-  .planner-ai-discard-dialog p {
-    margin-block: var(--spacing-2) 0;
-    color: var(--color-text-secondary);
-    font-size: var(--text-body);
-    line-height: var(--leading-body);
   }
 
   .planner-shopping-tab {
