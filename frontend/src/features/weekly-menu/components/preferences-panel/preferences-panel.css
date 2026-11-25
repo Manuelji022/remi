@@ -159,15 +159,13 @@
   }
 
   .panel-day-card,
-  .panel-recipe-form,
   .panel-recipe-card {
     background: var(--color-bg-surface);
     border-radius: var(--radius-surface);
     box-shadow: 0 0 0 1px var(--color-border-subtle);
   }
 
-  .panel-day-card,
-  .panel-recipe-form {
+  .panel-day-card {
     padding: var(--spacing-card-pad);
     display: grid;
     gap: var(--spacing-6);
