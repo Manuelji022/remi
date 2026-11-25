@@ -1,4 +1,4 @@
-import { Badge, Dots, Icon } from '#/components/primitives'
+import { Badge, Button, Dots, Icon } from '#/components/primitives'
 import { getWeekNumber } from '#/features/weekly-menu/constants'
 import { useI18n } from '#/shared/i18n'
 
@@ -28,15 +28,13 @@ export function PlannerHeader(props: PlannerHeaderProps) {
           className="planner-week-nav"
           aria-label={t('planner.weekNavigationLabel')}
         >
-          <button
-            className="icon-btn"
-            type="button"
+          <Button
+            iconOnly
+            icon="previous"
             aria-label={t('planner.previousWeek')}
             disabled={props.weekOffset <= -1 || props.isWriting}
             onClick={() => props.onNavigate(props.weekOffset - 1)}
-          >
-            <Icon name="previous" />
-          </button>
+          />
           <p className="planner-week-pill" aria-live="polite">
             {t('planner.weekKicker', {
               week: getWeekNumber(props.weekDate),
@@ -49,32 +47,28 @@ export function PlannerHeader(props: PlannerHeaderProps) {
               {t('planner.currentWeek')}
             </span>
           )}
-          <button
-            className="icon-btn"
-            type="button"
+          <Button
+            iconOnly
+            icon="next"
             aria-label={t('planner.nextWeek')}
             disabled={props.weekOffset >= 1 || props.isWriting}
             onClick={() => props.onNavigate(props.weekOffset + 1)}
-          >
-            <Icon name="next" />
-          </button>
+          />
         </div>
       </div>
       <div className="planner-actions" aria-label={t('planner.actionsLabel')}>
-        <button
-          className="btn btn-secondary"
-          type="button"
+        <Button
+          variant="secondary"
+          leadingIcon="settings"
           onClick={props.onOpenPreferences}
           disabled={!props.canWrite || props.isWriting || props.hasPreview}
         >
-          <Icon name="settings" />
           {t('planner.preferences')}
           <Badge count={props.preferenceCount} />
-        </button>
-        <button
+        </Button>
+        <Button
           ref={props.onGenerateButtonRef}
-          className="btn btn-primary"
-          type="button"
+          variant="brand"
           onClick={props.onGenerateMenu}
           disabled={!props.canWrite || props.isWriting || props.hasPreview}
         >
@@ -95,7 +89,7 @@ export function PlannerHeader(props: PlannerHeaderProps) {
                 : t('planner.generateMenu')}
             </>
           )}
-        </button>
+        </Button>
       </div>
     </div>
   )

@@ -1,5 +1,6 @@
 import { TourCallout } from './TourCallout'
 import type { useFirstRunTour } from '../hooks/useFirstRunTour'
+import { Button } from '#/components/primitives'
 import { Dialog } from '#/components/primitives/Dialog'
 import type { Preferences } from '#/features/weekly-menu/types'
 import type {
@@ -92,35 +93,21 @@ export function AiGenerationScheduleDialog({
                   : 'planner.aiMissingDinnerRecipes',
             )}
           </p>
-          <button
-            className="btn btn-secondary"
-            type="button"
-            onClick={onAddRecipes}
-          >
+          <Button variant="secondary" onClick={onAddRecipes}>
             {t('planner.aiAddRecipes')}
-          </button>
+          </Button>
         </div>
       )}
       {replacesSavedMenu && (
         <p className="planner-ai-replace-note">{t('planner.aiReplaceNote')}</p>
       )}
       <footer className="planner-ai-dialog-footer">
-        <button
-          className="btn btn-secondary"
-          disabled={isPending}
-          type="button"
-          onClick={onCancel}
-        >
+        <Button variant="secondary" disabled={isPending} onClick={onCancel}>
           {t('common.cancel')}
-        </button>
-        <button
-          className="btn btn-primary"
-          disabled={isPending}
-          type="button"
-          onClick={onConfirm}
-        >
+        </Button>
+        <Button variant="brand" disabled={isPending} onClick={onConfirm}>
           {t(isPending ? 'planner.generating' : 'planner.aiConfirmSchedule')}
-        </button>
+        </Button>
       </footer>
     </Dialog>
   )

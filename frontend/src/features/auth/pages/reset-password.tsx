@@ -2,7 +2,7 @@ import { useNavigate, useSearch } from '@tanstack/react-router'
 import '../auth.css'
 import type { ComponentProps } from 'react'
 import { useState } from 'react'
-import { Banner, Card } from '#/components/primitives'
+import { Banner, Button, Card } from '#/components/primitives'
 import { getLocalizedPath, useI18n } from '#/shared/i18n'
 import { authClient } from '#/features/auth/auth-client'
 
@@ -63,13 +63,13 @@ export function ResetPasswordPage() {
         >
           <h1 id="reset-done-title">{t('auth.resetPasswordDoneTitle')}</h1>
           <p className="auth-copy">{t('auth.resetPasswordDoneCopy')}</p>
-          <button
-            className="btn btn-primary"
+          <Button
+            block
+            variant="brand"
             onClick={() => navigate({ to: getLocalizedPath('/login', locale) })}
-            type="button"
           >
             {t('auth.login')}
-          </button>
+          </Button>
         </Card>
       </main>
     )
@@ -101,15 +101,11 @@ export function ResetPasswordPage() {
             </Banner>
           ) : null}
 
-          <button
-            className="btn btn-primary"
-            disabled={isSubmitting}
-            type="submit"
-          >
+          <Button block variant="brand" disabled={isSubmitting} type="submit">
             {isSubmitting
               ? t('auth.resettingPassword')
               : t('auth.resetPassword')}
-          </button>
+          </Button>
         </form>
       </Card>
     </main>

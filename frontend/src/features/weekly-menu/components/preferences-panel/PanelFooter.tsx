@@ -1,4 +1,4 @@
-import { Icon } from '#/components/primitives'
+import { Button } from '#/components/primitives'
 import type { Preferences } from '#/features/weekly-menu/types'
 import { useI18n } from '#/shared/i18n'
 
@@ -31,23 +31,21 @@ export function PanelFooter({
         </p>
       )}
       <div className="panel-footer-actions">
-        <button
-          className="btn btn-secondary"
+        <Button
+          variant="secondary"
           disabled={isSaving || isRecipeMutationPending}
-          type="button"
           onClick={onClose}
         >
           {t('common.cancel')}
-        </button>
-        <button
-          className="btn btn-primary"
+        </Button>
+        <Button
+          variant="brand"
+          leadingIcon="done"
           disabled={saveDisabled || isRecipeMutationPending}
-          type="button"
           onClick={() => onSave(draftPrefs)}
         >
-          <Icon name="done" />
           {t(isSaving ? 'preferences.saving' : 'preferences.save')}
-        </button>
+        </Button>
       </div>
     </div>
   )

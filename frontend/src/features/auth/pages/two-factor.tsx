@@ -2,7 +2,7 @@ import { useNavigate } from '@tanstack/react-router'
 import '../auth.css'
 import type { ComponentProps } from 'react'
 import { useEffect, useEffectEvent, useRef, useState } from 'react'
-import { Banner, Card, TextLink } from '#/components/primitives'
+import { Banner, Button, Card, TextLink } from '#/components/primitives'
 import { getLocalizedPath, useI18n } from '#/shared/i18n'
 import { authClient } from '#/features/auth/auth-client'
 
@@ -111,23 +111,19 @@ export function TwoFactorPage() {
             </Banner>
           ) : null}
 
-          <button
-            className="btn btn-primary"
-            disabled={isVerifying}
-            type="submit"
-          >
+          <Button block variant="brand" disabled={isVerifying} type="submit">
             {isVerifying ? t('auth.otpVerifying') : t('auth.otpVerify')}
-          </button>
+          </Button>
         </form>
 
-        <button
-          className="btn btn-secondary"
+        <Button
+          block
+          variant="secondary"
           disabled={isSending}
           onClick={sendOtp}
-          type="button"
         >
           {isSending ? t('auth.otpSending') : t('auth.otpResend')}
-        </button>
+        </Button>
 
         <p className="auth-switch">
           <TextLink to="/login">{t('auth.backToLogin')}</TextLink>

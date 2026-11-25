@@ -2,6 +2,7 @@ import { TourCallout } from './TourCallout'
 import type { useFirstRunTour } from '../hooks/useFirstRunTour'
 import { useEffect, useRef } from 'react'
 import { MenuTab } from './MenuTab'
+import { Button } from '#/components/primitives'
 import type { Day } from '../constants'
 import type { CalendarWeekMenu } from '../week'
 import type { MealSlot, Recipe } from '#/features/recipes/recipe'
@@ -104,30 +105,23 @@ export function AiMenuPreview({
           />
         )}
         <div className="planner-ai-preview-actions">
-          <button
-            className="btn btn-secondary"
-            type="button"
+          <Button
+            variant="secondary"
             onClick={onEditSchedule}
             disabled={isWriting}
           >
             {t('planner.aiEditSchedule')}
-          </button>
-          <button
-            className="btn btn-secondary"
-            type="button"
+          </Button>
+          <Button
+            variant="secondary"
             onClick={(event) => onGenerateAnother(event.currentTarget)}
             disabled={!canGenerateAnother}
           >
             {t('planner.aiGenerateAnother')}
-          </button>
-          <button
-            className="btn btn-secondary"
-            type="button"
-            onClick={onDiscard}
-            disabled={isWriting}
-          >
+          </Button>
+          <Button variant="secondary" onClick={onDiscard} disabled={isWriting}>
             {t('planner.aiDiscardPreview')}
-          </button>
+          </Button>
           {tour.step === 3 && (
             <TourCallout
               step={3}
@@ -138,18 +132,13 @@ export function AiMenuPreview({
               onSkip={tour.skip}
             />
           )}
-          <button
-            className="btn btn-primary"
-            type="button"
-            onClick={onAccept}
-            disabled={!canAccept}
-          >
+          <Button variant="brand" onClick={onAccept} disabled={!canAccept}>
             {t(
               isAccepting
                 ? 'planner.aiSavingPreview'
                 : 'planner.aiAcceptPreview',
             )}
-          </button>
+          </Button>
         </div>
       </div>
       {unavailableSlots.map((slot) => (
@@ -164,13 +153,9 @@ export function AiMenuPreview({
       {!isCatalogReady && hasCatalogLoadFailed && (
         <div className="planner-feedback" role="alert">
           <p>{t('planner.loadErrorBody')}</p>
-          <button
-            className="btn btn-secondary"
-            type="button"
-            onClick={onRetryCatalog}
-          >
+          <Button variant="secondary" onClick={onRetryCatalog}>
             {t('planner.retryLoad')}
-          </button>
+          </Button>
         </div>
       )}
       {!isCatalogReady && !hasCatalogLoadFailed && (
