@@ -1,94 +1,140 @@
+/* Header. Paper: Header. White surface, two zones: wordmark and account.
+   Phone is 56 tall with a 16 gutter; from lg (1024) it is 88 with a 40
+   gutter and a 1200 lane. Wordmark sizes (24 / 30, 800) have no token, as in
+   footer.css. */
 @layer components {
   .site-header {
     position: sticky;
     inset-block-start: 0;
     z-index: 10;
     background: var(--color-bg-surface);
-    border-block-end: 1px solid var(--color-border-subtle);
   }
 
-  .header-wrapper {
+  .header-inner {
+    /* Same lane as <main> and the footer, so the edges line up. */
     max-inline-size: 75rem;
     margin-inline: auto;
-    min-block-size: 4rem;
     padding-inline: clamp(var(--spacing-4), 4vw, var(--spacing-6));
+    min-block-size: 3.5rem;
     display: flex;
     align-items: center;
-    gap: var(--spacing-4);
-  }
-
-  .header-leading {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-4);
-    min-inline-size: 0;
-    flex: 1;
+    justify-content: space-between;
+    gap: var(--spacing-3);
   }
 
   .header-logo {
-    padding: 0;
-    color: var(--color-text-primary);
-    font-size: var(--text-title);
-    font-weight: var(--font-weight-bold);
-    letter-spacing: var(--tracking-title);
-    line-height: var(--leading-title);
-    text-decoration: none;
-    text-transform: none;
     display: inline-flex;
     align-items: center;
-    min-block-size: var(--size-hit);
     flex: none;
-  }
-
-  .header-logo-span {
-    color: var(--color-action);
-  }
-
-  .header-nav-link {
-    display: none;
-    align-items: center;
     min-block-size: var(--size-hit);
-    padding-inline: var(--spacing-2);
     border-radius: var(--radius-mark);
-    color: var(--color-text-secondary);
-    font-size: var(--text-callout);
-    font-weight: var(--font-weight-regular);
-    line-height: var(--leading-callout);
+    color: var(--color-action);
+    font-family: var(--font-display);
+    font-size: 24px;
+    font-weight: var(--font-weight-extrabold);
+    letter-spacing: var(--tracking-display);
+    line-height: 28px;
     text-decoration: none;
-  }
-
-  .header-nav-link[aria-current='page'] {
-    color: var(--color-text-primary);
-    font-weight: var(--font-weight-semibold);
   }
 
   .header-auth {
     display: flex;
     align-items: center;
-    justify-content: end;
-    flex-wrap: wrap;
+    justify-content: flex-end;
     gap: var(--spacing-2);
-    margin-inline-start: auto;
   }
 
-  .header-auth:empty {
-    min-inline-size: min(calc(25rem + 5rem), calc(100vw - 9rem));
-    min-block-size: var(--size-hit);
+  /* Session pending: reserve the signed-out width (76 + 92 on desktop, 76 on
+     phone) so nothing jumps when the buttons arrive. */
+  .header-auth[aria-busy='true']::before,
+  .header-auth[aria-busy='true']::after {
+    content: '';
+    block-size: var(--size-control);
+    border-radius: var(--radius-pill);
+    background: var(--color-bg-fill-hover);
+    inline-size: 76px;
   }
 
-  .header-user {
-    max-inline-size: 25rem;
-    overflow: hidden;
-    font-size: var(--text-callout);
-    font-weight: var(--font-weight-semibold);
-    line-height: var(--leading-callout);
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  .header-auth[aria-busy='true']::after {
+    display: none;
+    inline-size: 92px;
   }
 
-  @media (min-width: 48rem) {
-    .header-nav-link {
+  /* Phone: one secondary Log in. Sign up lives in the hero. */
+  .header-login.button {
+    --button-bg: var(--color-bg-surface);
+    --button-fg: var(--color-text-primary);
+    border-color: var(--color-gray-300);
+  }
+
+  .header-signup {
+    display: none;
+  }
+
+  /* 36 face inside a 44 tap on phone, 44 on desktop. */
+  .header-avatar {
+    display: grid;
+    place-items: center;
+    inline-size: var(--size-control);
+    block-size: var(--size-control);
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-pill);
+    background: none;
+    color: var(--color-text-primary);
+    font: inherit;
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+
+  .header-avatar-face {
+    display: grid;
+    place-items: center;
+    inline-size: var(--size-handle);
+    block-size: var(--size-handle);
+    border-radius: var(--radius-pill);
+    background: var(--color-butter-400);
+    font-family: var(--font-display);
+    font-size: var(--text-body);
+    font-weight: var(--font-weight-bold);
+    line-height: var(--leading-caption);
+  }
+
+  .header-avatar[aria-expanded='true'] .header-avatar-face {
+    box-shadow:
+      0 0 0 2px var(--color-bg-surface),
+      0 0 0 4px var(--color-gray-300);
+  }
+
+  @media (min-width: 64rem) {
+    .header-inner {
+      min-block-size: 5.5rem;
+      gap: var(--spacing-10);
+    }
+
+    .header-logo {
+      font-size: 30px;
+      line-height: 36px;
+    }
+
+    .header-login.button {
+      --button-bg: transparent;
+      border-color: transparent;
+    }
+
+    .header-signup {
       display: inline-flex;
+    }
+
+    .header-auth[aria-busy='true']::after {
+      display: block;
+    }
+
+    .header-avatar-face {
+      inline-size: var(--size-control);
+      block-size: var(--size-control);
+      font-size: 18px;
+      line-height: 20px;
     }
   }
 }

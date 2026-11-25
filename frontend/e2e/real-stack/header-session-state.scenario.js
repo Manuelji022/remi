@@ -63,10 +63,10 @@ export default async function scenario({
     `${auth}?.getAttribute('aria-busy') === 'false' && ${auth}?.innerText.includes('Iniciar sesión') && ${auth}?.innerText.includes('Registrarse')`,
   )
   const logo = await evaluate(
-    `(() => { const link = document.querySelector('.header-logo'); return { label: link.getAttribute('aria-label'), dotHidden: link.querySelector('.header-logo-span')?.getAttribute('aria-hidden') } })()`,
+    `(() => { const link = document.querySelector('.header-logo'); return { label: link.getAttribute('aria-label'), text: link.textContent } })()`,
   )
-  assert.equal(logo.label, 'Inicio de Remi')
-  assert.equal(logo.dotHidden, 'true')
+  assert.equal(logo.label, 'Remi, inicio')
+  assert.equal(logo.text, 'remi')
   await browser([
     'find',
     'role',

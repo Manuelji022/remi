@@ -284,8 +284,8 @@ await scenario('route navigation protects a preview stashed by schedule editing'
       node.click()
     }
     const link = (name) => {
-      const node = name === 'Remi home'
-        ? document.querySelector('a[aria-label="Remi home"]')
+      const node = name === 'Remi, home'
+        ? document.querySelector('a[aria-label="Remi, home"]')
         : [...document.querySelectorAll('a')].find((item) => item.textContent.trim() === name)
       if (!node) throw new Error('missing link ' + name)
       node.click()
@@ -305,12 +305,12 @@ await scenario('route navigation protects a preview stashed by schedule editing'
     if (!context) throw new Error('missing schedule context')
     context.click()
     await waitFor('preview invalidation', () => !${preview})
-    link('Remi home')
+    link('Remi, home')
     await waitFor('discard confirmation', () => document.querySelector('dialog[aria-labelledby="ai-preview-discard-title"]')?.open)
     if (!${dialog} || ${preview}) throw new Error('schedule edit state was not preserved')
     button('Discard generated preview')
     await waitFor('home route', () => location.pathname === '/')
-    link('Weekly menu')
+    link('Plan your weekly menu')
     await waitFor('planner route', () => location.pathname.endsWith('/weekly-menu-planner'))
     await waitFor('clean state', () => !${preview} && !${dialog} && !document.querySelector('dialog[aria-labelledby="ai-preview-discard-title"]'))
   `),
@@ -351,15 +351,15 @@ for (const fail of [false, true]) {
     evaluate(`${fixture}.holdSave=true; ${fixture}.failSave=${fail}`),
     click('Accept and save menu'),
     wait(`${fixture}.pendingSave`),
-    ['find', 'role', 'link', 'click', '--name', 'Remi home', '--exact'],
+    ['find', 'role', 'link', 'click', '--name', 'Remi, home', '--exact'],
     text('Wait for saving to finish before leaving or discarding this preview.'),
     assert(`${discardButton}.disabled`, 'Discard cannot proceed during acceptance'),
     ['press', 'Escape'],
     assert(`!document.querySelector('dialog[aria-labelledby="ai-preview-discard-title"]') && location.pathname.endsWith('/weekly-menu-planner')`, 'Escape cancels navigation during acceptance'),
-    ['find', 'role', 'link', 'click', '--name', 'Remi home', '--exact'],
+    ['find', 'role', 'link', 'click', '--name', 'Remi, home', '--exact'],
     click('Keep preview'),
     assert(`location.pathname.endsWith('/weekly-menu-planner') && ${preview}!==null`, 'Keep cancels navigation and retains pending preview'),
-    ['find', 'role', 'link', 'click', '--name', 'Remi home', '--exact'],
+    ['find', 'role', 'link', 'click', '--name', 'Remi, home', '--exact'],
     text('Wait for saving to finish before leaving or discarding this preview.'),
     evaluate(`${discardButton}.click()`),
     assert(`location.pathname.endsWith('/weekly-menu-planner') && ${preview}!==null`, 'disabled Discard does not navigate or remove the saving preview'),
@@ -367,7 +367,7 @@ for (const fail of [false, true]) {
     text(fail ? 'Could not confirm the preview was saved.' : 'Weekly Menu saved.'),
     assert(fail ? `${preview}!==null && !${discardButton}.disabled` : `${preview}===null && !${discardDialog}`, 'failure retains preview and enables explicit discard; success cancels pending navigation'),
     ...(fail ? [click('Discard generated preview'), ['wait', '--url', `${base}/`]] : [
-      ['find', 'role', 'link', 'click', '--name', 'Remi home', '--exact'],
+      ['find', 'role', 'link', 'click', '--name', 'Remi, home', '--exact'],
       ['wait', '--url', `${base}/`],
     ]),
   ])
