@@ -1,6 +1,6 @@
 import { TourCallout } from './TourCallout'
 import type { useFirstRunTour } from '../hooks/useFirstRunTour'
-import { Button } from '#/components/primitives'
+import { Banner, Button, TextLink } from '#/components/primitives'
 import { Dialog } from '#/components/primitives/Dialog'
 import type { Preferences } from '#/features/weekly-menu/types'
 import type {
@@ -83,20 +83,24 @@ export function AiGenerationScheduleDialog({
         />
       )}
       {missingRecipeSlots.length > 0 && (
-        <div className="planner-feedback" role="alert">
-          <p>
-            {t(
-              missingRecipeSlots.length > 1
-                ? 'planner.aiMissingBothRecipes'
-                : missingRecipeSlots[0] === 'lunch'
-                  ? 'planner.aiMissingLunchRecipes'
-                  : 'planner.aiMissingDinnerRecipes',
-            )}
-          </p>
-          <Button variant="secondary" onClick={onAddRecipes}>
-            {t('planner.aiAddRecipes')}
-          </Button>
-        </div>
+        <Banner
+          tone="error"
+          announce
+          className="planner-banner"
+          action={
+            <TextLink onClick={onAddRecipes}>
+              {t('planner.aiAddRecipes')}
+            </TextLink>
+          }
+        >
+          {t(
+            missingRecipeSlots.length > 1
+              ? 'planner.aiMissingBothRecipes'
+              : missingRecipeSlots[0] === 'lunch'
+                ? 'planner.aiMissingLunchRecipes'
+                : 'planner.aiMissingDinnerRecipes',
+          )}
+        </Banner>
       )}
       {replacesSavedMenu && (
         <p className="planner-ai-replace-note">{t('planner.aiReplaceNote')}</p>

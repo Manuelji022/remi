@@ -60,19 +60,6 @@
     margin-block-end: var(--spacing-6);
   }
 
-  .planner-feedback {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: var(--spacing-2);
-    padding: var(--spacing-card-pad);
-    margin-block-end: var(--spacing-6);
-    background: var(--color-bg-surface);
-    border-radius: var(--radius-surface);
-    box-shadow: 0 0 0 1px var(--color-border-subtle);
-  }
-
   .planner-banner {
     margin-block-end: var(--spacing-6);
   }

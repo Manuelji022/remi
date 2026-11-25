@@ -2,7 +2,7 @@ import { TourCallout } from './TourCallout'
 import type { useFirstRunTour } from '../hooks/useFirstRunTour'
 import { useEffect, useRef } from 'react'
 import { MenuTab } from './MenuTab'
-import { Button } from '#/components/primitives'
+import { Banner, Button, TextLink } from '#/components/primitives'
 import type { Day } from '../constants'
 import type { CalendarWeekMenu } from '../week'
 import type { MealSlot, Recipe } from '#/features/recipes/recipe'
@@ -151,17 +151,23 @@ export function AiMenuPreview({
         </p>
       ))}
       {!isCatalogReady && hasCatalogLoadFailed && (
-        <div className="planner-feedback" role="alert">
-          <p>{t('planner.loadErrorBody')}</p>
-          <Button variant="secondary" onClick={onRetryCatalog}>
-            {t('planner.retryLoad')}
-          </Button>
-        </div>
+        <Banner
+          tone="error"
+          announce
+          className="planner-banner"
+          action={
+            <TextLink onClick={onRetryCatalog}>
+              {t('planner.retryLoad')}
+            </TextLink>
+          }
+        >
+          {t('planner.loadErrorBody')}
+        </Banner>
       )}
       {!isCatalogReady && !hasCatalogLoadFailed && (
-        <p className="planner-feedback" role="status">
+        <Banner tone="info" announce className="planner-banner">
           {t('planner.loadingWeek')}
-        </p>
+        </Banner>
       )}
       <div className="planner-ai-preview-menu">
         <MenuTab
