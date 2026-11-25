@@ -1,0 +1,174 @@
+/* Menu primitive. Semantic tokens only. Paper: Design System / Menu. */
+@layer components {
+  /* The native popover lives in the top layer. Menu.tsx sets the inset,
+     max-height and transform-origin when it opens. */
+  .menu {
+    position: fixed;
+    inset: auto;
+    margin: 0;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-0-5);
+    inline-size: max-content;
+    min-inline-size: 220px;
+    max-inline-size: min(320px, calc(100vw - var(--spacing-8)));
+    padding: var(--spacing-2);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border: 0;
+    border-radius: var(--radius-surface);
+    background: var(--color-bg-surface);
+    color: var(--color-text-primary);
+    /* Paper has no shadow token: value from the Menu artboard. */
+    box-shadow:
+      0 8px 24px color-mix(in srgb, var(--color-ink) 12%, transparent),
+      0 0 0 1px color-mix(in srgb, var(--color-ink) 6%, transparent);
+    /* Close: a fade. */
+    opacity: 0;
+    transform: scale(0.96);
+    transition:
+      opacity var(--duration-fast) var(--ease-standard),
+      transform var(--duration-fast) var(--ease-standard),
+      overlay var(--duration-fast) allow-discrete,
+      display var(--duration-fast) allow-discrete;
+  }
+
+  .menu[data-wide] {
+    inline-size: 280px;
+    min-inline-size: 0;
+  }
+
+  /* Open: fade in and grow from 96% at the trigger's corner. */
+  .menu:popover-open {
+    opacity: 1;
+    transform: none;
+    transition-duration: var(--duration-base);
+    transition-timing-function: var(--ease-out);
+  }
+
+  @starting-style {
+    .menu:popover-open {
+      opacity: 0;
+      transform: scale(0.96);
+    }
+  }
+
+  /* Reduced motion: fade only. */
+  @media (prefers-reduced-motion: reduce) {
+    .menu,
+    .menu:popover-open {
+      transform: none;
+    }
+  }
+
+  .menu-header {
+    padding: var(--spacing-2) var(--spacing-3) var(--spacing-1-5);
+    color: var(--color-text-secondary);
+    font-size: var(--text-caption);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--leading-caption);
+  }
+
+  /* Identity (account menu): a header, not a row. */
+  .menu-identity {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-0-5);
+    padding: var(--spacing-3) var(--spacing-3) calc(var(--spacing-3) + 2px);
+    overflow-wrap: anywhere;
+  }
+
+  .menu-identity-name {
+    color: var(--color-text-primary);
+    font-size: var(--text-headline);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--leading-headline);
+  }
+
+  .menu-identity-detail {
+    color: var(--color-text-secondary);
+    font-size: var(--text-caption);
+    line-height: var(--leading-caption);
+  }
+
+  .menu-divider {
+    padding: var(--spacing-1) var(--spacing-3);
+  }
+
+  /* Three lanes: 20 icon, label, 20 trailing slot (the check). */
+  .menu-item {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: var(--spacing-3);
+    box-sizing: border-box;
+    min-block-size: var(--size-control);
+    padding: var(--spacing-2) var(--spacing-3);
+    border-radius: var(--radius-inner);
+    color: var(--color-text-primary);
+    font-size: var(--text-callout);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--leading-callout);
+    cursor: pointer;
+    touch-action: manipulation;
+    user-select: none;
+    transition: background-color var(--duration-fast) var(--ease-standard);
+  }
+
+  .menu-item-label {
+    flex: 1;
+    min-inline-size: 0;
+  }
+
+  .menu-item .icon {
+    flex-shrink: 0;
+  }
+
+  .menu-item-check {
+    display: flex;
+    flex-shrink: 0;
+    justify-content: center;
+    inline-size: var(--size-icon-md);
+  }
+
+  .menu-item[data-checked] {
+    background: var(--color-bg-fill);
+    font-weight: var(--font-weight-semibold);
+  }
+
+  .menu-item[data-tone='danger'] {
+    color: var(--color-status-error-text);
+  }
+
+  .menu-item[data-tone='brand'] {
+    color: var(--color-text-brand);
+    font-weight: var(--font-weight-semibold);
+  }
+
+  /* Pointer only: touch has no hover. */
+  @media (hover: hover) {
+    .menu-item:hover {
+      background: var(--color-bg-fill-hover);
+    }
+
+    .menu-item[data-tone='danger']:hover {
+      background: var(--color-status-error-bg);
+    }
+  }
+
+  .menu-item:active {
+    background: var(--color-gray-200);
+  }
+
+  /* The ring sits inside the row: the popover clips anything outside it. */
+  .menu-item:focus-visible {
+    outline: 0;
+    box-shadow: inset 0 0 0 2px var(--color-focus-ring);
+  }
+
+  .menu-item[aria-disabled='true'] {
+    opacity: var(--opacity-disabled);
+    cursor: default;
+  }
+}

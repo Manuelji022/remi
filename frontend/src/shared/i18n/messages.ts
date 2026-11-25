@@ -95,6 +95,7 @@ export const messages = {
       'Find the ingredients from your weekly menu together in a single shopping list.',
     'nav.weeklyMenu': 'Weekly menu',
     'nav.home': 'Remi home',
+    'nav.account': 'Account menu',
     'about.kicker': 'About',
     'about.title': 'A small starter with room to grow.',
     'about.body':
@@ -384,6 +385,7 @@ export const messages = {
       'Encuentra los ingredientes de tu menú semanal reunidos en una sola lista de la compra.',
     'nav.weeklyMenu': 'Menú semanal',
     'nav.home': 'Inicio de Remi',
+    'nav.account': 'Menú de la cuenta',
     'about.kicker': 'Acerca de',
     'about.title': 'Un pequeño punto de partida con espacio para crecer.',
     'about.body':

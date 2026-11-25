@@ -1,5 +1,5 @@
 import './header.css'
-import { Button, TextLink } from '#/components/primitives'
+import { Button, Menu, MenuItem, TextLink } from '#/components/primitives'
 import { LocalizedLink, useI18n } from '#/shared/i18n'
 import { authClient } from '#/features/auth/auth-client'
 import { useSignOut } from '#/features/auth/use-sign-out'
@@ -34,10 +34,20 @@ export function Header() {
         </div>
         <div aria-busy={isSessionPending} className="header-auth">
           {isSessionPending ? null : session ? (
-            <>
-              <span className="header-user">{session.user.name}</span>
-              <Button onClick={() => void signOut()}>{t('auth.logout')}</Button>
-            </>
+            <Menu
+              identity={{ name: session.user.name, detail: session.user.email }}
+              label={t('nav.account')}
+              trigger={(props) => (
+                <Button {...props} trailingIcon="expand">
+                  <span className="header-user">{session.user.name}</span>
+                </Button>
+              )}
+              wide
+            >
+              <MenuItem icon="log-out" onSelect={() => void signOut()}>
+                {t('auth.logout')}
+              </MenuItem>
+            </Menu>
           ) : (
             <>
               <TextLink nav to="/login">
