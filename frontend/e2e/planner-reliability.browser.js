@@ -150,12 +150,12 @@ await scenario('schedule failure retains draft; pending retry is guarded and suc
   click('Next week'),
   wait(`${grid}.innerText.includes('Saved dinner')`),
   click('Preferences'),
-  ['click', '#preferences-schedule-panel .panel-day-card:first-child .panel-context-pill:first-child'],
+  ['click', '#preferences-schedule-panel .panel-day-card:first-child button[aria-pressed]:first-child'],
   evaluate(`${fixture}.failSave=true`),
   click('Save preferences'),
   text('Could not confirm your preferences were saved.'),
   assert(
-    `${dialog}.querySelector('.panel-day-card:first-child .panel-context-pill:first-child').getAttribute('aria-pressed')==='true' && !document.querySelector('.day-context-badge') && ${fixture}.writes.at(-1).payload.includes('saved-dinner')`,
+    `${dialog}.querySelector('.panel-day-card:first-child button[aria-pressed]:first-child').getAttribute('aria-pressed')==='true' && !document.querySelector('.day-card-header .badge') && ${fixture}.writes.at(-1).payload.includes('saved-dinner')`,
     'failed save preserves draft, assigned dinner, and last loaded menu',
   ),
   evaluate(`${fixture}.failSave=false;${fixture}.hold.save=true`),
@@ -167,7 +167,7 @@ await scenario('schedule failure retains draft; pending retry is guarded and suc
   ),
   evaluate(`${fixture}.hold.save=false;${fixture}.release.save()`),
   text('Preferences saved.'),
-  assert(`!${dialog} && ${grid}.innerText.includes('Saved dinner') && document.querySelector('.day-context-badge')?.textContent==='Office'`, 'retry confirms saved schedule'),
+  assert(`!${dialog} && ${grid}.innerText.includes('Saved dinner') && document.querySelector('.day-card-header .badge')?.textContent==='Office'`, 'retry confirms saved schedule'),
 ])
 
 for (const failed of [false, true]) {
@@ -218,7 +218,8 @@ await scenario('catalog failure is actionable and retry restores shopping', [
   evaluate(`${fixture}.failRecipes=false`),
   click('Retry loading'),
   wait(currentDinner),
-  click('Shopping List 1'),
+  // The planner tabs are a SegmentedControl (role=tab); the accessible name carries the count badge, and the header also has a separate "Shopping list" button.
+  ['find', 'role', 'tab', 'click', '--name', 'Shopping List 1', '--exact'],
   text('100 g Rice'),
   assert(`document.querySelector('.planner-shopping-tab').innerText.includes('100 g Rice') && ${fixture}.writes.length===0`, 'catalog retry restores derived shopping list'),
 ])
@@ -245,13 +246,13 @@ await scenario('Spanish load/save failures and recovery are localized', [
   click('Semana siguiente'),
   wait(`${grid}.innerText.includes('Saved dinner')`),
   click('Preferencias'),
-  ['click', '#preferences-schedule-panel .panel-day-card:first-child .panel-context-pill:first-child'],
+  ['click', '#preferences-schedule-panel .panel-day-card:first-child button[aria-pressed]:first-child'],
   evaluate(`${fixture}.failSave=true`),
   click('Guardar preferencias'),
   text('No se pudo confirmar el guardado de tus preferencias.'),
-  assert(`${dialog}.querySelector('.panel-day-card:first-child .panel-context-pill:first-child').getAttribute('aria-pressed')==='true'`, 'Spanish failure retains draft'),
+  assert(`${dialog}.querySelector('.panel-day-card:first-child button[aria-pressed]:first-child').getAttribute('aria-pressed')==='true'`, 'Spanish failure retains draft'),
   evaluate(`${fixture}.failSave=false`),
   click('Guardar preferencias'),
   text('Preferencias guardadas.'),
-  assert(`!${dialog} && document.querySelector('.day-context-badge')?.textContent==='Oficina'`, 'Spanish retry succeeds'),
+  assert(`!${dialog} && document.querySelector('.day-card-header .badge')?.textContent==='Oficina'`, 'Spanish retry succeeds'),
 ])
