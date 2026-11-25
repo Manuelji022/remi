@@ -1,60 +1,115 @@
-.week-lock {
-  display: flex;
-  justify-content: center;
-}
-
-.week-lock-button {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-block: 0 1rem;
-  padding: 0.4rem 1rem;
-  border: 1px solid currentColor;
-  border-radius: 2rem;
-  background: transparent;
-  color: inherit;
-  font: inherit;
-  cursor: pointer;
-  touch-action: none;
-  user-select: none;
-  -webkit-touch-callout: none;
-}
-
-.week-lock-button svg {
-  inline-size: 2.5rem;
-  block-size: 2.5rem;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2;
-}
-
-.week-lock-track {
-  opacity: 0.2;
-}
-
-.week-lock-progress {
-  stroke-dasharray: 1;
-  stroke-dashoffset: 1;
-  transform: rotate(-90deg);
-  transform-origin: center;
-  animation: week-lock-fill linear forwards;
-}
-
-@keyframes week-lock-fill {
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .week-lock-progress {
-    animation: none;
-    stroke-dashoffset: 0;
+/* Paper: Planner controls · v2 / Desktop states. The lock is a pill with the
+   same anatomy as the week switcher: kicker says the state, main line says
+   the action. */
+@layer components {
+  .week-lock {
+    display: flex;
+    min-inline-size: 0;
   }
 
-  .week-lock-button[data-holding='true'] {
-    outline: 3px solid currentColor;
-    outline-offset: 3px;
+  .week-lock-pill {
+    position: relative;
+    display: flex;
+    flex: 1;
+    align-items: center;
+    gap: var(--spacing-3);
+    box-sizing: border-box;
+    block-size: var(--size-control-xl);
+    padding-inline: var(--spacing-1-5)
+      calc(var(--spacing-5) + var(--spacing-0-5));
+    border: 0;
+    border-radius: var(--radius-pill);
+    background: var(--color-bg-brand-soft);
+    color: var(--color-text-brand);
+    font: inherit;
+    text-align: start;
+    overflow: clip;
+  }
+
+  .week-lock-button {
+    cursor: pointer;
+    touch-action: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+
+  /* Fills left to right while held, drains back when let go early. The hold
+     duration comes inline from WeekLockButton. */
+  .week-lock-fill {
+    position: absolute;
+    inset: 0;
+    background: color-mix(
+      in srgb,
+      var(--color-bg-brand-soft),
+      var(--color-pop) 22%
+    );
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--duration-slow) var(--ease-out);
+  }
+
+  .week-lock-button[data-holding='true'] .week-lock-fill {
+    transform: scaleX(1);
+    transition-duration: var(--week-lock-hold);
+    transition-timing-function: linear;
+  }
+
+  .week-lock-icon,
+  .week-lock-text {
+    position: relative;
+  }
+
+  .week-lock-icon {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    inline-size: var(--size-control-lg);
+    block-size: var(--size-control-lg);
+    border-radius: var(--radius-pill);
+    background: var(--color-bg-surface);
+  }
+
+  .week-lock-text {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-0-5);
+    white-space: nowrap;
+  }
+
+  .week-lock-kicker {
+    font-size: var(--text-caption);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--spacing-4);
+  }
+
+  .week-lock-action {
+    color: var(--color-text-primary);
+    font-size: var(--text-body);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--leading-callout);
+  }
+
+  /* After unlocking it is a quiet status: grey fill, open lock. */
+  .week-lock-unlocked {
+    background: var(--color-bg-fill);
+    color: var(--color-text-secondary);
+  }
+
+  .week-lock-unlocked .week-lock-action {
+    color: var(--color-text-secondary);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .week-lock-fill,
+    .week-lock-button[data-holding='true'] .week-lock-fill {
+      transition: none;
+    }
+
+    .week-lock-button[data-holding='true'] {
+      outline: 3px solid currentColor;
+      outline-offset: 3px;
+    }
   }
 }
 

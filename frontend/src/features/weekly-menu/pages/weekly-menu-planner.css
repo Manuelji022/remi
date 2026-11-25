@@ -3,48 +3,127 @@
     display: grid;
   }
 
-  .planner-hero {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--spacing-4);
-    flex-wrap: wrap;
+  /* Paper: Planner controls · v2. Three zones: week + lock, the one hero
+     action, tools. Below lg they stack; from lg they share one row and the
+     tools sit at the end. */
+  .planner-controls {
+    display: grid;
+    gap: var(--spacing-3);
     margin-block-end: var(--spacing-8);
   }
 
-  .planner-week-nav {
-    display: inline-flex;
+  .planner-controls-start {
+    display: flex;
+    flex-wrap: wrap;
     align-items: center;
+    gap: var(--spacing-3);
+    min-inline-size: 0;
+  }
+
+  .planner-controls-start > .week-lock {
+    flex: 1 1 14rem;
+  }
+
+  .planner-week-nav {
+    display: flex;
+    flex: 1 1 100%;
+    align-items: center;
+    justify-content: space-between;
     gap: var(--spacing-1);
+    box-sizing: border-box;
+    block-size: var(--size-control-xl);
+    padding: var(--spacing-1-5);
+    border-radius: var(--radius-pill);
+    background: var(--color-bg-fill);
+  }
+
+  /* White circles on the grey pill, no edge. */
+  .planner-week-nav .button.button-icon-only {
+    border-color: transparent;
   }
 
   .planner-week-pill {
-    font-weight: var(--font-weight-semibold);
-    font-size: var(--text-body);
-    line-height: var(--leading-body);
-    padding-inline: var(--spacing-2);
-  }
-
-  .planner-current-week-label {
-    padding: var(--spacing-1) var(--spacing-2);
-    border-radius: var(--radius-pill);
-    background: var(--color-bg-fill-hover);
-    color: var(--color-text-primary);
-    font-size: var(--text-caption);
-    font-weight: var(--font-weight-semibold);
-    line-height: var(--leading-caption);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-0-5);
+    /* Fixed label width so the arrows never move between weeks. */
+    min-inline-size: 8.5rem;
+    margin: 0;
+    text-align: center;
     white-space: nowrap;
   }
 
-  .planner-actions {
+  .planner-week-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-1-5);
+    color: var(--color-text-secondary);
+    font-size: var(--text-caption);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--spacing-4);
+  }
+
+  .planner-current-week-label {
+    color: var(--color-text-brand);
+  }
+
+  .planner-week-dot {
+    inline-size: var(--size-dot);
+    block-size: var(--size-dot);
+    border-radius: var(--radius-pill);
+    background: var(--color-pop);
+  }
+
+  .planner-week-range {
+    font-size: var(--text-body);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--leading-callout);
+  }
+
+  .planner-tools {
     display: flex;
     align-items: center;
     gap: var(--spacing-2);
-    inline-size: 100%;
   }
 
-  .planner-actions .button {
+  .planner-tools .button,
+  .planner-generate {
     flex: 1;
+  }
+
+  @media (min-width: 40rem) {
+    .planner-week-nav {
+      flex: none;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .planner-controls {
+      grid-template-columns: auto auto 1fr;
+      align-items: center;
+      gap: var(--spacing-6);
+    }
+
+    .planner-controls-start {
+      flex-wrap: nowrap;
+    }
+
+    .planner-controls-start > .week-lock {
+      flex: none;
+    }
+
+    .planner-generate {
+      flex: none;
+    }
+
+    .planner-tools {
+      justify-content: end;
+    }
+
+    .planner-tools .button {
+      flex: none;
+    }
   }
 
   .planner-section-heading:empty {
@@ -151,16 +230,6 @@
 
   .planner-shopping-tab li + li {
     border-block-start: 1px solid var(--color-border-subtle);
-  }
-
-  @media (min-width: 48rem) {
-    .planner-actions {
-      inline-size: auto;
-    }
-
-    .planner-actions .button {
-      flex: none;
-    }
   }
 }
 

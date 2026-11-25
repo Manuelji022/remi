@@ -1,6 +1,8 @@
 import './week-lock-button.css'
 import { useState } from 'react'
+import type { CSSProperties } from 'react'
 import { useHoldToConfirm } from '../hooks/useHoldToConfirm'
+import { Icon } from '#/components/primitives'
 import { useI18n } from '#/shared/i18n'
 
 const HOLD_DURATION_MS = 1000
@@ -24,31 +26,41 @@ export function WeekLockButton({
 
   return (
     <div className="week-lock">
-      {isLocked && (
+      {isLocked ? (
         <button
           {...handlers}
           type="button"
-          className="week-lock-button"
+          className="week-lock-pill week-lock-button"
           data-holding={isHolding}
+          style={
+            { '--week-lock-hold': `${HOLD_DURATION_MS}ms` } as CSSProperties
+          }
           aria-label={t('planner.weekLockedLabel')}
           onContextMenu={(event) => event.preventDefault()}
         >
-          <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true">
-            <circle className="week-lock-track" cx="20" cy="20" r="18" />
-            {isHolding && (
-              <circle
-                className="week-lock-progress"
-                cx="20"
-                cy="20"
-                r="18"
-                pathLength="1"
-                style={{ animationDuration: `${HOLD_DURATION_MS}ms` }}
-              />
-            )}
-            <path d="M15 18v-4a5 5 0 0 1 10 0v4m-11 0h12v12H14z" />
-          </svg>
-          <span>{t('planner.holdToUnlock')}</span>
+          <span className="week-lock-fill" aria-hidden="true" />
+          <span className="week-lock-icon">
+            <Icon name="lock" size="sm" />
+          </span>
+          <span className="week-lock-text">
+            <span className="week-lock-kicker">{t('planner.menuLocked')}</span>
+            <span className="week-lock-action">
+              {t(isHolding ? 'planner.keepHolding' : 'planner.holdToUnlock')}
+            </span>
+          </span>
         </button>
+      ) : (
+        <div className="week-lock-pill week-lock-unlocked">
+          <span className="week-lock-icon">
+            <Icon name="unlock" size="sm" />
+          </span>
+          <span className="week-lock-text">
+            <span className="week-lock-kicker">
+              {t('planner.weekUnlocked')}
+            </span>
+            <span className="week-lock-action">{t('planner.youCanEdit')}</span>
+          </span>
+        </div>
       )}
       <span className="week-lock-status" role="status" aria-live="polite">
         {announced ? t('planner.weekUnlocked') : ''}
