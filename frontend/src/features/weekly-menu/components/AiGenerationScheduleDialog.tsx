@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react'
 import { TourCallout } from './TourCallout'
 import type { useFirstRunTour } from '../hooks/useFirstRunTour'
 import { Banner, Button, TextLink } from '#/components/primitives'
@@ -26,6 +27,9 @@ interface AiGenerationScheduleDialogProps {
   onUpdatePlanningScope: SchedulePlanningScopeChange
 }
 
+/** The schedule editor needs more room than the 520 default. */
+const wideDialog = { '--dialog-width': '58rem' } as CSSProperties
+
 export function AiGenerationScheduleDialog({
   tour,
   isPending,
@@ -43,26 +47,27 @@ export function AiGenerationScheduleDialog({
   const { t } = useI18n()
   return (
     <Dialog
-      className="planner-ai-dialog"
-      describedBy="ai-generation-description"
-      labelledBy="ai-generation-title"
+      id="ai-generation"
+      title={t('planner.aiScheduleTitle')}
+      description={t('planner.aiScheduleBody')}
+      style={wideDialog}
       returnFocusTo={returnFocusTo}
       onDismiss={onCancel}
       dismissDisabled={isPending}
+      actions={
+        <>
+          <Button variant="secondary" disabled={isPending} onClick={onCancel}>
+            {t('common.cancel')}
+          </Button>
+          <Button variant="brand" disabled={isPending} onClick={onConfirm}>
+            {t(isPending ? 'planner.generating' : 'planner.aiConfirmSchedule')}
+          </Button>
+        </>
+      }
     >
-      <header className="planner-ai-dialog-header">
-        <div>
-          <p className="panel-section-kicker">
-            {t('planner.aiScheduleKicker')}
-          </p>
-          <h2 id="ai-generation-title">{t('planner.aiScheduleTitle')}</h2>
-          <p className="planner-ai-dialog-range">
-            {targetWeekRange.start} – {targetWeekRange.end}
-          </p>
-        </div>
-      </header>
-      <p id="ai-generation-description" className="planner-ai-dialog-copy">
-        {t('planner.aiScheduleBody')}
+      <p className="panel-section-kicker">
+        {t('planner.aiScheduleKicker')} · {targetWeekRange.start} –{' '}
+        {targetWeekRange.end}
       </p>
       <fieldset className="planner-ai-schedule-fields" disabled={isPending}>
         <ScheduleEditor
@@ -86,7 +91,6 @@ export function AiGenerationScheduleDialog({
         <Banner
           tone="error"
           announce
-          className="planner-banner"
           action={
             <TextLink onClick={onAddRecipes}>
               {t('planner.aiAddRecipes')}
@@ -105,14 +109,6 @@ export function AiGenerationScheduleDialog({
       {replacesSavedMenu && (
         <p className="planner-ai-replace-note">{t('planner.aiReplaceNote')}</p>
       )}
-      <footer className="planner-ai-dialog-footer">
-        <Button variant="secondary" disabled={isPending} onClick={onCancel}>
-          {t('common.cancel')}
-        </Button>
-        <Button variant="brand" disabled={isPending} onClick={onConfirm}>
-          {t(isPending ? 'planner.generating' : 'planner.aiConfirmSchedule')}
-        </Button>
-      </footer>
     </Dialog>
   )
 }

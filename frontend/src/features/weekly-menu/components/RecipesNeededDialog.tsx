@@ -16,24 +16,21 @@ export function RecipesNeededDialog({
   const { t } = useI18n()
   return (
     <Dialog
-      className="planner-ai-discard-dialog"
-      describedBy="ai-recipes-needed-description"
-      labelledBy="ai-recipes-needed-title"
+      id="ai-recipes-needed"
+      title={t('planner.aiRecipesNeededTitle')}
+      description={t('planner.aiRecipesNeededBody')}
       returnFocusTo={returnFocusTo}
       onDismiss={onClose}
-    >
-      <h2 id="ai-recipes-needed-title">{t('planner.aiRecipesNeededTitle')}</h2>
-      <p id="ai-recipes-needed-description">
-        {t('planner.aiRecipesNeededBody')}
-      </p>
-      <footer className="planner-ai-dialog-footer">
-        <Button variant="secondary" onClick={onClose}>
-          {t('common.close')}
-        </Button>
-        <Button variant="brand" onClick={onAddRecipes}>
-          {t('planner.aiAddRecipes')}
-        </Button>
-      </footer>
-    </Dialog>
+      actions={
+        <>
+          <Button variant="secondary" onClick={onClose}>
+            {t('common.close')}
+          </Button>
+          <Button variant="brand" onClick={onAddRecipes}>
+            {t('planner.aiAddRecipes')}
+          </Button>
+        </>
+      }
+    />
   )
 }

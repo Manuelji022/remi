@@ -1,11 +1,13 @@
 import { useEffect, useId, useRef } from 'react'
 import './Dialog.css'
-import type { ReactNode } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 
 interface DialogShellProps {
   /** Extra content between the header and the actions (a field, for a form). */
   children?: ReactNode
   className?: string
+  /** For `--dialog-width` on a wide form; the surface keeps its own look. */
+  style?: CSSProperties
   onDismiss: () => void
   dismissDisabled?: boolean
   returnFocusTo?: HTMLElement | null
@@ -49,6 +51,7 @@ export type DialogProps = DialogShellProps &
 export function Dialog({
   children,
   className,
+  style,
   onDismiss,
   dismissDisabled = false,
   returnFocusTo,
@@ -95,6 +98,7 @@ export function Dialog({
       aria-labelledby={titleId}
       aria-describedby={descriptionId}
       className={classes || undefined}
+      style={style}
       onCancel={(event) => {
         event.preventDefault()
         if (!dismissDisabled) onDismiss()
