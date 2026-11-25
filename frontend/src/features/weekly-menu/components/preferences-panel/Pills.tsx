@@ -1,4 +1,4 @@
-import { Chip, Icon } from '#/components/primitives'
+import { Chip } from '#/components/primitives'
 import { useI18n } from '#/shared/i18n'
 import type { PreferencesPanelTab } from './types'
 
@@ -56,32 +56,5 @@ export function DayContextPill({
     >
       {label}
     </Chip>
-  )
-}
-
-interface PlanningScopePillProps {
-  isDisabled: boolean
-  isSelected: boolean
-  label: string
-  onClick: () => void
-}
-
-export function PlanningScopePill({
-  isDisabled,
-  isSelected,
-  label,
-  onClick,
-}: PlanningScopePillProps) {
-  return (
-    <button
-      aria-pressed={isSelected}
-      className={`panel-scope-pill ${isSelected ? 'selected' : ''}`}
-      disabled={isDisabled}
-      type="button"
-      onClick={onClick}
-    >
-      {isSelected ? <Icon name="done" size="sm" /> : null}
-      {label}
-    </button>
   )
 }

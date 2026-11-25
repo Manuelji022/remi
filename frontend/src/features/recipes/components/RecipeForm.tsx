@@ -1,5 +1,11 @@
 import { useId, useRef, useState } from 'react'
-import { Button, Field, Icon, Input, Select } from '#/components/primitives'
+import {
+  Button,
+  Field,
+  Input,
+  SegmentedControl,
+  Select,
+} from '#/components/primitives'
 import { useI18n } from '#/shared/i18n'
 import {
   INGREDIENT_UNITS,
@@ -101,24 +107,15 @@ export function RecipeForm({ isAddingRecipe, onAddRecipe }: RecipeFormProps) {
 
       <div className="panel-field">
         <span>{t('preferences.recipeSlot')}</span>
-        <div
-          className="panel-pill-row"
-          aria-label={t('preferences.recipeSlotHelp')}
-          role="group"
-        >
-          {MEAL_SLOTS.map((slot) => (
-            <button
-              aria-pressed={recipeSlot === slot}
-              className={`panel-scope-pill ${recipeSlot === slot ? 'selected' : ''}`}
-              key={slot}
-              type="button"
-              onClick={() => setRecipeSlot(slot)}
-            >
-              {recipeSlot === slot ? <Icon name="done" size="sm" /> : null}
-              {t(`slots.${slot}`)}
-            </button>
-          ))}
-        </div>
+        <SegmentedControl
+          label={t('preferences.recipeSlotHelp')}
+          options={MEAL_SLOTS.map((slot) => ({
+            value: slot,
+            label: t(`slots.${slot}`),
+          }))}
+          value={recipeSlot}
+          onChange={setRecipeSlot}
+        />
       </div>
 
       <div className="panel-field">
