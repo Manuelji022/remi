@@ -28,7 +28,7 @@
     color: var(--color-text-secondary);
     opacity: 1;
   }
-  .field-control:hover:not(:disabled, :read-only) {
+  .field-control:hover:not(:disabled, input:read-only, textarea:read-only) {
     border-color: var(--color-text-secondary);
   }
   .field-control:focus-visible {
@@ -36,7 +36,7 @@
     outline: 2px solid var(--color-focus-ring);
     outline-offset: 2px;
   }
-  .field-control:read-only:not(:disabled) {
+  .field-control:is(input, textarea):read-only:not(:disabled) {
     border-color: var(--color-bg-fill);
     background: var(--color-bg-fill);
   }
@@ -48,6 +48,29 @@
     background: var(--color-bg-fill);
     opacity: var(--opacity-disabled);
     cursor: not-allowed;
+  }
+  /* Select: the native control with its arrow removed, chevron 20 in
+     text-secondary with 12 of end padding. */
+  .field-select {
+    position: relative;
+    display: block;
+  }
+  .field-select .field-control {
+    appearance: none;
+    padding-inline-end: calc(
+      var(--spacing-3) + var(--size-icon-md) + var(--spacing-2)
+    );
+  }
+  .field-select .icon {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-end: var(--spacing-3);
+    margin-block: auto;
+    color: var(--color-text-secondary);
+    pointer-events: none;
+  }
+  .field-select:has(:disabled) .icon {
+    opacity: var(--opacity-disabled);
   }
   .field-message {
     display: flex;

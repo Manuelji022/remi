@@ -13,11 +13,13 @@ export function Field({
   label,
   hint,
   error,
+  className,
   children,
 }: {
   label: ReactNode
   hint?: ReactNode
   error?: ReactNode
+  className?: string
   children: ReactElement<ControlProps>
 }) {
   const generatedId = useId()
@@ -29,7 +31,7 @@ export function Field({
       .filter(Boolean)
       .join(' ') || undefined
   return (
-    <div className="field">
+    <div className={className ? `field ${className}` : 'field'}>
       <label className="field-label" htmlFor={id}>
         {label}
       </label>

@@ -205,22 +205,10 @@
     gap: var(--spacing-2);
   }
 
-  .panel-field > span,
-  .panel-ingredient-name-field > span,
-  .panel-ingredient-quantity-field > span,
-  .panel-ingredient-unit-field > span {
+  .panel-field > span {
     font-size: var(--text-callout);
     font-weight: var(--font-weight-semibold);
     line-height: var(--leading-callout);
-  }
-
-  .panel-ingredient-name-field > span,
-  .panel-ingredient-quantity-field > span,
-  .panel-ingredient-unit-field > span {
-    font-size: var(--text-caption);
-    line-height: var(--leading-caption);
-    color: var(--color-text-secondary);
-    font-weight: var(--font-weight-regular);
   }
 
   .panel-ingredient-rows {
@@ -240,8 +228,6 @@
   .panel-ingredient-name-field,
   .panel-ingredient-quantity-field,
   .panel-ingredient-unit-field {
-    display: grid;
-    gap: var(--spacing-2);
     min-inline-size: 0;
   }
 
