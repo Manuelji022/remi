@@ -1,9 +1,18 @@
-import { useEffect, useId, useRef, useSyncExternalStore } from 'react'
+import {
+  Children,
+  Fragment,
+  isValidElement,
+  useEffect,
+  useId,
+  useRef,
+  useSyncExternalStore,
+} from 'react'
 import { useI18n } from '#/shared/i18n'
 import { Button } from './Button'
 import { Sheet } from './Sheet'
 import { useModalDialog } from './useModalDialog'
 import './Drawer.css'
+import type { ReactNode } from 'react'
 import type { SheetProps } from './Sheet'
 
 export interface DrawerProps extends SheetProps {
@@ -39,6 +48,15 @@ export function Drawer(props: DrawerProps) {
     <DrawerSurface {...sheetProps} closeLabel={closeLabel} />
   ) : (
     <Sheet {...sheetProps} />
+  )
+}
+
+/** Fragments are unwrapped so `<>…</>` actions reverse like a plain list. */
+function flattenActions(node: ReactNode): Array<ReactNode> {
+  return Children.toArray(node).flatMap((child) =>
+    isValidElement<{ children?: ReactNode }>(child) && child.type === Fragment
+      ? flattenActions(child.props.children)
+      : [child],
   )
 }
 
@@ -115,7 +133,13 @@ function DrawerSurface({
         />
       </header>
       <div className="drawer-body">{children}</div>
-      {actions && <footer className="drawer-footer">{actions}</footer>}
+      {actions && (
+        // The owner passes the Sheet order (main action first). The Drawer
+        // puts it last, in the DOM too, so Tab follows what the eye sees.
+        <footer className="drawer-footer">
+          {flattenActions(actions).reverse()}
+        </footer>
+      )}
     </dialog>
   )
 }

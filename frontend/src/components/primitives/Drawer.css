@@ -99,13 +99,12 @@
         no-repeat scroll;
   }
 
-  /* Buttons hug and end-align, the main action last: the owner passes it
-     first (the Sheet order), so the row is reversed. */
+  /* Buttons hug and end-align, the main action last. Drawer.tsx reverses the
+     children, so DOM order is visual order (WCAG 2.4.3). */
   .drawer-footer {
     flex-shrink: 0;
     display: flex;
-    flex-direction: row-reverse;
-    justify-content: flex-start;
+    justify-content: flex-end;
     gap: var(--spacing-2);
     padding: var(--spacing-4) var(--drawer-pad) var(--drawer-pad);
   }
