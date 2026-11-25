@@ -3,7 +3,7 @@ import { DayCard } from './DayCard'
 import { Button, EmptyState } from '#/components/primitives'
 import { DAYS, isWeekend } from '#/features/weekly-menu/constants'
 import type { Day } from '#/features/weekly-menu/constants'
-import { showMenuDay } from '#/features/weekly-menu/week'
+import { dayTiming, showMenuDay } from '#/features/weekly-menu/week'
 import type { CalendarWeekMenu } from '#/features/weekly-menu/week'
 import type { MealSlot, Recipe } from '#/features/recipes/recipe'
 import { useI18n } from '#/shared/i18n'
@@ -79,6 +79,8 @@ export function MenuTab({
     )
   }
 
+  const now = new Date()
+
   return (
     <div className="planner-menu-tab">
       <div className="planner-section-heading"></div>
@@ -118,10 +120,13 @@ export function MenuTab({
               <DayCard
                 day={day}
                 dayContext={shown.context}
+                dayIndex={index}
                 dinner={shown.dinner}
                 editableMeals={editableMeals}
                 isWeekend={isWeekend(day)}
                 lunch={shown.lunch}
+                timing={dayTiming(menu.weekStart, index, now)}
+                weekStart={menu.weekStart}
               />
             </div>
           )
