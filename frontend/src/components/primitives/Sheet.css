@@ -1,0 +1,162 @@
+/* Sheet primitive. Semantic tokens only. Paper: Design System / Sheet.
+   Phone: a full-width surface from the bottom edge. md and up: 480 centered. */
+@layer components {
+  .sheet {
+    --sheet-pad: var(--spacing-5);
+
+    box-sizing: border-box;
+    inset: auto 0 0;
+    inline-size: 100%;
+    /* The viewport minus 48: a strip of page always shows above it. */
+    max-inline-size: none;
+    max-block-size: calc(100dvh - var(--spacing-12));
+    margin: 0 auto;
+    padding: 0;
+    overflow: hidden;
+    border: 0;
+    border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
+    background: var(--color-bg-surface);
+    color: var(--color-text-primary);
+    /* Paper has no shadow token: value from the Sheet artboard. */
+    box-shadow: 0 -8px 32px
+      color-mix(in srgb, var(--color-ink) 14%, transparent);
+    /* Set while a drag moves the sheet down. */
+    translate: 0 var(--sheet-drag, 0px);
+    transition: translate var(--duration-base) var(--ease-standard);
+    animation: sheet-in var(--duration-slow) var(--ease-out) both;
+  }
+
+  /* On [open] so the native closed state keeps its `display: none`. */
+  .sheet[open] {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sheet[data-dragging] {
+    transition: none;
+  }
+
+  .sheet::backdrop {
+    background: var(--color-bg-overlay);
+    animation: sheet-fade var(--duration-slow) var(--ease-out) both;
+  }
+
+  /* The page keeps its scroll position underneath. */
+  body:has(.sheet[open]) {
+    overflow: hidden;
+  }
+
+  /* The whole header is the drag zone. */
+  .sheet-header {
+    flex-shrink: 0;
+    display: grid;
+    gap: var(--spacing-1);
+    padding: var(--spacing-2) var(--sheet-pad);
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+  }
+
+  .sheet[data-dragging] .sheet-header {
+    cursor: grabbing;
+  }
+
+  .sheet-handle {
+    justify-self: center;
+    inline-size: var(--size-handle);
+    block-size: var(--spacing-1);
+    margin-block-end: var(--spacing-3);
+    border-radius: var(--radius-pill);
+    background: var(--color-gray-300);
+  }
+
+  .sheet-title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--text-title);
+    font-weight: var(--font-weight-bold);
+    letter-spacing: var(--tracking-title);
+    line-height: var(--leading-title);
+  }
+
+  .sheet-title:focus-visible {
+    outline: none;
+  }
+
+  .sheet-description {
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: var(--text-callout);
+    line-height: var(--leading-callout);
+  }
+
+  /* The only part that scrolls. The hairline above the footer shows while
+     content sits under it: a fixed line, hidden by a surface-colored one that
+     scrolls with the content and lands on it at the end. */
+  .sheet-body {
+    flex: 1 1 auto;
+    min-block-size: 0;
+    padding: var(--spacing-3) var(--sheet-pad) var(--spacing-2);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    background:
+      linear-gradient(var(--color-bg-surface) 0 0) bottom / 100% 1px no-repeat
+        local,
+      linear-gradient(var(--color-border-subtle) 0 0) bottom / 100% 1px
+        no-repeat scroll;
+  }
+
+  /* Block buttons: the main action at lg, the way out below as ghost. */
+  .sheet-footer {
+    flex-shrink: 0;
+    display: grid;
+    gap: var(--spacing-2);
+    /* Nothing sits under the home indicator. */
+    padding: var(--spacing-3) var(--sheet-pad)
+      max(var(--spacing-3), env(safe-area-inset-bottom));
+  }
+
+  .sheet-footer > .button {
+    --button-size: var(--size-control-lg);
+    --button-text: var(--text-body);
+
+    inline-size: 100%;
+  }
+
+  .sheet-footer > .button-ghost {
+    --button-size: var(--size-control);
+    --button-text: var(--text-callout);
+  }
+
+  @keyframes sheet-in {
+    from {
+      translate: 0 100%;
+    }
+  }
+
+  @keyframes sheet-fade {
+    from {
+      opacity: 0;
+    }
+  }
+
+  @media (min-width: 48rem) {
+    .sheet {
+      --sheet-pad: var(--spacing-6);
+
+      inline-size: var(--container-sheet);
+    }
+
+    .sheet-footer {
+      padding-block-end: var(--spacing-6);
+    }
+  }
+
+  /* Reduced motion: no slide, the sheet and scrim fade. The duration tokens
+     already drop to 0 for the drag. */
+  @media (prefers-reduced-motion: reduce) {
+    .sheet {
+      animation-name: sheet-fade;
+    }
+  }
+}

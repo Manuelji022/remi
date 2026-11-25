@@ -1,0 +1,7 @@
+/* The recipe form inside the Sheet body: fields sit 20 apart. */
+@layer components {
+  .recipe-form {
+    display: grid;
+    gap: var(--spacing-5);
+  }
+}

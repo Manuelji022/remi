@@ -1,4 +1,5 @@
-import { EmptyState, Icon, TextLink } from '#/components/primitives'
+import { useState } from 'react'
+import { Button, EmptyState, Icon, TextLink } from '#/components/primitives'
 import { useI18n } from '#/shared/i18n'
 import { authClient } from '#/features/auth/auth-client'
 import { useRecipeCatalog } from '#/features/recipes/hooks/useRecipeCatalog'
@@ -130,13 +131,28 @@ function RecipeCatalogList({
   recipes,
 }: RecipeCatalogListProps) {
   const { t } = useI18n()
+  const [isFormOpen, setIsFormOpen] = useState(false)
 
   return (
     <>
       {error && (
         <p className="panel-field-error">{t('preferences.recipesError')}</p>
       )}
-      <RecipeForm isAddingRecipe={isAddingRecipe} onAddRecipe={onAddRecipe} />
+      <Button
+        block
+        variant="secondary"
+        leadingIcon="add"
+        onClick={() => setIsFormOpen(true)}
+      >
+        {t('preferences.addRecipe')}
+      </Button>
+      {isFormOpen && (
+        <RecipeForm
+          isAddingRecipe={isAddingRecipe}
+          onAddRecipe={onAddRecipe}
+          onClose={() => setIsFormOpen(false)}
+        />
+      )}
       {recipes.length === 0 ? (
         <EmptyState
           variant="compact"

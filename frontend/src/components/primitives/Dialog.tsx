@@ -1,4 +1,5 @@
-import { useEffect, useId, useRef } from 'react'
+import { useId } from 'react'
+import { useModalDialog } from './useModalDialog'
 import './Dialog.css'
 import type { CSSProperties, ReactNode } from 'react'
 
@@ -64,7 +65,11 @@ export function Dialog({
   labelledBy,
   describedBy,
 }: DialogProps) {
-  const ref = useRef<HTMLDialogElement>(null)
+  const { ref, onCancel } = useModalDialog({
+    onDismiss,
+    dismissDisabled,
+    returnFocusTo,
+  })
   const generatedId = useId()
   const baseId = id ?? generatedId
   const hasAnatomy = title !== undefined
@@ -74,18 +79,6 @@ export function Dialog({
       ? `${baseId}-description`
       : undefined
     : describedBy
-
-  useEffect(() => {
-    const dialog = ref.current
-    if (!dialog) return
-    dialog.showModal()
-    return () => {
-      if (dialog.open) dialog.close()
-      if (returnFocusTo?.isConnected && !returnFocusTo.matches(':disabled')) {
-        returnFocusTo.focus()
-      }
-    }
-  }, [returnFocusTo])
 
   const classes = [!bare && 'dialog', hasAnatomy && 'dialog-stack', className]
     .filter(Boolean)
@@ -99,10 +92,7 @@ export function Dialog({
       aria-describedby={descriptionId}
       className={classes || undefined}
       style={style}
-      onCancel={(event) => {
-        event.preventDefault()
-        if (!dismissDisabled) onDismiss()
-      }}
+      onCancel={onCancel}
     >
       {hasAnatomy && (
         <header className="dialog-header">

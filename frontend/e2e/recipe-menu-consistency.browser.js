@@ -74,9 +74,10 @@ await run([
 
 await run(['find', 'role', 'button', 'click', '--name', 'Preferences'])
 await run(['find', 'role', 'tab', 'click', '--name', 'My Recipes', '--exact'])
+await run(['find', 'role', 'button', 'click', '--name', 'Add recipe', '--exact'])
 await run(['fill', 'input[name=recipeName]', 'Persistent recipe'])
 await run(['eval', '--stdin'], 'window.recipeConsistency.holds.create = true')
-await run(['find', 'role', 'button', 'click', '--name', 'Add recipe', '--exact'])
+await run(['find', 'role', 'button', 'click', '--name', 'Save recipe', '--exact'])
 await run([
   'wait',
   '--fn',
