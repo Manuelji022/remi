@@ -190,7 +190,7 @@ export const messages = {
       'This is a fresh full-week replacement preview. Your saved menu has not changed.',
     'planner.aiPreviewSaveUnconfirmed':
       'This is a fresh full-week replacement preview. The save result is unconfirmed, so your saved menu may have changed. Reload to check before retrying.',
-    'planner.aiPreviewRecipeSelect': 'Choose a saved {slot} recipe',
+    'planner.swapSlot': 'Swap {day} {slot}',
     'planner.aiPreviewNoRecipe': 'No recipe',
     'planner.aiEditSchedule': 'Edit target schedule',
     'planner.aiGenerateAnother': 'Generate another',
@@ -498,7 +498,7 @@ export const messages = {
       'Esta es una vista previa nueva que reemplaza toda la semana. El menú guardado no ha cambiado.',
     'planner.aiPreviewSaveUnconfirmed':
       'Esta es una vista previa nueva que reemplaza toda la semana. No se pudo confirmar el resultado del guardado, así que el menú guardado podría haber cambiado. Recarga para comprobarlo antes de volver a intentarlo.',
-    'planner.aiPreviewRecipeSelect': 'Elige una receta guardada para {slot}',
+    'planner.swapSlot': 'Cambiar {slot} · {day}',
     'planner.aiPreviewNoRecipe': 'Sin receta',
     'planner.aiEditSchedule': 'Editar agenda de destino',
     'planner.aiGenerateAnother': 'Generar otra',
