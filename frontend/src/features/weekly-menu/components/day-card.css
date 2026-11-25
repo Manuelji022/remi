@@ -30,7 +30,7 @@
   }
 
   .day-card-past .day-card-paper {
-    background: var(--color-bg-fill-hover);
+    background: var(--color-bg-fill);
   }
 
   .day-card-today .day-card-paper {
@@ -131,6 +131,10 @@
   @media (max-width: 39.999rem) {
     .day-card-paper {
       rotate: calc(var(--rotate-note-phone) * var(--tilt));
+    }
+
+    .day-card-past .day-card-paper {
+      background: var(--color-bg-fill-hover);
     }
 
     .day-card-upcoming .day-card-paper,
