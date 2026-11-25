@@ -1,26 +1,77 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useId, useRef } from 'react'
+import './Dialog.css'
 import type { ReactNode } from 'react'
 
-interface DialogProps {
-  children: ReactNode
-  labelledBy: string
-  describedBy?: string
+interface DialogShellProps {
+  /** Extra content between the header and the actions (a field, for a form). */
+  children?: ReactNode
   className?: string
   onDismiss: () => void
   dismissDisabled?: boolean
   returnFocusTo?: HTMLElement | null
+  /** Drops the Paper surface and scrim so the child draws its own, as the
+   *  preferences drawer does. Pass it only for a custom full-screen layer. */
+  bare?: boolean
 }
+
+/** Paper anatomy: title, optional body, actions. Nothing else. */
+interface DialogAnatomyProps {
+  /** A question about the outcome ("Plan next week again?"), or the task for a
+   *  form. It labels the dialog. */
+  title: ReactNode
+  /** One or two sentences: what changes, what stays. */
+  description?: ReactNode
+  /** Buttons, `Cancel` (secondary) first, the verb last. Two at most. Use
+   *  `variant="danger"` on the verb only for what can't come back. */
+  actions?: ReactNode
+  /** `destructive` makes it an `alertdialog`. */
+  tone?: 'default' | 'destructive'
+  /** Stable base for the title and description ids (`<id>-title`). */
+  id?: string
+  labelledBy?: never
+  describedBy?: never
+}
+
+/** Legacy shape: the caller draws its own header and footer. */
+interface DialogCustomProps {
+  labelledBy: string
+  describedBy?: string
+  title?: never
+  description?: never
+  actions?: never
+  tone?: never
+  id?: never
+}
+
+export type DialogProps = DialogShellProps &
+  (DialogAnatomyProps | DialogCustomProps)
 
 export function Dialog({
   children,
-  labelledBy,
-  describedBy,
   className,
   onDismiss,
   dismissDisabled = false,
   returnFocusTo,
+  bare = false,
+  title,
+  description,
+  actions,
+  tone = 'default',
+  id,
+  labelledBy,
+  describedBy,
 }: DialogProps) {
   const ref = useRef<HTMLDialogElement>(null)
+  const generatedId = useId()
+  const baseId = id ?? generatedId
+  const hasAnatomy = title !== undefined
+  const titleId = hasAnatomy ? `${baseId}-title` : labelledBy
+  const descriptionId = hasAnatomy
+    ? description
+      ? `${baseId}-description`
+      : undefined
+    : describedBy
+
   useEffect(() => {
     const dialog = ref.current
     if (!dialog) return
@@ -33,18 +84,36 @@ export function Dialog({
     }
   }, [returnFocusTo])
 
+  const classes = [!bare && 'dialog', hasAnatomy && 'dialog-stack', className]
+    .filter(Boolean)
+    .join(' ')
+
   return (
     <dialog
       ref={ref}
-      aria-labelledby={labelledBy}
-      aria-describedby={describedBy}
-      className={className}
+      role={tone === 'destructive' ? 'alertdialog' : undefined}
+      aria-labelledby={titleId}
+      aria-describedby={descriptionId}
+      className={classes || undefined}
       onCancel={(event) => {
         event.preventDefault()
         if (!dismissDisabled) onDismiss()
       }}
     >
+      {hasAnatomy && (
+        <header className="dialog-header">
+          <h2 id={titleId} className="dialog-title">
+            {title}
+          </h2>
+          {description && (
+            <p id={descriptionId} className="dialog-description">
+              {description}
+            </p>
+          )}
+        </header>
+      )}
       {children}
+      {actions && <footer className="dialog-footer">{actions}</footer>}
     </dialog>
   )
 }
