@@ -3,7 +3,6 @@ import { AiMenuPreview } from './AiMenuPreview'
 import { AiMenuSkeleton } from './AiMenuSkeleton'
 import { MenuTab } from './MenuTab'
 import { ShoppingTab } from './ShoppingTab'
-import { WeekLockButton } from './WeekLockButton'
 import type { ShoppingLine } from '#/features/weekly-menu/shopping'
 import { Button, EmptyState } from '#/components/primitives'
 import { useI18n } from '#/shared/i18n'
@@ -43,7 +42,6 @@ interface PlannerContentProps {
   isGenerating: boolean
   visibleMenu: MenuProps['menu']
   viewedWeek: string
-  isLocked: boolean
   shoppingEnabled: boolean
   shoppingLines: readonly ShoppingLine[]
   checkedIngredients: ComponentProps<typeof ShoppingTab>['checkedIngredients']
@@ -54,7 +52,6 @@ interface PlannerContentProps {
   onAccept: () => void
   onGenerateMenu: () => void
   onUpdateRecipe: PreviewProps['onUpdateRecipe']
-  onUnlockWeek: (week: string) => void
 }
 
 export function PlannerContent(props: PlannerContentProps) {
@@ -121,20 +118,6 @@ export function PlannerContent(props: PlannerContentProps) {
   }
   return (
     <>
-      {props.visibleMenu && (
-        <WeekLockButton
-          key={props.viewedWeek}
-          isLocked={props.isLocked}
-          onUnlock={() => {
-            props.onUnlockWeek(props.viewedWeek)
-            document
-              .querySelector<HTMLButtonElement>(
-                '.planner-actions .button-secondary',
-              )
-              ?.focus()
-          }}
-        />
-      )}
       <MenuTab
         isGenerating={props.isGenerating}
         menu={props.visibleMenu}

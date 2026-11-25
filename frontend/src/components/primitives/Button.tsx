@@ -33,6 +33,8 @@ interface ButtonLabelProps {
   trailingIcon?: IconName
   /** Number shown in a pill after the label (Shopping list 12). */
   count?: number
+  /** `pop` is the tomato pill: one per screen, for the number that asks. */
+  countTone?: 'neutral' | 'pop'
   iconOnly?: false
   icon?: never
 }
@@ -46,6 +48,7 @@ interface ButtonIconOnlyProps {
   leadingIcon?: never
   trailingIcon?: never
   count?: never
+  countTone?: never
 }
 
 type ButtonContentProps = ButtonLabelProps | ButtonIconOnlyProps
@@ -94,6 +97,7 @@ export function Button(props: ButtonProps) {
     leadingIcon,
     trailingIcon,
     count,
+    countTone = 'neutral',
     children,
     ...rest
   } = props
@@ -124,7 +128,15 @@ export function Button(props: ButtonProps) {
           <Icon name={trailingIcon} size={iconSize} />
         )}
         {!iconOnly && count !== undefined && (
-          <span className="button-count">{count}</span>
+          <span
+            className={
+              countTone === 'pop'
+                ? 'button-count button-count-pop'
+                : 'button-count'
+            }
+          >
+            {count}
+          </span>
         )}
       </span>
       {pending && (

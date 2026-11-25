@@ -96,7 +96,6 @@ export function WeeklyMenuPlanner() {
   const tour = useFirstRunTour(tourUserId)
   const {
     savedPreferences,
-    selectedWeekDate,
     weekRange,
     displayedWeekOffset,
     activePreferenceCount,
@@ -180,18 +179,33 @@ export function WeeklyMenuPlanner() {
     <main className="planner-page" id="main">
       <section className="planner-shell" aria-labelledby="planner-title">
         <PlannerHeader
-          weekDate={selectedWeekDate}
           weekRange={weekRange}
           weekOffset={displayedWeekOffset}
           isWriting={isWriting}
           canWrite={canWrite}
           hasPreview={Boolean(currentPreview)}
           preferenceCount={activePreferenceCount}
+          shoppingCount={lines.length}
+          isShoppingDisabled={!shoppingEnabled || isWriting}
           isGenerating={isGenerating}
           isPreparingSchedule={aiGeneration.isPreparing}
           hasMenu={Boolean(visibleMenu)}
+          lock={{
+            // Same cases where the menu itself is on screen.
+            isVisible:
+              Boolean(visibleMenu) &&
+              activeTab === 'menu' &&
+              !currentPreview &&
+              !generatingTargetWeek &&
+              !isLoading &&
+              !loadFailed,
+            isLocked,
+            weekStart: viewedWeek,
+            onUnlock: setUnlockedWeek,
+          }}
           onNavigate={handleWeekNavigation}
           onOpenPreferences={handleOpenPreferences}
+          onOpenShopping={() => setActiveTab('ingredients')}
           onGenerateMenu={generation.handleGenerateMenu}
           onGenerateButtonRef={(button) => {
             generation.scheduleHeaderButtonRef.current = button
@@ -250,7 +264,6 @@ export function WeeklyMenuPlanner() {
             isGenerating={isGenerating}
             visibleMenu={visibleMenu}
             viewedWeek={viewedWeek}
-            isLocked={isLocked}
             shoppingEnabled={shoppingEnabled}
             shoppingLines={lines}
             checkedIngredients={checkedIngredients}
@@ -261,7 +274,6 @@ export function WeeklyMenuPlanner() {
             onAccept={() => void acceptPreview()}
             onGenerateMenu={generation.handleGenerateMenu}
             onUpdateRecipe={handlePreviewRecipeChange}
-            onUnlockWeek={setUnlockedWeek}
           />
         </div>
       </section>

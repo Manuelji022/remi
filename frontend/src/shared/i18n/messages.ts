@@ -9,8 +9,11 @@ export const messages = {
   en: {
     'planner.holdToUnlock': 'Hold to unlock',
     'planner.weekLockedLabel':
-      'Week locked. Hold Enter, Space, or press and hold for 1 second to unlock.',
-    'planner.weekUnlocked': 'Week unlocked',
+      'Menu locked. Hold to unlock: press and hold, or hold Enter or Space, for 1 second.',
+    'planner.weekUnlocked': 'Menu unlocked',
+    'planner.menuLocked': 'Menu locked',
+    'planner.keepHolding': 'Keep holding…',
+    'planner.youCanEdit': 'You can edit it',
     'planner.lockedScheduleNote':
       'This week is locked. Close preferences and hold the lock to edit its schedule.',
     'app.title': 'Remi - Your weekly meal planner',
@@ -127,7 +130,11 @@ export const messages = {
     'dayContext.officeDay': 'Office day',
     'dayContext.eatingOut': 'Eating out',
     'dayContext.none': 'No day context selected',
-    'planner.weekKicker': 'Week {week} - {start} to {end}',
+    'planner.weekRange': '{start} – {end}',
+    'planner.weekKickerCurrent': 'This week',
+    'planner.weekKickerPast': 'Last week',
+    'planner.weekKickerFuture': 'Next week',
+    'planner.shoppingList': 'Shopping list',
     'planner.weekNavigationLabel': 'Week navigation',
     'planner.previousWeek': 'Previous week',
     'planner.nextWeek': 'Next week',
@@ -234,7 +241,6 @@ export const messages = {
     'planner.emptyTitle': 'No Weekly Menu yet',
     'planner.emptyBody':
       'Generate a menu from your saved recipes. Home slots stay empty until a recipe is assigned.',
-    'planner.currentWeek': 'Current week',
     'planner.shoppingHelper':
       'Ingredients from the home meals planned this week.',
     'planner.shoppingEmpty': 'No ingredients for the home meals in this week.',
@@ -306,8 +312,11 @@ export const messages = {
   es: {
     'planner.holdToUnlock': 'Mantén pulsado para desbloquear',
     'planner.weekLockedLabel':
-      'Semana bloqueada. Mantén Enter, Espacio o pulsa durante 1 segundo para desbloquear.',
-    'planner.weekUnlocked': 'Semana desbloqueada',
+      'Menú bloqueado. Mantén pulsado para desbloquear: pulsa y mantén, o mantén Enter o Espacio, durante 1 segundo.',
+    'planner.weekUnlocked': 'Menú desbloqueado',
+    'planner.menuLocked': 'Menú bloqueado',
+    'planner.keepHolding': 'Sigue pulsando…',
+    'planner.youCanEdit': 'Puedes editarlo',
     'planner.lockedScheduleNote':
       'Esta semana está bloqueada. Cierra las preferencias y mantén pulsado el candado para editar el horario.',
     'app.title': 'Remi - Tu planificador semanal de comidas',
@@ -424,7 +433,11 @@ export const messages = {
     'dayContext.officeDay': 'Día de oficina',
     'dayContext.eatingOut': 'Comida fuera',
     'dayContext.none': 'Sin contexto seleccionado',
-    'planner.weekKicker': 'Semana {week} - {start} al {end}',
+    'planner.weekRange': '{start} – {end}',
+    'planner.weekKickerCurrent': 'Esta semana',
+    'planner.weekKickerPast': 'Semana pasada',
+    'planner.weekKickerFuture': 'Próxima semana',
+    'planner.shoppingList': 'Lista de la compra',
     'planner.weekNavigationLabel': 'Navegación de semana',
     'planner.previousWeek': 'Semana anterior',
     'planner.nextWeek': 'Semana siguiente',
@@ -531,7 +544,6 @@ export const messages = {
     'planner.emptyTitle': 'Todavía no hay Menú Semanal',
     'planner.emptyBody':
       'Genera un menú a partir de tus recetas guardadas. Los espacios de casa se quedan vacíos hasta que se asigne una receta.',
-    'planner.currentWeek': 'Semana actual',
     'planner.shoppingHelper':
       'Ingredientes de las comidas en casa planificadas esta semana.',
     'planner.shoppingEmpty':

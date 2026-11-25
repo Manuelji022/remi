@@ -15,6 +15,7 @@ const open = (fixtureScenario = 'ready', locale = '') => [
 const locked = () => wait(`${lock} !== null`)
 const unlocked = () => wait(`${lock} === null`)
 const sleep = ms => `await new Promise(resolve => setTimeout(resolve, ${ms}))`
+const fillScale = () => `new DOMMatrix(getComputedStyle(document.querySelector('.week-lock-fill')).transform).a`
 const pointer = type => `b.dispatchEvent(new PointerEvent('${type}', { bubbles: true, button: 0, isPrimary: true, pointerId: 1 }))`
 const key = (type, value, repeat = false) => `b.dispatchEvent(new KeyboardEvent('${type}', { bubbles: true, key: ${JSON.stringify(value)}, repeat: ${repeat}, cancelable: true }))`
 const hold = (ms = 1100) => ev(`const b=${lock}; ${pointer('pointerdown')}; ${sleep(ms)}; ${pointer('pointerup')}`)
@@ -33,11 +34,11 @@ async function scenario(name, steps) {
   }
 }
 
-await scenario('current week is locked, accessible, centered above the menu', [
+await scenario('current week is locked, accessible, beside the week switcher, above the menu', [
   ...open(), locked(),
-  check(`${lock}.textContent.includes('Hold to unlock') && ${lock}.getAttribute('aria-label').includes('Week locked') && ${lock}.getAttribute('aria-label').includes('1 second')`, 'lock and instructions are named'),
-  check(`(() => { const b=${lock}.getBoundingClientRect(), grid=document.querySelector('.planner-day-grid').getBoundingClientRect(); return b.bottom <= grid.top && Math.abs((b.left+b.width/2)-(grid.left+grid.width/2))<2 })()`, 'button is centered above menu'),
-  check(`${lock}.querySelector('svg').getBoundingClientRect().width>=40`, 'ring has readable dimensions'),
+  check(`${lock}.textContent.includes('Hold to unlock') && ${lock}.getAttribute('aria-label').includes('Menu locked') && ${lock}.getAttribute('aria-label').includes('1 second')`, 'lock and instructions are named'),
+  check(`(() => { const b=${lock}.getBoundingClientRect(), nav=document.querySelector('.planner-week-nav').getBoundingClientRect(), gen=document.querySelector('.planner-generate').getBoundingClientRect(), grid=document.querySelector('.planner-day-grid').getBoundingClientRect(); return b.bottom <= grid.top && b.left >= nav.right && b.right <= gen.left && Math.abs((b.top+b.height/2)-(nav.top+nav.height/2))<2 })()`, 'lock sits on the controls row between the week switcher and the hero action'),
+  check(`${lock}.querySelector('.week-lock-icon').getBoundingClientRect().width>=44 && ${lock}.getBoundingClientRect().height>=60`, 'lock pill has readable dimensions'),
   ['screenshot', 'e2e/artifacts/week-lock.png'],
 ])
 await scenario('quick native pointer tap and keyboard taps never unlock', [
@@ -45,10 +46,10 @@ await scenario('quick native pointer tap and keyboard taps never unlock', [
   ev(sleep(1100)), locked(),
 ])
 for (const event of ['pointerup', 'pointercancel']) {
-  await scenario(`${event} at 500ms cancels and resets ring`, [
+  await scenario(`${event} at 500ms cancels and drains the fill`, [
     ...open(), locked(),
     ev(`const b=${lock}; ${pointer('pointerdown')}; ${sleep(500)}; if (!${lock}) throw new Error('unlocked too early'); ${pointer(event)}; ${sleep(650)}`),
-    locked(), check(`${lock}.dataset.holding==='false' && !document.querySelector('.week-lock-progress')`, 'cancel removes progress'),
+    locked(), check(`${lock}.dataset.holding==='false' && ${fillScale()}===0`, 'cancel drains progress back to empty'),
   ])
 }
 await scenario('native pointer leave at 500ms cancels even with implicit capture', [
@@ -63,12 +64,12 @@ await scenario('native pointer leave at 500ms cancels even with implicit capture
 await scenario('native pointer hold confirms after about 1 second and announces once', [
   ...open(), locked(), ['hover', '.week-lock-button'], ['mouse', 'down', 'left'],
   ev(sleep(1100)), ['mouse', 'up', 'left'], unlocked(),
-  check(`document.querySelector('.week-lock [role="status"]').textContent==='Week unlocked'`, 'persistent polite status announces result'),
+  check(`document.querySelector('.week-lock [role="status"]').textContent==='Menu unlocked'`, 'persistent polite status announces result'),
 ])
 for (const value of ['Enter', ' ']) {
   await scenario(`${JSON.stringify(value)} hold ignores repeats and confirms at 1000ms`, [
     ...open(), locked(), ['focus', '.week-lock-button'],
-    ev(`const b=${lock}; const started=performance.now(); window.holdElapsed=null; const observer=new MutationObserver(() => { if (!${lock} && window.holdElapsed===null) { window.holdElapsed=performance.now()-started; observer.disconnect() } }); observer.observe(b.parentElement, { childList:true }); ${key('keydown', value)}; ${sleep(500)}; ${key('keydown', value, true)}; if (!${lock} || !document.querySelector('.week-lock-progress')) throw new Error('unlocked before 500ms or no ring'); ${sleep(600)}; if (${lock}) { observer.disconnect(); throw new Error('repeat delayed confirmation') } ${key('keydown', value, true)}; ${key('keyup', value)}`),
+    ev(`const b=${lock}; const started=performance.now(); window.holdElapsed=null; const observer=new MutationObserver(() => { if (!${lock} && window.holdElapsed===null) { window.holdElapsed=performance.now()-started; observer.disconnect() } }); observer.observe(b.parentElement, { childList:true }); ${key('keydown', value)}; ${sleep(500)}; ${key('keydown', value, true)}; if (!${lock} || !(${fillScale()} > 0.3)) throw new Error('unlocked before 500ms or fill not progressing'); ${sleep(600)}; if (${lock}) { observer.disconnect(); throw new Error('repeat delayed confirmation') } ${key('keydown', value, true)}; ${key('keyup', value)}`),
     unlocked(), check(`window.holdElapsed>=990 && window.holdElapsed<1500`, 'actual lock removal occurs near 1000ms, never at 600ms'),
     check(`document.activeElement?.textContent.includes('Preferences') || document.activeElement?.textContent.includes('Preferencias')`, 'keyboard unlock focuses Preferences'),
   ])
@@ -147,7 +148,7 @@ await scenario('touch context menu and selection suppressed', [
 ])
 await scenario('reduced-motion hold still unlocks without animation', [
   ...open(), locked(), ['set', 'media', 'light', 'reduced-motion'],
-  ev(`const b=${lock}; ${pointer('pointerdown')}; ${sleep(100)}; const ring=document.querySelector('.week-lock-progress'); if(!matchMedia('(prefers-reduced-motion: reduce)').matches || getComputedStyle(ring).animationName!=='none') throw new Error('ring animated'); ${sleep(1000)}; ${pointer('pointerup')}`), unlocked(),
+  ev(`const b=${lock}; ${pointer('pointerdown')}; ${sleep(100)}; const fill=document.querySelector('.week-lock-fill'); if(!matchMedia('(prefers-reduced-motion: reduce)').matches || getComputedStyle(fill).transitionDuration!=='0s') throw new Error('fill animated'); ${sleep(1000)}; ${pointer('pointerup')}`), unlocked(),
   ['set', 'media', 'light'],
 ])
 await scenario('unmount cancels pending confirmation instead of unlocking another week', [
@@ -163,8 +164,8 @@ await scenario('DST Sunday uses local civil Monday; subsequent Monday relocks ne
 ])
 await scenario('Spanish label, instructions, and unlocked announcement', [
   ...open('ready', '/es'), locked(),
-  check(`${lock}.textContent.includes('Mantén pulsado para desbloquear') && ${lock}.getAttribute('aria-label').includes('Semana bloqueada')`, 'localized lock instructions'),
-  hold(), unlocked(), check(`document.querySelector('.week-lock [role="status"]').textContent==='Semana desbloqueada'`, 'localized result'),
+  check(`${lock}.textContent.includes('Mantén pulsado para desbloquear') && ${lock}.getAttribute('aria-label').includes('Menú bloqueado')`, 'localized lock instructions'),
+  hold(), unlocked(), check(`document.querySelector('.week-lock [role="status"]').textContent==='Menú desbloqueado'`, 'localized result'),
 ])
 emit({ suite: 'week-lock', passed, failed, verdict: failed ? 'FAIL' : 'PASS', limitations: [
   'HTTP fixture: no real account, DB or provider calls.',
