@@ -34,6 +34,13 @@
       display var(--duration-fast) allow-discrete;
   }
 
+  /* `display: flex` above beats the UA's hidden popover, so a closed menu would
+     sit invisibly over the page and take its clicks. The transition below
+     keeps the fade on close (display is discrete). */
+  .menu:not(:popover-open) {
+    display: none;
+  }
+
   .menu[data-wide] {
     inline-size: 280px;
     min-inline-size: 0;
