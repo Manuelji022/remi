@@ -266,6 +266,16 @@
     line-height: 30px;
   }
 
+  @media (min-width: 80rem) {
+    .planner-day-grid[data-stacked='roomy']
+      .meal-slot[data-tonight]:not([data-empty])
+      .meal-name {
+      /* Paper sets tonight at 30/34 on the wider today note. */
+      font-size: 30px;
+      line-height: 34px;
+    }
+  }
+
   /* Swap: hidden at rest, shown on hover and focus, always on touch. */
   .meal-swap {
     /* Over the slot, not in the row, so notes this narrow keep their text

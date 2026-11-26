@@ -19,6 +19,19 @@ Written before implementation; use the independent browser harness below.
 - Local Sunday→Monday rollover compares the wrong calendar week.
 - A DST week uses elapsed hours instead of the civil Monday boundary.
 
+## Stacked past days failure checklist
+
+Written before the scenarios; they live in the same harness because its clock is
+pinned to a Wednesday.
+
+- The current week starts open, or today is stacked away with the past days.
+- A week that is all past, or all ahead, gets a stack and loses its board.
+- An AI preview hides days that are still editable.
+- `aria-expanded`, the controlled ids or the button's name disagree with the board.
+- The keyboard cannot open or close it, or focus is lost on toggle.
+- An open stack survives a reload or shows up on another week.
+- The singular or Spanish copy is wrong; the phone target is under 44px.
+
 ## Repeatable browser harness
 
 The fixture intercepts authenticated HTTP transport with synthetic data; no database,

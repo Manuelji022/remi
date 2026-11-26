@@ -171,6 +171,53 @@ await scenario('Spanish label, instructions, and unlocked announcement', [
   check(`${lock}.textContent.includes('Mantén pulsado para desbloquear') && ${lock}.getAttribute('aria-label').includes('Menú bloqueado')`, 'localized lock instructions'),
   hold(), unlocked(), check(`document.querySelector('.week-lock [role="status"]').textContent==='Menú desbloqueado'`, 'localized result'),
 ])
+// The fixture's today is a Wednesday, so Monday and Tuesday are past.
+const pastToggle = `[...document.querySelectorAll('button')].find(b => /past days?$|días? pasados?$/.test(b.textContent.trim()))`
+const shownDays = `[...document.querySelectorAll('article h3')].filter(h => h.checkVisibility()).map(h => h.getAttribute('aria-label').split(' ')[0]).join()`
+const wholeWeek = 'Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday'
+const stacked = () => check(`${pastToggle}?.getAttribute('aria-expanded')==='false' && ${shownDays}===${JSON.stringify(wholeWeek.slice(15))}`, 'past days are stacked away; today leads the board')
+// Not exact: on the board the button's name also carries the range and count.
+const showPast = ['find', 'role', 'button', 'click', '--name', 'Show 2 past days']
+// Waits, because another week's menu may still be loading.
+const allShown = () => wait(`${shownDays}===${JSON.stringify(wholeWeek)}`)
+await scenario('current week stacks its past days behind a named disclosure', [
+  ...open(), locked(), stacked(),
+  check(`${pastToggle}.textContent.includes('Mon–Tue') && ${pastToggle}.textContent.includes('2 done') && ${pastToggle}.textContent.includes('Show 2 past days')`, 'stack names its range, count and action'),
+  check(`(() => { const ids=${pastToggle}.getAttribute('aria-controls').split(' '); return ids.length===2 && ids.every(id => document.getElementById(id)?.hidden) })()`, 'it controls the two hidden days'),
+  check(`document.querySelector('article[aria-current="date"] h3').getAttribute('aria-label')==='Wednesday 4'`, 'today stays on the board'),
+])
+await scenario('keyboard opens and closes the past days and keeps focus', [
+  ...open(), locked(), ev(`${pastToggle}.focus()`), ['press', 'Enter'], allShown(),
+  check(`document.activeElement===${pastToggle} && ${pastToggle}.getAttribute('aria-expanded')==='true' && ${pastToggle}.textContent.includes('Hide past days')`, 'same button now hides them'),
+  ['press', 'Space'], stacked(), check(`document.activeElement===${pastToggle}`, 'focus stays on the button'),
+])
+await scenario('past and next weeks are never stacked, and a reload stacks again', [
+  ...open(), locked(), showPast, allShown(),
+  click('Previous week'), locked(), allShown(), check(`!${pastToggle}`, 'a week that is all past has no stack'),
+  click('Next week'), locked(), click('Next week'), unlocked(), allShown(), check(`!${pastToggle}`, 'a future week has no stack'),
+  ['reload'], locked(), wait(pastToggle), stacked(),
+])
+await scenario('an AI preview keeps every day on screen once some are past', [
+  ...open(), locked(), click('Regenerate menu'),
+  wait(`[...document.querySelectorAll('dialog[open] button')].some(b => b.textContent === 'Confirm schedule and generate' && !b.disabled)`),
+  click('Confirm schedule and generate'), wait(`document.querySelector('[aria-label="Swap Monday dinner"]:not(:disabled)')`),
+  // Tuesday of the previewed week, then any edit to render again.
+  ev(`${f}.advanceClock(6*24*60*60*1000); document.querySelector('[aria-label="Swap Monday dinner"]').click(); ${sleep(300)}; document.querySelector('[role="menu"]:popover-open [role="menuitemradio"]:last-of-type').click(); ${sleep(300)}`),
+  check(`document.querySelector('article[aria-current="date"] h3').getAttribute('aria-label').startsWith('Tuesday')`, 'the preview now has a past Monday'),
+  allShown(), check(`!${pastToggle}`, 'previews have no stack'),
+])
+await scenario('phone shows a Show past days line with a 44px target', [
+  ['set', 'viewport', '390', '844'], ...open(), locked(), stacked(),
+  check(`${pastToggle}.innerText.trim()==='Show 2 past days' && ${pastToggle}.getBoundingClientRect().height>=44 && document.documentElement.scrollWidth<=390`, 'phone line is text only, tappable, without sideways scroll'),
+  showPast, allShown(), click('Hide past days'), stacked(),
+  ['set', 'viewport', '1440', '1200'],
+])
+await scenario('past days copy is singular on Tuesday and localized in Spanish', [
+  ...open('ready', '/es'), locked(),
+  check(`${pastToggle}.textContent.includes('2 hechos') && ${pastToggle}.textContent.includes('Mostrar 2 días pasados')`, 'Spanish plural'),
+  ...open(), locked(), ev(`${f}.advanceClock(-24*60*60*1000)`), click('Previous week'), locked(), click('Next week'), locked(),
+  check(`${pastToggle}.textContent.includes('1 done') && ${pastToggle}.textContent.trim().endsWith('Show 1 past day')`, 'English singular'),
+])
 emit({ suite: 'week-lock', passed, failed, verdict: failed ? 'FAIL' : 'PASS', limitations: [
   'HTTP fixture: no real account, DB or provider calls.',
   'Detailed key repeat and cancellation use DOM events; native pointer hold and keyboard taps also exercised.',

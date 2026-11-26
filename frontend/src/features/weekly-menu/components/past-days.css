@@ -1,0 +1,169 @@
+/* Past days of the week. Paper: Week, stationery / Past stack. */
+@layer components {
+  .past-days-toggle {
+    border-radius: var(--radius-pill);
+    color: var(--color-text-secondary);
+    font-size: var(--text-caption);
+    line-height: var(--spacing-4);
+  }
+
+  .past-days-action {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-1-5);
+    font-weight: var(--font-weight-semibold);
+  }
+
+  .past-days[data-open] .icon {
+    rotate: 180deg;
+  }
+
+  .past-days[data-open] .past-days-toggle {
+    min-block-size: var(--size-hit);
+    padding-inline: var(--spacing-1);
+  }
+
+  .past-days[data-open] .past-days-range,
+  .past-days[data-open] .past-days-done {
+    display: none;
+  }
+
+  @media (min-width: 40rem) {
+    /* Open, the line sits in the space above the notes. */
+    .past-days[data-open] {
+      position: absolute;
+      inset-block-start: 0;
+      inset-inline-start: 0;
+    }
+
+    /* Closed: two loose sheets under the top one. Paper: 112 by 150. */
+    .past-days:not([data-open]) {
+      position: relative;
+      block-size: 180px;
+      min-inline-size: 7.5rem;
+    }
+
+    .past-days:not([data-open])::before,
+    .past-days:not([data-open])::after {
+      content: '';
+      position: absolute;
+      inline-size: 112px;
+      block-size: 150px;
+      border-radius: var(--radius-surface);
+      background: var(--color-bg-fill-hover);
+      transform-origin: 0 0;
+    }
+
+    .past-days:not([data-open])::before {
+      inset-block-start: 24px;
+      inset-inline-start: 0;
+      opacity: 0.7;
+      rotate: calc(var(--rotate-stack) * -1);
+    }
+
+    .past-days:not([data-open])::after {
+      inset-block-start: 12px;
+      inset-inline-start: var(--spacing-1);
+      opacity: 0.85;
+      rotate: calc(var(--rotate-stack) * 0.75);
+    }
+
+    .past-days:not([data-open]) .past-days-toggle {
+      position: absolute;
+      inset-block-start: 0;
+      inset-inline-start: var(--spacing-1-5);
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: space-between;
+      inline-size: 112px;
+      block-size: 150px;
+      padding: 14px;
+      border-radius: var(--radius-surface);
+      background: var(--color-bg-fill-hover);
+      text-align: start;
+      transition: translate var(--duration-fast) var(--ease-out);
+    }
+
+    .past-days:not([data-open]) .past-days-toggle:hover {
+      translate: 0 calc(var(--spacing-0-5) * -1);
+    }
+
+    .past-days:not([data-open]) .past-days-range {
+      font-family: var(--font-display);
+      /* Paper sets the range at 22/26. */
+      font-size: 22px;
+      font-weight: var(--font-weight-extrabold);
+      font-variation-settings: 'wdth' 75;
+      line-height: 26px;
+      white-space: nowrap;
+    }
+
+    .past-days:not([data-open]) .past-days-done {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-1-5);
+      font-weight: var(--font-weight-medium);
+    }
+
+    .past-days-dot {
+      inline-size: var(--size-dot);
+      block-size: var(--size-dot);
+      border-radius: var(--radius-pill);
+      background: var(--color-status-success-text);
+    }
+
+    /* The stack says it all on screen; the action stays in the name. */
+    .past-days:not([data-open]) .past-days-action {
+      position: absolute;
+      inline-size: 1px;
+      block-size: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+  }
+
+  @media (max-width: 39.999rem) {
+    .past-days {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .past-days-toggle {
+      align-self: start;
+      min-block-size: var(--size-hit);
+      padding-inline: var(--spacing-1);
+    }
+
+    .past-days-range,
+    .past-days-done {
+      display: none;
+    }
+
+    /* Closed: the edges of the notes tucked behind today's. */
+    .past-days:not([data-open]) {
+      /* Today's note sits right on the edges, with no grid gap. */
+      margin-block-end: -10px;
+    }
+
+    .past-days:not([data-open])::before,
+    .past-days:not([data-open])::after {
+      content: '';
+      order: 1;
+      block-size: 10px;
+      margin-inline: var(--spacing-6);
+      border-radius: var(--radius-inner) var(--radius-inner) 0 0;
+      background: var(--color-gray-300);
+    }
+
+    .past-days:not([data-open])::after {
+      order: 2;
+      margin-inline: var(--spacing-3);
+      /* Paper rounds the nearer edge at 18. */
+      border-radius: 18px 18px 0 0;
+      background: var(--color-bg-fill-hover);
+    }
+  }
+}

@@ -2,6 +2,14 @@
 // --init-script; never import this file into the application.
 ;(() => {
   const nativeFetch = window.fetch.bind(window)
+  // Pinned to a Monday: only Monday has a dish here, and later in the week it
+  // would sit in the stacked past days.
+  const NativeDate = window.Date
+  const clockOffset = new NativeDate(2026, 10, 2, 12).getTime() - NativeDate.now()
+  window.Date = class extends NativeDate {
+    constructor(...args) { if (args.length) super(...args); else super(NativeDate.now() + clockOffset) }
+    static now() { return NativeDate.now() + clockOffset }
+  }
   const days = [
     'Monday',
     'Tuesday',

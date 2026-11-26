@@ -1,5 +1,6 @@
-import { useMemo } from 'react'
+import { useId, useMemo, useState } from 'react'
 import { DayCard } from './DayCard'
+import { PastDaysToggle } from './PastDaysToggle'
 import { Button, EmptyState } from '#/components/primitives'
 import { DAYS, isWeekend } from '#/features/weekly-menu/constants'
 import type { Day } from '#/features/weekly-menu/constants'
@@ -19,6 +20,7 @@ interface MenuTabProps {
   editableRecipes?: readonly Recipe[]
   onUpdateRecipe?: (day: Day, slot: MealSlot, recipeId: string | null) => void
   areRecipeEditsDisabled?: boolean
+  stackPastDays?: boolean
 }
 
 export function MenuTab({
@@ -30,8 +32,12 @@ export function MenuTab({
   editableRecipes,
   onUpdateRecipe,
   areRecipeEditsDisabled = false,
+  stackPastDays = false,
 }: MenuTabProps) {
   const { t, locale } = useI18n()
+  const dayId = useId()
+  // The week whose past days are open, so other weeks start stacked.
+  const [openPastWeek, setOpenPastWeek] = useState<string | null>(null)
   const recipesBySlot = useMemo<SlotRecipes | undefined>(() => {
     if (!editableRecipes) return undefined
     const collator = new Intl.Collator(locale, {
@@ -80,10 +86,33 @@ export function MenuTab({
   }
 
   const now = new Date()
+  const timings = DAYS.map((_, index) => dayTiming(menu.weekStart, index, now))
+  const pastCount = timings.filter((timing) => timing === 'past').length
+  // A week that is all past stays open: stacking it would empty the board.
+  const canStack = stackPastDays && pastCount > 0 && pastCount < DAYS.length
+  const isPastOpen = openPastWeek === menu.weekStart
+  const isStacked = canStack && !isPastOpen
 
   return (
     <div className="planner-menu-tab">
-      <div className="planner-day-grid">
+      <div
+        className="planner-day-grid"
+        // With four notes or fewer to show, the stacked board has room.
+        data-stacked={
+          isStacked ? (pastCount >= 3 ? 'roomy' : 'compact') : undefined
+        }
+      >
+        {canStack && (
+          <PastDaysToggle
+            controls={DAYS.slice(0, pastCount)
+              .map((_, index) => `${dayId}-${index}`)
+              .join(' ')}
+            count={pastCount}
+            isOpen={isPastOpen}
+            onToggle={() => setOpenPastWeek(isPastOpen ? null : menu.weekStart)}
+            weekStart={menu.weekStart}
+          />
+        )}
         {DAYS.map((day, index) => {
           const plan = menu.days[day]
           const shown = showMenuDay(plan, recipeNames)
@@ -115,7 +144,12 @@ export function MenuTab({
                 }
               : undefined
           return (
-            <div className={`delay-${index + 1}`} key={day}>
+            <div
+              className={`delay-${index + 1}`}
+              hidden={isStacked && timings[index] === 'past'}
+              id={`${dayId}-${index}`}
+              key={day}
+            >
               <DayCard
                 day={day}
                 dayContext={shown.context}
@@ -124,7 +158,7 @@ export function MenuTab({
                 editableMeals={editableMeals}
                 isWeekend={isWeekend(day)}
                 lunch={shown.lunch}
-                timing={dayTiming(menu.weekStart, index, now)}
+                timing={timings[index]}
                 weekStart={menu.weekStart}
               />
             </div>
