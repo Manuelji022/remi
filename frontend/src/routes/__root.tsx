@@ -15,6 +15,12 @@ import appCss from '../app/styles.css?url'
 
 const THEME_COLOR = '#F8F8F8' // must match --color-theme in shared/styles/design-tokens.css
 
+// must match the design faces in shared/styles/fonts.css
+const PRELOADED_FONTS = [
+  '/fonts/bricolage-grotesque-latin-wdth-normal.woff2',
+  '/fonts/geist-latin-wght-normal.woff2',
+]
+
 export const Route = createRootRoute({
   head: () => ({
     meta: [
@@ -35,6 +41,14 @@ export const Route = createRootRoute({
       },
     ],
     links: [
+      ...PRELOADED_FONTS.map((href) => ({
+        rel: 'preload',
+        as: 'font',
+        type: 'font/woff2',
+        href,
+        // Font requests are CORS requests; without this they download twice.
+        crossOrigin: 'anonymous' as const,
+      })),
       {
         rel: 'stylesheet',
         href: appCss,
