@@ -32,6 +32,10 @@ pinned to a Wednesday.
 - An open stack survives a reload or shows up on another week.
 - The singular or Spanish copy is wrong; the phone target is under 44px.
 
+Phone rows, same harness: the "Rest of the week" heading shows on the desktop
+board, appears on a week without today, reads out of order or in the wrong
+language; or two swap buttons in a preview overlap.
+
 ## Repeatable browser harness
 
 The fixture intercepts authenticated HTTP transport with synthetic data; no database,

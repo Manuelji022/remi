@@ -327,17 +327,35 @@
       rotate: calc(var(--rotate-note-phone) * var(--tilt));
     }
 
+    /* Paper leans the weekend rows the other way from their desktop notes. */
+    .day-card[data-day='5'] {
+      --tilt: 0.67;
+    }
+
+    .day-card[data-day='6'] {
+      --tilt: -0.67;
+    }
+
     .day-card-upcoming .day-card-paper,
     .day-card-past .day-card-paper {
-      --card-pad: var(--spacing-3) var(--spacing-4);
+      /* Paper pads the row 14 by 16 and gives the day a 76px column. */
+      --card-pad: 14px var(--spacing-4);
+      --card-gap: var(--spacing-3);
 
-      grid-template-columns: 6rem minmax(0, 1fr);
+      grid-template-columns: 76px minmax(0, 1fr);
       align-items: center;
     }
 
     .day-card-upcoming .day-card-header,
     .day-card-past .day-card-header {
       padding: 0;
+    }
+
+    /* The day column is narrow, so a long context wraps inside it. */
+    .day-card-upcoming .badge,
+    .day-card-past .badge {
+      block-size: auto;
+      white-space: normal;
     }
 
     /* Rows carry no slot cards: label and dish sit inline on the paper. */
@@ -354,12 +372,19 @@
       color: var(--on-note-text);
     }
 
+    /* A slot that can be swapped keeps the button's height, so two buttons
+       never overlap on touch. */
+    .day-card .meal-slot:has(.meal-swap) {
+      min-block-size: var(--size-hit);
+      padding-inline: var(--spacing-2) var(--spacing-12);
+    }
+
     .day-card-upcoming .meal-slot-text,
     .day-card-past .meal-slot-text,
     .day-card-today .meal-slot:not([data-tonight]) .meal-slot-text {
       display: flex;
       align-items: baseline;
-      gap: var(--spacing-2);
+      gap: 10px; /* Paper's label to dish gap. */
     }
 
     .day-card-upcoming .meal-label,
@@ -372,8 +397,27 @@
 
     .day-card-upcoming .day-name,
     .day-card-past .day-name {
-      font-size: var(--text-title);
-      line-height: var(--leading-title);
+      /* Paper sets a row's day at 26/28. */
+      font-size: 26px;
+      line-height: 28px;
+    }
+
+    .day-card-upcoming .meal-name,
+    .day-card-past .meal-name {
+      font-size: var(--text-callout);
+      line-height: var(--leading-callout);
+    }
+
+    /* A slot waiting for a meal: the dish line in a dashed pill. */
+    .day-card-upcoming .meal-slot[data-empty] .meal-name,
+    .day-card-past .meal-slot[data-empty] .meal-name {
+      /* Paper: 26 tall, 14/18. The inner radius still reads as a pill, and
+         holds up when the line wraps. */
+      padding: 2.5px 10px;
+      border: 1.5px dashed var(--slot-dash);
+      border-radius: var(--radius-inner);
+      font-size: 14px;
+      line-height: 18px;
     }
 
     .day-card-today .day-card-paper {

@@ -1,4 +1,4 @@
-import { useId, useMemo, useState } from 'react'
+import { Fragment, useId, useMemo, useState } from 'react'
 import { DayCard } from './DayCard'
 import { PastDaysToggle } from './PastDaysToggle'
 import { Button, EmptyState } from '#/components/primitives'
@@ -144,24 +144,30 @@ export function MenuTab({
                 }
               : undefined
           return (
-            <div
-              className={`delay-${index + 1}`}
-              hidden={isStacked && timings[index] === 'past'}
-              id={`${dayId}-${index}`}
-              key={day}
-            >
-              <DayCard
-                day={day}
-                dayContext={shown.context}
-                dayIndex={index}
-                dinner={shown.dinner}
-                editableMeals={editableMeals}
-                isWeekend={isWeekend(day)}
-                lunch={shown.lunch}
-                timing={timings[index]}
-                weekStart={menu.weekStart}
-              />
-            </div>
+            <Fragment key={day}>
+              <div
+                className={`delay-${index + 1}`}
+                hidden={isStacked && timings[index] === 'past'}
+                id={`${dayId}-${index}`}
+              >
+                <DayCard
+                  day={day}
+                  dayContext={shown.context}
+                  dayIndex={index}
+                  dinner={shown.dinner}
+                  editableMeals={editableMeals}
+                  isWeekend={isWeekend(day)}
+                  lunch={shown.lunch}
+                  timing={timings[index]}
+                  weekStart={menu.weekStart}
+                />
+              </div>
+              {timings[index] === 'today' && index < DAYS.length - 1 && (
+                <h2 className="planner-rest-heading">
+                  {t('planner.restOfWeek')}
+                </h2>
+              )}
+            </Fragment>
           )
         })}
       </div>

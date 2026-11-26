@@ -149,7 +149,23 @@
     grid-column: span 2;
   }
 
+  /* Only the phone list needs a heading between today and what follows. */
+  .planner-rest-heading {
+    display: none;
+  }
+
   @media (max-width: 39.999rem) {
+    .planner-rest-heading {
+      display: block;
+      /* 28 above with the grid gap; Paper sets it 20/24. */
+      margin: 18px 0 var(--spacing-0-5);
+      padding-inline: var(--spacing-1);
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: var(--font-weight-bold);
+      line-height: 24px;
+    }
+
     .planner-controls {
       margin-block-end: var(--spacing-3);
     }
