@@ -130,6 +130,7 @@ function MealSlotDisplay({
     <div
       className={`meal-slot ${home ? '' : 'unplanned'}`}
       data-empty={meal.kind === 'unplanned' || undefined}
+      data-recipe-id={editableMeal ? (editableMeal.recipeId ?? '') : undefined}
       data-tonight={tonight || undefined}
     >
       <div className="meal-slot-text">
