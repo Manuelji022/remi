@@ -74,7 +74,7 @@
     transform: none;
   }
 
-  .panel-ingredient-quantity-field .field-control,
+  .recipe-ingredient-row input[type='number'],
   .planner-week-pill,
   .panel-ingredient-chip {
     font-variant-numeric: tabular-nums;

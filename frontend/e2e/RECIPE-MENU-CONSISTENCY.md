@@ -20,8 +20,9 @@ The fetch fixture starts with a synthetic account, one recipe assigned to Monday
 
 1. **Deleting an assigned recipe leaves stale planner data.** This fails if the selected week/menu and recipe names are not reloaded after deletion.
 2. **A later schedule save submits a deleted recipe ID.** This fails if writes are re-enabled before the selected menu refresh completes.
-3. **Pending create allows conflicting actions or leaves the submit control active.** The held request fails if more than one create is recorded or create/save/cancel controls remain enabled before the refresh completes.
+3. **Pending create allows conflicting actions or leaves the submit control active.** The held request fails if more than one create is recorded or create/save/cancel controls remain enabled before the refresh completes. The submit control stays focusable while pending, so it is checked through `aria-disabled`.
 4. **Cancel discards newly created recipes.** This fails if cancel is treated as rollback for the immediate recipe mutation.
+5. **The recipe sheet loses its place after a save.** This fails unless the sheet stays open with an empty, focused name field, and pressing Enter saves the next recipe.
 
 ## Evidence and limitations
 

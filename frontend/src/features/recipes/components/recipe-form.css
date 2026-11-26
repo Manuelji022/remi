@@ -1,7 +1,316 @@
-/* The recipe form inside the Sheet body: fields sit 20 apart. */
+/* The recipe form. Paper: Onboarding / 2 add recipes, form column. Phone
+   first; from md the ingredients stay open and Save sits beside the Enter hint.
+   The 52 name field, 18 type, 56 / 64 meal cards, 32 / 36 icon circles, 28
+   reveal circle, 88 / 112 columns, 6 key-cap radius and the card tints have
+   no token. */
 @layer components {
   .recipe-form {
+    container: recipe-form / inline-size;
     display: grid;
-    gap: var(--spacing-5);
+    gap: 22px; /* Paper's phone rhythm: between spacing 5 and 6 */
+    text-align: start;
+  }
+
+  .recipe-form .recipe-form-name {
+    min-height: 52px;
+    padding-inline: var(--spacing-4);
+    font-size: var(--text-headline);
+  }
+
+  .recipe-form-group {
+    min-inline-size: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .recipe-form-label {
+    display: block;
+    padding: 0;
+    font-size: var(--text-callout);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--leading-callout);
+  }
+
+  legend.recipe-form-label {
+    margin-block-end: var(--spacing-2);
+  }
+
+  .recipe-form-optional {
+    color: var(--color-text-secondary);
+    font-weight: var(--font-weight-regular);
+  }
+
+  .recipe-form-help {
+    display: block;
+    color: var(--color-text-secondary);
+    font-size: var(--text-caption);
+    line-height: var(--leading-caption);
+  }
+
+  .recipe-slots {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .recipe-slot {
+    --slot-color: var(--color-mint-300);
+
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-block-size: 56px;
+    padding-inline: var(--spacing-3);
+    border: 1px solid var(--color-gray-300);
+    border-radius: var(--radius-inner);
+    box-shadow: 0 0 0 0 var(--color-ink);
+    cursor: pointer;
+  }
+
+  .recipe-slot-dinner {
+    --slot-color: var(--color-lilac-300);
+  }
+
+  /* The radio covers the card: it takes the tap, the card shows the state. */
+  .recipe-slot-input {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .recipe-slot:has(:checked) {
+    border-color: var(--color-ink);
+    /* A second pixel of border that does not move the content. */
+    box-shadow: 0 0 0 1px var(--color-ink);
+    background: color-mix(in srgb, var(--slot-color) 30%, transparent);
+  }
+
+  .recipe-slot:has(:focus-visible) {
+    outline: 2px solid var(--color-focus-ring);
+    outline-offset: 2px;
+  }
+
+  .recipe-slot:has(:disabled) {
+    opacity: var(--opacity-disabled);
+  }
+
+  .recipe-slot-icon,
+  .recipe-ingredients-reveal-icon {
+    display: grid;
+    flex: none;
+    place-items: center;
+    inline-size: var(--size-control-sm);
+    block-size: var(--size-control-sm);
+    border-radius: var(--radius-pill);
+  }
+
+  .recipe-slot-icon {
+    background: color-mix(in srgb, var(--slot-color) 60%, transparent);
+  }
+
+  .recipe-slot:has(:checked) .recipe-slot-icon {
+    background: var(--slot-color);
+  }
+
+  .recipe-slot-text {
+    display: grid;
+    flex: 1;
+  }
+
+  .recipe-slot-name {
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--leading-callout);
+  }
+
+  .recipe-slot-hint {
+    display: none;
+    color: var(--color-text-secondary);
+    font-size: var(--text-caption);
+    line-height: var(--leading-caption);
+  }
+
+  .recipe-slot-check {
+    display: grid;
+    visibility: hidden;
+    flex: none;
+    place-items: center;
+    inline-size: var(--size-badge);
+    block-size: var(--size-badge);
+    border: 1.5px solid var(--color-gray-300);
+    border-radius: var(--radius-pill);
+    color: transparent;
+  }
+
+  .recipe-slot-check .icon {
+    inline-size: var(--spacing-3);
+    block-size: var(--spacing-3);
+  }
+
+  .recipe-slot:has(:checked) .recipe-slot-check {
+    visibility: visible;
+    border-color: var(--color-ink);
+    background: var(--color-ink);
+    color: var(--color-white);
+  }
+
+  .recipe-ingredients-reveal {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-3);
+    inline-size: 100%;
+    padding: var(--spacing-3) var(--spacing-4);
+    border: 1.5px dashed var(--color-gray-300);
+    border-radius: var(--radius-inner);
+    text-align: start;
+  }
+
+  .recipe-ingredients-reveal-icon {
+    inline-size: 28px;
+    block-size: 28px;
+    background: var(--color-bg-fill);
+  }
+
+  .recipe-ingredients[data-open] .recipe-ingredients-reveal {
+    display: none;
+  }
+
+  @media (max-width: 47.99rem) {
+    .recipe-ingredients:not([data-open]) .recipe-ingredients-body {
+      display: none;
+    }
+  }
+
+  .recipe-ingredients-body .recipe-form-help {
+    margin-block: calc(-1 * var(--spacing-1-5)) var(--spacing-3);
+  }
+
+  .recipe-ingredient-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 88px 112px var(--size-control);
+    gap: var(--spacing-2);
+    margin-block-end: var(--spacing-2);
+  }
+
+  @container recipe-form (max-width: 24rem) {
+    .recipe-ingredient-row {
+      grid-template-columns: repeat(2, minmax(0, 1fr)) var(--size-control);
+    }
+
+    .recipe-ingredient-name {
+      grid-column: 1 / -1;
+    }
+  }
+
+  .recipe-ingredients-add {
+    padding-inline: 0 var(--spacing-3);
+    color: var(--color-text-primary);
+  }
+
+  .recipe-form-submit {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    column-gap: var(--spacing-4);
+    row-gap: var(--spacing-2);
+  }
+
+  /* Paper fills Save with tomato. Ink on it, never white (contrast). */
+  .recipe-form .recipe-form-save {
+    --button-bg: var(--color-pop);
+    --button-bg-hover: color-mix(
+      in srgb,
+      var(--color-pop),
+      var(--color-white) 12%
+    );
+    --button-bg-active: var(--color-pop);
+    --button-fg: var(--color-ink);
+
+    inline-size: 100%;
+  }
+
+  .recipe-form-enter {
+    display: none;
+    color: var(--color-text-secondary);
+    font-size: var(--text-caption);
+    line-height: var(--leading-caption);
+  }
+
+  .recipe-form-enter kbd {
+    display: inline-block;
+    margin-inline-start: var(--spacing-0-5);
+    padding: var(--spacing-0-5) var(--spacing-2);
+    border: 1px solid var(--color-gray-200);
+    border-radius: 6px;
+    background: var(--color-bg-fill);
+    color: var(--color-text-primary);
+    font: inherit;
+    font-weight: var(--font-weight-semibold);
+  }
+
+  .recipe-form-status {
+    flex-basis: 100%;
+    color: var(--color-text-secondary);
+    font-size: var(--text-caption);
+    line-height: var(--leading-caption);
+    text-align: center;
+  }
+
+  .recipe-form-status:empty {
+    margin-block-start: calc(-1 * var(--spacing-2));
+  }
+
+  @media (min-width: 48rem) {
+    .recipe-form {
+      gap: var(--spacing-6);
+    }
+
+    .recipe-form .recipe-form-name {
+      font-size: 18px;
+    }
+
+    .recipe-slots {
+      gap: var(--spacing-3);
+    }
+
+    .recipe-slot {
+      gap: var(--spacing-3);
+      min-block-size: 64px;
+      padding-inline: var(--spacing-4);
+    }
+
+    .recipe-slot-icon {
+      inline-size: 36px;
+      block-size: 36px;
+    }
+
+    .recipe-slot-hint {
+      display: block;
+    }
+
+    .recipe-slot-check {
+      visibility: visible;
+      inline-size: var(--size-check);
+      block-size: var(--size-check);
+    }
+
+    .recipe-ingredients .recipe-ingredients-reveal {
+      display: none;
+    }
+
+    .recipe-form .recipe-form-save {
+      inline-size: auto;
+    }
+
+    .recipe-form-enter {
+      display: block;
+    }
+
+    .recipe-form-status {
+      text-align: start;
+    }
   }
 }

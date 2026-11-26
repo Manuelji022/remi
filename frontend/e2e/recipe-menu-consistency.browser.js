@@ -19,6 +19,16 @@ const check = async (condition, message) =>
     })()`,
   )
 
+// The header's Preferences button is disabled while a week loads or saves.
+const openPreferences = async () => {
+  await run([
+    'wait',
+    '--fn',
+    `[...document.querySelectorAll('button')].some(button => button.textContent.trim().startsWith('Preferences') && !button.disabled)`,
+  ])
+  await run(['find', 'role', 'button', 'click', '--name', 'Preferences'])
+}
+
 const textButton = (scope, labels) =>
   `Array.from(${scope}.querySelectorAll('button')).find(button => ${JSON.stringify(labels)}.some(label => button.textContent.includes(label)))`
 const dialog = 'document.querySelector("dialog[aria-labelledby=preferences-panel-title]")'
@@ -36,13 +46,14 @@ await run([
   '--fn',
   `document.querySelector('.planner-week-pill')?.textContent !== window.recipeConsistency.initialWeekHeader && window.recipeConsistency.requests.filter(r=>r.kind==='menu-read').length >= 2`,
 ])
-await run(['find', 'role', 'button', 'click', '--name', 'Preferences', '--exact'])
+await openPreferences()
 await run(['find', 'role', 'tab', 'click', '--name', 'My Recipes', '--exact'])
 await check(
   `document.querySelector('#preferences-recipes-panel')?.innerText.includes('Cancel only discards schedule changes')`,
   'recipe persistence and cancel behavior are explained',
 )
 
+await run(['wait', '--fn', `document.querySelector('button[aria-label="Delete Assigned dinner"]') !== null`])
 await run([
   'find',
   'role',
@@ -72,8 +83,10 @@ await run([
   `document.body.innerText.includes('Preferences saved.') && window.recipeConsistency.posts.filter(post=>post.kind==='menu-save').at(-1)?.data.days.Monday.dinnerRecipeId === null`,
 ])
 
-await run(['find', 'role', 'button', 'click', '--name', 'Preferences'])
+await openPreferences()
 await run(['find', 'role', 'tab', 'click', '--name', 'My Recipes', '--exact'])
+// The tab lists nothing until its own recipe read lands.
+await run(['wait', '--text', 'Add recipe'])
 await run(['find', 'role', 'button', 'click', '--name', 'Add recipe', '--exact'])
 await run(['fill', 'input[name=recipeName]', 'Persistent recipe'])
 await run(['eval', '--stdin'], 'window.recipeConsistency.holds.create = true')
@@ -81,7 +94,7 @@ await run(['find', 'role', 'button', 'click', '--name', 'Save recipe', '--exact'
 await run([
   'wait',
   '--fn',
-  `Boolean(window.recipeConsistency.release.create) && window.recipeConsistency.posts.filter(post=>post.kind==='recipe-create').length === 1 && document.querySelector('dialog[aria-labelledby=preferences-panel-title] .panel-drawer')?.getAttribute('aria-busy') === 'true' && document.querySelector('dialog[aria-labelledby=preferences-panel-title] [data-testid=panel-add-recipe]')?.disabled && ${cancelButton}.disabled && ${saveButton}.disabled`,
+  `Boolean(window.recipeConsistency.release.create) && window.recipeConsistency.posts.filter(post=>post.kind==='recipe-create').length === 1 && document.querySelector('dialog[aria-labelledby=preferences-panel-title] .panel-drawer')?.getAttribute('aria-busy') === 'true' && document.querySelector('dialog[aria-labelledby=preferences-panel-title] [data-testid=panel-add-recipe]')?.getAttribute('aria-disabled') === 'true' && ${cancelButton}.disabled && ${saveButton}.disabled`,
 ])
 await run(
   ['eval', '--stdin'],
@@ -92,13 +105,27 @@ await run([
   '--fn',
   `document.body.innerText.includes('Persistent recipe') && document.querySelector('dialog[aria-labelledby=preferences-panel-title] .panel-drawer')?.getAttribute('aria-busy') === 'false' && window.recipeConsistency.requests.filter(r=>r.kind==='menu-read').length >= 3`,
 ])
+// The recipe sheet stays open for the next dish: empty name, focus back on it.
+await run([
+  'wait',
+  '--fn',
+  `document.activeElement?.name === 'recipeName' && document.activeElement.value === ''`,
+])
+await run(['fill', 'input[name=recipeName]', 'Entered recipe'])
+await run(['press', 'Enter'])
+await run([
+  'wait',
+  '--fn',
+  `window.recipeConsistency.posts.filter(post=>post.kind==='recipe-create').length === 2 && document.activeElement?.name === 'recipeName' && document.activeElement.value === '' && document.activeElement.form.innerText.includes('“Entered recipe” saved')`,
+])
+await run(['find', 'role', 'button', 'click', '--name', 'Close', '--exact'])
 await run(['find', 'role', 'button', 'click', '--name', 'Cancel', '--exact'])
-await run(['find', 'role', 'button', 'click', '--name', 'Preferences'])
+await openPreferences()
 await run(['find', 'role', 'tab', 'click', '--name', 'My Recipes', '--exact'])
 await run([
   'wait',
   '--fn',
-  `window.recipeConsistency.posts.filter(post=>post.kind==='recipe-create').length === 1 && [...document.querySelectorAll('.panel-recipe-card h4')].some(node=>node.textContent==='Persistent recipe')`,
+  `window.recipeConsistency.posts.filter(post=>post.kind==='recipe-create').length === 2 && [...document.querySelectorAll('.panel-recipe-card h4')].some(node=>node.textContent==='Persistent recipe')`,
 ])
 
 emit({
@@ -108,6 +135,8 @@ emit({
     'assigned recipe deletion refreshes menu and names before writes',
     'schedule save omits deleted recipe ID',
     'pending create is single-submit and blocks conflicting actions',
+    'sheet stays open after a save and refocuses the empty name field',
+    'Enter saves the next recipe',
     'cancel retains created recipe',
   ],
   posts: await run(
