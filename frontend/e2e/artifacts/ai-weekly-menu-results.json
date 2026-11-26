@@ -43,7 +43,7 @@
 {"scenario":"rate-limited Generate another keeps the proposal; retry after a failed first generation has no previousMenu","verdict":"PASS"},
 {"scenario":"Generate another after Monday targets the preview week and a stale answer keeps the proposal","verdict":"PASS"},
 {"scenario":"Generate another is disabled while the preview is being saved","verdict":"PASS"},
-{"scenario":"preview alternatives are alphabetical per locale, with No recipe first and the selection kept","verdict":"PASS"},
+{"scenario":"preview alternatives are alphabetical per locale, with No recipe last and the selection kept","verdict":"PASS"},
 {"scenario":"Spanish selectors use the Spanish collation","verdict":"PASS"},
 {"scenario":"first-run tour follows generation through Done without blocking controls","verdict":"PASS"},
 {"scenario":"Skip at step 1 persists completion across reload","verdict":"PASS"},

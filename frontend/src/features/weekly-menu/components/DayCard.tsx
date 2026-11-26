@@ -1,4 +1,11 @@
-import { Badge, Card, Divider } from '#/components/primitives'
+import {
+  Badge,
+  Button,
+  Card,
+  Menu,
+  MenuDivider,
+  MenuItem,
+} from '#/components/primitives'
 import type { Day } from '#/features/weekly-menu/constants'
 import './day-card.css'
 import type { DayContext } from '#/features/weekly-menu/types'
@@ -75,15 +82,18 @@ export function DayCard({
         </div>
         <div className="day-meals">
           <MealSlotDisplay
+            dayName={t(`days.${day}`)}
             editableMeal={editableMeals?.lunch}
             meal={lunch}
             slot="lunch"
+            timing={timing}
           />
-          <Divider />
           <MealSlotDisplay
+            dayName={t(`days.${day}`)}
             editableMeal={editableMeals?.dinner}
             meal={dinner}
             slot="dinner"
+            timing={timing}
           />
         </div>
       </Card>
@@ -92,46 +102,75 @@ export function DayCard({
 }
 
 interface MealSlotDisplayProps {
+  dayName: string
   meal: ShownMeal
   slot: MealSlot
+  timing: DayTiming
   editableMeal?: EditableMeal
 }
 
-function MealSlotDisplay({ meal, slot, editableMeal }: MealSlotDisplayProps) {
+function MealSlotDisplay({
+  dayName,
+  meal,
+  slot,
+  timing,
+  editableMeal,
+}: MealSlotDisplayProps) {
   const { t } = useI18n()
   const home = meal.kind === 'recipe' || meal.kind === 'unplanned'
   const name = meal.kind === 'recipe' ? meal.name : t('meal.unplannedName')
+  // Today's dinner is the one lifted slot on the board.
+  const tonight = timing === 'today' && slot === 'dinner' && home
+  const swapLabel = t('planner.swapSlot', {
+    day: dayName,
+    slot: t(`slots.${slot}`).toLowerCase(),
+  })
 
   return (
-    <div className={`meal-slot ${home ? '' : 'unplanned'}`}>
-      <span className="meal-label">{t(`slots.${slot}`)}</span>
-      <span className="meal-name">{name}</span>
-      {meal.kind === 'outside' ? t('meal.outsideScope') : null}
+    <div
+      className={`meal-slot ${home ? '' : 'unplanned'}`}
+      data-empty={meal.kind === 'unplanned' || undefined}
+      data-recipe-id={editableMeal ? (editableMeal.recipeId ?? '') : undefined}
+      data-tonight={tonight || undefined}
+    >
+      <div className="meal-slot-text">
+        <span className="meal-label">{t(`slots.${slot}`)}</span>
+        <span className="meal-name">{name}</span>
+        {meal.kind === 'outside' ? t('meal.outsideScope') : null}
+      </div>
       {editableMeal && (
-        <label className="meal-recipe-editor">
-          <span>
-            {t('planner.aiPreviewRecipeSelect', {
-              slot: t(`slots.${slot}`).toLowerCase(),
-            })}
-          </span>
-          <select
-            aria-label={t('planner.aiPreviewRecipeSelect', {
-              slot: t(`slots.${slot}`).toLowerCase(),
-            })}
-            disabled={editableMeal.disabled}
-            value={editableMeal.recipeId ?? ''}
-            onChange={(event) =>
-              editableMeal.onChange(event.target.value || null)
-            }
+        <Menu
+          header={swapLabel}
+          trigger={(props) => (
+            <Button
+              {...props}
+              aria-label={swapLabel}
+              className="meal-swap"
+              disabled={editableMeal.disabled}
+              icon="let-remi-choose"
+              iconOnly
+              variant="secondary"
+            />
+          )}
+          wide
+        >
+          {editableMeal.recipes.map((recipe) => (
+            <MenuItem
+              checked={recipe.id === editableMeal.recipeId}
+              key={recipe.id}
+              onSelect={() => editableMeal.onChange(recipe.id)}
+            >
+              {recipe.name}
+            </MenuItem>
+          ))}
+          <MenuDivider />
+          <MenuItem
+            checked={editableMeal.recipeId === null}
+            onSelect={() => editableMeal.onChange(null)}
           >
-            <option value="">{t('planner.aiPreviewNoRecipe')}</option>
-            {editableMeal.recipes.map((recipe) => (
-              <option key={recipe.id} value={recipe.id}>
-                {recipe.name}
-              </option>
-            ))}
-          </select>
-        </label>
+            {t('planner.aiPreviewNoRecipe')}
+          </MenuItem>
+        </Menu>
       )}
     </div>
   )

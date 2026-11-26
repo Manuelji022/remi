@@ -24,7 +24,7 @@ export default async function scenario({ assert, browser, evaluate, wait, click,
     }
   }
   await generate('ok', 'Generate menu', true)
-  const shown = await evaluate(`Array.from(${preview}.querySelectorAll('.day-card'), card => ({day:card.querySelector('.day-name').textContent, ids:Array.from(card.querySelectorAll('select'), s=>s.value || null), names:Array.from(card.querySelectorAll('.meal-name'), s=>s.textContent)}))`)
+  const shown = await evaluate(`Array.from(${preview}.querySelectorAll('.day-card'), card => ({day:card.querySelector('.day-name').textContent, ids:Array.from(card.querySelectorAll('.meal-slot[data-recipe-id]'), slot=>slot.dataset.recipeId || null), names:Array.from(card.querySelectorAll('.meal-name'), s=>s.textContent)}))`)
   assert.equal(shown.length, 7)
   assert(shown.every((day) => day.names.includes('Synthetic dinner') && day.names.includes('Synthetic lunch')))
   assert.deepEqual(await accounting(), { attempts: 1, leases: 0 })
@@ -108,7 +108,27 @@ export default async function scenario({ assert, browser, evaluate, wait, click,
     }
   }
   const genAnother = "document.querySelector('dialog[aria-labelledby=\"ai-generate-another-title\"][open]')"
-  const read = () => evaluate(`Array.from(${preview}.querySelectorAll('.day-card'), card => Array.from(card.querySelectorAll('.meal-slot'), slot => slot.querySelector('select')?.value || null))`)
+  const read = () => evaluate(`Array.from(${preview}.querySelectorAll('.day-card'), card => Array.from(card.querySelectorAll('.meal-slot'), slot => slot.dataset.recipeId || null))`)
+  // Swap a slot through its button and menu, by role and accessible name ("Swap Tuesday dinner",
+  // then the recipe row). Prefers a recipe not yet in the preview. Recipe names are "Decision <slot> <n>"
+  // for ids "dec-<slot>-<n>". The menu rows live in the slot even while the popover is closed.
+  const swapSlot = async (cardIndex, slotIndex, dayName, slotName) => {
+    const slotSource = `${preview}.querySelectorAll('.day-card')[${cardIndex}].querySelectorAll('.meal-slot')[${slotIndex}]`
+    const picked = await evaluate(`(() => {
+      const slot = ${slotSource}
+      const toId = (name) => { const match = /^Decision (lunch|dinner) (\\d+)$/.exec(name); return match ? 'dec-' + match[1] + '-' + match[2] : null }
+      const used = new Set(Array.from(${preview}.querySelectorAll('.meal-slot[data-recipe-id]'), s => s.dataset.recipeId))
+      const options = Array.from(slot.querySelectorAll('[role="menuitemradio"]'), row => ({ name: row.textContent.trim(), id: toId(row.textContent.trim()) })).filter(o => o.id)
+      const next = options.find(o => !used.has(o.id)) ?? options.find(o => o.id !== slot.dataset.recipeId)
+      slot.querySelector('.meal-swap').scrollIntoView({ block: 'center' })
+      return next
+    })()`)
+    await click(`Swap ${dayName} ${slotName}`)
+    await browser(['find', 'role', 'menuitemradio', 'click', '--name', picked.name, '--exact'])
+    await wait(`${slotSource}.dataset.recipeId === ${JSON.stringify(picked.id)}`)
+    await wait(`Array.from(document.querySelectorAll('.menu')).every(menu => getComputedStyle(menu).display === 'none')`)
+    return { to: picked.id }
+  }
   const names = () => evaluate(`Array.from(document.querySelectorAll('.day-card .meal-name'), n => n.textContent)`)
   const setMock = (m) => evaluate(`history.replaceState(null, '', location.pathname + '?mock=${m}'); true`)
   const origin = await evaluate('location.origin')
@@ -124,7 +144,7 @@ export default async function scenario({ assert, browser, evaluate, wait, click,
     // Office on Monday: lunch becomes a covered slot without a recipe.
     await evaluate(`Array.from(document.querySelectorAll('dialog .panel-day-card')[0].querySelectorAll('button')).find(b => b.textContent.includes('Office')).click(); true`)
     await click('Confirm schedule and generate')
-    await wait(`${preview} !== null && ${preview}.querySelector('select') !== null`)
+    await wait(`${preview} !== null && ${preview}.querySelector('.meal-swap') !== null`)
     const generated = await read()
     const [transport] = await transportLog()
     await check('transport called once with more than one candidate', () => {
@@ -135,7 +155,7 @@ export default async function scenario({ assert, browser, evaluate, wait, click,
       assert.equal(transport.choice, `menu-${transport.candidateCount - 1}`)
       assert.deepEqual(generated, transport.selected)
     })
-    await check('covered Monday lunch has no recipe and no selector', () => assert.equal(generated[0][0], null))
+    await check('covered Monday lunch has no recipe and no swap button', () => assert.equal(generated[0][0], null))
     await check('every home slot has a recipe', () => assert(generated.flat().filter((id) => id !== null).length === 13))
     await check('one guarded attempt, no lease, nothing saved by preview', async () => {
       assert.deepEqual(await accounting(), { attempts: 1, leases: 0 })
@@ -145,15 +165,7 @@ export default async function scenario({ assert, browser, evaluate, wait, click,
     emit('ok: real adapter selected last candidate; one guarded attempt; preview unsaved', { candidateCount: transport.candidateCount, choice: transport.choice })
 
     // B: manual edit of one home slot.
-    const swapped = await evaluate(`(() => {
-      const select = document.querySelectorAll('.planner-ai-preview .day-card')[1].querySelectorAll('select')[1]
-      const used = new Set(Array.from(document.querySelectorAll('.planner-ai-preview select'), s => s.value))
-      const next = Array.from(select.options).map(o => o.value).find(v => v && !used.has(v)) ?? Array.from(select.options).map(o => o.value).find(v => v && v !== select.value)
-      Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set.call(select, next)
-      select.dispatchEvent(new Event('change', { bubbles: true }))
-      return { to: next }
-    })()`)
-    await wait(`${preview}.querySelectorAll('.day-card')[1].querySelectorAll('select')[1].value === ${JSON.stringify(swapped.to)}`)
+    const swapped = await swapSlot(1, 1, 'Tuesday', 'dinner')
     const edited = await read()
     await check('manual change is reflected only in the edited slot', () => {
       assert.equal(edited[1][1], swapped.to)
@@ -165,7 +177,7 @@ export default async function scenario({ assert, browser, evaluate, wait, click,
       assert.equal((await transportLog()).length, 1)
     })
     await browser(['screenshot', `${stem}-manual.png`])
-    emit('manual selector change: no further generation call, no extra attempt', { swappedTo: swapped.to })
+    emit('manual swap: no further generation call, no extra attempt', { swappedTo: swapped.to })
 
     // D: failed regeneration keeps the edited preview intact.
     await setMock('decision-invalid')
@@ -173,7 +185,7 @@ export default async function scenario({ assert, browser, evaluate, wait, click,
     await wait(`${genAnother} !== null`)
     await evaluate(`${textButton(genAnother, 'Generate another')}.click(); true`)
     await browser(['wait', '--text', errors.error])
-    await wait(`${skeleton} === null && ${preview} !== null && ${preview}.querySelector('select') !== null`)
+    await wait(`${skeleton} === null && ${preview} !== null && ${preview}.querySelector('.meal-swap') !== null`)
     const restored = await read()
     const log = await transportLog()
     await check('invalid choice fails recoverably and edited preview is restored intact', () => assert.deepEqual(restored, edited))
@@ -231,7 +243,7 @@ export default async function scenario({ assert, browser, evaluate, wait, click,
     await clickGeneration('Generate menu')
     await wait(`${dialog} !== null`)
     await click('Confirm schedule and generate')
-    await wait(`${preview} !== null && ${preview}.querySelector('select') !== null`)
+    await wait(`${preview} !== null && ${preview}.querySelector('.meal-swap') !== null`)
     const fallback = await read()
     const flog = await transportLog()
     await check('local fallback preview shows the plain-language notice', async () => assert(await evaluate(notice)))
@@ -248,14 +260,7 @@ export default async function scenario({ assert, browser, evaluate, wait, click,
       assert(ids.every((id) => /^dec-(lunch|dinner)-\d$/.test(id)))
     })
     await browser(['screenshot', `${stem}-local-fallback.png`])
-    const fbSwap = await evaluate(`(() => {
-      const select = ${preview}.querySelectorAll('.day-card')[2].querySelectorAll('select')[1]
-      const next = Array.from(select.options).map(o => o.value).find(v => v && v !== select.value)
-      Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set.call(select, next)
-      select.dispatchEvent(new Event('change', { bubbles: true }))
-      return next
-    })()`)
-    await wait(`${preview}.querySelectorAll('.day-card')[2].querySelectorAll('select')[1].value === ${JSON.stringify(fbSwap)}`)
+    await swapSlot(2, 1, 'Wednesday', 'dinner')
     const fbEdited = await read()
     await check('manual change keeps the notice', async () => assert(await evaluate(notice)))
     await click('Accept and save menu')

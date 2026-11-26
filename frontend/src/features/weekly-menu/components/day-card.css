@@ -85,45 +85,115 @@
 
   .day-meals {
     display: grid;
-    gap: var(--spacing-stack-md);
-    padding-inline: var(--spacing-2);
+    gap: var(--spacing-1-5);
   }
 
+  /* Meal slot: a sand fill on the inner radius, label over dish. The swap
+     button sits at the right and shows on hover or focus. */
   .meal-slot {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-2);
+    /* Paper pads the slot 10 by 12. */
+    padding: 10px var(--spacing-3);
+    border-radius: var(--radius-inner);
+    background: var(--color-bg-fill);
     color: var(--color-text-secondary);
     font-size: var(--text-caption);
     line-height: var(--leading-caption);
   }
 
-  .meal-label {
-    display: block;
-    margin-block-end: var(--spacing-1);
+  .day-card-past .meal-slot {
+    background: var(--color-bg-fill-hover);
+  }
+
+  /* Nothing planned at home: a hairline outline instead of a fill. */
+  .meal-slot.unplanned {
+    border: 1px solid var(--color-border-subtle);
+    background: none;
+  }
+
+  /* A home slot with no meal yet: dashed, as Paper draws an empty slot. */
+  .meal-slot[data-empty] {
+    /* Paper uses gray-300 here; there is no semantic dashed-edge token. */
+    border: 2px dashed var(--color-gray-300);
+    background: none;
+  }
+
+  .meal-slot-text {
+    display: grid;
+    gap: var(--spacing-0-5);
+    min-inline-size: 0;
   }
 
   .meal-name {
-    display: block;
     color: var(--color-text-primary);
     font-size: var(--text-callout);
+    font-weight: var(--font-weight-semibold);
     line-height: var(--leading-callout);
   }
 
-  .meal-slot.unplanned .meal-name {
-    color: var(--color-text-secondary);
-  }
-
+  .meal-slot.unplanned .meal-name,
   .day-card-past .meal-name {
     color: var(--color-text-secondary);
+    font-weight: var(--font-weight-medium);
   }
 
-  .meal-recipe-editor {
-    display: grid;
-    gap: var(--spacing-1);
-    margin-block-start: var(--spacing-2);
+  /* Tonight: the brand-soft slot with the dish in the display face. */
+  .meal-slot[data-tonight] {
+    padding-block: var(--spacing-3) var(--spacing-4);
+    background: var(--color-bg-brand-soft);
   }
 
-  .meal-recipe-editor select {
-    min-inline-size: 0;
-    inline-size: 100%;
+  .meal-slot[data-tonight] .meal-label {
+    color: var(--color-text-brand);
+    font-weight: var(--font-weight-medium);
+  }
+
+  .meal-slot[data-tonight] .meal-name {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: var(--font-weight-extrabold);
+    letter-spacing: var(--tracking-title);
+    line-height: 32px;
+  }
+
+  /* Swap: hidden at rest, shown on hover and focus, always on touch. */
+  .meal-swap {
+    /* Over the slot, not in the row, so notes this narrow keep their text
+       width. */
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-end: var(--spacing-1);
+    translate: 0 -50%;
+    opacity: 0;
+  }
+
+  .meal-slot:hover .meal-swap,
+  .meal-slot:focus-within .meal-swap,
+  .meal-swap[aria-expanded='true'] {
+    opacity: 1;
+  }
+
+  @media (hover: none) {
+    .meal-swap {
+      opacity: 1;
+    }
+  }
+
+  /* Swapping: the slot turns ink while its menu is open. */
+  .meal-slot:has(.meal-swap[aria-expanded='true']) {
+    background: var(--color-text-primary);
+  }
+
+  .meal-slot:has(.meal-swap[aria-expanded='true']) .meal-label {
+    color: var(--color-gray-300);
+  }
+
+  .meal-slot:has(.meal-swap[aria-expanded='true']) .meal-name {
+    color: var(--color-text-on-brand);
   }
 
   /* Phone: the note is a row (day, then meals) and tilts less. Today keeps a
@@ -148,6 +218,32 @@
     .day-card-upcoming .day-card-header,
     .day-card-past .day-card-header {
       padding: 0;
+    }
+
+    /* Rows carry no slot fills: label and dish sit inline on the sand. */
+    .day-card-upcoming .day-meals,
+    .day-card-past .day-meals {
+      gap: var(--spacing-1);
+    }
+
+    .day-card-upcoming .meal-slot,
+    .day-card-past .meal-slot {
+      padding: 0;
+      border: 0;
+      background: none;
+    }
+
+    .day-card-upcoming .meal-slot-text,
+    .day-card-past .meal-slot-text {
+      display: flex;
+      align-items: baseline;
+      gap: var(--spacing-2);
+    }
+
+    .day-card-upcoming .meal-label,
+    .day-card-past .meal-label {
+      flex-shrink: 0;
+      inline-size: 2.75rem;
     }
 
     .day-card-upcoming .day-name,

@@ -7,7 +7,37 @@ const dialog = `document.querySelector(${JSON.stringify(dialogSelector)})`
 const previewSelector = '.planner-ai-preview'
 const preview = `document.querySelector(${JSON.stringify(previewSelector)})`
 const generateAnotherButton = `[...${preview}.querySelectorAll('.planner-ai-preview-actions button')].find(button => /Generate another|Generar otra/.test(button.textContent))`
-const firstDayDinnerSelector = `${previewSelector} .delay-1 .meal-recipe-editor select[aria-label="Choose a saved dinner recipe"]`
+const firstDinnerSlot = `${previewSelector} .delay-1 .meal-slot:last-child`
+// The swap button of Monday's dinner; its menu rows are role=menuitemradio.
+const firstDayDinnerSelector = `${firstDinnerSlot} .meal-swap`
+// In-page swap: the pointer-driven steps above race the popover's open and close
+// animation when many scenarios run back to back, so only the first scenario uses them.
+const swapDinnerInPage = (name) => [[
+  'eval',
+  `(async () => {
+    const until = async (label, test) => { for (let i = 0; i < 100; i++) { const value = test(); if (value) return value; await new Promise(resolve => setTimeout(resolve, 50)) } throw new Error('swap: ' + label) }
+    document.querySelector(${JSON.stringify(firstDayDinnerSelector)}).click()
+    const row = await until('menu row', () => [...document.querySelectorAll('.menu:popover-open [role="menuitemradio"]')].find(item => item.textContent.includes(${JSON.stringify(name)})))
+    row.click()
+    await until('name updated', () => document.querySelector(${JSON.stringify(`${firstDinnerSlot} .meal-name`)}).textContent === ${JSON.stringify(name)})
+    await until('menu closed', () => [...document.querySelectorAll('.menu')].every(menu => getComputedStyle(menu).display === 'none'))
+    return true
+  })()`,
+]]
+const firstDinnerName = `${preview}.querySelector(${JSON.stringify(`${firstDinnerSlot} .meal-name`)}).textContent`
+const swapDinnerTo = (name) => [
+  // Centre the button: scrollintoview parks it under the sticky header.
+  ['eval', `document.querySelector(${JSON.stringify(firstDayDinnerSelector)}).scrollIntoView({ block: 'center' })`],
+  ['find', 'role', 'button', 'click', '--name', 'Swap Monday dinner', '--exact'],
+  // Wait until the open menu is placed and its first row is the topmost element at its centre.
+  ['wait', '--fn', `(() => { const row = document.querySelector('.menu:popover-open [role="menuitemradio"]'); if (!row) return false; const box = row.getBoundingClientRect(); return document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2)?.closest('[role="menuitemradio"]') === row })()`],
+  ['find', 'role', 'menuitemradio', 'click', '--name', name, '--exact'],
+  // The popover fades out before it leaves the top layer; wait so it cannot cover the next click.
+  ['wait', '--fn', `[...document.querySelectorAll('.menu')].every(menu => getComputedStyle(menu).display === 'none')`],
+  ['wait', '--fn', `${firstDinnerName}===${JSON.stringify(name)}`],
+  // Go back to the top so later scrollintoview clicks start from a known position.
+  ['eval', 'window.scrollTo(0, 0)'],
+]
 const noticeDialog = `document.querySelector('dialog[aria-labelledby="ai-recipes-needed-title"]')`
 const discardDialog = `document.querySelector('dialog[aria-labelledby="ai-preview-discard-title"]')`
 const skeleton = `document.querySelector('.planner-ai-skeleton')`
@@ -146,9 +176,9 @@ await scenario('schedule confirmation is required; accept alone persists next we
     'client request contains its IANA calendar timezone but no account identity',
   ),
   wait(`${preview}.querySelector(${JSON.stringify(firstDayDinnerSelector)}) !== null`),
-  ['select', firstDayDinnerSelector, 'saved-dinner-alternative'],
+  ...swapDinnerTo('Mushroom barley bowl'),
   assert(
-    `${preview}.querySelector(${JSON.stringify(firstDayDinnerSelector)}).value==='saved-dinner-alternative' && ${preview}.querySelector(${JSON.stringify(firstDayDinnerSelector)}).closest('.meal-slot').querySelector('.meal-name').textContent==='Mushroom barley bowl'`,
+    `${firstDinnerName}==='Mushroom barley bowl' && ${preview}.querySelector(${JSON.stringify(firstDayDinnerSelector)}).closest('.meal-slot').querySelector('.meal-name').textContent==='Mushroom barley bowl'`,
     'preview assignments can be manually changed in the first day dinner slot to an owned dinner recipe',
   ),
   waitPreviewAcceptable(),
@@ -233,9 +263,9 @@ await scenario('discard and edit schedule guard the fresh preview', [
   assert(`${preview} !== null && ${saveCount}===0`, 'discard warning keeps preview and saved menu'),
   click('Keep preview'),
   waitPreviewAcceptable(),
-  ['select', firstDayDinnerSelector, 'saved-dinner-alternative'],
+  ...swapDinnerInPage('Mushroom barley bowl'),
   assert(
-    `${preview}.querySelector(${JSON.stringify(firstDayDinnerSelector)}).value==='saved-dinner-alternative'`,
+    `${firstDinnerName}==='Mushroom barley bowl'`,
     'manual recipe swap is in place before schedule edits',
   ),
   click('Edit target schedule'),
@@ -244,7 +274,7 @@ await scenario('discard and edit schedule guard the fresh preview', [
   assert(`${preview}===null && ${generationCount}===1 && ${saveCount}===0`, 'changing the schedule hides the stale preview without saving'),
   click('Cancel'),
   assert(
-    `${preview}!==null && ${preview}.querySelector(${JSON.stringify(firstDayDinnerSelector)}).value==='saved-dinner-alternative' && ${saveCount}===0`,
+    `${preview}!==null && ${firstDinnerName}==='Mushroom barley bowl' && ${saveCount}===0`,
     'cancel restores the preview with its manual recipe swap and does not save',
   ),
   click('Edit target schedule'),
@@ -296,9 +326,12 @@ await scenario('route navigation protects a preview stashed by schedule editing'
     button('Confirm schedule and generate')
     await waitFor('editable dinner', () => Boolean(${preview}?.querySelector(${JSON.stringify(firstDayDinnerSelector)})))
     const dinner = ${preview}?.querySelector(${JSON.stringify(firstDayDinnerSelector)})
-    if (!dinner) throw new Error('missing dinner selector')
-    Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set.call(dinner, 'saved-dinner-alternative')
-    dinner.dispatchEvent(new Event('change', { bubbles: true }))
+    if (!dinner) throw new Error('missing dinner swap button')
+    dinner.click()
+    await waitFor('swap menu', () => document.querySelector('[role="menuitemradio"]'))
+    const alternative = [...document.querySelectorAll('[role="menuitemradio"]')].find(item => item.textContent.includes('Mushroom barley bowl'))
+    if (!alternative) throw new Error('missing swap option')
+    alternative.click()
     button('Edit target schedule')
     await waitFor('edit schedule dialog', () => ${dialog}?.open)
     const context = ${dialog}?.querySelector('.panel-day-card:first-child button[aria-pressed]:first-child')
@@ -324,17 +357,17 @@ await scenario('unchanged selected scope and failed regeneration preserve manual
   click('Confirm schedule and generate'),
   wait(`${preview} !== null`),
   waitPreviewAcceptable(),
-  ['select', firstDayDinnerSelector, 'saved-dinner-alternative'],
+  ...swapDinnerInPage('Mushroom barley bowl'),
   click('Edit target schedule'),
   text('Review next week’s schedule'),
   ['click', `${dialogSelector} .panel-day-card:first-child [role="radio"][aria-checked="true"]`],
   click('Cancel'),
-  assert(`${preview}?.querySelector(${JSON.stringify(firstDayDinnerSelector)}).value==='saved-dinner-alternative'`, 'selecting the effective scope and cancelling retains manual edits'),
+  assert(`${firstDinnerName}==='Mushroom barley bowl'`, 'selecting the effective scope and cancelling retains manual edits'),
   click('Edit target schedule'),
   evaluate(`${fixture}.failGeneration=true`),
   click('Confirm schedule and generate'),
   text('Could not generate next week’s menu'),
-  assert(`${preview}?.querySelector(${JSON.stringify(firstDayDinnerSelector)}).value==='saved-dinner-alternative'`, 'failed unchanged regeneration retains manual edits'),
+  assert(`${firstDinnerName}==='Mushroom barley bowl'`, 'failed unchanged regeneration retains manual edits'),
   waitPreviewAcceptable(),
   click('Accept and save menu'),
   text('Weekly Menu saved.'),
@@ -456,16 +489,15 @@ await scenario('recipe edits are disabled and ignored while acceptance save is p
     'all preview recipe controls disable synchronously while acceptance is pending',
   ),
   evaluate(`(() => {
-    const select = document.querySelector(${JSON.stringify(firstDayDinnerSelector)});
-    const setter = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set;
-    setter.call(select, 'saved-dinner-alternative');
-    select.dispatchEvent(new Event('change', { bubbles: true }));
+    window.__dinnerBeforeEdit = ${firstDinnerName};
+    // The swap button is disabled while the save is pending; a click opens nothing.
+    document.querySelector(${JSON.stringify(firstDayDinnerSelector)}).click();
     return true;
   })()`),
   evaluate(`(() => { ${fixture}.holdSave=false; ${fixture}.releaseSave(); return true })()`),
   text('Could not confirm the preview was saved.'),
   assert(
-    `${preview}.querySelector(${JSON.stringify(firstDayDinnerSelector)}).value==='saved-dinner' && !JSON.stringify(${fixture}.saveRequests[0].payload).includes('saved-dinner-alternative')`,
+    `${firstDinnerName}===window.__dinnerBeforeEdit && ${firstDinnerName}!=='Mushroom barley bowl' && !JSON.stringify(${fixture}.saveRequests[0].payload).includes('saved-dinner-alternative')`,
     'pending-save change events cannot mutate the accepted menu snapshot or retained preview',
   ),
   evaluate(`${fixture}.failSave=false`),
@@ -487,10 +519,11 @@ await scenario('a successful Sunday preview remains editable and acceptable afte
   assert(`new Date().getDay()===0`, 'the successful preview arrives while the browser still sees Sunday'),
   evaluate(`${fixture}.advanceClock(2 * 60 * 1000)`),
   assert(`new Date().getDay()===1`, 'the browser clock crosses into Monday while preview is open'),
-  ['select', firstDayDinnerSelector, 'saved-dinner-alternative'],
+  ...swapDinnerInPage('Mushroom barley bowl'),
+  wait(`${firstDinnerName}==='Mushroom barley bowl'`),
   waitPreviewAcceptable(),
   assert(
-    `${preview}.querySelector(${JSON.stringify(firstDayDinnerSelector)}).value==='saved-dinner-alternative'`,
+    `${firstDinnerName}==='Mushroom barley bowl'`,
     'the absolute preview week remains loaded, editable, and acceptable after rollover',
   ),
   click('Accept and save menu'),
@@ -828,7 +861,7 @@ await scenario('Generate another without edits sends one request with previousMe
   wait(`${preview} !== null`),
   waitPreviewAcceptable(),
   assert(
-    `${skeleton}===null && ${generationCount}===2 && ${saveCount}===0 && ${preview}.querySelector(${JSON.stringify(firstDayDinnerSelector)}).value==='saved-dinner-alternative'`,
+    `${skeleton}===null && ${generationCount}===2 && ${saveCount}===0 && ${firstDinnerName}==='Mushroom barley bowl'`,
     'the new proposal replaces the skeleton and differs; nothing saved',
   ),
 ])
@@ -836,13 +869,13 @@ await scenario('Generate another without edits sends one request with previousMe
 await scenario('Generate another with a manual edit confirms first; Cancel sends nothing, Confirm sends one request', [
   open('ready'),
   ...generateFromReady,
-  ['select', firstDayDinnerSelector, 'saved-dinner-alternative'],
+  ...swapDinnerInPage('Mushroom barley bowl'),
   evaluate(`${generateAnotherButton}.click()`),
   wait(`${generateAnotherDialog} !== null`),
   assert(`${generateAnotherDialog}.innerText.includes('Generate another?') && ${generateAnotherDialog}.innerText.includes('Your manual changes to this proposal will be lost.') && ${generateAnotherDialog}.open && ${generateAnotherDialog}.contains(document.activeElement)`, 'a confirmation dialog warns that manual changes will be lost'),
   shot('ai-preview-actions-confirm.png'),
   ['press', 'Escape'],
-  assert(`!${generateAnotherDialog} && ${generationCount}===1 && ${preview}.querySelector(${JSON.stringify(firstDayDinnerSelector)}).value==='saved-dinner-alternative' && document.activeElement===${generateAnotherButton}`, 'Escape/Cancel sends nothing, keeps the edit and returns focus to the button'),
+  assert(`!${generateAnotherDialog} && ${generationCount}===1 && ${firstDinnerName}==='Mushroom barley bowl' && document.activeElement===${generateAnotherButton}`, 'Escape/Cancel sends nothing, keeps the edit and returns focus to the button'),
   evaluate(`${generateAnotherButton}.click()`),
   wait(`${generateAnotherDialog} !== null`),
   evaluate(`[...${generateAnotherDialog}.querySelectorAll('button')].find(button => button.textContent.trim()==='Cancel').click()`),
@@ -857,8 +890,8 @@ await scenario('Generate another with a manual edit confirms first; Cancel sends
 await scenario('reverting a manual edit means no confirmation; double click sends one request', [
   open('ready'),
   ...generateFromReady,
-  ['select', firstDayDinnerSelector, 'saved-dinner-alternative'],
-  ['select', firstDayDinnerSelector, 'saved-dinner'],
+  ...swapDinnerInPage('Mushroom barley bowl'),
+  ...swapDinnerInPage('Roasted vegetable bowl'),
   evaluate(`${fixture}.holdGeneration=true; const button=${generateAnotherButton}; button.click(); button.click()`),
   wait(`${fixture}.pendingGeneration`),
   assert(`!${generateAnotherDialog} && ${generationCount}===2`, 'a reverted edit regenerates directly and a double click sends one request'),
@@ -870,13 +903,13 @@ await scenario('reverting a manual edit means no confirmation; double click send
 await scenario('failed Generate another keeps the previous edited proposal and Accept still saves it', [
   open('ready'),
   ...generateFromReady,
-  ['select', firstDayDinnerSelector, 'saved-dinner-alternative'],
+  ...swapDinnerInPage('Mushroom barley bowl'),
   evaluate(`${fixture}.failGeneration=true; ${generateAnotherButton}.click()`),
   wait(`${generateAnotherDialog} !== null`),
   evaluate(`[...${generateAnotherDialog}.querySelectorAll('button')].find(button => button.textContent.trim()==='Generate another').click()`),
   text('Could not generate next week’s menu'),
   assert(
-    `${skeleton}===null && ${preview} !== null && ${preview}.querySelector(${JSON.stringify(firstDayDinnerSelector)}).value==='saved-dinner-alternative' && ${saveCount}===0 && ${generationCount}===2`,
+    `${skeleton}===null && ${preview} !== null && ${firstDinnerName}==='Mushroom barley bowl' && ${saveCount}===0 && ${generationCount}===2`,
     'the previous proposal with its manual edit stays visible with the error; nothing saved',
   ),
   evaluate(`${fixture}.failGeneration=false`),
@@ -892,7 +925,7 @@ for (const reason of ['generate', 'in-progress']) {
     ...generateFromReady,
     wait(`${preview}.contains(document.activeElement)`),
     assert(`document.activeElement.getAttribute('role')==='heading'`, 'confirmation settles focus on the preview heading'),
-    ['select', firstDayDinnerSelector, 'saved-dinner-alternative'],
+    ...swapDinnerInPage('Mushroom barley bowl'),
     evaluate(`${fixture}.failGeneration=${reason === 'generate'}; ${fixture}.generationRejection=${JSON.stringify(reason === 'in-progress' ? reason : null)}; ${generateAnotherButton}.click()`),
     wait(`${generateAnotherDialog} !== null`),
     evaluate(`[...${generateAnotherDialog}.querySelectorAll('button')].find(button => button.textContent.trim()==='Generate another').click()`),
@@ -901,9 +934,9 @@ for (const reason of ['generate', 'in-progress']) {
     assert(`!${generateAnotherButton}.disabled`, 'Generate another is available after a retryable failure'),
     click('Retry generation'),
     wait(`${generationCount}===3 && ${preview} !== null && ${shell}.querySelector('[role="alert"]') !== null`),
-    assert(`!${dialog} && ${preview}.querySelector(${JSON.stringify(firstDayDinnerSelector)}).value==='saved-dinner-alternative'`, 'Retry never opens a fresh schedule flow and another failure keeps the manual edit'),
+    assert(`!${dialog} && ${firstDinnerName}==='Mushroom barley bowl'`, 'Retry never opens a fresh schedule flow and another failure keeps the manual edit'),
     ['press', 'Escape'],
-    assert(`${preview} !== null && ${saveCount}===0 && ${preview}.querySelector(${JSON.stringify(firstDayDinnerSelector)}).value==='saved-dinner-alternative'`, 'Escape cannot silently discard the retained proposal'),
+    assert(`${preview} !== null && ${saveCount}===0 && ${firstDinnerName}==='Mushroom barley bowl'`, 'Escape cannot silently discard the retained proposal'),
     evaluate(`${fixture}.failGeneration=false; ${fixture}.generationRejection=null`),
     click('Retry generation'),
     wait(`${generationCount}===4 && ${preview} !== null && !${shell}.querySelector('[role="alert"]')`),
@@ -956,22 +989,24 @@ await scenario('Generate another is disabled while the preview is being saved', 
   assert(`${generationCount}===1`, 'no generation was sent while saving'),
 ])
 
-const dinnerOptions = `[...${preview}.querySelector(${JSON.stringify(firstDayDinnerSelector)}).options].map(option => option.textContent)`
+// Swap menu rows render inside the slot (a closed popover), so they can be read without opening it.
+const slotOptions = (slot) => `[...${preview}.querySelectorAll(${JSON.stringify(`.delay-1 .meal-slot:${slot} [role="menuitemradio"]`)})]`
+const dinnerOptions = `${slotOptions('last-child')}.map(option => option.textContent)`
 
-await scenario('preview alternatives are alphabetical per locale, with No recipe first and the selection kept', [
+await scenario('preview alternatives are alphabetical per locale, with No recipe last and the selection kept', [
   open('sorted-catalog'),
   ...generateFromReady,
   assert(
-    `JSON.stringify(${dinnerOptions})===JSON.stringify(['No recipe','Apple stew 2','Apple stew 10','Épinards crème','Mushroom barley bowl','Roasted vegetable bowl','Zucchini bake'])`,
-    'dinner alternatives are alphabetical (accent-insensitive, numeric) with No recipe first',
+    `JSON.stringify(${dinnerOptions})===JSON.stringify(['Apple stew 2','Apple stew 10','Épinards crème','Mushroom barley bowl','Roasted vegetable bowl','Zucchini bake','No recipe'])`,
+    'dinner alternatives are alphabetical (accent-insensitive, numeric) with No recipe last',
   ),
   ['screenshot', `${process.cwd()}/e2e/artifacts/ai-sorted-alternatives.png`],
   assert(
-    `${preview}.querySelector(${JSON.stringify(firstDayDinnerSelector)}).value==='saved-dinner' && ${preview}.querySelector(${JSON.stringify(firstDayDinnerSelector)}).selectedOptions[0].textContent==='Roasted vegetable bowl'`,
+    `${firstDinnerName}==='Roasted vegetable bowl' && ${slotOptions('last-child')}.find(option => option.getAttribute('aria-checked')==='true').textContent==='Roasted vegetable bowl'`,
     'the generated recipe stays selected after sorting',
   ),
   assert(
-    `JSON.stringify([...${preview}.querySelector('.delay-1 .meal-recipe-editor select[aria-label="Choose a saved lunch recipe"]').options].map(option => option.textContent))===JSON.stringify(['No recipe','Crispy lentil salad','Lemon chickpea pasta'])`,
+    `JSON.stringify(${slotOptions('first-child')}.map(option => option.textContent))===JSON.stringify(['Crispy lentil salad','Lemon chickpea pasta','No recipe'])`,
     'lunch alternatives are alphabetical too',
   ),
 ])
@@ -984,7 +1019,7 @@ await scenario('Spanish selectors use the Spanish collation', [
   click('Confirmar agenda y generar'),
   wait(`${preview} !== null`),
   assert(
-    `(() => { const selects=[...${preview}.querySelectorAll('.delay-1 .meal-recipe-editor select')]; const names=[...selects[selects.length-1].options].slice(1).map(option => option.textContent); const expected=[...names].sort(new Intl.Collator('es',{sensitivity:'base',numeric:true}).compare); return JSON.stringify(names)===JSON.stringify(expected) && names.indexOf('Épinards crème') < names.indexOf('Mushroom barley bowl') })()`,
+    `(() => { const names=${slotOptions('last-child')}.slice(0, -1).map(option => option.textContent); const expected=[...names].sort(new Intl.Collator('es',{sensitivity:'base',numeric:true}).compare); return JSON.stringify(names)===JSON.stringify(expected) && names.indexOf('Épinards crème') < names.indexOf('Mushroom barley bowl') })()`,
     'Spanish dinner options follow the es collator',
   ),
 ])
@@ -1011,7 +1046,7 @@ await scenario('first-run tour follows generation through Done without blocking 
   text('Review and tweak'),
   assert(`${tour}?.textContent.includes('Step 2 of 3') && ${tour}.closest('.planner-ai-preview-banner') && !${tour}.contains(document.activeElement) && !${tour}.closest('[aria-live]')`, 'step 2 accompanies the preview without moving focus or duplicate announcements'),
   waitPreviewAcceptable(),
-  ['select', firstDayDinnerSelector, 'saved-dinner-alternative'],
+  ...swapDinnerInPage('Mushroom barley bowl'),
   click('Next'),
   text('Accept when you like it'),
   assert(`${tour}?.textContent.includes('Step 3 of 3') && ${tour}.nextElementSibling.textContent.includes('Accept and save menu') && !${tour}.nextElementSibling.disabled`, 'step 3 is adjacent to usable Accept'),

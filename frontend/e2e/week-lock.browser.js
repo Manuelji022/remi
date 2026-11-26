@@ -133,7 +133,7 @@ await scenario('Sunday pinned preview stays editable and acceptable on Monday wi
   ev(`${f}.advanceClock(120000)`),
   check(`new Date().getDay()===1`, 'controlled local Sunday to Monday'),
   wait(`${acceptButton} && !${acceptButton}.disabled`),
-  check(`document.querySelector('.planner-ai-preview-menu select:not(:disabled)') && !${lock}`, 'preview recipes editable despite current target week'),
+  check(`document.querySelector('.planner-ai-preview-menu .meal-swap:not(:disabled)') && !${lock}`, 'preview recipes editable despite current target week'),
   click('Accept and save menu'), wait(`${f}.saveRequests.length===1 && !document.querySelector('.planner-ai-preview')`), locked(),
 ])
 await scenario('empty weeks do not show a lock', [
