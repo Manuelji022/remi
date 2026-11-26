@@ -1,17 +1,33 @@
-import { Icon } from '#/components/primitives'
+import { Button, Icon } from '#/components/primitives'
 import { LocalizedLink, useI18n } from '#/shared/i18n'
 
 const STEPS = ['welcome', 'recipes', 'done'] as const
 
 export type OnboardingStep = (typeof STEPS)[number]
 
+interface OnboardingTopBarProps {
+  /** On phone this takes the wordmark's place. */
+  onBack?: () => void
+  step: OnboardingStep
+}
+
 /** Wordmark, the three steps (dots on phone) and the way out. */
-export function OnboardingTopBar({ step }: { step: OnboardingStep }) {
+export function OnboardingTopBar({ onBack, step }: OnboardingTopBarProps) {
   const { t } = useI18n()
   const current = STEPS.indexOf(step)
 
   return (
-    <header className="onboarding-header">
+    <header className="onboarding-header" data-back={onBack ? true : undefined}>
+      {onBack && (
+        <Button
+          aria-label={t('onboarding.back')}
+          className="onboarding-back"
+          icon="previous"
+          iconOnly
+          onClick={onBack}
+          variant="ghost"
+        />
+      )}
       <LocalizedLink
         aria-label={t('nav.home')}
         className="onboarding-wordmark"
@@ -42,10 +58,14 @@ export function OnboardingTopBar({ step }: { step: OnboardingStep }) {
           </li>
         ))}
       </ol>
-      <LocalizedLink className="onboarding-later" to="/weekly-menu-planner">
-        <span className="onboarding-wide">{t('onboarding.later')}</span>
-        <span className="onboarding-narrow">{t('onboarding.laterShort')}</span>
-      </LocalizedLink>
+      {step !== 'done' && (
+        <LocalizedLink className="onboarding-later" to="/weekly-menu-planner">
+          <span className="onboarding-wide">{t('onboarding.later')}</span>
+          <span className="onboarding-narrow">
+            {t('onboarding.laterShort')}
+          </span>
+        </LocalizedLink>
+      )}
     </header>
   )
 }

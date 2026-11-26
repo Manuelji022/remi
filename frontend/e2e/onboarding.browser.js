@@ -32,7 +32,20 @@ const noOverflow = `document.documentElement.scrollWidth <= window.innerWidth`
 
 await run('set', 'viewport', '1440', '900')
 await run('open', `${base}/onboarding`)
-await run('wait', '--text', 'What do you cook at home?')
+await run('wait', '--text', 'Your week starts with your recipes.')
+
+await scenario('welcome greets by first name and starts the recipes step', async () => {
+  await check(`document.body.innerText.includes('Hi, Ana') && !document.body.innerText.includes('Hi, Ana García')`, 'first name only')
+  await check(`!document.querySelector('.site-header, .site-footer')`, 'no site header or footer')
+  await run('find', 'role', 'button', 'click', '--name', 'Get started')
+  await wait(`location.search === '?step=recipes' && document.activeElement === ${nameField}`)
+})
+
+await scenario('done cannot be reached with nothing saved', async () => {
+  await run('open', `${base}/onboarding?step=done`)
+  await run('wait', '--text', 'What do you cook at home?')
+  await wait(`location.search === '?step=recipes'`)
+})
 
 await scenario('Continue waits for the first recipe', async () => {
   await check(`${continueButton}.disabled`, 'Continue starts disabled')
@@ -70,6 +83,35 @@ await scenario('the tip leaves with five recipes of both meals', async () => {
   await check(`!document.querySelector('aside').innerText.includes('With 5 or more')`, 'the tip is gone')
 })
 
+const doneTitle = 'Your recipe book is ready!'
+const finish = async () => {
+  await run('find', 'role', 'button', 'click', '--name', 'Continue')
+  await wait(`location.search === '?step=done' && document.activeElement?.textContent === '${doneTitle}'`)
+}
+
+await scenario('Continue shows the counted recipes, and Add more goes back', async () => {
+  await finish()
+  await check(`document.body.innerText.includes('5 recipes: 1 lunch and 4 dinners') && document.body.innerText.includes('Well done, Ana!')`, 'the summary counts')
+  await check(`document.querySelectorAll('ul[aria-label="Your recipes"] li').length === 5`, 'one chip per recipe')
+  await check(`!document.querySelector('header a[href$="weekly-menu-planner"]')`, 'nothing left to put off')
+  await run('find', 'role', 'button', 'click', '--name', 'Add more recipes')
+  await wait(`location.search === '?step=recipes' && ${nameField} !== null`)
+})
+
+await scenario('Generate my first menu opens the planner and its schedule dialog once', async () => {
+  await finish()
+  await run('find', 'role', 'button', 'click', '--name', 'Generate my first menu')
+  await wait(`location.pathname === '/weekly-menu-planner' && location.search === '' && document.querySelector('dialog[open][aria-labelledby="ai-generation-title"]') !== null`)
+  await run('reload')
+  await run('wait', '--text', 'Preferences')
+  await wait(`[...document.querySelectorAll('button')].some(button => button.textContent.includes('Generate') && !button.disabled)`)
+  await run('wait', '1000')
+  await check(`!document.querySelector('dialog[open]')`, 'a reload does not ask again')
+})
+
+await run('open', `${base}/onboarding?step=recipes`)
+await run('wait', '--text', 'What do you cook at home?')
+
 await scenario('phone: ingredients start collapsed and the list opens from the bar', async () => {
   await run('set', 'viewport', '390', '844')
   await check(`!document.querySelector('.recipe-ingredient-name').checkVisibility()`, 'ingredients are collapsed')
@@ -83,8 +125,17 @@ await scenario('phone: ingredients start collapsed and the list opens from the b
   await check(noOverflow, 'no sideways scroll at 390')
 })
 
+await scenario('phone: Back returns to welcome without sideways scroll', async () => {
+  await run('find', 'role', 'button', 'click', '--name', 'Back', '--exact')
+  await run('wait', '--text', 'Your week starts with your recipes.')
+  await check(noOverflow, 'welcome fits 390')
+  await run('open', `${base}/onboarding?step=done`)
+  await run('wait', '--text', doneTitle)
+  await check(noOverflow, 'done fits 390')
+})
+
 await scenario('Spanish copy and counts', async () => {
-  await run('open', `${base}/es/onboarding`)
+  await run('open', `${base}/es/onboarding?step=recipes`)
   await run('wait', '--text', '¿Qué cocinas en casa?')
   await wait(`document.body.innerText.includes('5 recetas · 1 comida · 4 cenas')`)
   await check(`document.querySelector('header a:last-child').getAttribute('href') === '/es/weekly-menu-planner'`, 'the way out keeps the locale')

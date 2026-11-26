@@ -1,0 +1,247 @@
+/* Onboarding notes. Paper: Onboarding 1 and 3. Phone is a 390 x 200 strip,
+   from lg a 500 board. All note sizes, offsets, tilts, type sizes, shadows and
+   the 20 / 12 phone radii and 3px tape radius have no token. */
+@layer components {
+  .onboarding-notes {
+    block-size: 200px;
+    overflow: clip;
+  }
+
+  .onboarding-notes-stage {
+    position: relative;
+    inline-size: 390px;
+    block-size: 100%;
+    margin-inline: auto;
+  }
+
+  .onboarding-note {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-1-5);
+    padding: 10px;
+    border-radius: 20px;
+    color: var(--color-ink);
+    transform-origin: 0 0;
+  }
+
+  .onboarding-note-lunch {
+    inset-block-start: 18px;
+    inset-inline-start: 22px;
+    inline-size: 180px;
+    background: var(--color-mint-300);
+    rotate: -4deg;
+  }
+
+  .onboarding-note-dinner {
+    inset-block-start: 40px;
+    inset-inline-end: 20px;
+    inline-size: 164px;
+    background: var(--color-lilac-300);
+    rotate: 3deg;
+  }
+
+  .onboarding-note-yours {
+    inset-block-start: 118px;
+    inset-inline-start: 88px;
+    inline-size: 210px;
+    background: var(--color-pop);
+    box-shadow: 0 18px 30px -8px
+      color-mix(in srgb, var(--color-ink) 20%, transparent);
+    rotate: -1.5deg;
+  }
+
+  .onboarding-note-title {
+    padding: var(--spacing-1-5) var(--spacing-2) var(--spacing-0-5);
+    font-family: var(--font-display);
+    font-size: var(--text-title);
+    font-variation-settings: 'wdth' 75;
+    font-weight: var(--font-weight-extrabold);
+    line-height: 26px;
+  }
+
+  .onboarding-note-head {
+    display: none;
+    flex-direction: column;
+    font-size: var(--text-caption);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--leading-caption);
+  }
+
+  .onboarding-note-body {
+    display: flex;
+    flex-direction: column;
+    padding: 10px var(--spacing-3);
+    border-radius: 12px;
+    background: var(--color-white);
+    font-size: 14px;
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--leading-callout);
+  }
+
+  .onboarding-note-day {
+    color: var(--color-text-secondary);
+    font-size: var(--text-caption);
+    font-weight: var(--font-weight-regular);
+    line-height: var(--leading-caption);
+  }
+
+  .onboarding-note-field,
+  .onboarding-note-answer {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-3);
+    padding: var(--spacing-3);
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: var(--font-weight-extrabold);
+    line-height: var(--leading-body);
+  }
+
+  .onboarding-note-answer {
+    gap: var(--spacing-2);
+    font-size: var(--text-body);
+    white-space: nowrap;
+  }
+
+  /* Placeholder art inside a hidden picture, not text to read. */
+  .onboarding-note-field {
+    color: var(--color-gray-300);
+  }
+
+  .onboarding-note-caret {
+    inline-size: var(--spacing-0-5);
+    block-size: var(--size-badge);
+    background: var(--color-pop);
+  }
+
+  .onboarding-note-check {
+    order: 1;
+    display: grid;
+    flex: none;
+    place-items: center;
+    inline-size: var(--size-badge);
+    block-size: var(--size-badge);
+    border-radius: var(--radius-pill);
+    background: var(--color-basil-500);
+    color: var(--color-white);
+  }
+
+  .onboarding-note-tape {
+    position: absolute;
+    inset-block-start: -10px;
+    inset-inline-start: 70px;
+    inline-size: 60px;
+    block-size: 20px;
+    border-radius: 3px;
+    background: color-mix(in srgb, var(--color-butter-400) 85%, transparent);
+    rotate: 4deg;
+    transform-origin: 0 0;
+  }
+
+  @media (min-width: 64rem) {
+    .onboarding-notes {
+      flex: none;
+      inline-size: 500px;
+      block-size: auto;
+      min-block-size: 576px;
+      border-radius: var(--radius-surface);
+      background: var(--color-bg-page);
+    }
+
+    /* The notes hang from both ends: shorter copy must not stack them. */
+    .onboarding-notes:has(.onboarding-note-field) {
+      min-block-size: 618px;
+    }
+
+    .onboarding-notes-stage {
+      inline-size: auto;
+    }
+
+    .onboarding-note {
+      gap: var(--spacing-2);
+      padding: var(--spacing-3);
+      border-radius: var(--radius-surface);
+      box-shadow: 0 18px 36px -8px
+        color-mix(in srgb, var(--color-ink) 12%, transparent);
+    }
+
+    .onboarding-note-lunch {
+      inset-block-start: 96px;
+      inset-inline-start: 44px;
+      inline-size: 250px;
+    }
+
+    .onboarding-note-dinner {
+      inset-block-start: 200px;
+      inset-inline-end: 40px;
+      inline-size: 230px;
+    }
+
+    .onboarding-note-yours {
+      inset-block: auto 72px;
+      inset-inline-start: 84px;
+      inline-size: 300px;
+      box-shadow: 0 24px 40px -8px
+        color-mix(in srgb, var(--color-ink) 20%, transparent);
+    }
+
+    .onboarding-note-title {
+      padding: 10px 10px var(--spacing-1-5);
+      font-size: var(--text-large-title);
+      line-height: var(--spacing-8);
+    }
+
+    .onboarding-note-head {
+      display: flex;
+      gap: var(--spacing-0-5);
+      padding: var(--spacing-3) var(--spacing-3) var(--spacing-2);
+    }
+
+    .onboarding-note-head .onboarding-note-title {
+      padding: 0;
+      font-size: 40px;
+      line-height: var(--spacing-10);
+    }
+
+    .onboarding-note-body {
+      gap: var(--spacing-0-5);
+      padding: var(--spacing-3) 14px;
+      border-radius: var(--radius-inner);
+      font-size: var(--text-body);
+      line-height: var(--leading-body);
+    }
+
+    .onboarding-note-field,
+    .onboarding-note-answer {
+      padding: var(--spacing-4);
+      font-size: 20px;
+      line-height: var(--leading-title);
+    }
+
+    .onboarding-note-field {
+      font-size: 22px;
+    }
+
+    .onboarding-note-answer {
+      justify-content: flex-start;
+      gap: var(--spacing-3);
+      font-size: 18px;
+      white-space: normal;
+    }
+
+    .onboarding-note-check {
+      order: 0;
+      inline-size: var(--size-control-sm);
+      block-size: var(--size-control-sm);
+    }
+
+    .onboarding-note-tape {
+      inset-block-start: -12px;
+      inset-inline-start: 110px;
+      inline-size: 76px;
+      block-size: var(--spacing-6);
+    }
+  }
+}
