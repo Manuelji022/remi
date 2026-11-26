@@ -20,6 +20,7 @@ import {
   Lock,
   LockOpen,
   LogOut,
+  Mail,
   Minus,
   Pencil,
   Plus,
@@ -72,6 +73,7 @@ const ICONS = {
   warning: TriangleAlert,
   error: CircleAlert,
   // Auth
+  email: Mail,
   show: Eye,
   hide: EyeOff,
   // Account

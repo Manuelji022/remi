@@ -90,6 +90,41 @@
     color: var(--color-text-secondary);
   }
 
+  /* Result titles take focus from code, to be read out. They are not
+     controls, so no ring. */
+  .auth-title h1:focus {
+    outline: 0;
+  }
+
+  .auth-title strong {
+    color: var(--color-text-primary);
+    font-weight: var(--font-weight-semibold);
+  }
+
+  /* Result states. The 72 note, its 32 icon and the -4deg tilt have no
+     token. */
+  .auth-panel > .auth-badge {
+    display: grid;
+    place-items: center;
+    flex: none;
+    inline-size: 72px;
+    block-size: 72px;
+    margin-inline: max(0px, (100% - 22rem) / 2) auto;
+    border-radius: var(--radius-inner);
+    background: var(--color-butter-400);
+    rotate: calc(-1 * var(--rotate-stack));
+  }
+
+  .auth-badge .icon {
+    inline-size: var(--spacing-8);
+    block-size: var(--spacing-8);
+  }
+
+  .auth-back.text-link {
+    align-self: center;
+    color: var(--color-text-secondary);
+  }
+
   .auth-panel-form {
     flex: 1;
     display: flex;
@@ -180,6 +215,10 @@
   }
 
   @media (min-width: 64rem) {
+    .auth-panel > .auth-badge {
+      margin-inline: 0 auto;
+    }
+
     .auth-header-inner {
       min-block-size: 5.5rem;
       padding-inline: var(--spacing-10);
