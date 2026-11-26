@@ -25,11 +25,22 @@ export function OnboardingPage({ step }: { step: OnboardingStep }) {
   const shownStep = isEarly ? 'recipes' : step
   const onboardingPath = getLocalizedPath('/onboarding', locale)
 
-  // Onboarding saves to an account, so guests go straight to the planner.
-  const isGuest = !isPending && !userId
+  // Onboarding saves to an account, so guests go straight to the planner. Right
+  // after two-factor the session store can still say "nobody" for a moment, so
+  // the server is asked before anyone is sent away.
+  const seemsGuest = !isPending && !userId
   useEffect(() => {
-    if (isGuest) void navigate({ to: plannerPath, replace: true })
-  }, [isGuest, navigate, plannerPath])
+    if (!seemsGuest) return
+    let cancelled = false
+    void authClient.getSession().then(({ data }) => {
+      if (!cancelled && !data) {
+        void navigate({ to: plannerPath, replace: true })
+      }
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [seemsGuest, navigate, plannerPath])
 
   // The address is corrected too, or the first save would jump to done.
   useEffect(() => {
@@ -64,6 +75,7 @@ export function OnboardingPage({ step }: { step: OnboardingStep }) {
       <AddRecipesStep
         isSaving={catalog.isAddingRecipe}
         onAddRecipe={catalog.addRecipe}
+        onEditRecipe={catalog.editRecipe}
         onContinue={() => goTo('done')}
         recipes={recipes}
       />

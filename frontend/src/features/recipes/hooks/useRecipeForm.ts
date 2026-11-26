@@ -4,24 +4,35 @@ import {
   recipeInputSchema,
   recipeQuantityDraftSchema,
 } from '#/features/recipes/recipe'
-import type { MealSlot, RecipeInput } from '#/features/recipes/recipe'
+import type { MealSlot, Recipe, RecipeInput } from '#/features/recipes/recipe'
 import {
   buildRecipeIngredients,
   getEmptyRecipeIngredient,
+  toRecipeIngredientDrafts,
 } from '../components/recipe-form-utils'
 import type { RecipeIngredientDraft } from '../components/recipe-form-utils'
 
-/** The recipe form's draft. It lives outside the form so a wrapper can ask
- *  whether anything typed would be lost. */
-export function useRecipeForm(onSave: (recipe: RecipeInput) => Promise<void>) {
-  const [name, setName] = useState('')
-  const [slot, setSlot] = useState<MealSlot>('dinner')
-  const [ingredients, setIngredients] = useState<RecipeIngredientDraft[]>(
-    () => [getEmptyRecipeIngredient()],
-  )
+const DEFAULT_SLOT: MealSlot = 'dinner'
+
+/** The recipe form's draft: a new recipe, or the one in `recipe`. It lives
+ *  outside the form so a wrapper can ask whether anything would be lost. */
+export function useRecipeForm(
+  onSave: (recipe: RecipeInput) => Promise<void>,
+  recipe?: Recipe,
+) {
+  const [initial] = useState(() => ({
+    name: recipe?.name ?? '',
+    slot: recipe?.slot ?? DEFAULT_SLOT,
+    ingredients: toRecipeIngredientDrafts(recipe?.ingredients ?? []),
+  }))
+  const [name, setName] = useState(initial.name)
+  const [slot, setSlot] = useState(initial.slot)
+  const [ingredients, setIngredients] = useState(initial.ingredients)
   const [saved, setSaved] = useState<{ name: string } | null>(null)
   const [saveFailed, setSaveFailed] = useState(false)
-  const [ingredientsOpen, setIngredientsOpen] = useState(false)
+  const [ingredientsOpen, setIngredientsOpen] = useState(
+    Boolean(recipe?.ingredients.length),
+  )
   const submissionInFlight = useRef(false)
   const hasInvalidQuantity = ingredients.some(
     ({ quantity }) => !recipeQuantityDraftSchema.safeParse(quantity).success,
@@ -30,22 +41,22 @@ export function useRecipeForm(onSave: (recipe: RecipeInput) => Promise<void>) {
   async function submit(event: FormEvent) {
     event.preventDefault()
     if (submissionInFlight.current || hasInvalidQuantity) return
-    const recipe = recipeInputSchema.safeParse({
+    const input = recipeInputSchema.safeParse({
       name,
       slot,
       ingredients: buildRecipeIngredients(ingredients),
     })
-    if (!recipe.success) return
+    if (!input.success) return
 
     submissionInFlight.current = true
     setSaveFailed(false)
     try {
-      await onSave(recipe.data)
+      await onSave(input.data)
       // The meal stays: people tend to add several dinners in a row.
       setName('')
       setIngredients([getEmptyRecipeIngredient()])
       setIngredientsOpen(false)
-      setSaved({ name: recipe.data.name })
+      setSaved({ name: input.data.name })
     } catch {
       setSaveFailed(true)
     } finally {
@@ -67,11 +78,22 @@ export function useRecipeForm(onSave: (recipe: RecipeInput) => Promise<void>) {
     saveFailed,
     hasInvalidQuantity,
     canSave: name.trim() !== '' && !hasInvalidQuantity,
+    isEditing: recipe !== undefined,
+    // On a new recipe the meal alone is not worth asking about.
     isDirty:
-      name.trim() !== '' ||
-      ingredients.some((ingredient) =>
-        Object.values(ingredient).some((value) => value.trim() !== ''),
-      ),
+      draftKey({ name, slot: recipe ? slot : initial.slot, ingredients }) !==
+      draftKey(initial),
     submit,
   }
+}
+
+function draftKey(draft: {
+  name: string
+  slot: MealSlot
+  ingredients: RecipeIngredientDraft[]
+}) {
+  const rows = draft.ingredients.filter((row) =>
+    Object.values(row).some(Boolean),
+  )
+  return JSON.stringify([draft.name.trim(), draft.slot, rows])
 }

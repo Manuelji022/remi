@@ -15,6 +15,12 @@
 - A page overflows sideways at 390 wide.
 - Spanish shows English copy, or a link drops the locale.
 - A signed-out visitor gets a form that cannot save.
+- After two-factor, a new account does not reach onboarding because the session
+  store is late and the page takes it for a guest.
+- An account with recipes lands in onboarding, or an unreadable recipe list
+  keeps someone from the planner.
+- Editing from the list adds a copy, or throws away what is half typed.
+- **I'll do it later** misses the planner, or `/` starts redirecting.
 
 ## Repeatable browser harness
 

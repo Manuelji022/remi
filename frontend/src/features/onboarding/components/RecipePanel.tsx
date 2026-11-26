@@ -11,6 +11,7 @@ const VARIED_WEEK_RECIPES = 5
 interface RecipePanelProps {
   justAddedId: string | undefined
   onContinue: () => void
+  onEdit: (recipe: Recipe) => void
   recipes: Recipe[]
 }
 
@@ -18,6 +19,7 @@ interface RecipePanelProps {
 export function RecipePanel({
   justAddedId,
   onContinue,
+  onEdit,
   recipes,
 }: RecipePanelProps) {
   const { t } = useI18n()
@@ -34,7 +36,7 @@ export function RecipePanel({
   const [tipLead, tipRest] = [t('onboarding.tipLead'), t('onboarding.tipRest')]
   const list = (
     <>
-      <RecipeRows justAddedId={justAddedId} recipes={recipes} />
+      <RecipeRows justAddedId={justAddedId} onEdit={onEdit} recipes={recipes} />
       {needsTip && (
         <p className="recipe-panel-tip">
           <Icon name="tip" />
@@ -99,8 +101,9 @@ export function RecipePanel({
 
 function RecipeRows({
   justAddedId,
+  onEdit,
   recipes,
-}: Pick<RecipePanelProps, 'justAddedId' | 'recipes'>) {
+}: Pick<RecipePanelProps, 'justAddedId' | 'onEdit' | 'recipes'>) {
   const { t } = useI18n()
 
   return (
@@ -127,6 +130,13 @@ function RecipeRows({
                 {isNew ? `${t('onboarding.justAdded')} · ${detail}` : detail}
               </span>
             </span>
+            <Button
+              aria-label={t('onboarding.editRecipe', { name: recipe.name })}
+              icon="edit"
+              iconOnly
+              onClick={() => onEdit(recipe)}
+              variant="ghost"
+            />
           </li>
         )
       })}

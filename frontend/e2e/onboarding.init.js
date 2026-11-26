@@ -9,6 +9,7 @@
   const fixture = {
     recipes: read('recipes', []),
     signedOut: read('signedOut', false),
+    failRecipes: read('failRecipes', false),
     posts: [],
     set(key, value) {
       fixture[key] = value
@@ -62,6 +63,15 @@
     const url = new URL(request.url)
     if (url.origin !== window.location.origin) return nativeFetch(input, init)
 
+    // Any six digits verify, and only then is there a session.
+    if (url.pathname === '/api/auth/two-factor/send-otp') {
+      return json({ status: true })
+    }
+    if (url.pathname === '/api/auth/two-factor/verify-otp') {
+      fixture.set('signedOut', false)
+      return json({ status: true })
+    }
+
     if (url.pathname === '/api/auth/get-session') {
       if (fixture.signedOut) return json(null)
       return json({
@@ -88,6 +98,9 @@
       const weekStart = /\d{4}-\d{2}-\d{2}/.exec(
         decodeURIComponent(url.search),
       )?.[0]
+      if (!weekStart && fixture.failRecipes) {
+        return new Response('synthetic failure', { status: 500 })
+      }
       return json({
         result: weekStart ? emptyWeek(weekStart) : fixture.recipes,
       })
