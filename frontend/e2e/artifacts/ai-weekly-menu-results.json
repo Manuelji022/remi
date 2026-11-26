@@ -53,5 +53,5 @@
 {"scenario":"storage blocked still allows generation and session completion","verdict":"PASS"},
 {"scenario":"storage write-blocked still allows generation and session completion","verdict":"PASS"},
 {"scenario":"guests never see the first-run tour","verdict":"PASS"},
-{"suite":"AI Weekly Menu browser checks","verdict":"PASS","evidence":{"success":true,"data":{"lifecycle":{"effectiveLaunch":{"browserLaunched":true,"engine":"chrome","launchHash":17350349395124705000},"launched":false,"relaunchedBrowser":false,"restartedBackground":false,"restoreStatus":"not_configured","reused":true,"saveStatus":"not_attempted"},"origin":"http://127.0.0.1:3202/weekly-menu-planner?scenario=guest&tour=first","result":{"fixture":"guest","generationRequests":0,"saveRequests":0,"targetWeekStart":"2026-11-30"}},"error":null}}
+{"suite":"AI Weekly Menu browser checks","verdict":"PASS","evidence":{"success":true,"data":{"lifecycle":{"effectiveLaunch":{"browserLaunched":true,"engine":"chrome","launchHash":8608986512274248000},"launched":false,"relaunchedBrowser":false,"restartedBackground":false,"restoreStatus":"not_configured","reused":true,"saveStatus":"not_attempted"},"origin":"http://127.0.0.1:3101/weekly-menu-planner?scenario=guest&tour=first","result":{"fixture":"guest","generationRequests":0,"saveRequests":0,"targetWeekStart":"2026-11-30"}},"error":null}}
 ]

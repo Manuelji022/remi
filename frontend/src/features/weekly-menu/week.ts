@@ -88,6 +88,30 @@ export function shiftWeekStart(weekStart: string, offset: -1 | 0 | 1): string {
   )
 }
 
+export type DayTiming = 'past' | 'today' | 'upcoming'
+
+// Where a day of the viewed week sits against today, by local calendar date.
+export function dayTiming(
+  weekStart: string,
+  dayIndex: number,
+  today: Date,
+): DayTiming {
+  const [year, month, day] = parseWeekStart(weekStart).split('-').map(Number)
+  const date = new Date(Date.UTC(year, month - 1, day + dayIndex))
+  const iso = formatIsoDate(
+    date.getUTCFullYear(),
+    date.getUTCMonth() + 1,
+    date.getUTCDate(),
+  )
+  const todayIso = formatIsoDate(
+    today.getFullYear(),
+    today.getMonth() + 1,
+    today.getDate(),
+  )
+  if (iso < todayIso) return 'past'
+  return iso === todayIso ? 'today' : 'upcoming'
+}
+
 export function emptyMenu(weekStart: string): CalendarWeekMenu {
   const monday = parseWeekStart(weekStart)
   const days = {} as Record<Day, DayPlan>

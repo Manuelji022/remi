@@ -140,6 +140,12 @@
     gap: var(--spacing-stack-md);
   }
 
+  @media (max-width: 39.999rem) {
+    .planner-day-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
   .planner-ai-preview {
     display: grid;
     gap: var(--spacing-stack-md);

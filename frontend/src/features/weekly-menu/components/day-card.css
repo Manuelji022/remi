@@ -1,22 +1,92 @@
 @layer components {
+  /* The article is the straight hit area; the paper inside carries the tilt
+     and never changes layout size. Paper: Design System / Day card. */
   .day-card {
-    background: var(--color-bg-surface);
-    border-radius: var(--radius-surface);
-    box-shadow: 0 0 0 1px var(--color-border-subtle);
-    padding: var(--spacing-card-pad-compact);
+    min-inline-size: 0;
+  }
+
+  .day-card-paper {
+    /* Paper pads the note 10, between --spacing-2 and --spacing-3. */
+    --card-pad: 10px;
+    --card-gap: var(--spacing-1-5);
+    --card-edge: transparent;
+
+    --tilt: 0;
+    /* Only upcoming notes lean: -1x, +0.67x and -0.67x of the note angle. */
+    rotate: calc(var(--rotate-note) * var(--tilt));
+    transform-origin: 50% 50%;
+  }
+
+  .day-card-upcoming[data-tilt='0'] .day-card-paper {
+    --tilt: -1;
+  }
+
+  .day-card-upcoming[data-tilt='1'] .day-card-paper {
+    --tilt: 0.67;
+  }
+
+  .day-card-upcoming[data-tilt='2'] .day-card-paper {
+    --tilt: -0.67;
+  }
+
+  .day-card-past .day-card-paper {
+    background: var(--color-bg-fill);
+  }
+
+  .day-card-today .day-card-paper {
+    /* The 2px current ring plus a lifted shadow; no token for the lift yet. */
+    box-shadow:
+      0 0 0 2px var(--color-border-current),
+      0 16px 32px color-mix(in srgb, var(--color-ink) 12%, transparent);
   }
 
   .day-card-header {
     display: flex;
+    flex-wrap: wrap;
     align-items: flex-start;
     justify-content: space-between;
-    gap: var(--spacing-2);
-    margin-block-end: var(--spacing-stack-md);
+    column-gap: var(--spacing-2);
+    row-gap: var(--spacing-0-5);
+    padding: var(--spacing-2) var(--spacing-2) var(--spacing-1);
+  }
+
+  .day-name {
+    margin: 0;
+    color: var(--color-text-primary);
+    font-family: var(--font-display);
+    font-size: var(--text-large-title);
+    font-weight: var(--font-weight-extrabold);
+    font-variation-settings: 'wdth' 75;
+    line-height: 34px;
+    text-transform: capitalize;
+  }
+
+  .day-card-past .day-name {
+    color: var(--color-text-dimmed);
+  }
+
+  .day-card-today .day-card-header {
+    padding: var(--spacing-3) var(--spacing-3) var(--spacing-2);
+  }
+
+  .day-card-today .day-name {
+    font-size: var(--text-display);
+    line-height: var(--leading-display);
+  }
+
+  .day-today {
+    order: 1;
+    inline-size: 100%;
+    color: var(--color-text-brand);
+    font-size: var(--text-caption);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--leading-caption);
   }
 
   .day-meals {
     display: grid;
     gap: var(--spacing-stack-md);
+    padding-inline: var(--spacing-2);
   }
 
   .meal-slot {
@@ -41,6 +111,10 @@
     color: var(--color-text-secondary);
   }
 
+  .day-card-past .meal-name {
+    color: var(--color-text-secondary);
+  }
+
   .meal-recipe-editor {
     display: grid;
     gap: var(--spacing-1);
@@ -50,5 +124,69 @@
   .meal-recipe-editor select {
     min-inline-size: 0;
     inline-size: 100%;
+  }
+
+  /* Phone: the note is a row (day, then meals) and tilts less. Today keeps a
+     single brand line, "Today · Thu 14", above its meals. */
+  @media (max-width: 39.999rem) {
+    .day-card-paper {
+      rotate: calc(var(--rotate-note-phone) * var(--tilt));
+    }
+
+    .day-card-past .day-card-paper {
+      background: var(--color-bg-fill-hover);
+    }
+
+    .day-card-upcoming .day-card-paper,
+    .day-card-past .day-card-paper {
+      --card-pad: var(--spacing-3) var(--spacing-4);
+
+      grid-template-columns: 6rem minmax(0, 1fr);
+      align-items: center;
+    }
+
+    .day-card-upcoming .day-card-header,
+    .day-card-past .day-card-header {
+      padding: 0;
+    }
+
+    .day-card-upcoming .day-name,
+    .day-card-past .day-name {
+      font-size: var(--text-title);
+      line-height: var(--leading-title);
+    }
+
+    .day-card-today .day-card-header {
+      flex-wrap: nowrap;
+      justify-content: flex-start;
+      align-items: center;
+      column-gap: var(--spacing-1);
+      padding: var(--spacing-1-5) var(--spacing-2) var(--spacing-0-5);
+    }
+
+    .day-card-today .day-name {
+      color: var(--color-text-brand);
+      font-family: var(--font-text);
+      font-size: var(--text-callout);
+      font-variation-settings: normal;
+      font-weight: var(--font-weight-semibold);
+      line-height: var(--leading-caption);
+    }
+
+    .day-card-today .day-today {
+      order: -1;
+      inline-size: auto;
+      color: var(--color-text-brand);
+      font-size: var(--text-callout);
+      font-weight: var(--font-weight-semibold);
+    }
+
+    .day-card-today .day-today::after {
+      content: ' ·';
+    }
+
+    .day-card-today .badge {
+      margin-inline-start: auto;
+    }
   }
 }
