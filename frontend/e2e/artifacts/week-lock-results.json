@@ -13,10 +13,10 @@
 {"scenario":"reload discards unlock","verdict":"PASS"},
 {"scenario":"locked schedule cannot edit or save; recipe controls remain usable","verdict":"PASS"},
 {"scenario":"unlocked schedule can edit and save","verdict":"PASS"},
-{"scenario":"already-open Sunday schedule cannot save its now-current target on Monday","verdict":"PASS"},
+{"scenario":"already-open Sunday schedule cannot save its now-current target on Monday","verdict":"FAIL","error":"Error: \"Element '@e11' is disabled, so the click would not reach it\""},
 {"scenario":"AI Generate from a locked week still opens next-week schedule","verdict":"PASS"},
-{"scenario":"no lock overlays the AI generation skeleton or preview","verdict":"PASS"},
-{"scenario":"Sunday pinned preview stays editable and acceptable on Monday with no lock","verdict":"PASS"},
+{"scenario":"no lock overlays the AI generation skeleton or preview","verdict":"FAIL","error":"Error: \"8 elements have role \\\"button\\\", but none match name \\\"Confirm schedule and generate\\\". Names seen: \\\"Account, Week lock tester\\\", \\\"Menu locked. Hold to unlock: press and hold, or hold Enter or Space, for 1 second.\\\", \\\"Loading next week’s schedule\\\", \\\"Previous week\\\", \\\"Next week\\\", ...\""},
+{"scenario":"Sunday pinned preview stays editable and acceptable on Monday with no lock","verdict":"FAIL","error":"Error: \"8 elements have role \\\"button\\\", but none match name \\\"Confirm schedule and generate\\\". Names seen: \\\"Account, Week lock tester\\\", \\\"Menu locked. Hold to unlock: press and hold, or hold Enter or Space, for 1 second.\\\", \\\"Loading next week’s schedule\\\", \\\"Previous week\\\", \\\"Next week\\\", ...\""},
 {"scenario":"empty weeks do not show a lock","verdict":"PASS"},
 {"scenario":"guests use the same current, past, future and navigation locks","verdict":"PASS"},
 {"scenario":"touch context menu and selection suppressed","verdict":"PASS"},
@@ -24,5 +24,11 @@
 {"scenario":"unmount cancels pending confirmation instead of unlocking another week","verdict":"PASS"},
 {"scenario":"DST Sunday uses local civil Monday; subsequent Monday relocks next week","verdict":"PASS"},
 {"scenario":"Spanish label, instructions, and unlocked announcement","verdict":"PASS"},
-{"suite":"week-lock","passed":25,"failed":0,"verdict":"PASS","limitations":["HTTP fixture: no real account, DB or provider calls.","Detailed key repeat and cancellation use DOM events; native pointer hold and keyboard taps also exercised.","Touch checks cover DOM contextmenu prevention and CSS, not a physical device.","Live-region semantics checked; no screen-reader audio verification.","Unmount regression checks no stale unlock; not a heap/timer profiler.","Calendar transition reevaluates on rerender; no midnight relock timer is introduced."]}
+{"scenario":"current week stacks its past days behind a named disclosure","verdict":"PASS"},
+{"scenario":"keyboard opens and closes the past days and keeps focus","verdict":"PASS"},
+{"scenario":"past and next weeks are never stacked, and a reload stacks again","verdict":"PASS"},
+{"scenario":"an AI preview keeps every day on screen once some are past","verdict":"PASS"},
+{"scenario":"phone shows a Show past days line with a 44px target","verdict":"PASS"},
+{"scenario":"past days copy is singular on Tuesday and localized in Spanish","verdict":"PASS"},
+{"suite":"week-lock","passed":28,"failed":3,"verdict":"FAIL","limitations":["HTTP fixture: no real account, DB or provider calls.","Detailed key repeat and cancellation use DOM events; native pointer hold and keyboard taps also exercised.","Touch checks cover DOM contextmenu prevention and CSS, not a physical device.","Live-region semantics checked; no screen-reader audio verification.","Unmount regression checks no stale unlock; not a heap/timer profiler.","Calendar transition reevaluates on rerender; no midnight relock timer is introduced."]}
 ]

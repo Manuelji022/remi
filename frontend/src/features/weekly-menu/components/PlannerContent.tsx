@@ -105,6 +105,7 @@ export function PlannerContent(props: PlannerContentProps) {
         onGenerateMenu={props.onGenerateMenu}
         recipeNames={props.readyData?.week.recipeNames ?? {}}
         isSignedIn={Boolean(props.userId)}
+        stackPastDays
       />
     </>
   )

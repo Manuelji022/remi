@@ -137,6 +137,7 @@
 
   /* The board. The space above the notes holds today's tape. */
   .planner-day-grid {
+    position: relative;
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
     align-items: start;
@@ -209,6 +210,34 @@
 
     .planner-day-grid > :has(> .day-card-today) {
       flex: 0 0 16.5rem;
+    }
+
+    /* Past days stacked: the stack keeps its width, and with few days left
+       the notes stop growing and the row centres. */
+    .planner-day-grid[data-stacked] {
+      justify-content: center;
+    }
+
+    .planner-day-grid[data-stacked] > * {
+      max-inline-size: 15rem;
+    }
+
+    .planner-day-grid[data-stacked] > .past-days {
+      flex: 0 0 7.5rem;
+    }
+
+    .planner-day-grid[data-stacked] > :has(> .day-card-today) {
+      max-inline-size: none;
+    }
+
+    /* Paper: the stationery board, 300 for today and 24 between notes. */
+    .planner-day-grid[data-stacked='roomy'] {
+      gap: var(--spacing-6);
+      padding-inline: var(--spacing-3);
+    }
+
+    .planner-day-grid[data-stacked='roomy'] > :has(> .day-card-today) {
+      flex-basis: 18.75rem;
     }
   }
 
