@@ -19,6 +19,7 @@ import { shoppingList } from '#/features/weekly-menu/shopping'
 import { getActivePreferencesBadgeCount } from '#/features/weekly-menu/types'
 import type { Preferences } from '#/features/weekly-menu/types'
 import { isWeekLocked, scheduleFromMenu } from '#/features/weekly-menu/week'
+import { weekLockEnabled } from '#/features/weekly-menu/feature-flags'
 import { useI18n } from '#/shared/i18n'
 
 interface PlannerStatusOptions {
@@ -156,6 +157,7 @@ export function usePlannerWeekView({
     viewedWeek,
   })
   const isLocked = Boolean(
+    weekLockEnabled &&
     visibleMenu &&
     !currentPreview &&
     !generatingTargetWeek &&
