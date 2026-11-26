@@ -29,8 +29,9 @@ const swapDinnerTo = (name) => [
   // Centre the button: scrollintoview parks it under the sticky header.
   ['eval', `document.querySelector(${JSON.stringify(firstDayDinnerSelector)}).scrollIntoView({ block: 'center' })`],
   ['find', 'role', 'button', 'click', '--name', 'Swap Monday dinner', '--exact'],
-  // Wait until the open menu is placed and its first row is the topmost element at its centre.
-  ['wait', '--fn', `(() => { const row = document.querySelector('.menu:popover-open [role="menuitemradio"]'); if (!row) return false; const box = row.getBoundingClientRect(); return document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2)?.closest('[role="menuitemradio"]') === row })()`],
+  // Wait until the open menu is placed (focus moves in only then), has stopped growing,
+  // and its first row is the topmost element at its centre.
+  ['wait', '--fn', `(() => { const row = document.querySelector('.menu:popover-open [role="menuitemradio"]'); const menu = row?.closest('.menu'); if (!menu?.contains(document.activeElement) || menu.getAnimations().length) return false; const box = row.getBoundingClientRect(); return document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2)?.closest('[role="menuitemradio"]') === row })()`],
   ['find', 'role', 'menuitemradio', 'click', '--name', name, '--exact'],
   // The popover fades out before it leaves the top layer; wait so it cannot cover the next click.
   ['wait', '--fn', `[...document.querySelectorAll('.menu')].every(menu => getComputedStyle(menu).display === 'none')`],

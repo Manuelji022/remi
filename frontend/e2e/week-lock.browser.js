@@ -137,7 +137,7 @@ await scenario('Sunday pinned preview stays editable and acceptable on Monday wi
   click('Accept and save menu'), wait(`${f}.saveRequests.length===1 && !document.querySelector('.planner-ai-preview')`), locked(),
 ])
 await scenario('empty weeks do not show a lock', [
-  ...open('empty'), wait(`document.querySelector('.planner-shell')?.innerText.includes('No Weekly Menu yet')`), unlocked(),
+  ...open('empty'), wait(`document.querySelector('.planner-shell')?.innerText.includes('Nothing planned this week.')`), unlocked(),
 ])
 await scenario('guests use the same current, past, future and navigation locks', [
   ...open('guest'), click('Generate menu'), locked(), click('Preferences'),
@@ -232,6 +232,25 @@ await scenario('phone preview rows keep 44px swap buttons apart', [
   click('Confirm schedule and generate'), wait(`document.querySelector('[aria-label="Swap Monday dinner"]:not(:disabled)')`),
   check(`(() => { const r=[...document.querySelectorAll('button[aria-label^="Swap "]')].map(b => b.getBoundingClientRect()); return r.length===14 && r.every(a => a.height>=44) && r.every((a,i) => r.slice(i+1).every(b => a.bottom<=b.top+1 || b.bottom<=a.top+1)) })()`, 'no two swap targets overlap'),
   ['set', 'viewport', '1440', '1200'],
+])
+const headings = `[...document.querySelectorAll('h2')].map(h => h.textContent).join('|')`
+await scenario('empty week shows a hidden outline and opens the schedule', [
+  ...open('empty'), wait(`${headings}.includes('Nothing planned this week.')`),
+  check(`[...document.querySelectorAll('button')].filter(b => b.textContent.trim()==='Generate menu').length===1`, 'one Generate menu button'),
+  check(`(() => { const outline=[...document.querySelectorAll('[aria-hidden="true"]')].find(el => el.textContent.includes('Mon 2')); return outline?.checkVisibility() && outline.textContent.includes('Sun 8') && !document.querySelector('article') })()`, 'the outline carries the viewed week and no day articles'),
+  click('Set when you eat at home'), wait(`document.querySelector('[role="tab"][aria-selected="true"]')?.textContent.includes('Weekly Schedule')`),
+  check(`${f}.saveRequests.length===0 && ${f}.generationRequests.length===0`, 'opening the schedule writes nothing'),
+  ['set', 'viewport', '390', '844'], ...open('empty', '/es'), wait(`${headings}.includes('No hay nada planificado esta semana.')`),
+  check(`[...document.querySelectorAll('button')].some(b => b.textContent.trim()==='Elige cuándo comes en casa') && document.documentElement.scrollWidth<=390`, 'Spanish phone empty week, no sideways scroll'),
+  ['set', 'viewport', '1440', '1200'],
+])
+await scenario('generating shows the seven dates of the week being planned', [
+  ...open(), locked(), click('Regenerate menu'), ev(`${f}.holdGeneration=true`),
+  wait(`[...document.querySelectorAll('dialog[open] button')].some(b => b.textContent === 'Confirm schedule and generate' && !b.disabled)`),
+  click('Confirm schedule and generate'), wait(`document.querySelector('[role="status"][aria-busy="true"] article') && ${f}.releaseGeneration`),
+  check(`(() => { const busy=document.querySelector('[role="status"][aria-busy="true"]'), days=[...busy.querySelectorAll('article')]; return days.length===7 && days[0].textContent.includes('Mon 9') && days[6].textContent.includes('Sun 15') && busy.textContent.includes('Building next week’s menu…') })()`, 'seven target-week notes under the status line'),
+  ev(`${f}.holdGeneration=false; ${f}.releaseGeneration()`),
+  wait(`document.querySelector('[aria-label="Swap Monday dinner"]')`),
 ])
 emit({ suite: 'week-lock', passed, failed, verdict: failed ? 'FAIL' : 'PASS', limitations: [
   'HTTP fixture: no real account, DB or provider calls.',

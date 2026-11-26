@@ -42,7 +42,9 @@ interface PlannerContentProps {
   onEditSchedule: () => void
   onDiscard: () => void
   onAccept: () => void
-  onGenerateMenu: () => void
+  viewedWeek: string
+  canWrite: boolean
+  onSetSchedule: () => void
   onUpdateRecipe: PreviewProps['onUpdateRecipe']
 }
 
@@ -50,7 +52,9 @@ export function PlannerContent(props: PlannerContentProps) {
   const { t } = useI18n()
   const { currentPreview } = props
 
-  if (props.generatingTargetWeek) return <AiMenuSkeleton />
+  if (props.generatingTargetWeek) {
+    return <AiMenuSkeleton weekStart={props.generatingTargetWeek} />
+  }
   if (props.isLoading && !currentPreview) {
     return <EmptyState title={t('planner.loadingWeek')} role="status" />
   }
@@ -92,7 +96,6 @@ export function PlannerContent(props: PlannerContentProps) {
         onDiscard={props.onDiscard}
         onAccept={props.onAccept}
         onRetryCatalog={props.onRetryLoad}
-        onGenerateMenu={props.onGenerateMenu}
         onUpdateRecipe={props.onUpdateRecipe}
       />
     )
@@ -102,7 +105,11 @@ export function PlannerContent(props: PlannerContentProps) {
       <MenuTab
         isGenerating={props.isGenerating}
         menu={props.visibleMenu}
-        onGenerateMenu={props.onGenerateMenu}
+        emptyWeek={{
+          weekStart: props.viewedWeek,
+          canSetSchedule: props.canWrite && !props.isWriting,
+          onSetSchedule: props.onSetSchedule,
+        }}
         recipeNames={props.readyData?.week.recipeNames ?? {}}
         isSignedIn={Boolean(props.userId)}
         stackPastDays

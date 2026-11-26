@@ -70,7 +70,7 @@ await scenario('failed read is not an empty week; retry restores existing data',
   ['snapshot', '-i'],
   text('Could not load this week'),
   assert(
-    `${primary('Generate menu')}.disabled && !${shell}.innerText.includes('No Weekly Menu yet') && ${fixture}.writes.length===0`,
+    `${primary('Generate menu')}.disabled && !${shell}.innerText.includes('Nothing planned this week.') && ${fixture}.writes.length===0`,
     'failed read blocks writes and does not render the empty state',
   ),
   evaluate(`${fixture}.failLoad=false`),
@@ -233,14 +233,14 @@ await scenario('catalog failure is actionable and retry restores shopping', [
 await scenario('successful empty read permits first generation', [
   open('empty'),
   wait(`!${primary('Generate menu')}.disabled`),
-  assert(`${shell}.innerText.includes('No Weekly Menu yet') && ${fixture}.writes.length===0`, 'successful absence is distinct from read failure'),
+  assert(`${shell}.innerText.includes('Nothing planned this week.') && ${fixture}.writes.length===0`, 'successful absence is distinct from read failure'),
   click('Generate menu'),
   ...confirmSchedule,
   text('Review and tweak'),
   assert(`Boolean(${grid}) && ${fixture}.generations===1 && ${fixture}.writes.length===0`, 'first generation reaches a preview without saving'),
   click('Discard preview'),
   click('Discard generated preview'),
-  text('No Weekly Menu yet'),
+  text('Nothing planned this week.'),
 ])
 
 await scenario('Spanish load/save failures and recovery are localized', [

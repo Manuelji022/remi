@@ -3,4 +3,14 @@
     display: grid;
     gap: var(--spacing-stack-md);
   }
+
+  /* The bars fill what their slot has left, on the board and in phone rows. */
+  .planner-ai-skeleton .meal-slot-text {
+    flex: 1;
+  }
+
+  .planner-ai-skeleton .skeleton {
+    flex-shrink: 1;
+    min-inline-size: 0;
+  }
 }

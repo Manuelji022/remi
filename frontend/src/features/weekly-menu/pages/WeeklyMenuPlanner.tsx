@@ -257,7 +257,9 @@ export function WeeklyMenuPlanner() {
           onEditSchedule={generation.editSchedule}
           onDiscard={openDiscardConfirmation}
           onAccept={() => void acceptPreview()}
-          onGenerateMenu={generation.handleGenerateMenu}
+          viewedWeek={viewedWeek}
+          canWrite={canWrite}
+          onSetSchedule={handleOpenPreferences}
           onUpdateRecipe={handlePreviewRecipeChange}
         />
       </section>

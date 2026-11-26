@@ -289,7 +289,8 @@ export const messages = {
     'planner.regenerateMenu': 'Regenerate menu',
     'planner.buildingTitle': 'Building your Weekly Menu',
     'planner.buildingBody': 'Assigning saved recipes to this week.',
-    'planner.emptyTitle': 'No Weekly Menu yet',
+    'planner.emptyTitle': 'Nothing planned this week.',
+    'planner.setSchedule': 'Set when you eat at home',
     'planner.emptyBody':
       'Generate a menu from your saved recipes. Home slots stay empty until a recipe is assigned.',
     'planner.shoppingHelper':
@@ -731,7 +732,8 @@ export const messages = {
     'planner.regenerateMenu': 'Regenerar menú',
     'planner.buildingTitle': 'Construyendo tu Menú Semanal',
     'planner.buildingBody': 'Asignando las recetas guardadas a esta semana.',
-    'planner.emptyTitle': 'Todavía no hay Menú Semanal',
+    'planner.emptyTitle': 'No hay nada planificado esta semana.',
+    'planner.setSchedule': 'Elige cuándo comes en casa',
     'planner.emptyBody':
       'Genera un menú a partir de tus recetas guardadas. Los espacios de casa se quedan vacíos hasta que se asigne una receta.',
     'planner.shoppingHelper':
