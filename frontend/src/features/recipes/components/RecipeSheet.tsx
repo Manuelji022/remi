@@ -1,24 +1,31 @@
 import { useState } from 'react'
 import { Button, Dialog, Sheet } from '#/components/primitives'
 import { useI18n } from '#/shared/i18n'
-import type { RecipeInput } from '#/features/recipes/recipe'
+import type { Recipe, RecipeInput } from '#/features/recipes/recipe'
 import { useRecipeForm } from '../hooks/useRecipeForm'
 import { RecipeForm } from './RecipeForm'
 
-interface NewRecipeSheetProps {
+interface RecipeSheetProps {
   isSaving: boolean
+  /** The recipe to edit. Leave it out to add new ones. */
+  recipe?: Recipe
   onSave: (recipe: RecipeInput) => Promise<void>
   onClose: () => void
 }
 
-/** The recipe form in a sheet. It stays open after a save for the next one. */
-export function NewRecipeSheet({
+/** The recipe form in a sheet. After adding it stays open for the next one;
+ *  after editing it closes. */
+export function RecipeSheet({
   isSaving,
+  recipe,
   onSave,
   onClose,
-}: NewRecipeSheetProps) {
+}: RecipeSheetProps) {
   const { t } = useI18n()
-  const form = useRecipeForm(onSave)
+  const form = useRecipeForm(async (input) => {
+    await onSave(input)
+    if (recipe) onClose()
+  }, recipe)
   const [confirmingDiscard, setConfirmingDiscard] = useState(false)
 
   // Unsaved input is never dropped by a stray tap on the scrim.
@@ -30,7 +37,7 @@ export function NewRecipeSheet({
   return (
     <>
       <Sheet
-        title={t('preferences.newRecipe')}
+        title={t(recipe ? 'recipeForm.editTitle' : 'preferences.newRecipe')}
         dismissDisabled={isSaving}
         onDismiss={requestClose}
         actions={

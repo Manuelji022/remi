@@ -3,6 +3,7 @@ import {
   createRecipe,
   deleteRecipe,
   listRecipes,
+  updateRecipe,
 } from '#/features/recipes/functions'
 import type { Recipe, RecipeInput } from '#/features/recipes/recipe'
 
@@ -50,7 +51,26 @@ export function useRecipeCatalog({
     }
   }, [userId, legacyPending])
 
-  async function addRecipe(input: RecipeInput) {
+  function addRecipe(input: RecipeInput) {
+    return write(
+      () => createRecipe({ data: input }),
+      (current, saved) => [...current, saved],
+    )
+  }
+
+  function editRecipe(id: string, input: RecipeInput) {
+    return write(
+      () => updateRecipe({ data: { ...input, id } }),
+      (current, saved) =>
+        current.map((item) => (item.id === id ? saved : item)),
+    )
+  }
+
+  /** One create or update at a time. Rejects when it was not saved. */
+  async function write(
+    request: () => Promise<Recipe>,
+    merge: (current: Recipe[], saved: Recipe) => Recipe[],
+  ) {
     if (addingRecipe.current) return
 
     addingRecipe.current = true
@@ -60,13 +80,13 @@ export function useRecipeCatalog({
     try {
       let recipe: Recipe
       try {
-        recipe = await createRecipe({ data: input })
+        recipe = await request()
       } catch (error) {
         setActionFailed(true)
         throw error
       }
 
-      setRecipes((current) => [...(current ?? []), recipe])
+      setRecipes((current) => merge(current ?? [], recipe))
       setActionFailed(false)
       try {
         await onRecipeMutation?.()
@@ -111,6 +131,7 @@ export function useRecipeCatalog({
     actionFailed,
     isAddingRecipe,
     addRecipe,
+    editRecipe,
     deleteRecipe: deleteRecipeFromCatalog,
   }
 }

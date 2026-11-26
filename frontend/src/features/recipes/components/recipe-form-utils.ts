@@ -16,6 +16,19 @@ export function getEmptyRecipeIngredient(): RecipeIngredientDraft {
   return { ...EMPTY_RECIPE_INGREDIENT }
 }
 
+/** Saved ingredients as form rows; one empty row when there are none. */
+export function toRecipeIngredientDrafts(
+  ingredients: readonly RecipeIngredientInput[],
+): RecipeIngredientDraft[] {
+  if (ingredients.length === 0) return [getEmptyRecipeIngredient()]
+
+  return ingredients.map(({ name, quantity, unit }) => ({
+    name,
+    quantity: quantity === null ? '' : String(quantity),
+    unit: unit ?? '',
+  }))
+}
+
 export function buildRecipeIngredients(
   recipeIngredients: RecipeIngredientDraft[],
 ): RecipeIngredientInput[] {

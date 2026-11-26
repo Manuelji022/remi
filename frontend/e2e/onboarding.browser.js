@@ -112,6 +112,24 @@ await scenario('Generate my first menu opens the planner and its schedule dialog
 await run('open', `${base}/onboarding?step=recipes`)
 await run('wait', '--text', 'What do you cook at home?')
 
+await scenario('editing a listed recipe saves it and keeps the half-typed one', async () => {
+  await run('fill', 'input[name=recipeName]', 'Half typed')
+  await run('find', 'role', 'button', 'click', '--name', 'Edit Lentil stew', '--exact')
+  await wait(`document.querySelector('dialog[open] input[name=recipeName]')?.value === 'Lentil stew'`)
+  await run('fill', 'dialog[open] input[name=recipeName]', 'Lentil and chorizo stew')
+  await run('fill', 'dialog[open] .recipe-ingredient-name', 'Lentils')
+  await run('find', 'role', 'button', 'click', '--name', 'Save changes', '--exact')
+  await wait(`!document.querySelector('dialog[open]') && document.querySelector('aside').innerText.includes('Lentil and chorizo stew')`)
+  await check(`${posts}.at(-1).id === window.onboardingFixture.recipes[0].id && ${posts}.at(-1).ingredients[0].name === 'Lentils' && window.onboardingFixture.recipes.length === 5`, 'the same recipe is updated')
+  await check(`${nameField}.value === 'Half typed'`, 'the page form is untouched')
+})
+
+await scenario('an unchanged edit closes without asking', async () => {
+  await run('find', 'role', 'button', 'click', '--name', 'Edit Lentil and chorizo stew', '--exact')
+  await run('find', 'role', 'button', 'click', '--name', 'Close', '--exact')
+  await check(`!document.querySelector('dialog[open]')`, 'no discard question')
+})
+
 await scenario('phone: ingredients start collapsed and the list opens from the bar', async () => {
   await run('set', 'viewport', '390', '844')
   await check(`!document.querySelector('.recipe-ingredient-name').checkVisibility()`, 'ingredients are collapsed')
@@ -139,6 +157,52 @@ await scenario('Spanish copy and counts', async () => {
   await run('wait', '--text', '¿Qué cocinas en casa?')
   await wait(`document.body.innerText.includes('5 recetas · 1 comida · 4 cenas')`)
   await check(`document.querySelector('header a:last-child').getAttribute('href') === '/es/weekly-menu-planner'`, 'the way out keeps the locale')
+})
+
+const verifyCode = async (prefix, { recipes, failRecipes = false }) => {
+  await run('eval', `const f = window.onboardingFixture; f.set('recipes', ${recipes}); f.set('failRecipes', ${failRecipes}); f.set('signedOut', true)`)
+  await run('open', `${base}${prefix}/two-factor`)
+  await wait(`Object.keys(document.querySelector('form') ?? {}).some(key => key.startsWith('__react'))`)
+  await run('fill', 'input[name=code]', '482913')
+  await run('find', 'role', 'button', 'click', '--name', prefix ? 'Verificar código' : 'Verify code', '--exact')
+}
+
+await scenario('after two-factor, no recipes means onboarding, signed in', async () => {
+  await verifyCode('', { recipes: '[]' })
+  await run('wait', '--text', 'Your week starts with your recipes.')
+  // The session arrives late on this path: it must not read as a guest.
+  await run('wait', '1500')
+  await check(`location.pathname === '/onboarding'`, 'stays on onboarding')
+})
+
+await scenario('after two-factor in Spanish, onboarding keeps the locale', async () => {
+  await verifyCode('/es', { recipes: '[]' })
+  await run('wait', '--text', 'Tu semana empieza por tus recetas.')
+  await check(`location.pathname === '/es/onboarding'`, 'Spanish onboarding')
+})
+
+const oneRecipe = `[{ id: 'kept', name: 'Kept', slot: 'dinner', ingredients: [] }]`
+
+await scenario('after two-factor, an account with a recipe goes to the planner', async () => {
+  await verifyCode('', { recipes: oneRecipe })
+  await wait(`location.pathname === '/weekly-menu-planner'`)
+})
+
+await scenario('after two-factor, unreadable recipes still reach the planner', async () => {
+  await verifyCode('', { recipes: '[]', failRecipes: true })
+  await wait(`location.pathname === '/weekly-menu-planner'`)
+  await run('eval', `window.onboardingFixture.set('failRecipes', false)`)
+})
+
+await scenario("I'll do it later goes to the planner, and / stays put", async () => {
+  await run('set', 'viewport', '1440', '900')
+  await run('open', `${base}/onboarding`)
+  await run('wait', '--text', 'Your week starts with your recipes.')
+  await run('find', 'role', 'link', 'click', '--name', "I'll do it later")
+  await wait(`location.pathname === '/weekly-menu-planner' && location.search === ''`)
+  await run('open', `${base}/`)
+  await run('wait', '1000')
+  await check(`location.pathname === '/'`, 'the home page does not redirect')
 })
 
 await scenario('guests are sent to the planner', async () => {

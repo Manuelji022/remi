@@ -17,6 +17,7 @@ Written before the two-factor code input was implemented.
 - A wrong code loses the typed digits or shows no error.
 - "Resend code" does not ask for a new code.
 - A verified code goes to `/` instead of the weekly planner, or drops the locale.
+  An account with no recipes goes to onboarding instead; see `ONBOARDING.md`.
 - Select all, then typing, does not replace the code.
 - A page overflows sideways at 390 wide.
 

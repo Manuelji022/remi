@@ -7,8 +7,15 @@
 {"scenario":"the tip leaves with five recipes of both meals","verdict":"PASS"},
 {"scenario":"Continue shows the counted recipes, and Add more goes back","verdict":"PASS"},
 {"scenario":"Generate my first menu opens the planner and its schedule dialog once","verdict":"PASS"},
+{"scenario":"editing a listed recipe saves it and keeps the half-typed one","verdict":"PASS"},
+{"scenario":"an unchanged edit closes without asking","verdict":"PASS"},
 {"scenario":"phone: ingredients start collapsed and the list opens from the bar","verdict":"PASS"},
 {"scenario":"phone: Back returns to welcome without sideways scroll","verdict":"PASS"},
 {"scenario":"Spanish copy and counts","verdict":"PASS"},
+{"scenario":"after two-factor, no recipes means onboarding, signed in","verdict":"PASS"},
+{"scenario":"after two-factor in Spanish, onboarding keeps the locale","verdict":"PASS"},
+{"scenario":"after two-factor, an account with a recipe goes to the planner","verdict":"PASS"},
+{"scenario":"after two-factor, unreadable recipes still reach the planner","verdict":"PASS"},
+{"scenario":"I'll do it later goes to the planner, and / stays put","verdict":"PASS"},
 {"scenario":"guests are sent to the planner","verdict":"PASS"}
 ]

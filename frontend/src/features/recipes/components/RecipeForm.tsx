@@ -100,13 +100,13 @@ export function RecipeForm({ autoFocus, form, isSaving }: RecipeFormProps) {
           className="recipe-form-save"
           data-testid="panel-add-recipe"
           disabled={!form.canSave && !isSaving}
-          leadingIcon="add"
+          leadingIcon={form.isEditing ? 'done' : 'add'}
           pending={isSaving}
           size="lg"
           type="submit"
           variant="brand"
         >
-          {t('recipeForm.save')}
+          {t(form.isEditing ? 'recipeForm.saveChanges' : 'recipeForm.save')}
         </Button>
         <p className="recipe-form-enter">
           {t('recipeForm.orPress')} <kbd>Enter ↵</kbd>

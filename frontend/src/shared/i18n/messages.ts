@@ -427,6 +427,9 @@ export const messages = {
     'onboarding.addMore': 'Add more recipes',
     'onboarding.doneEditNote':
       'You can edit your recipes any time in Preferences.',
+    'recipeForm.editTitle': 'Edit recipe',
+    'recipeForm.saveChanges': 'Save changes',
+    'onboarding.editRecipe': 'Edit {name}',
     'units.unit': 'unit',
     'units.g': 'g',
     'units.kg': 'kg',
@@ -861,6 +864,9 @@ export const messages = {
     'onboarding.addMore': 'Añadir más recetas',
     'onboarding.doneEditNote':
       'Puedes editar tus recetas cuando quieras desde Preferencias.',
+    'recipeForm.editTitle': 'Editar receta',
+    'recipeForm.saveChanges': 'Guardar cambios',
+    'onboarding.editRecipe': 'Editar {name}',
     'units.unit': 'unidad',
     'units.g': 'g',
     'units.kg': 'kg',

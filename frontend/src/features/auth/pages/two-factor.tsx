@@ -6,6 +6,7 @@ import { getLocalizedPath, useI18n } from '#/shared/i18n'
 import { OTP_EMAIL_STORAGE_KEY, authClient } from '#/features/auth/auth-client'
 import { AuthLayout } from '#/features/auth/components/AuthLayout'
 import { OtpInput } from '#/features/auth/components/OtpInput'
+import { pathAfterSignIn } from '#/features/onboarding/path-after-sign-in'
 
 type FormSubmitEvent = Parameters<
   NonNullable<ComponentProps<'form'>['onSubmit']>
@@ -72,7 +73,7 @@ export function TwoFactorPage() {
       }
 
       window.sessionStorage.removeItem(OTP_EMAIL_STORAGE_KEY)
-      await navigate({ to: getLocalizedPath('/weekly-menu-planner', locale) })
+      await navigate({ to: getLocalizedPath(await pathAfterSignIn(), locale) })
     } catch {
       setError(t('auth.otpVerifyError'))
     } finally {
