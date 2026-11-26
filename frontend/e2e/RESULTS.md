@@ -19,7 +19,7 @@ agent-browser --session <session> close
 | `recipe-menu-consistency` | 3101 | `/weekly-menu-planner`                | `remi-recipe`      | `recipe-menu-consistency.json` |
 
 The runner exits non-zero if any scenario fails. Harnesses drive the UI by accessible role and
-name where possible (planner tabs are `role=tab`, day-context chips are `button[aria-pressed]`,
+name where possible (the shopping list is a dialog opened by the header's "Shopping list" button, day-context chips are `button[aria-pressed]`,
 planning scope is a `radiogroup`, "New recipe" opens in a dialog sheet); the remaining CSS
 selectors are layout hooks without an accessible equivalent.
 

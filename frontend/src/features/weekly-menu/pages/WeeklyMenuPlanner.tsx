@@ -1,13 +1,15 @@
 import './weekly-menu-planner.css'
 import { useEffect, useState } from 'react'
 import { PlannerHeader } from '../components/PlannerHeader'
-import { MainTab } from '../components/MainTab'
 import { PreferencesPanel } from '../components/preferences-panel'
 import type { PreferencesPanelTab } from '../components/preferences-panel/types'
 import { PlannerContent } from '../components/PlannerContent'
 import { PlannerDialogs } from '../components/PlannerDialogs'
 import { PlannerFeedback } from '../components/PlannerFeedback'
-import { useCheckedIngredients } from '../components/ShoppingTab'
+import {
+  ShoppingDrawer,
+  useCheckedIngredients,
+} from '../components/ShoppingDrawer'
 import { authClient } from '#/features/auth/auth-client'
 import { useAiMenuGeneration } from '#/features/weekly-menu/hooks/useAiMenuGeneration'
 import { useFirstRunTour } from '#/features/weekly-menu/hooks/useFirstRunTour'
@@ -25,10 +27,8 @@ import {
 import { usePlannerWeek } from '#/features/weekly-menu/hooks/usePlannerWeek'
 import { viewWeekStart } from '#/features/weekly-menu/week'
 
-type MainTabId = 'menu' | 'ingredients'
-
 export function WeeklyMenuPlanner() {
-  const [activeTab, setActiveTab] = useState<MainTabId>('menu')
+  const [isShoppingOpen, setIsShoppingOpen] = useState(false)
   const { checkedIngredients, toggleIngredient } = useCheckedIngredients()
   const [isPreferencesOpen, setIsPreferencesOpen] = useState(false)
   const {
@@ -141,7 +141,6 @@ export function WeeklyMenuPlanner() {
     canWrite,
     isWriting,
     canGenerateAnother,
-    setActiveTab,
     setGuestGridOpen,
     setPreferencesTab,
     setIsPreferencesOpen,
@@ -149,7 +148,7 @@ export function WeeklyMenuPlanner() {
 
   useEffect(() => {
     setIsPreferencesOpen(false)
-    setActiveTab('menu')
+    setIsShoppingOpen(false)
   }, [userId, viewedWeek])
 
   const {
@@ -187,6 +186,7 @@ export function WeeklyMenuPlanner() {
           preferenceCount={activePreferenceCount}
           shoppingCount={lines.length}
           isShoppingDisabled={!shoppingEnabled || isWriting}
+          isShoppingOpen={isShoppingOpen}
           isGenerating={isGenerating}
           isPreparingSchedule={aiGeneration.isPreparing}
           hasMenu={Boolean(visibleMenu)}
@@ -194,7 +194,6 @@ export function WeeklyMenuPlanner() {
             // Same cases where the menu itself is on screen.
             isVisible:
               Boolean(visibleMenu) &&
-              activeTab === 'menu' &&
               !currentPreview &&
               !generatingTargetWeek &&
               !isLoading &&
@@ -205,21 +204,12 @@ export function WeeklyMenuPlanner() {
           }}
           onNavigate={handleWeekNavigation}
           onOpenPreferences={handleOpenPreferences}
-          onOpenShopping={() => setActiveTab('ingredients')}
+          onOpenShopping={() => setIsShoppingOpen(true)}
           onGenerateMenu={generation.handleGenerateMenu}
           onGenerateButtonRef={(button) => {
             generation.scheduleHeaderButtonRef.current = button
           }}
         />
-
-        <div className="planner-toolbar">
-          <MainTab
-            activeTab={activeTab}
-            isIngredientsDisabled={!shoppingEnabled || isWriting}
-            neededItems={lines.length}
-            onTabChange={setActiveTab}
-          />
-        </div>
 
         <PlannerFeedback
           generationReason={currentGeneration?.reason}
@@ -240,44 +230,42 @@ export function WeeklyMenuPlanner() {
           onRetryPreviewSave={() => void acceptPreview()}
         />
 
-        <div
-          role="tabpanel"
-          id="planner-panel"
-          aria-labelledby={`planner-tab-${activeTab}`}
-        >
-          <PlannerContent
-            activeTab={activeTab}
-            generatingTargetWeek={generatingTargetWeek}
-            isLoading={isLoading}
-            loadFailed={loadFailed}
-            onRetryLoad={handleRetryLoad}
-            tour={tour}
-            currentPreview={currentPreview}
-            readyData={readyData}
-            previewCatalogReady={previewCatalogReady}
-            isWriting={isWriting}
-            isAcceptingPreview={isAcceptingPreview}
-            previewSaveError={previewSaveError}
-            canAcceptPreview={canAcceptPreview}
-            canGenerateAnother={canGenerateAnother}
-            userId={userId}
-            isGenerating={isGenerating}
-            visibleMenu={visibleMenu}
-            viewedWeek={viewedWeek}
-            weekRange={weekRange}
-            shoppingEnabled={shoppingEnabled}
-            shoppingLines={lines}
-            checkedIngredients={checkedIngredients}
-            onToggleIngredient={toggleIngredient}
-            onGenerateAnother={generation.handleGenerateAnother}
-            onEditSchedule={generation.editSchedule}
-            onDiscard={openDiscardConfirmation}
-            onAccept={() => void acceptPreview()}
-            onGenerateMenu={generation.handleGenerateMenu}
-            onUpdateRecipe={handlePreviewRecipeChange}
-          />
-        </div>
+        <PlannerContent
+          generatingTargetWeek={generatingTargetWeek}
+          isLoading={isLoading}
+          loadFailed={loadFailed}
+          onRetryLoad={handleRetryLoad}
+          tour={tour}
+          currentPreview={currentPreview}
+          readyData={readyData}
+          previewCatalogReady={previewCatalogReady}
+          isWriting={isWriting}
+          isAcceptingPreview={isAcceptingPreview}
+          previewSaveError={previewSaveError}
+          canAcceptPreview={canAcceptPreview}
+          canGenerateAnother={canGenerateAnother}
+          userId={userId}
+          isGenerating={isGenerating}
+          visibleMenu={visibleMenu}
+          onGenerateAnother={generation.handleGenerateAnother}
+          onEditSchedule={generation.editSchedule}
+          onDiscard={openDiscardConfirmation}
+          onAccept={() => void acceptPreview()}
+          onGenerateMenu={generation.handleGenerateMenu}
+          onUpdateRecipe={handlePreviewRecipeChange}
+        />
       </section>
+
+      {isShoppingOpen && shoppingEnabled && (
+        <ShoppingDrawer
+          lines={lines}
+          checklistId={JSON.stringify([userId, viewedWeek])}
+          checkedIngredients={checkedIngredients}
+          onToggleIngredient={toggleIngredient}
+          weekRange={weekRange}
+          onClose={() => setIsShoppingOpen(false)}
+        />
+      )}
 
       <PlannerDialogs
         generation={generation}

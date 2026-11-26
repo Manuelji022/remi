@@ -130,15 +130,6 @@
     display: none;
   }
 
-  .planner-toolbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--spacing-4);
-    flex-wrap: wrap;
-    margin-block-end: var(--spacing-6);
-  }
-
   .planner-banner {
     margin-block-end: var(--spacing-6);
   }
@@ -215,79 +206,7 @@
     border: 0;
   }
 
-  /* The shopping ticket, Paper: Shopping ticket. */
-  .shopping-ticket {
-    position: relative;
-    display: grid;
-    inline-size: min(100%, var(--container-sheet));
-    margin-inline: auto;
-    padding-block-start: var(--spacing-4);
-    /* Paper's ticket shadow: 0 6 10 at 10% ink. Not a token. */
-    filter: drop-shadow(
-      0 6px 10px color-mix(in srgb, var(--color-ink) 10%, transparent)
-    );
-  }
-
-  .shopping-ticket-paper {
-    padding: var(--spacing-6) var(--spacing-6) var(--spacing-4);
-    border-start-start-radius: var(--radius-mark);
-    border-start-end-radius: var(--radius-mark);
-    background: var(--color-bg-surface);
-  }
-
-  /* The magnet that holds it to the door. */
-  .shopping-ticket-magnet {
-    position: absolute;
-    inset-block-start: calc(var(--spacing-4) - var(--spacing-3));
-    inset-inline-start: calc(50% - var(--spacing-3));
-    z-index: 1;
-    inline-size: var(--spacing-6);
-    block-size: var(--spacing-6);
-    border-radius: var(--radius-pill);
-    background: var(--color-tomato-500);
-    box-shadow: 0 2px 0 color-mix(in srgb, var(--color-ink) 18%, transparent);
-  }
-
-  .shopping-ticket[data-empty] .shopping-ticket-magnet {
-    background: var(--color-butter-400);
-  }
-
-  /* Zigzag torn edge, 10 wide and 10 deep per tooth. */
-  .shopping-ticket-edge {
-    block-size: var(--spacing-3);
-    background: var(--color-bg-surface);
-    mask: conic-gradient(
-        from -45deg at bottom,
-        transparent,
-        black 1deg 89deg,
-        transparent 90deg
-      )
-      50% / 20px 100%;
-  }
-
-  .shopping-ticket-header {
-    display: grid;
-    gap: var(--spacing-1);
-    padding-block-end: var(--spacing-5);
-  }
-
-  .shopping-ticket-title {
-    margin: 0;
-    font-family: var(--font-display);
-    font-size: var(--text-large-title);
-    font-weight: var(--font-weight-extrabold);
-    letter-spacing: var(--tracking-title);
-    line-height: var(--leading-large-title);
-  }
-
-  .shopping-ticket-week {
-    margin: 0;
-    color: var(--color-text-secondary);
-    font-size: var(--text-caption);
-    font-weight: var(--font-weight-medium);
-    line-height: var(--leading-caption);
-  }
-
+  /* The ticket inside the shopping drawer, Paper: Shopping ticket. */
   /* The perforations are dashed gray-300 hairlines. */
   .shopping-ticket-progress {
     display: grid;

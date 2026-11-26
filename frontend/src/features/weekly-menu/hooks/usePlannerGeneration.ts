@@ -33,7 +33,6 @@ interface PlannerGenerationOptions {
   canWrite: boolean
   isWriting: boolean
   canGenerateAnother: boolean
-  setActiveTab: (tab: 'menu') => void
   setGuestGridOpen: (open: boolean) => void
   setPreferencesTab: (tab: PreferencesPanelTab) => void
   setIsPreferencesOpen: Dispatch<SetStateAction<boolean>>
@@ -51,7 +50,6 @@ export function usePlannerGeneration({
   canWrite,
   isWriting,
   canGenerateAnother,
-  setActiveTab,
   setGuestGridOpen,
   setPreferencesTab,
   setIsPreferencesOpen,
@@ -123,7 +121,6 @@ export function usePlannerGeneration({
 
   function handleGenerateMenu() {
     if (!canWrite || isWriting || currentPreview) return
-    setActiveTab('menu')
     plannerWeek.clearAction()
     if (!userId) {
       setGuestGridOpen(true)
@@ -181,7 +178,6 @@ export function usePlannerGeneration({
       }
       setMissingRecipeSlots([])
       plannerWeek.clearAction()
-      setActiveTab('menu')
       if (tour.step === 1) tour.next()
       void aiGeneration.confirm()
     } finally {

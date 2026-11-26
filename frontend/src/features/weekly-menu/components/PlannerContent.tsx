@@ -2,8 +2,6 @@ import type { ComponentProps } from 'react'
 import { AiMenuPreview } from './AiMenuPreview'
 import { AiMenuSkeleton } from './AiMenuSkeleton'
 import { MenuTab } from './MenuTab'
-import { ShoppingTab } from './ShoppingTab'
-import type { ShoppingLine } from '#/features/weekly-menu/shopping'
 import { Button, EmptyState } from '#/components/primitives'
 import { useI18n } from '#/shared/i18n'
 
@@ -11,13 +9,12 @@ type PreviewProps = ComponentProps<typeof AiMenuPreview>
 type MenuProps = ComponentProps<typeof MenuTab>
 
 interface PlannerContentProps {
-  activeTab: 'menu' | 'ingredients'
   generatingTargetWeek: string | null
   isLoading: boolean
   loadFailed: boolean
   onRetryLoad: () => void
   tour: PreviewProps['tour']
-  // Set while an AI preview is open; otherwise the saved menu or shopping list.
+  // Set while an AI preview is open; otherwise the saved menu.
   currentPreview:
     | {
         menu: PreviewProps['menu']
@@ -41,12 +38,6 @@ interface PlannerContentProps {
   userId: string | undefined
   isGenerating: boolean
   visibleMenu: MenuProps['menu']
-  viewedWeek: string
-  weekRange: { start: string; end: string }
-  shoppingEnabled: boolean
-  shoppingLines: readonly ShoppingLine[]
-  checkedIngredients: ComponentProps<typeof ShoppingTab>['checkedIngredients']
-  onToggleIngredient: (key: string) => void
   onGenerateAnother: PreviewProps['onGenerateAnother']
   onEditSchedule: () => void
   onDiscard: () => void
@@ -57,7 +48,7 @@ interface PlannerContentProps {
 
 export function PlannerContent(props: PlannerContentProps) {
   const { t } = useI18n()
-  const { currentPreview, shoppingLines } = props
+  const { currentPreview } = props
 
   if (props.generatingTargetWeek) return <AiMenuSkeleton />
   if (props.isLoading && !currentPreview) {
@@ -76,18 +67,6 @@ export function PlannerContent(props: PlannerContentProps) {
       >
         <p>{t('planner.loadErrorBody')}</p>
       </EmptyState>
-    )
-  }
-  if (props.activeTab !== 'menu') {
-    if (!props.shoppingEnabled) return null
-    return (
-      <ShoppingTab
-        lines={shoppingLines}
-        checklistId={JSON.stringify([props.userId, props.viewedWeek])}
-        checkedIngredients={props.checkedIngredients}
-        onToggleIngredient={props.onToggleIngredient}
-        weekRange={props.weekRange}
-      />
     )
   }
   if (currentPreview) {

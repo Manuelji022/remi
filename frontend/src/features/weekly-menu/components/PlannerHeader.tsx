@@ -12,6 +12,7 @@ interface PlannerHeaderProps {
   preferenceCount: number
   shoppingCount: number
   isShoppingDisabled: boolean
+  isShoppingOpen: boolean
   isGenerating: boolean
   isPreparingSchedule: boolean
   hasMenu: boolean
@@ -135,6 +136,8 @@ export function PlannerHeader(props: PlannerHeaderProps) {
           leadingIcon="shopping-list"
           count={hasAction(props.shoppingCount)}
           countTone="pop"
+          aria-haspopup="dialog"
+          aria-expanded={props.isShoppingOpen}
           onClick={props.onOpenShopping}
           disabled={props.isShoppingDisabled}
         >

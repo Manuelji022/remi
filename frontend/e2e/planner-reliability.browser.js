@@ -218,11 +218,16 @@ await scenario('catalog failure is actionable and retry restores shopping', [
   evaluate(`${fixture}.failRecipes=false`),
   click('Retry loading'),
   wait(currentDinner),
-  // The planner tabs are a SegmentedControl (role=tab); the accessible name carries the count badge, and the header also has a separate "Shopping list" button.
-  ['find', 'role', 'tab', 'click', '--name', 'Shopping List 1', '--exact'],
+  // The header "Shopping list" button opens the ticket in a drawer; its accessible name carries the count.
+  ['find', 'role', 'button', 'click', '--name', 'Shopping list 1', '--exact'],
   // The ticket names the item and puts its quantity in its own lane; the checkbox name reads "Rice 100 g".
   ['find', 'role', 'checkbox', 'check', '--name', 'Rice 100 g', '--exact'],
-  assert(`document.querySelector('[aria-labelledby=shopping-ticket-title]').innerText.includes('Rice') && ${fixture}.writes.length===0`, 'catalog retry restores derived shopping list'),
+  assert(`document.querySelector('dialog[aria-labelledby=shopping-drawer-title]').innerText.includes('Rice') && ${fixture}.writes.length===0`, 'catalog retry restores derived shopping list'),
+  // Ticks live in the planner, so they survive closing and reopening the drawer.
+  ['find', 'role', 'button', 'click', '--name', 'Close shopping list', '--exact'],
+  assert(`!document.querySelector('dialog[aria-labelledby=shopping-drawer-title]')`, 'closing removes the shopping drawer'),
+  ['find', 'role', 'button', 'click', '--name', 'Shopping list 1', '--exact'],
+  assert(`document.querySelector('dialog[aria-labelledby=shopping-drawer-title] input:checked') !== null`, 'ticked items survive closing and reopening'),
 ])
 
 await scenario('successful empty read permits first generation', [
