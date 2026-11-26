@@ -1,17 +1,18 @@
 import { useNavigate } from '@tanstack/react-router'
-import '../auth.css'
 import type { ComponentProps } from 'react'
 import { useState } from 'react'
 import {
   Banner,
   Button,
-  Card,
   Field,
+  Icon,
   Input,
   TextLink,
 } from '#/components/primitives'
 import { getLocalizedPath, useI18n } from '#/shared/i18n'
 import { authClient } from '#/features/auth/auth-client'
+import { AuthLayout } from '#/features/auth/components/AuthLayout'
+import { PasswordInput } from '#/features/auth/components/PasswordInput'
 
 type FormSubmitEvent = Parameters<
   NonNullable<ComponentProps<'form'>['onSubmit']>
@@ -23,7 +24,10 @@ export function LoginPage() {
   const { locale, t } = useI18n()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<{
+    title?: string
+    message: string
+  } | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   async function handleSubmit(event: FormSubmitEvent) {
@@ -38,7 +42,14 @@ export function LoginPage() {
       })
 
       if (result.error) {
-        setError(result.error.message ?? t('auth.loginError'))
+        setError(
+          result.error.code === 'INVALID_EMAIL_OR_PASSWORD'
+            ? {
+                title: t('auth.loginMismatchTitle'),
+                message: t('auth.loginMismatchCopy'),
+              }
+            : { message: result.error.message ?? t('auth.loginError') },
+        )
         return
       }
 
@@ -50,21 +61,39 @@ export function LoginPage() {
       }
 
       await authClient.signOut()
-      setError(t('auth.twoFactorRequiredError'))
+      setError({ message: t('auth.twoFactorRequiredError') })
     } catch {
-      setError(t('auth.loginError'))
+      setError({ message: t('auth.loginError') })
     } finally {
       setIsSubmitting(false)
     }
   }
 
   return (
-    <main className="auth-page" id="main">
-      <Card as="section" className="auth-card" aria-labelledby="login-title">
-        <h1 id="login-title">{t('auth.loginTitle')}</h1>
-        <p className="auth-copy">{t('auth.loginCopy')}</p>
+    <AuthLayout
+      description={t('auth.loginCopy')}
+      headerSwitch={{
+        prompt: t('auth.noAccount'),
+        label: t('auth.signup'),
+        to: '/signup',
+      }}
+      pitchCopy={t('auth.loginPitchCopy')}
+      pitchTitle={t('auth.loginPitchTitle')}
+      title={t('auth.loginTitle')}
+    >
+      <form className="auth-panel-form" onSubmit={handleSubmit}>
+        {error ? (
+          <Banner
+            announce
+            className="auth-banner"
+            title={error.title}
+            tone="error"
+          >
+            {error.message}
+          </Banner>
+        ) : null}
 
-        <form className="auth-form" onSubmit={handleSubmit}>
+        <div className="auth-fields">
           <Field label={t('auth.email')}>
             <Input
               autoComplete="email"
@@ -77,42 +106,43 @@ export function LoginPage() {
             />
           </Field>
 
-          <Field label={t('auth.password')}>
-            <Input
-              autoComplete="current-password"
-              minLength={8}
-              name="password"
-              onChange={(event) => setPassword(event.target.value)}
-              required
-              type="password"
-              value={password}
-            />
-          </Field>
+          <div className="auth-password-field">
+            <Field label={t('auth.password')}>
+              <PasswordInput
+                autoComplete="current-password"
+                minLength={8}
+                name="password"
+                onChange={(event) => setPassword(event.target.value)}
+                required
+                value={password}
+              />
+            </Field>
+            <TextLink
+              className="auth-link"
+              to="/forgot-password"
+              variant="inline"
+            >
+              {t('auth.forgotPasswordLink')}
+            </TextLink>
+          </div>
+        </div>
 
-          {error ? (
-            <Banner tone="error" announce>
-              {error}
-            </Banner>
-          ) : null}
-
-          <Button block variant="brand" disabled={isSubmitting} type="submit">
+        <div className="auth-actions">
+          <Button
+            block
+            disabled={isSubmitting}
+            size="lg"
+            type="submit"
+            variant="brand"
+          >
             {isSubmitting ? t('auth.loggingIn') : t('auth.login')}
           </Button>
-        </form>
-
-        <p className="auth-forgot">
-          <TextLink to="/forgot-password">
-            {t('auth.forgotPasswordLink')}
-          </TextLink>
-        </p>
-
-        <p className="auth-switch">
-          {t('auth.noAccount')}{' '}
-          <TextLink variant="inline" to="/signup">
-            {t('auth.createOne')}
-          </TextLink>
-        </p>
-      </Card>
-    </main>
+          <p className="auth-note-line">
+            <Icon name="lock" size="sm" />
+            {t('auth.loginCodeNote')}
+          </p>
+        </div>
+      </form>
+    </AuthLayout>
   )
 }

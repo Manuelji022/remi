@@ -1,0 +1,288 @@
+/* Auth layout. Paper: Auth · phone 390 and Auth · desktop 1440. Phone is the
+   note strip over a white sheet; from lg (64rem) a white card holds the pitch
+   board and a 400 form panel. Wordmark (26 / 30), pitch (52 / 54), panel and
+   header widths have no token. */
+@layer components {
+  .auth-header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-3);
+    max-inline-size: 75rem;
+    min-block-size: 3.5rem;
+    margin-inline: auto;
+    padding-inline: var(--spacing-4);
+  }
+
+  .auth-wordmark {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: var(--size-hit);
+    border-radius: var(--radius-mark);
+    color: var(--color-pop);
+    font-family: var(--font-display);
+    font-size: 26px;
+    font-weight: var(--font-weight-extrabold);
+    letter-spacing: var(--tracking-display);
+    line-height: 32px;
+    text-decoration: none;
+  }
+
+  .auth-header-switch {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-3);
+  }
+
+  .auth-header-prompt {
+    display: none;
+    color: var(--color-text-secondary);
+    font-size: var(--text-callout);
+    line-height: var(--leading-callout);
+  }
+
+  .auth-main {
+    display: flex;
+    flex-direction: column;
+    /* Fills the first screen, so the footer starts below it on phone. */
+    min-block-size: calc(100dvh - 3.5rem);
+    padding: 0;
+  }
+
+  .auth-pitch {
+    display: none;
+  }
+
+  .auth-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--spacing-6) + var(--spacing-1));
+    padding: var(--spacing-8) var(--spacing-5) 34px;
+    border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
+    background: var(--color-bg-surface);
+    /* The sheet covers the foot of the note strip. */
+    position: relative;
+  }
+
+  .auth-panel > * {
+    inline-size: 100%;
+    max-inline-size: 22rem;
+    margin-inline: auto;
+  }
+
+  .auth-title {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-1-5);
+  }
+
+  .auth-title h1 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--text-large-title);
+    font-weight: var(--font-weight-extrabold);
+    letter-spacing: var(--tracking-display);
+    line-height: var(--leading-large-title);
+  }
+
+  .auth-title p {
+    color: var(--color-text-secondary);
+  }
+
+  .auth-panel-form {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--spacing-6) + var(--spacing-1));
+  }
+
+  .auth-banner .banner-text {
+    font-size: var(--text-caption);
+    line-height: var(--leading-caption);
+  }
+
+  .auth-banner .banner-text:only-child {
+    font-size: var(--text-callout);
+    line-height: var(--leading-callout);
+  }
+
+  .auth-fields {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-5);
+  }
+
+  /* Phone: pinned to the foot of the sheet. */
+  .auth-actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-3);
+    margin-block-start: auto;
+  }
+
+  .auth-note-line {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-1-5);
+    color: var(--color-text-secondary);
+    font-size: var(--text-caption);
+    line-height: var(--leading-caption);
+    text-align: center;
+  }
+
+  .auth-password-input {
+    position: relative;
+  }
+
+  .auth-password-input .field-control {
+    padding-inline-end: var(--size-control-lg);
+  }
+
+  /* Looks 36 (Paper), taps 44. */
+  .auth-password-toggle.button {
+    --button-size: var(--size-handle);
+
+    position: absolute;
+    inset-block-start: var(--spacing-1);
+    inset-inline-end: var(--spacing-1);
+  }
+
+  .auth-password-toggle::after {
+    content: '';
+    position: absolute;
+    inset: calc((var(--size-hit) - var(--size-handle)) / -2 - 1px);
+  }
+
+  .auth-link.text-link {
+    color: var(--color-text-primary);
+    font-size: var(--text-callout);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--leading-callout);
+  }
+
+  /* The link follows the input in the DOM, so Tab goes email, password. */
+  .auth-password-field {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .auth-password-field > .field {
+    align-self: stretch;
+  }
+
+  .auth-password-field > .auth-link {
+    margin-block-start: 10px;
+    padding-block: var(--spacing-0-5);
+  }
+
+  @media (min-width: 64rem) {
+    .auth-header-inner {
+      min-block-size: 5.5rem;
+      padding-inline: var(--spacing-10);
+    }
+
+    .auth-wordmark {
+      font-size: 30px;
+      line-height: 36px;
+    }
+
+    .auth-header-prompt {
+      display: inline;
+    }
+
+    .auth-header-button.button {
+      --button-size: var(--size-control);
+      --button-pad: calc(var(--spacing-4) + var(--spacing-0-5));
+      --button-text: var(--text-callout);
+    }
+
+    .auth-header-button::after {
+      content: none;
+    }
+
+    .auth-main {
+      flex-direction: row;
+      gap: var(--spacing-10);
+      inline-size: min(75rem, 100% - var(--spacing-8));
+      min-block-size: 0;
+      padding: var(--spacing-10);
+      border-radius: var(--radius-sheet);
+      background: var(--color-bg-surface);
+    }
+
+    .auth-board {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: var(--spacing-10);
+      min-inline-size: 0;
+      min-block-size: 36rem;
+      padding: var(--spacing-10);
+      overflow: clip;
+      border-radius: var(--radius-surface);
+      background: var(--color-bg-page);
+    }
+
+    .auth-pitch {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-4);
+      max-inline-size: 420px;
+    }
+
+    .auth-pitch-title {
+      font-family: var(--font-display);
+      font-size: 52px;
+      font-weight: var(--font-weight-extrabold);
+      letter-spacing: var(--tracking-display);
+      line-height: 54px;
+      text-wrap: wrap;
+    }
+
+    .auth-pitch-copy {
+      max-inline-size: 400px;
+      color: var(--color-text-secondary);
+    }
+
+    .auth-panel {
+      flex: none;
+      justify-content: center;
+      gap: var(--spacing-8);
+      inline-size: 400px;
+      padding: 0 var(--spacing-6);
+      border-radius: 0;
+    }
+
+    .auth-title {
+      gap: var(--spacing-2);
+    }
+
+    .auth-title h1 {
+      font-size: var(--text-display);
+      line-height: var(--leading-display);
+    }
+
+    .auth-panel-form {
+      flex: none;
+      gap: var(--spacing-8);
+    }
+
+    .auth-actions {
+      gap: var(--spacing-4);
+      margin-block-start: 0;
+    }
+
+    /* Up into the label row. */
+    .auth-password-field > .auth-link {
+      position: absolute;
+      inset-block-start: 0;
+      inset-inline-end: 0;
+      margin-block: -2px 0;
+    }
+  }
+}

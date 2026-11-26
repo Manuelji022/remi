@@ -108,4 +108,42 @@
       font-size: 96px;
     }
   }
+
+  /* Compact (auth pages). Paper: Auth / Footer. The 22 mark has no token. */
+  .site-footer-compact .footer-inner {
+    padding-block: calc(var(--spacing-6) + var(--spacing-1)) var(--spacing-8);
+  }
+
+  .site-footer-compact .footer-actions {
+    min-block-size: var(--size-hit);
+  }
+
+  .footer-brand {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--spacing-1) var(--spacing-4);
+  }
+
+  .footer-brand .footer-legal {
+    padding: 0;
+  }
+
+  .footer-mark {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: var(--font-weight-extrabold);
+    letter-spacing: var(--tracking-display);
+    line-height: 26px;
+  }
+
+  @media (min-width: 64rem) {
+    .site-footer-compact .footer-inner {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      padding-inline: var(--spacing-10);
+    }
+  }
 }
