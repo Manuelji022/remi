@@ -3,6 +3,7 @@ import { Button, Icon } from '#/components/primitives'
 import { getLocalizedPath, useI18n } from '#/shared/i18n'
 import { authClient } from '#/features/auth/auth-client'
 import { hasAuthLayout } from '#/features/auth/auth-layout-paths'
+import { isOnboardingPath } from '#/features/onboarding/onboarding-path'
 import './footer.css'
 
 export function Footer() {
@@ -26,6 +27,8 @@ export function Footer() {
       {languageName}
     </Link>
   )
+
+  if (isOnboardingPath(pathname)) return null
 
   // Auth pages: one quiet row. The page itself already offers sign up.
   if (hasAuthLayout(pathname)) {

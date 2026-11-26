@@ -1,0 +1,225 @@
+/* The saved-recipes panel. Paper: Onboarding 2, "Recipes column" (desktop) and
+   "Bottom bar" (phone). The 420 column, 28 padding, 64 x 26 meal pill, 12 pill
+   type, 28 dots, 62 placeholder, 52 phone button, the -1deg tilt and the new
+   row's shadow have no token. */
+@layer components {
+  .recipe-panel {
+    position: sticky;
+    inset-block-end: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-3);
+    margin-block-start: auto;
+    padding: var(--spacing-3) var(--spacing-5)
+      max(var(--spacing-5), env(safe-area-inset-bottom));
+    border-block-start: 1px solid var(--color-border-subtle);
+    border-radius: var(--radius-surface) var(--radius-surface) 0 0;
+    background: var(--color-bg-page);
+  }
+
+  /* A focused field never ends up behind the bottom bar. */
+  @media (max-width: 63.99rem) {
+    html:has(.recipe-panel) {
+      scroll-padding-block-end: 9rem;
+    }
+  }
+
+  .recipe-panel > .button-brand {
+    --button-size: 52px;
+    --button-text: var(--text-headline);
+  }
+
+  .recipe-panel-head,
+  .recipe-panel-list {
+    display: none;
+  }
+
+  .recipe-panel-peek {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+  }
+
+  .recipe-panel-peek .recipe-panel-summary {
+    flex: 1;
+    min-inline-size: 0;
+  }
+
+  .recipe-panel-peek .button {
+    color: var(--color-text-primary);
+  }
+
+  /* The chevron points up: the list opens from below. */
+  .recipe-panel-peek .button .icon {
+    rotate: 90deg;
+  }
+
+  .recipe-panel-dots {
+    display: flex;
+  }
+
+  .recipe-panel-dots > span {
+    inline-size: 28px;
+    block-size: 28px;
+    border: 2px solid var(--color-bg-page);
+    border-radius: var(--radius-pill);
+    background: var(--color-mint-300);
+  }
+
+  .recipe-panel-dots > span + span {
+    margin-inline-start: -10px;
+    background: var(--color-lilac-300);
+  }
+
+  .recipe-panel-summary {
+    color: var(--color-text-secondary);
+    font-size: var(--text-callout);
+    line-height: var(--leading-callout);
+  }
+
+  .recipe-panel-summary strong {
+    color: var(--color-text-primary);
+    font-weight: var(--font-weight-semibold);
+  }
+
+  .recipe-panel-sheet {
+    display: grid;
+    gap: var(--spacing-4);
+    padding: var(--spacing-1);
+    border-radius: var(--radius-surface);
+    background: var(--color-bg-page);
+  }
+
+  .recipe-rows {
+    display: grid;
+    gap: var(--spacing-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .recipe-row {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-3);
+    padding: var(--spacing-3);
+    border-radius: var(--radius-inner);
+    background: var(--color-bg-surface);
+  }
+
+  .recipe-row[data-new] {
+    box-shadow: 0 10px 24px -10px
+      color-mix(in srgb, var(--color-ink) 18%, transparent);
+    rotate: -1deg;
+  }
+
+  .recipe-row-slot {
+    display: grid;
+    flex: none;
+    place-items: center;
+    min-inline-size: 64px;
+    block-size: 26px;
+    padding-inline: var(--spacing-2);
+    border-radius: var(--radius-pill);
+    font-size: 12px;
+    font-weight: var(--font-weight-semibold);
+  }
+
+  .recipe-row-slot-lunch {
+    background: var(--color-mint-300);
+  }
+
+  .recipe-row-slot-dinner {
+    background: var(--color-lilac-300);
+  }
+
+  .recipe-row-copy {
+    display: grid;
+    flex: 1;
+    min-inline-size: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .recipe-row-name {
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--leading-body);
+  }
+
+  .recipe-row-detail {
+    color: var(--color-text-secondary);
+    font-size: var(--text-caption);
+    line-height: var(--leading-caption);
+  }
+
+  .recipe-row[data-new] .recipe-row-detail {
+    color: var(--color-status-success-text);
+  }
+
+  .recipe-row-placeholder {
+    display: grid;
+    place-items: center;
+    min-block-size: 62px;
+    padding-inline: var(--spacing-3);
+    border: 1.5px dashed var(--color-gray-300);
+    border-radius: var(--radius-inner);
+    color: var(--color-text-secondary);
+    font-size: var(--text-callout);
+    text-align: center;
+  }
+
+  .recipe-panel-tip {
+    display: flex;
+    align-items: start;
+    gap: var(--spacing-2);
+    padding: var(--spacing-3) var(--spacing-4);
+    border-radius: var(--radius-inner);
+    background: var(--color-status-warning-bg);
+    color: var(--color-status-warning-text);
+    font-size: var(--text-callout);
+    line-height: var(--leading-callout);
+  }
+
+  @media (min-width: 64rem) {
+    .recipe-panel {
+      position: static;
+      flex: none;
+      gap: var(--spacing-5);
+      inline-size: 420px;
+      margin: 0;
+      padding: 28px;
+      border: 0;
+      border-radius: var(--radius-surface);
+    }
+
+    .recipe-panel-peek {
+      display: none;
+    }
+
+    .recipe-panel-head {
+      display: grid;
+      gap: var(--spacing-1);
+    }
+
+    .recipe-panel-head h2 {
+      margin: 0;
+      font-family: var(--font-display);
+      font-weight: var(--font-weight-extrabold);
+    }
+
+    .recipe-panel-list {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      gap: var(--spacing-5);
+    }
+
+    .recipe-panel-list .recipe-panel-tip {
+      margin-block-start: auto;
+    }
+
+    .recipe-panel > .button-brand {
+      --button-size: var(--size-control-lg);
+      --button-text: var(--text-body);
+    }
+  }
+}
