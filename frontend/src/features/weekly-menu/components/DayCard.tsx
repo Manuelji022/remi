@@ -120,7 +120,7 @@ function MealSlotDisplay({
   const { t } = useI18n()
   const home = meal.kind === 'recipe' || meal.kind === 'unplanned'
   const name = meal.kind === 'recipe' ? meal.name : t('meal.unplannedName')
-  // Today's dinner is the one headline slot on the board.
+  // Today's dinner is the one lifted slot on the board.
   const tonight = timing === 'today' && slot === 'dinner' && home
   const swapLabel = t('planner.swapSlot', {
     day: dayName,

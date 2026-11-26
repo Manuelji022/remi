@@ -8,6 +8,8 @@
      sit at the end and wrap under it when the labels do not fit. */
   .planner-controls {
     display: grid;
+    /* A long label wraps instead of widening the row past the screen. */
+    grid-template-columns: minmax(0, 1fr);
     gap: var(--spacing-3);
     margin-block-end: var(--spacing-8);
   }
@@ -83,6 +85,7 @@
 
   .planner-tools {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: var(--spacing-2);
   }
@@ -148,6 +151,12 @@
   @media (max-width: 39.999rem) {
     .planner-controls {
       margin-block-end: var(--spacing-3);
+    }
+
+    /* Tighter, so both tools still share a row at 390. */
+    .planner-tools .button {
+      --button-pad: var(--spacing-3);
+      --button-pad-icon: var(--spacing-2);
     }
 
     .planner-day-grid {

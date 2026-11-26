@@ -336,8 +336,6 @@
       gap: var(--spacing-1);
     }
 
-    .day-card-upcoming .meal-slot,
-    .day-card-past .meal-slot,
     .day-card-upcoming .day-card-paper .meal-slot,
     .day-card-past .day-card-paper .meal-slot {
       padding: 0;
@@ -358,7 +356,8 @@
     .day-card-past .meal-label,
     .day-card-today .meal-slot:not([data-tonight]) .meal-label {
       flex-shrink: 0;
-      inline-size: 2.75rem;
+      /* Paper uses 44, which "Comida" overruns. */
+      inline-size: 3.25rem;
     }
 
     .day-card-upcoming .day-name,
