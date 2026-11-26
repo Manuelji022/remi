@@ -12,6 +12,8 @@ import {
   CircleCheck,
   Ellipsis,
   ExternalLink,
+  Eye,
+  EyeOff,
   Globe,
   Info,
   Leaf,
@@ -69,6 +71,9 @@ const ICONS = {
   success: CircleCheck,
   warning: TriangleAlert,
   error: CircleAlert,
+  // Auth
+  show: Eye,
+  hide: EyeOff,
   // Account
   settings: Settings,
   more: Ellipsis,

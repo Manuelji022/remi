@@ -4,6 +4,7 @@ import { Button, Menu, MenuItem } from '#/components/primitives'
 import { LocalizedLink, getLocalizedPath, useI18n } from '#/shared/i18n'
 import { authClient } from '#/features/auth/auth-client'
 import { useSignOut } from '#/features/auth/use-sign-out'
+import { hasAuthLayout } from '#/features/auth/auth-layout-paths'
 
 /** Pages where the form is the only action, so the account zone is hidden. */
 const AUTH_PATHS = new Set([
@@ -22,6 +23,8 @@ export function Header() {
   const isAuthPage = AUTH_PATHS.has(
     getLocalizedPath(pathname, 'en').replace(/(?<=.)\/$/, ''),
   )
+
+  if (hasAuthLayout(pathname)) return null
 
   return (
     <header className="site-header">

@@ -1,0 +1,202 @@
+/* Auth day notes. Paper: Auth / Notes. Phone is a 390 x 124 strip with two
+   notes placed by hand; from lg all three sit in a row at the foot of the
+   board. Note sizes, offsets, tilts, type sizes, the 20 / 12 phone radii and
+   the 3px tape radius have no token. */
+@layer components {
+  .auth-notes {
+    block-size: 124px;
+    overflow: clip;
+  }
+
+  .auth-notes-stage {
+    position: relative;
+    inline-size: 390px;
+    margin-inline: auto;
+  }
+
+  .auth-note {
+    position: absolute;
+    inset-block-start: 34px;
+    inset-inline-start: 204px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-1-5);
+    inline-size: 150px;
+    padding: 10px;
+    border-radius: 20px;
+    color: var(--color-ink);
+    rotate: 2.5deg;
+    transform-origin: 0 0;
+  }
+
+  .auth-note-today {
+    inset-block-start: 24px;
+    inset-inline-start: 24px;
+    inline-size: 168px;
+    background: var(--color-pop);
+    box-shadow: 0 12px 24px -8px
+      color-mix(in srgb, var(--color-ink) 12%, transparent);
+    rotate: -3deg;
+  }
+
+  .auth-note-friday {
+    background: var(--color-lilac-300);
+  }
+
+  .auth-note-saturday {
+    display: none;
+    background: var(--color-mint-300);
+  }
+
+  .auth-note-head,
+  .auth-note-meal {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .auth-note-head {
+    padding: var(--spacing-1) var(--spacing-1-5) 0;
+  }
+
+  .auth-note-date {
+    font-family: var(--font-display);
+    font-size: 26px;
+    font-variation-settings: 'wdth' 75;
+    font-weight: var(--font-weight-extrabold);
+    line-height: 28px;
+  }
+
+  .auth-note-when,
+  .auth-note-slot {
+    display: none;
+    font-size: var(--text-caption);
+    line-height: var(--leading-caption);
+  }
+
+  .auth-note-meal {
+    padding: var(--spacing-2) 10px;
+    border-radius: 12px;
+    background: var(--color-bg-surface);
+  }
+
+  .auth-note-name {
+    font-size: var(--text-callout);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--leading-callout);
+  }
+
+  .auth-note-tape {
+    position: absolute;
+    inset-block-start: -10px;
+    inset-inline-start: 54px;
+    inline-size: 60px;
+    block-size: 20px;
+    border-radius: 3px;
+    background: color-mix(in srgb, var(--color-butter-400) 85%, transparent);
+    rotate: 4deg;
+    transform-origin: 0 0;
+  }
+
+  @media (min-width: 64rem) {
+    .auth-notes {
+      block-size: auto;
+      overflow: visible;
+    }
+
+    .auth-notes-stage {
+      display: flex;
+      align-items: flex-end;
+      gap: var(--spacing-3);
+      inline-size: auto;
+    }
+
+    .auth-note {
+      position: relative;
+      inset: auto;
+      flex: none;
+      gap: var(--spacing-2);
+      inline-size: 180px;
+      padding: var(--spacing-3);
+      border-radius: var(--radius-surface);
+      rotate: 2deg;
+      transform-origin: center;
+    }
+
+    .auth-note-today {
+      inline-size: 260px;
+      box-shadow: 0 18px 36px -8px
+        color-mix(in srgb, var(--color-ink) 12%, transparent);
+      rotate: -3deg;
+    }
+
+    .auth-note-saturday {
+      display: flex;
+      rotate: calc(-1 * var(--rotate-note));
+    }
+
+    .auth-note-head {
+      padding: 10px 10px var(--spacing-1-5);
+    }
+
+    .auth-note-today .auth-note-head {
+      gap: var(--spacing-0-5);
+      padding: var(--spacing-3) var(--spacing-3) var(--spacing-2);
+    }
+
+    .auth-note-date {
+      font-size: var(--text-large-title);
+      line-height: 32px;
+    }
+
+    .auth-note-today .auth-note-date {
+      font-size: 40px;
+      line-height: 40px;
+    }
+
+    .auth-note-when {
+      display: block;
+      font-weight: var(--font-weight-medium);
+    }
+
+    .auth-note-slot {
+      display: block;
+      color: var(--color-text-secondary);
+    }
+
+    .auth-note-today .auth-note-slot {
+      color: var(--color-ink);
+      font-weight: var(--font-weight-medium);
+    }
+
+    .auth-note-meal {
+      gap: var(--spacing-0-5);
+      padding: var(--spacing-3) calc(var(--spacing-3) + var(--spacing-0-5));
+      border-radius: var(--radius-inner);
+    }
+
+    .auth-note-today .auth-note-meal {
+      gap: var(--spacing-1);
+      padding: calc(var(--spacing-3) + var(--spacing-0-5)) var(--spacing-4) 18px;
+    }
+
+    .auth-note-name {
+      font-size: var(--text-body);
+      line-height: var(--leading-body);
+    }
+
+    .auth-note-today .auth-note-name {
+      font-family: var(--font-display);
+      font-size: var(--text-title);
+      font-weight: var(--font-weight-extrabold);
+      letter-spacing: var(--tracking-title);
+      line-height: var(--leading-title);
+    }
+
+    .auth-note-tape {
+      inset-block-start: -12px;
+      inset-inline-start: 80px;
+      inline-size: 76px;
+      block-size: 24px;
+    }
+  }
+}
