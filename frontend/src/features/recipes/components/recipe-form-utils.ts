@@ -1,4 +1,3 @@
-import { recipeQuantityDraftSchema } from '../recipe'
 import type { IngredientUnit, RecipeIngredientInput } from '../recipe'
 
 export type RecipeIngredientDraft = {
@@ -33,15 +32,5 @@ export function buildRecipeIngredients(
         unit: ingredient.unit === '' ? null : ingredient.unit,
       },
     ]
-  })
-}
-
-export function hasInvalidRecipeIngredientQuantity(
-  recipeIngredients: RecipeIngredientDraft[],
-): boolean {
-  return recipeIngredients.some((ingredient) => {
-    const quantity = ingredient.quantity.trim()
-
-    return !recipeQuantityDraftSchema.safeParse(quantity).success
   })
 }

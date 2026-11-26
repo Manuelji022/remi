@@ -198,50 +198,6 @@
     list-style: none;
   }
 
-  .panel-field {
-    display: grid;
-    gap: var(--spacing-2);
-  }
-
-  .panel-field > span {
-    font-size: var(--text-callout);
-    font-weight: var(--font-weight-semibold);
-    line-height: var(--leading-callout);
-  }
-
-  .panel-ingredient-rows {
-    display: grid;
-    gap: var(--spacing-2);
-  }
-
-  .panel-ingredient-row {
-    display: grid;
-    grid-template-columns:
-      minmax(0, 1fr) 5rem
-      var(--size-hit);
-    gap: var(--spacing-2);
-    align-items: end;
-  }
-
-  .panel-ingredient-name-field,
-  .panel-ingredient-quantity-field,
-  .panel-ingredient-unit-field {
-    min-inline-size: 0;
-  }
-
-  .panel-ingredient-unit-field {
-    grid-column: 1 / 3;
-  }
-
-  .panel-ingredient-delete-btn {
-    align-self: end;
-  }
-
-  .panel-add-ingredient-btn {
-    justify-self: start;
-  }
-
-  .panel-add-hint,
   .panel-field-error {
     margin: 0;
     font-size: var(--text-caption);
@@ -307,18 +263,6 @@
 
   .panel-footer-actions .button {
     flex: 1;
-  }
-
-  @container drawer (min-width: 28rem) {
-    .panel-ingredient-row {
-      grid-template-columns:
-        minmax(0, 1fr) 5rem
-        7.5rem var(--size-hit);
-    }
-
-    .panel-ingredient-unit-field {
-      grid-column: auto;
-    }
   }
 
   @media (min-width: 48rem) {

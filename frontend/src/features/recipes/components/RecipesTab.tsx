@@ -5,7 +5,7 @@ import { authClient } from '#/features/auth/auth-client'
 import { useRecipeCatalog } from '#/features/recipes/hooks/useRecipeCatalog'
 import type { Recipe, RecipeInput } from '#/features/recipes/recipe'
 import { RecipeCard } from './RecipeCard'
-import { RecipeForm } from './RecipeForm'
+import { NewRecipeSheet } from './NewRecipeSheet'
 
 interface RecipesTabProps {
   legacyPending: boolean
@@ -147,9 +147,9 @@ function RecipeCatalogList({
         {t('preferences.addRecipe')}
       </Button>
       {isFormOpen && (
-        <RecipeForm
-          isAddingRecipe={isAddingRecipe}
-          onAddRecipe={onAddRecipe}
+        <NewRecipeSheet
+          isSaving={isAddingRecipe}
+          onSave={onAddRecipe}
           onClose={() => setIsFormOpen(false)}
         />
       )}

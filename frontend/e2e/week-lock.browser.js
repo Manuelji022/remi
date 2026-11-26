@@ -100,7 +100,7 @@ await scenario('locked schedule cannot edit or save; recipe controls remain usab
   // Recipe creation lives in a Sheet opened by "Add recipe"; it must stay usable on a locked week.
   check(`[...document.querySelectorAll('.panel-content button')].every(button => !button.disabled)`, 'recipe actions are enabled'),
   click('Add recipe'), ['wait', '--text', 'New recipe'],
-  check(`(() => { const label = [...document.querySelectorAll('label')].find(l => l.textContent.trim() === 'Recipe name'); return label && label.control && !label.control.disabled })()`, 'new recipe name field is enabled'),
+  check(`(() => { const label = [...document.querySelectorAll('label')].find(l => l.textContent.trim() === "What\\'s the dish called?"); return label && label.control && !label.control.disabled })()`, 'new recipe name field is enabled'),
 ])
 await scenario('unlocked schedule can edit and save', [
   ...open(), locked(), hold(), unlocked(), click('Preferences'),

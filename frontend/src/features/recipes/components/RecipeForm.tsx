@@ -1,306 +1,116 @@
-import { useId, useRef, useState } from 'react'
-import {
-  Button,
-  Dialog,
-  Field,
-  Input,
-  SegmentedControl,
-  Select,
-  Sheet,
-} from '#/components/primitives'
+import { useEffect, useId, useRef } from 'react'
+import { Banner, Button, Field, Icon, Input } from '#/components/primitives'
 import { useI18n } from '#/shared/i18n'
-import {
-  INGREDIENT_UNITS,
-  MEAL_SLOTS,
-  recipeInputSchema,
-  recipeQuantityDraftSchema,
-} from '#/features/recipes/recipe'
-import type { MealSlot, RecipeInput } from '#/features/recipes/recipe'
-import {
-  buildRecipeIngredients,
-  getEmptyRecipeIngredient,
-  hasInvalidRecipeIngredientQuantity,
-} from './recipe-form-utils'
-import type { RecipeIngredientDraft } from './recipe-form-utils'
+import { MEAL_SLOTS } from '#/features/recipes/recipe'
+import type { useRecipeForm } from '../hooks/useRecipeForm'
+import { RecipeIngredientFields } from './RecipeIngredientFields'
 import './recipe-form.css'
 
 interface RecipeFormProps {
-  isAddingRecipe: boolean
-  onAddRecipe: (recipe: RecipeInput) => Promise<void>
-  /** Closes the sheet: after a save, or when the input is given up. */
-  onClose: () => void
+  form: ReturnType<typeof useRecipeForm>
+  isSaving: boolean
 }
 
-/** "New recipe" as a bottom sheet: a short form, one task. */
-export function RecipeForm({
-  isAddingRecipe,
-  onAddRecipe,
-  onClose,
-}: RecipeFormProps) {
+/** One recipe at a time: Enter saves, then the name field takes the next. */
+export function RecipeForm({ form, isSaving }: RecipeFormProps) {
   const { t } = useI18n()
-  const [recipeName, setRecipeName] = useState('')
-  const [recipeSlot, setRecipeSlot] = useState<MealSlot>('dinner')
-  const [confirmingDiscard, setConfirmingDiscard] = useState(false)
-  const [recipeIngredients, setRecipeIngredients] = useState<
-    RecipeIngredientDraft[]
-  >([getEmptyRecipeIngredient()])
-  const submissionInFlight = useRef(false)
-  const recipeNameId = useId()
-  const recipeIngredientsId = useId()
-  const isDirty =
-    recipeName.trim() !== '' ||
-    recipeIngredients.some((ingredient) => ingredient.name.trim() !== '')
-  const hasInvalidIngredientQuantity =
-    hasInvalidRecipeIngredientQuantity(recipeIngredients)
+  const slotGroup = useId()
+  const nameRef = useRef<HTMLInputElement>(null)
+  const { saved } = form
 
-  async function handleAddRecipe() {
-    const name = recipeName.trim()
+  // An effect: a disabled ancestor has to be enabled again before focus.
+  useEffect(() => {
+    if (saved) nameRef.current?.focus()
+  }, [saved])
 
-    if (submissionInFlight.current || hasInvalidIngredientQuantity) return
-    const recipe = recipeInputSchema.safeParse({
-      name,
-      slot: recipeSlot,
-      ingredients: buildRecipeIngredients(recipeIngredients),
-    })
-    if (!recipe.success) return
-
-    submissionInFlight.current = true
-    try {
-      await onAddRecipe(recipe.data)
-      onClose()
-    } catch {
-      return
-    } finally {
-      submissionInFlight.current = false
-    }
-  }
-
-  function updateRecipeIngredient(
-    ingredientIndex: number,
-    field: keyof RecipeIngredientDraft,
-    value: string,
-  ) {
-    setRecipeIngredients(
-      recipeIngredients.map((ingredient, index) =>
-        index === ingredientIndex
-          ? { ...ingredient, [field]: value }
-          : ingredient,
-      ),
-    )
-  }
-
-  function addRecipeIngredientRow() {
-    setRecipeIngredients([...recipeIngredients, getEmptyRecipeIngredient()])
-  }
-
-  function deleteRecipeIngredientRow(ingredientIndex: number) {
-    if (recipeIngredients.length === 1) {
-      setRecipeIngredients([getEmptyRecipeIngredient()])
-      return
-    }
-
-    setRecipeIngredients(
-      recipeIngredients.filter((_, index) => index !== ingredientIndex),
-    )
-  }
-
-  // Unsaved input is never dropped by a stray tap on the scrim.
-  function requestClose() {
-    if (isDirty) setConfirmingDiscard(true)
-    else onClose()
+  let status = ''
+  if (!form.name.trim()) {
+    status = saved
+      ? t('recipeForm.saved', { name: saved.name })
+      : t('recipeForm.nameMissing')
   }
 
   return (
-    <>
-      <Sheet
-        title={t('preferences.newRecipe')}
-        dismissDisabled={isAddingRecipe}
-        onDismiss={requestClose}
-        actions={
-          <>
-            <Button
-              variant="primary"
-              data-testid="panel-add-recipe"
-              disabled={
-                isAddingRecipe ||
-                !recipeName.trim() ||
-                hasInvalidIngredientQuantity
-              }
-              onClick={handleAddRecipe}
-            >
-              {t(
-                isAddingRecipe
-                  ? 'preferences.addingRecipe'
-                  : 'preferences.saveRecipe',
-              )}
-            </Button>
-            <Button
-              variant="ghost"
-              disabled={isAddingRecipe}
-              onClick={requestClose}
-            >
-              {t('common.cancel')}
-            </Button>
-          </>
-        }
-      >
-        <div className="recipe-form">
-          <Field label={t('preferences.recipeName')}>
-            <Input
-              id={recipeNameId}
-              name="recipeName"
-              onChange={(event) => setRecipeName(event.target.value)}
-              placeholder={t('preferences.recipeNamePlaceholder')}
-              type="text"
-              value={recipeName}
-            />
-          </Field>
-
-          <div className="panel-field">
-            <span>{t('preferences.recipeSlot')}</span>
-            <SegmentedControl
-              label={t('preferences.recipeSlotHelp')}
-              options={MEAL_SLOTS.map((slot) => ({
-                value: slot,
-                label: t(`slots.${slot}`),
-              }))}
-              value={recipeSlot}
-              onChange={setRecipeSlot}
-            />
-          </div>
-
-          <div className="panel-field">
-            <span>{t('preferences.recipeIngredients')}</span>
-            <div className="panel-ingredient-rows">
-              {recipeIngredients.map((ingredient, ingredientIndex) => {
-                const ingredientNameId = `${recipeIngredientsId}-name-${ingredientIndex}`
-                const ingredientQuantityId = `${recipeIngredientsId}-quantity-${ingredientIndex}`
-                const ingredientUnitId = `${recipeIngredientsId}-unit-${ingredientIndex}`
-                const quantity = ingredient.quantity.trim()
-                const hasInvalidQuantity =
-                  !recipeQuantityDraftSchema.safeParse(quantity).success
-
-                return (
-                  <div className="panel-ingredient-row" key={ingredientIndex}>
-                    <Field
-                      className="panel-ingredient-name-field"
-                      label={t('preferences.ingredientName')}
-                    >
-                      <Input
-                        id={ingredientNameId}
-                        name={ingredientNameId}
-                        onChange={(event) =>
-                          updateRecipeIngredient(
-                            ingredientIndex,
-                            'name',
-                            event.target.value,
-                          )
-                        }
-                        placeholder={t('preferences.ingredientNamePlaceholder')}
-                        type="text"
-                        value={ingredient.name}
-                      />
-                    </Field>
-
-                    <Field
-                      className="panel-ingredient-quantity-field"
-                      label={t('preferences.ingredientQuantity')}
-                    >
-                      <Input
-                        aria-invalid={hasInvalidQuantity}
-                        id={ingredientQuantityId}
-                        min="0"
-                        name={ingredientQuantityId}
-                        onChange={(event) =>
-                          updateRecipeIngredient(
-                            ingredientIndex,
-                            'quantity',
-                            event.target.value,
-                          )
-                        }
-                        placeholder="1"
-                        type="number"
-                        value={ingredient.quantity}
-                      />
-                    </Field>
-
-                    <Field
-                      className="panel-ingredient-unit-field"
-                      label={t('preferences.ingredientUnit')}
-                    >
-                      <Select
-                        id={ingredientUnitId}
-                        name={ingredientUnitId}
-                        onChange={(event) =>
-                          updateRecipeIngredient(
-                            ingredientIndex,
-                            'unit',
-                            event.target.value,
-                          )
-                        }
-                        value={ingredient.unit}
-                      >
-                        <option value="">
-                          {t('preferences.ingredientNoUnit')}
-                        </option>
-                        {INGREDIENT_UNITS.map((unit) => (
-                          <option key={unit} value={unit}>
-                            {t(`units.${unit}`)}
-                          </option>
-                        ))}
-                      </Select>
-                    </Field>
-
-                    <Button
-                      iconOnly
-                      icon="remove"
-                      variant="ghost"
-                      className="panel-ingredient-delete-btn"
-                      aria-label={t('preferences.deleteIngredient')}
-                      onClick={() => deleteRecipeIngredientRow(ingredientIndex)}
-                    />
-                  </div>
-                )
-              })}
-            </div>
-            {hasInvalidIngredientQuantity && (
-              <p className="panel-field-error">
-                {t('preferences.invalidIngredientQuantity')}
-              </p>
-            )}
-            <Button
-              size="sm"
-              variant="ghost"
-              leadingIcon="add"
-              className="panel-add-ingredient-btn"
-              onClick={addRecipeIngredientRow}
-            >
-              {t('preferences.addIngredient')}
-            </Button>
-          </div>
-
-          {!recipeName.trim() ? (
-            <p className="panel-add-hint">{t('preferences.addRecipeHint')}</p>
-          ) : null}
-        </div>
-      </Sheet>
-      {confirmingDiscard && (
-        <Dialog
-          title={t('preferences.discardRecipeTitle')}
-          description={t('preferences.discardRecipeBody')}
-          onDismiss={() => setConfirmingDiscard(false)}
-          actions={
-            <>
-              <Button onClick={() => setConfirmingDiscard(false)}>
-                {t('preferences.keepEditingRecipe')}
-              </Button>
-              <Button variant="danger" onClick={onClose}>
-                {t('preferences.discardRecipe')}
-              </Button>
-            </>
-          }
+    <form className="recipe-form" noValidate onSubmit={form.submit}>
+      <Field label={t('recipeForm.name')}>
+        <Input
+          ref={nameRef}
+          autoComplete="off"
+          className="recipe-form-name"
+          enterKeyHint="done"
+          name="recipeName"
+          onChange={(event) => form.setName(event.target.value)}
+          placeholder={t('recipeForm.namePlaceholder')}
+          readOnly={isSaving}
+          type="text"
+          value={form.name}
         />
+      </Field>
+
+      <fieldset className="recipe-form-group">
+        <legend className="recipe-form-label">{t('recipeForm.slot')}</legend>
+        <div className="recipe-slots">
+          {MEAL_SLOTS.map((slot) => (
+            <label className={`recipe-slot recipe-slot-${slot}`} key={slot}>
+              <input
+                checked={form.slot === slot}
+                className="recipe-slot-input"
+                name={slotGroup}
+                onChange={() => form.setSlot(slot)}
+                type="radio"
+                value={slot}
+              />
+              <span className="recipe-slot-icon">
+                <Icon name={slot} />
+              </span>
+              <span className="recipe-slot-text">
+                <span className="recipe-slot-name">{t(`slots.${slot}`)}</span>
+                <span className="recipe-slot-hint">
+                  {t(`recipeForm.${slot}Hint`)}
+                </span>
+              </span>
+              <span aria-hidden="true" className="recipe-slot-check">
+                <Icon name="done" size="sm" />
+              </span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
+
+      <RecipeIngredientFields
+        hasInvalidQuantity={form.hasInvalidQuantity}
+        ingredients={form.ingredients}
+        isOpen={form.ingredientsOpen}
+        onChange={form.setIngredients}
+        onOpen={form.openIngredients}
+      />
+
+      {form.saveFailed && (
+        <Banner announce tone="error">
+          {t('recipeForm.saveError')}
+        </Banner>
       )}
-    </>
+
+      <div className="recipe-form-submit">
+        <Button
+          className="recipe-form-save"
+          data-testid="panel-add-recipe"
+          disabled={!form.canSave && !isSaving}
+          leadingIcon="add"
+          pending={isSaving}
+          size="lg"
+          type="submit"
+          variant="brand"
+        >
+          {t('recipeForm.save')}
+        </Button>
+        <p className="recipe-form-enter">
+          {t('recipeForm.orPress')} <kbd>Enter ↵</kbd>
+        </p>
+        <p className="recipe-form-status" role="status">
+          {status}
+        </p>
+      </div>
+    </form>
   )
 }
