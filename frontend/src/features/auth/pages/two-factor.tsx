@@ -1,17 +1,11 @@
 import { useNavigate } from '@tanstack/react-router'
-import '../auth.css'
 import type { ComponentProps } from 'react'
 import { useEffect, useEffectEvent, useRef, useState } from 'react'
-import {
-  Banner,
-  Button,
-  Card,
-  Field,
-  Input,
-  TextLink,
-} from '#/components/primitives'
+import { Banner, Button, Field, TextLink } from '#/components/primitives'
 import { getLocalizedPath, useI18n } from '#/shared/i18n'
-import { authClient } from '#/features/auth/auth-client'
+import { OTP_EMAIL_STORAGE_KEY, authClient } from '#/features/auth/auth-client'
+import { AuthLayout } from '#/features/auth/components/AuthLayout'
+import { OtpInput } from '#/features/auth/components/OtpInput'
 
 type FormSubmitEvent = Parameters<
   NonNullable<ComponentProps<'form'>['onSubmit']>
@@ -24,6 +18,7 @@ export function TwoFactorPage() {
   const [error, setError] = useState<string | null>(null)
   const [isSending, setIsSending] = useState(false)
   const [isVerifying, setIsVerifying] = useState(false)
+  const [email, setEmail] = useState<string | null>(null)
   const [showSignupMessage, setShowSignupMessage] = useState(false)
   const hasSentInitialOtp = useRef(false)
 
@@ -53,6 +48,7 @@ export function TwoFactorPage() {
       window.sessionStorage.getItem('remi:signupOtpPending') === 'true',
     )
     window.sessionStorage.removeItem('remi:signupOtpPending')
+    setEmail(window.sessionStorage.getItem(OTP_EMAIL_STORAGE_KEY))
 
     if (hasSentInitialOtp.current) return
     hasSentInitialOtp.current = true
@@ -75,7 +71,8 @@ export function TwoFactorPage() {
         return
       }
 
-      await navigate({ to: getLocalizedPath('/', locale) })
+      window.sessionStorage.removeItem(OTP_EMAIL_STORAGE_KEY)
+      await navigate({ to: getLocalizedPath('/weekly-menu-planner', locale) })
     } catch {
       setError(t('auth.otpVerifyError'))
     } finally {
@@ -83,58 +80,69 @@ export function TwoFactorPage() {
     }
   }
 
+  const [beforeEmail, afterEmail] = t('auth.otpCopyEmail').split('{email}')
+
   return (
-    <main className="auth-page" id="main">
-      <Card
-        as="section"
-        className="auth-card"
-        aria-labelledby="two-factor-title"
-      >
-        <h1 id="two-factor-title">{t('auth.otpTitle')}</h1>
-        <p className="auth-copy">{t('auth.otpCopy')}</p>
+    <AuthLayout
+      description={
+        email ? (
+          <>
+            {beforeEmail}
+            <strong>{email}</strong>
+            {afterEmail}
+          </>
+        ) : (
+          t('auth.otpCopy')
+        )
+      }
+      headerSwitch={{
+        prompt: t('auth.wrongAccount'),
+        label: t('auth.backToLogin'),
+        to: '/login',
+      }}
+      pitchCopy={t('auth.otpPitchCopy')}
+      pitchTitle={t('auth.otpPitchTitle')}
+      title={t('auth.otpTitle')}
+    >
+      <form className="auth-panel-form" onSubmit={handleSubmit}>
         {showSignupMessage ? (
-          <p className="auth-copy">{t('auth.signupOtpCopy')}</p>
+          <Banner className="auth-banner" tone="info">
+            {t('auth.signupOtpCopy')}
+          </Banner>
+        ) : null}
+        {error ? (
+          <Banner announce className="auth-banner" tone="error">
+            {error}
+          </Banner>
         ) : null}
 
-        <form className="auth-form" onSubmit={handleSubmit}>
-          <Field label={t('auth.otpCode')}>
-            <Input
-              autoComplete="one-time-code"
-              inputMode="numeric"
-              maxLength={6}
-              name="code"
-              onChange={(event) => setCode(event.target.value)}
-              pattern="[0-9]*"
-              required
-              type="text"
-              value={code}
-            />
-          </Field>
+        <Field hint={t('auth.otpHint')} label={t('auth.otpCode')}>
+          <OtpInput name="code" onValueChange={setCode} required value={code} />
+        </Field>
 
-          {error ? (
-            <Banner tone="error" announce>
-              {error}
-            </Banner>
-          ) : null}
-
-          <Button block variant="brand" disabled={isVerifying} type="submit">
+        <div className="auth-actions">
+          <Button
+            block
+            disabled={isVerifying}
+            size="lg"
+            type="submit"
+            variant="brand"
+          >
             {isVerifying ? t('auth.otpVerifying') : t('auth.otpVerify')}
           </Button>
-        </form>
-
-        <Button
-          block
-          variant="secondary"
-          disabled={isSending}
-          onClick={sendOtp}
-        >
-          {isSending ? t('auth.otpSending') : t('auth.otpResend')}
-        </Button>
-
-        <p className="auth-switch">
-          <TextLink to="/login">{t('auth.backToLogin')}</TextLink>
-        </p>
-      </Card>
-    </main>
+          <p className="auth-resend">
+            {t('auth.otpNotReceived')}
+            <TextLink
+              className="auth-link"
+              disabled={isSending}
+              onClick={sendOtp}
+              variant="inline"
+            >
+              {isSending ? t('auth.otpSending') : t('auth.otpResend')}
+            </TextLink>
+          </p>
+        </div>
+      </form>
+    </AuthLayout>
   )
 }

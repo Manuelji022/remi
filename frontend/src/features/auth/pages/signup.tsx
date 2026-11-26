@@ -3,7 +3,7 @@ import type { ComponentProps } from 'react'
 import { useState } from 'react'
 import { Banner, Button, Field, Input } from '#/components/primitives'
 import { getLocalizedPath, useI18n } from '#/shared/i18n'
-import { authClient } from '#/features/auth/auth-client'
+import { OTP_EMAIL_STORAGE_KEY, authClient } from '#/features/auth/auth-client'
 import { AuthLayout } from '#/features/auth/components/AuthLayout'
 import { PasswordInput } from '#/features/auth/components/PasswordInput'
 
@@ -65,6 +65,7 @@ export function SignupPage() {
       const data = loginResult.data as SignInData
 
       if (data?.twoFactorRedirect) {
+        window.sessionStorage.setItem(OTP_EMAIL_STORAGE_KEY, email)
         window.sessionStorage.setItem('remi:signupOtpPending', 'true')
         await navigate({ to: getLocalizedPath('/two-factor', locale) })
         return

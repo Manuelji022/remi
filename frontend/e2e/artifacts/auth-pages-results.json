@@ -1,0 +1,14 @@
+[
+{"scenario":"wrong password shows the mismatch banner; the eye shows and hides the password","verdict":"PASS"},
+{"scenario":"log in reaches two-factor, which names the email and has one labelled input","verdict":"PASS"},
+{"scenario":"typing fills boxes left to right, drops non-digits, and backspace removes the last one","verdict":"PASS"},
+{"scenario":"a short code is not sent","verdict":"PASS"},
+{"scenario":"pasting a code with spaces replaces a partly typed one","verdict":"PASS"},
+{"scenario":"inserted text with a space, as autofill sends it, is not cut short","verdict":"PASS"},
+{"scenario":"a seventh digit is ignored; select all then typing replaces the code","verdict":"PASS"},
+{"scenario":"a wrong code keeps the digits and shows an error","verdict":"PASS"},
+{"scenario":"resend asks for a new code","verdict":"PASS"},
+{"scenario":"pasting the right code verifies it and opens the weekly planner","verdict":"PASS"},
+{"scenario":"Spanish keeps its locale through to the planner, at 390 wide","verdict":"PASS"},
+{"scenario":"a direct visit without a stored email still reads as a sentence","verdict":"PASS"}
+]

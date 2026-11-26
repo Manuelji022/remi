@@ -1,0 +1,65 @@
+/* One-time code. Paper: Auth / two-factor / Field · Code. The 28 / 32 digit and
+   the 2 x 28 caret have no token. */
+@layer components {
+  .otp {
+    position: relative;
+  }
+
+  /* The real input covers the boxes and is invisible: it takes every click,
+     key, paste and autofill. 16px text stops iOS zooming on focus. */
+  .otp-input {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    inline-size: 100%;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: transparent;
+    caret-color: transparent;
+    font-size: var(--text-body);
+  }
+
+  .otp-input:focus-visible {
+    outline: 0;
+  }
+
+  .otp-input::selection {
+    background: transparent;
+  }
+
+  .otp-boxes {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: var(--spacing-2);
+  }
+
+  .otp-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    block-size: var(--size-control-xl);
+    border: 1px solid var(--color-border-control);
+    border-radius: var(--radius-mark);
+    background: var(--color-bg-surface);
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--font-weight-bold);
+    line-height: 32px;
+  }
+
+  .otp:focus-within .otp-active {
+    border-color: var(--color-border-current);
+    outline: 2px solid var(--color-focus-ring);
+    outline-offset: 2px;
+  }
+
+  .otp:focus-within .otp-active:empty::after {
+    content: '';
+    inline-size: 2px;
+    block-size: 28px;
+    background: var(--color-ink);
+  }
+}
