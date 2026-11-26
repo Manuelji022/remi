@@ -30,5 +30,7 @@
 {"scenario":"an AI preview keeps every day on screen once some are past","verdict":"PASS"},
 {"scenario":"phone shows a Show past days line with a 44px target","verdict":"PASS"},
 {"scenario":"past days copy is singular on Tuesday and localized in Spanish","verdict":"PASS"},
-{"suite":"week-lock","passed":28,"failed":3,"verdict":"FAIL","limitations":["HTTP fixture: no real account, DB or provider calls.","Detailed key repeat and cancellation use DOM events; native pointer hold and keyboard taps also exercised.","Touch checks cover DOM contextmenu prevention and CSS, not a physical device.","Live-region semantics checked; no screen-reader audio verification.","Unmount regression checks no stale unlock; not a heap/timer profiler.","Calendar transition reevaluates on rerender; no midnight relock timer is introduced."]}
+{"scenario":"phone heads the days after today with Rest of the week","verdict":"PASS"},
+{"scenario":"phone preview rows keep 44px swap buttons apart","verdict":"PASS"},
+{"suite":"week-lock","passed":30,"failed":3,"verdict":"FAIL","limitations":["HTTP fixture: no real account, DB or provider calls.","Detailed key repeat and cancellation use DOM events; native pointer hold and keyboard taps also exercised.","Touch checks cover DOM contextmenu prevention and CSS, not a physical device.","Live-region semantics checked; no screen-reader audio verification.","Unmount regression checks no stale unlock; not a heap/timer profiler.","Calendar transition reevaluates on rerender; no midnight relock timer is introduced."]}
 ]

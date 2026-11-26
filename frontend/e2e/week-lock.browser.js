@@ -218,6 +218,21 @@ await scenario('past days copy is singular on Tuesday and localized in Spanish',
   ...open(), locked(), ev(`${f}.advanceClock(-24*60*60*1000)`), click('Previous week'), locked(), click('Next week'), locked(),
   check(`${pastToggle}.textContent.includes('1 done') && ${pastToggle}.textContent.trim().endsWith('Show 1 past day')`, 'English singular'),
 ])
+const restHeading = `[...document.querySelectorAll('h2')].find(h => ['Rest of the week', 'Resto de la semana'].includes(h.textContent))`
+await scenario('phone heads the days after today with Rest of the week', [
+  ['set', 'viewport', '390', '844'], ...open(), locked(), wait(restHeading),
+  check(`(() => { const top = el => el.getBoundingClientRect().top, day = name => document.querySelector('article h3[aria-label^="' + name + '"]'); return ${restHeading}.checkVisibility() && top(day('Wednesday')) < top(${restHeading}) && top(${restHeading}) < top(day('Thursday')) })()`, 'heading sits between today and tomorrow'),
+  click('Next week'), unlocked(), allShown(), check(`!${restHeading}`, 'a week without today has no heading'),
+  ...open('ready', '/es'), locked(), wait(restHeading), check(`${restHeading}.textContent==='Resto de la semana' && document.documentElement.scrollWidth<=390`, 'Spanish heading, no sideways scroll'),
+  ['set', 'viewport', '1440', '1200'], check(`!${restHeading}.checkVisibility()`, 'the desktop board has no heading'),
+])
+await scenario('phone preview rows keep 44px swap buttons apart', [
+  ['set', 'viewport', '390', '844'], ...open(), locked(), click('Regenerate menu'),
+  wait(`[...document.querySelectorAll('dialog[open] button')].some(b => b.textContent === 'Confirm schedule and generate' && !b.disabled)`),
+  click('Confirm schedule and generate'), wait(`document.querySelector('[aria-label="Swap Monday dinner"]:not(:disabled)')`),
+  check(`(() => { const r=[...document.querySelectorAll('button[aria-label^="Swap "]')].map(b => b.getBoundingClientRect()); return r.length===14 && r.every(a => a.height>=44) && r.every((a,i) => r.slice(i+1).every(b => a.bottom<=b.top+1 || b.bottom<=a.top+1)) })()`, 'no two swap targets overlap'),
+  ['set', 'viewport', '1440', '1200'],
+])
 emit({ suite: 'week-lock', passed, failed, verdict: failed ? 'FAIL' : 'PASS', limitations: [
   'HTTP fixture: no real account, DB or provider calls.',
   'Detailed key repeat and cancellation use DOM events; native pointer hold and keyboard taps also exercised.',
