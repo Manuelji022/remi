@@ -42,6 +42,7 @@ interface PlannerContentProps {
   isGenerating: boolean
   visibleMenu: MenuProps['menu']
   viewedWeek: string
+  weekRange: { start: string; end: string }
   shoppingEnabled: boolean
   shoppingLines: readonly ShoppingLine[]
   checkedIngredients: ComponentProps<typeof ShoppingTab>['checkedIngredients']
@@ -85,6 +86,7 @@ export function PlannerContent(props: PlannerContentProps) {
         checklistId={JSON.stringify([props.userId, props.viewedWeek])}
         checkedIngredients={props.checkedIngredients}
         onToggleIngredient={props.onToggleIngredient}
+        weekRange={props.weekRange}
       />
     )
   }

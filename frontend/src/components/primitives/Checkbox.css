@@ -93,18 +93,38 @@
     gap: var(--spacing-1-5);
     color: var(--color-status-error-text);
   }
+  /* At least 52 tall, the first line at its middle. A long name wraps: the box and the
+     quantity stay on its first line. */
   .checkbox-shopping {
-    align-items: center;
+    align-items: flex-start;
     min-block-size: calc(var(--size-hit) + var(--spacing-2));
+    padding-block: var(--spacing-3);
     padding-inline: var(--spacing-2);
     border-radius: var(--radius-inner);
     font-size: var(--text-headline);
     font-weight: var(--font-weight-semibold);
   }
   .checkbox-shopping .checkbox-box {
+    /* The baseline lane (below) sits the text a little lower than the top. */
+    margin-block-start: var(--spacing-0-5);
     margin-inline: calc(
       (var(--size-icon-sm) + var(--spacing-3) - var(--size-check)) / 2
     );
+  }
+  /* The name and the quantity share a baseline, whatever their sizes. */
+  .checkbox-shopping .checkbox-content,
+  .checkbox-shopping .checkbox-trailing {
+    align-self: baseline;
+  }
+  /* A fixed 80 lane, so quantities line up down the list. */
+  .checkbox-trailing {
+    display: flex;
+    flex: none;
+    align-items: baseline;
+    justify-content: flex-end;
+    gap: var(--spacing-1);
+    inline-size: calc(var(--spacing-10) * 2);
+    font-variant-numeric: tabular-nums;
   }
   .checkbox-shopping-tick {
     position: absolute;
@@ -132,6 +152,9 @@
   .checkbox-shopping input:checked ~ .checkbox-content .checkbox-label {
     color: var(--color-text-secondary);
     font-weight: var(--font-weight-medium);
+  }
+  .checkbox-shopping input:checked ~ .checkbox-trailing {
+    color: var(--color-text-secondary);
   }
   .checkbox-shopping .checkbox-label {
     position: relative;

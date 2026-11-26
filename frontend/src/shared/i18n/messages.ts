@@ -244,6 +244,11 @@ export const messages = {
     'planner.shoppingHelper':
       'Ingredients from the home meals planned this week.',
     'planner.shoppingEmpty': 'No ingredients for the home meals in this week.',
+    'planner.shoppingTitle': 'Shopping',
+    'planner.shoppingBasket': 'of {total} in the basket',
+    'planner.shoppingToGo': '{count} to go',
+    'planner.shoppingAllIn': 'All in the basket.',
+    'planner.shoppingEmptyTitle': 'Nothing to buy yet.',
     'tabs.menu': 'Weekly Menu',
     'tabs.ingredients': 'Shopping List',
     'meal.unplannedName': 'No home-planned meal',
@@ -548,6 +553,11 @@ export const messages = {
       'Ingredientes de las comidas en casa planificadas esta semana.',
     'planner.shoppingEmpty':
       'No hay ingredientes para las comidas en casa de esta semana.',
+    'planner.shoppingTitle': 'Compra',
+    'planner.shoppingBasket': 'de {total} en la cesta',
+    'planner.shoppingToGo': 'faltan {count}',
+    'planner.shoppingAllIn': 'Todo en la cesta.',
+    'planner.shoppingEmptyTitle': 'Nada que comprar todavía.',
     'tabs.menu': 'Menú Semanal',
     'tabs.ingredients': 'Lista de la compra',
     'meal.unplannedName': 'Sin comida planificada en casa',

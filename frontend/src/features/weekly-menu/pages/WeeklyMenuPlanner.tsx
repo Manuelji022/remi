@@ -264,6 +264,7 @@ export function WeeklyMenuPlanner() {
             isGenerating={isGenerating}
             visibleMenu={visibleMenu}
             viewedWeek={viewedWeek}
+            weekRange={weekRange}
             shoppingEnabled={shoppingEnabled}
             shoppingLines={lines}
             checkedIngredients={checkedIngredients}
