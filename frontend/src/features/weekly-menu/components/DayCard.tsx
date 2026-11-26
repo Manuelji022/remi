@@ -11,7 +11,7 @@ import './day-card.css'
 import type { DayContext } from '#/features/weekly-menu/types'
 import type { MealSlot } from '#/features/recipes/recipe'
 import { useI18n } from '#/shared/i18n'
-import { parseWeekStart } from '#/features/weekly-menu/week'
+import { dayHeading, noteTone } from './day-note'
 import type { DayTiming, ShownMeal } from '#/features/weekly-menu/week'
 
 type EditableMeal = {
@@ -20,9 +20,6 @@ type EditableMeal = {
   recipes: readonly { id: string; name: string }[]
   onChange: (recipeId: string | null) => void
 }
-
-// By weekday, so a note keeps its colour as the week moves on.
-const NOTE_TONES = ['butter', 'lilac', 'mint'] as const
 
 interface DayCardProps {
   day: Day
@@ -49,15 +46,7 @@ export function DayCard({
 }: DayCardProps) {
   const { t, locale } = useI18n()
   const dayContextLabel = dayContext ? t(`contexts.${dayContext}`) : null
-  const [year, month, dayOfMonth] = parseWeekStart(weekStart)
-    .split('-')
-    .map(Number)
-  const date = new Date(Date.UTC(year, month - 1, dayOfMonth + dayIndex))
-  const shortName = new Intl.DateTimeFormat(locale, {
-    weekday: 'short',
-    timeZone: 'UTC',
-  }).format(date)
-  const dateNumber = date.getUTCDate()
+  const { shortName, dateNumber } = dayHeading(weekStart, dayIndex, locale)
   const isToday = timing === 'today'
 
   return (
@@ -66,7 +55,7 @@ export function DayCard({
       aria-current={isToday ? 'date' : undefined}
       className={`day-card day-card-${timing} ${isWeekend ? 'weekend' : ''}`}
       data-day={dayIndex}
-      data-tone={NOTE_TONES[dayIndex % NOTE_TONES.length]}
+      data-tone={noteTone(dayIndex)}
     >
       <Card className="day-card-paper">
         <div className="day-card-header">

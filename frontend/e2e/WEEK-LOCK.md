@@ -36,6 +36,11 @@ Phone rows, same harness: the "Rest of the week" heading shows on the desktop
 board, appears on a week without today, reads out of order or in the wrong
 language; or two swap buttons in a preview overlap.
 
+Empty and generating states, same harness: the schedule action opens the wrong
+tab or writes; the outline is read out as real days or carries another week;
+there are two "Generate menu" buttons; the skeleton shows the wrong week or not
+seven notes; the Spanish phone view scrolls sideways.
+
 ## Repeatable browser harness
 
 The fixture intercepts authenticated HTTP transport with synthetic data; no database,

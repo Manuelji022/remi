@@ -1,0 +1,72 @@
+/* The empty week's outline. Paper: Week, empty week, in stationery colours. */
+@layer components {
+  .ghost-week {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(6.5rem, 1fr));
+    gap: var(--spacing-3);
+    padding-block: var(--spacing-4) var(--spacing-6);
+  }
+
+  .ghost-note {
+    --ghost-paper: var(--color-butter-400);
+    --ghost-edge: color-mix(in srgb, var(--color-ink) 20%, transparent);
+
+    display: grid;
+    gap: var(--spacing-1-5);
+    /* Paper pads the note 10. */
+    padding: 10px;
+    border-radius: var(--radius-surface);
+    /* A pale wash of the note's colour. */
+    background: color-mix(in srgb, var(--ghost-paper) 35%, transparent);
+    color: var(--color-text-secondary);
+  }
+
+  .ghost-note[data-tone='lilac'] {
+    --ghost-paper: var(--color-lilac-300);
+  }
+
+  .ghost-note[data-tone='mint'] {
+    --ghost-paper: var(--color-mint-300);
+  }
+
+  .ghost-note[data-timing='past'] {
+    background: var(--color-bg-fill);
+  }
+
+  .ghost-note[data-timing='today'] {
+    --ghost-edge: color-mix(in srgb, var(--color-ink) 50%, transparent);
+
+    background: var(--color-pop);
+    color: var(--color-text-primary);
+  }
+
+  .ghost-day {
+    padding: var(--spacing-1-5) var(--spacing-1-5) var(--spacing-1);
+    font-family: var(--font-display);
+    font-size: var(--text-title);
+    font-weight: var(--font-weight-extrabold);
+    font-variation-settings: 'wdth' 75;
+    line-height: var(--leading-title);
+    text-transform: capitalize;
+    white-space: nowrap;
+  }
+
+  .ghost-slot {
+    block-size: var(--size-hit);
+    border: 1.5px dashed var(--ghost-edge);
+    border-radius: var(--radius-inner);
+  }
+
+  @media (min-width: 64rem) {
+    .ghost-week {
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+    }
+  }
+
+  /* Seven outlines would push the message off a phone screen. */
+  @media (max-width: 39.999rem) {
+    .ghost-week {
+      display: none;
+    }
+  }
+}

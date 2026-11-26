@@ -29,7 +29,6 @@ interface AiMenuPreviewProps {
   onDiscard: () => void
   onAccept: () => void
   onRetryCatalog: () => void
-  onGenerateMenu: () => void
   onUpdateRecipe: (day: Day, slot: MealSlot, recipeId: string | null) => void
 }
 
@@ -54,7 +53,6 @@ export function AiMenuPreview({
   onDiscard,
   onAccept,
   onRetryCatalog,
-  onGenerateMenu,
   onUpdateRecipe,
 }: AiMenuPreviewProps) {
   const { t } = useI18n()
@@ -174,7 +172,6 @@ export function AiMenuPreview({
           editableRecipes={isCatalogReady ? recipes : undefined}
           isGenerating={false}
           menu={menu}
-          onGenerateMenu={onGenerateMenu}
           onUpdateRecipe={onUpdateRecipe}
           areRecipeEditsDisabled={isAccepting}
           recipeNames={recipeNames}

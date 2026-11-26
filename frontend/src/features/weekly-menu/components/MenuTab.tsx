@@ -1,5 +1,6 @@
 import { Fragment, useId, useMemo, useState } from 'react'
 import { DayCard } from './DayCard'
+import { GhostWeek } from './GhostWeek'
 import { PastDaysToggle } from './PastDaysToggle'
 import { Button, EmptyState } from '#/components/primitives'
 import { DAYS, isWeekend } from '#/features/weekly-menu/constants'
@@ -14,7 +15,12 @@ type SlotRecipes = Record<MealSlot, readonly Recipe[]>
 interface MenuTabProps {
   isGenerating: boolean
   menu: CalendarWeekMenu | null
-  onGenerateMenu: () => void
+  /** What the empty week needs: its dates and the way to set its schedule. */
+  emptyWeek?: {
+    weekStart: string
+    canSetSchedule: boolean
+    onSetSchedule: () => void
+  }
   recipeNames: Record<string, string>
   isSignedIn: boolean
   editableRecipes?: readonly Recipe[]
@@ -26,7 +32,7 @@ interface MenuTabProps {
 export function MenuTab({
   isGenerating,
   menu,
-  onGenerateMenu,
+  emptyWeek,
   recipeNames,
   isSignedIn,
   editableRecipes,
@@ -66,22 +72,28 @@ export function MenuTab({
 
   if (!menu) {
     return (
-      <EmptyState
-        icon="let-remi-choose"
-        title={t('planner.emptyTitle')}
-        action={
-          <Button
-            variant="brand"
-            leadingIcon="let-remi-choose"
-            onClick={onGenerateMenu}
-          >
-            {t('planner.generateMenu')}
-          </Button>
-        }
-      >
-        <p>{t('planner.emptyBody')}</p>
-        {!isSignedIn && <p>{t('planner.aiSignInRequired')}</p>}
-      </EmptyState>
+      <>
+        {emptyWeek && <GhostWeek weekStart={emptyWeek.weekStart} />}
+        <EmptyState
+          icon="let-remi-choose"
+          title={t('planner.emptyTitle')}
+          action={
+            emptyWeek && (
+              <Button
+                variant="secondary"
+                leadingIcon="week"
+                disabled={!emptyWeek.canSetSchedule}
+                onClick={emptyWeek.onSetSchedule}
+              >
+                {t('planner.setSchedule')}
+              </Button>
+            )
+          }
+        >
+          <p>{t('planner.emptyBody')}</p>
+          {!isSignedIn && <p>{t('planner.aiSignInRequired')}</p>}
+        </EmptyState>
+      </>
     )
   }
 
