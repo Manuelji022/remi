@@ -60,6 +60,19 @@ export const messages = {
     'auth.otpCopy': 'Enter the 6-digit code we sent to your email address.',
     'auth.signupOtpCopy':
       'Your account was created. Verify this code to finish signing in.',
+    'auth.otpCopyEmail': 'Enter the 6-digit code we sent to {email}.',
+    'auth.otpHint': 'The code expires in 3 minutes. Paste works too.',
+    'auth.otpNotReceived': "Didn't get it?",
+    'auth.wrongAccount': 'Wrong account?',
+    'auth.otpPitchTitle': 'One quick check, then dinner.',
+    'auth.otpPitchCopy':
+      "We confirm it's you each time you log in, so your plans stay yours.",
+    'auth.resetPitchTitle': 'Fresh start, same recipes.',
+    'auth.resetPitchCopy':
+      "Pick something you'll remember. Your plans stay exactly as they were.",
+    'auth.passwordRule': 'At least 8 characters',
+    'auth.resetDonePitchTitle': "You're back in the kitchen.",
+    'auth.resetDonePitchCopy': 'Your week is right where you left it.',
     'auth.otpCode': 'Verification code',
     'auth.otpVerify': 'Verify code',
     'auth.otpVerifying': 'Verifying...',
@@ -399,6 +412,20 @@ export const messages = {
     'auth.otpCopy': 'Introduce el código de 6 dígitos que enviamos a tu email.',
     'auth.signupOtpCopy':
       'Tu cuenta se ha creado. Verifica este código para terminar de iniciar sesión.',
+    'auth.otpCopyEmail':
+      'Introduce el código de 6 dígitos que enviamos a {email}.',
+    'auth.otpHint': 'El código caduca en 3 minutos. También puedes pegarlo.',
+    'auth.otpNotReceived': '¿No te ha llegado?',
+    'auth.wrongAccount': '¿No es tu cuenta?',
+    'auth.otpPitchTitle': 'Una comprobación rápida y a cenar.',
+    'auth.otpPitchCopy':
+      'Comprobamos que eres tú cada vez que inicias sesión, para que tus planes sigan siendo tuyos.',
+    'auth.resetPitchTitle': 'Borrón y cuenta nueva, las mismas recetas.',
+    'auth.resetPitchCopy':
+      'Elige una que vayas a recordar. Tus planes siguen tal como estaban.',
+    'auth.passwordRule': 'Al menos 8 caracteres',
+    'auth.resetDonePitchTitle': 'Ya estás de vuelta en la cocina.',
+    'auth.resetDonePitchCopy': 'Tu semana está justo donde la dejaste.',
     'auth.otpCode': 'Código de verificación',
     'auth.otpVerify': 'Verificar código',
     'auth.otpVerifying': 'Verificando...',

@@ -101,7 +101,7 @@
     font-weight: var(--font-weight-semibold);
   }
 
-  /* Result states. The 72 note, its 32 icon and the -4deg tilt have no
+  /* Result states. The 72 note, its 32 icon and the 3deg tilt have no
      token. */
   .auth-panel > .auth-badge {
     display: grid;
@@ -113,6 +113,11 @@
     border-radius: var(--radius-inner);
     background: var(--color-butter-400);
     rotate: calc(-1 * var(--rotate-stack));
+  }
+
+  .auth-panel > .auth-badge-done {
+    background: var(--color-mint-300);
+    rotate: 3deg;
   }
 
   .auth-badge .icon {
@@ -165,6 +170,30 @@
     font-size: var(--text-caption);
     line-height: var(--leading-caption);
     text-align: center;
+  }
+
+  /* "Didn't get it? Resend code": a 44 tall row under the button. */
+  .auth-resend {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-0-5) var(--spacing-2);
+    min-block-size: var(--size-hit);
+    color: var(--color-text-secondary);
+    font-size: var(--text-callout);
+    line-height: var(--leading-callout);
+  }
+
+  .auth-resend .auth-link {
+    font-weight: var(--font-weight-semibold);
+  }
+
+  .auth-rule-met {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-1-5);
+    color: var(--color-status-success-text);
   }
 
   .auth-password-input {

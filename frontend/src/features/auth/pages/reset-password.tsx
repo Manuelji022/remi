@@ -1,18 +1,19 @@
-import { useNavigate, useSearch } from '@tanstack/react-router'
-import '../auth.css'
+import { useSearch } from '@tanstack/react-router'
 import type { ComponentProps } from 'react'
 import { useState } from 'react'
-import { Banner, Button, Card, Field, Input } from '#/components/primitives'
-import { getLocalizedPath, useI18n } from '#/shared/i18n'
+import { Banner, Button, Field, Icon } from '#/components/primitives'
+import { useI18n } from '#/shared/i18n'
 import { authClient } from '#/features/auth/auth-client'
+import { AuthLayout } from '#/features/auth/components/AuthLayout'
+import { PasswordInput } from '#/features/auth/components/PasswordInput'
 
 type FormSubmitEvent = Parameters<
   NonNullable<ComponentProps<'form'>['onSubmit']>
 >[0]
+const MIN_PASSWORD_LENGTH = 8
 
 export function ResetPasswordPage() {
-  const navigate = useNavigate()
-  const { locale, t } = useI18n()
+  const { t } = useI18n()
   const search = useSearch({
     from: '/{-$locale}/reset-password',
   })
@@ -55,58 +56,82 @@ export function ResetPasswordPage() {
 
   if (done) {
     return (
-      <main className="auth-page" id="main">
-        <Card
-          as="section"
-          className="auth-card"
-          aria-labelledby="reset-done-title"
-        >
-          <h1 id="reset-done-title">{t('auth.resetPasswordDoneTitle')}</h1>
-          <p className="auth-copy">{t('auth.resetPasswordDoneCopy')}</p>
+      <AuthLayout
+        badge="done"
+        description={t('auth.resetPasswordDoneCopy')}
+        pitchCopy={t('auth.resetDonePitchCopy')}
+        pitchTitle={t('auth.resetDonePitchTitle')}
+        title={t('auth.resetPasswordDoneTitle')}
+      >
+        <div className="auth-actions">
           <Button
             block
+            size="lg"
+            to="/login"
+            trailingIcon="forward"
             variant="brand"
-            onClick={() => navigate({ to: getLocalizedPath('/login', locale) })}
           >
             {t('auth.login')}
           </Button>
-        </Card>
-      </main>
+        </div>
+      </AuthLayout>
     )
   }
 
+  const isLongEnough = password.length >= MIN_PASSWORD_LENGTH
+
   return (
-    <main className="auth-page" id="main">
-      <Card as="section" className="auth-card" aria-labelledby="reset-title">
-        <h1 id="reset-title">{t('auth.resetPasswordTitle')}</h1>
-        <p className="auth-copy">{t('auth.resetPasswordCopy')}</p>
+    <AuthLayout
+      description={t('auth.resetPasswordCopy')}
+      headerSwitch={{
+        prompt: t('auth.rememberedPassword'),
+        label: t('auth.login'),
+        to: '/login',
+      }}
+      pitchCopy={t('auth.resetPitchCopy')}
+      pitchTitle={t('auth.resetPitchTitle')}
+      title={t('auth.resetPasswordTitle')}
+    >
+      <form className="auth-panel-form" onSubmit={handleSubmit}>
+        {error ? (
+          <Banner announce className="auth-banner" tone="error">
+            {error}
+          </Banner>
+        ) : null}
 
-        <form className="auth-form" onSubmit={handleSubmit}>
-          <Field label={t('auth.newPassword')}>
-            <Input
-              autoComplete="new-password"
-              minLength={8}
-              name="password"
-              onChange={(event) => setPassword(event.target.value)}
-              required
-              type="password"
-              value={password}
-            />
-          </Field>
+        <Field
+          hint={
+            <span className={isLongEnough ? 'auth-rule-met' : undefined}>
+              {isLongEnough ? <Icon name="done" size="sm" /> : null}
+              {t('auth.passwordRule')}
+            </span>
+          }
+          label={t('auth.newPassword')}
+        >
+          <PasswordInput
+            autoComplete="new-password"
+            minLength={MIN_PASSWORD_LENGTH}
+            name="password"
+            onChange={(event) => setPassword(event.target.value)}
+            required
+            value={password}
+          />
+        </Field>
 
-          {error ? (
-            <Banner tone="error" announce>
-              {error}
-            </Banner>
-          ) : null}
-
-          <Button block variant="brand" disabled={isSubmitting} type="submit">
+        <div className="auth-actions">
+          <Button
+            block
+            disabled={isSubmitting}
+            size="lg"
+            type="submit"
+            variant="brand"
+          >
             {isSubmitting
               ? t('auth.resettingPassword')
               : t('auth.resetPassword')}
           </Button>
-        </form>
-      </Card>
-    </main>
+        </div>
+      </form>
+    </AuthLayout>
   )
 }

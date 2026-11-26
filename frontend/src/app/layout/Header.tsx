@@ -1,28 +1,16 @@
 import './header.css'
 import { useLocation } from '@tanstack/react-router'
 import { Button, Menu, MenuItem } from '#/components/primitives'
-import { LocalizedLink, getLocalizedPath, useI18n } from '#/shared/i18n'
+import { LocalizedLink, useI18n } from '#/shared/i18n'
 import { authClient } from '#/features/auth/auth-client'
 import { useSignOut } from '#/features/auth/use-sign-out'
 import { hasAuthLayout } from '#/features/auth/auth-layout-paths'
-
-/** Pages where the form is the only action, so the account zone is hidden. */
-const AUTH_PATHS = new Set([
-  '/login',
-  '/signup',
-  '/forgot-password',
-  '/reset-password',
-  '/two-factor',
-])
 
 export function Header() {
   const { t } = useI18n()
   const { pathname } = useLocation()
   const { data: session, isPending: isSessionPending } = authClient.useSession()
   const signOut = useSignOut()
-  const isAuthPage = AUTH_PATHS.has(
-    getLocalizedPath(pathname, 'en').replace(/(?<=.)\/$/, ''),
-  )
 
   if (hasAuthLayout(pathname)) return null
 
@@ -37,52 +25,45 @@ export function Header() {
         >
           remi
         </LocalizedLink>
-        {isAuthPage ? null : (
-          <div aria-busy={isSessionPending} className="header-auth">
-            {isSessionPending ? null : session ? (
-              <Menu
-                identity={{
-                  name: session.user.name,
-                  detail: session.user.email,
-                }}
-                label={t('nav.account')}
-                trigger={(props) => (
-                  <button
-                    {...props}
-                    aria-label={t('nav.accountNamed', {
-                      name: session.user.name,
-                    })}
-                    className="header-avatar"
-                    type="button"
-                  >
-                    <span aria-hidden="true" className="header-avatar-face">
-                      {Array.from(session.user.name.trim())[0]?.toUpperCase()}
-                    </span>
-                  </button>
-                )}
-                wide
-              >
-                <MenuItem icon="log-out" onSelect={() => void signOut()}>
-                  {t('auth.logout')}
-                </MenuItem>
-              </Menu>
-            ) : (
-              <>
-                <Button
-                  className="header-login"
-                  nav
-                  to="/login"
-                  variant="ghost"
+        <div aria-busy={isSessionPending} className="header-auth">
+          {isSessionPending ? null : session ? (
+            <Menu
+              identity={{
+                name: session.user.name,
+                detail: session.user.email,
+              }}
+              label={t('nav.account')}
+              trigger={(props) => (
+                <button
+                  {...props}
+                  aria-label={t('nav.accountNamed', {
+                    name: session.user.name,
+                  })}
+                  className="header-avatar"
+                  type="button"
                 >
-                  {t('auth.login')}
-                </Button>
-                <Button className="header-signup" nav to="/signup">
-                  {t('auth.signup')}
-                </Button>
-              </>
-            )}
-          </div>
-        )}
+                  <span aria-hidden="true" className="header-avatar-face">
+                    {Array.from(session.user.name.trim())[0]?.toUpperCase()}
+                  </span>
+                </button>
+              )}
+              wide
+            >
+              <MenuItem icon="log-out" onSelect={() => void signOut()}>
+                {t('auth.logout')}
+              </MenuItem>
+            </Menu>
+          ) : (
+            <>
+              <Button className="header-login" nav to="/login" variant="ghost">
+                {t('auth.login')}
+              </Button>
+              <Button className="header-signup" nav to="/signup">
+                {t('auth.signup')}
+              </Button>
+            </>
+          )}
+        </div>
       </div>
     </header>
   )

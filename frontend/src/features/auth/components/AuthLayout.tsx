@@ -10,13 +10,13 @@ interface AuthLayoutProps {
   pitchTitle: string
   pitchCopy: string
   /** The one way out of the page, at the end of the header. */
-  headerSwitch: { prompt: string; label: string; to: string }
+  headerSwitch?: { prompt: string; label: string; to: string }
   title: string
   /**
    * The sticky note above a result title ("Check your email"). When it shows
    * up the form is gone, so focus moves to the title.
    */
-  badge?: IconName
+  badge?: Extract<IconName, 'email' | 'done'>
   description: ReactNode
   children: ReactNode
 }
@@ -49,16 +49,18 @@ export function AuthLayout({
           >
             remi
           </LocalizedLink>
-          <div className="auth-header-switch">
-            <span className="auth-header-prompt">{headerSwitch.prompt}</span>
-            <Button
-              className="auth-header-button"
-              size="sm"
-              to={headerSwitch.to}
-            >
-              {headerSwitch.label}
-            </Button>
-          </div>
+          {headerSwitch ? (
+            <div className="auth-header-switch">
+              <span className="auth-header-prompt">{headerSwitch.prompt}</span>
+              <Button
+                className="auth-header-button"
+                size="sm"
+                to={headerSwitch.to}
+              >
+                {headerSwitch.label}
+              </Button>
+            </div>
+          ) : null}
         </div>
       </header>
       <main className="auth-main" id="main">
@@ -71,7 +73,7 @@ export function AuthLayout({
         </div>
         <section className="auth-panel" aria-labelledby="auth-title">
           {badge ? (
-            <div className="auth-badge">
+            <div className={`auth-badge auth-badge-${badge}`}>
               <Icon name={badge} />
             </div>
           ) : null}

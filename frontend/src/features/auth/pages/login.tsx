@@ -10,7 +10,7 @@ import {
   TextLink,
 } from '#/components/primitives'
 import { getLocalizedPath, useI18n } from '#/shared/i18n'
-import { authClient } from '#/features/auth/auth-client'
+import { OTP_EMAIL_STORAGE_KEY, authClient } from '#/features/auth/auth-client'
 import { AuthLayout } from '#/features/auth/components/AuthLayout'
 import { PasswordInput } from '#/features/auth/components/PasswordInput'
 
@@ -56,6 +56,7 @@ export function LoginPage() {
       const data = result.data as SignInData
 
       if (data?.twoFactorRedirect) {
+        window.sessionStorage.setItem(OTP_EMAIL_STORAGE_KEY, email)
         await navigate({ to: getLocalizedPath('/two-factor', locale) })
         return
       }
