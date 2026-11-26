@@ -5,6 +5,7 @@ import { LocalizedLink, useI18n } from '#/shared/i18n'
 import { authClient } from '#/features/auth/auth-client'
 import { useSignOut } from '#/features/auth/use-sign-out'
 import { hasAuthLayout } from '#/features/auth/auth-layout-paths'
+import { isOnboardingPath } from '#/features/onboarding/onboarding-path'
 
 export function Header() {
   const { t } = useI18n()
@@ -12,7 +13,7 @@ export function Header() {
   const { data: session, isPending: isSessionPending } = authClient.useSession()
   const signOut = useSignOut()
 
-  if (hasAuthLayout(pathname)) return null
+  if (hasAuthLayout(pathname) || isOnboardingPath(pathname)) return null
 
   return (
     <header className="site-header">

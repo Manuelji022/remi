@@ -7,12 +7,14 @@ import { RecipeIngredientFields } from './RecipeIngredientFields'
 import './recipe-form.css'
 
 interface RecipeFormProps {
+  /** For a page that opens on the form. A sheet focuses it by itself. */
+  autoFocus?: boolean
   form: ReturnType<typeof useRecipeForm>
   isSaving: boolean
 }
 
 /** One recipe at a time: Enter saves, then the name field takes the next. */
-export function RecipeForm({ form, isSaving }: RecipeFormProps) {
+export function RecipeForm({ autoFocus, form, isSaving }: RecipeFormProps) {
   const { t } = useI18n()
   const slotGroup = useId()
   const nameRef = useRef<HTMLInputElement>(null)
@@ -35,6 +37,8 @@ export function RecipeForm({ form, isSaving }: RecipeFormProps) {
       <Field label={t('recipeForm.name')}>
         <Input
           ref={nameRef}
+          // react-doctor-disable-next-line react-doctor/no-autofocus -- Typing this name is the only task of the page.
+          autoFocus={autoFocus}
           autoComplete="off"
           className="recipe-form-name"
           enterKeyHint="done"

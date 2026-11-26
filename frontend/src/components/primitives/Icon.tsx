@@ -17,6 +17,7 @@ import {
   Globe,
   Info,
   Leaf,
+  Lightbulb,
   Lock,
   LockOpen,
   LogOut,
@@ -73,6 +74,7 @@ const ICONS = {
   dinner: Moon,
   // Status & feedback
   info: Info,
+  tip: Lightbulb,
   success: CircleCheck,
   warning: TriangleAlert,
   error: CircleAlert,

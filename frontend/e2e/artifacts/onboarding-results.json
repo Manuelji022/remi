@@ -1,0 +1,9 @@
+[
+{"scenario":"Continue waits for the first recipe","verdict":"PASS"},
+{"scenario":"Enter saves a recipe and refocuses the empty name field","verdict":"PASS"},
+{"scenario":"an empty name does not save on Enter","verdict":"PASS"},
+{"scenario":"the tip leaves with five recipes of both meals","verdict":"PASS"},
+{"scenario":"phone: ingredients start collapsed and the list opens from the bar","verdict":"PASS"},
+{"scenario":"Spanish copy and counts","verdict":"PASS"},
+{"scenario":"guests are sent to the planner","verdict":"PASS"}
+]

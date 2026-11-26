@@ -8,14 +8,15 @@ import type { Recipe, RecipeInput } from '#/features/recipes/recipe'
 
 interface UseRecipeCatalogOptions {
   userId: string | undefined
-  legacyPending: boolean
-  onRecipeMutation: () => Promise<void>
-  onRecipeMutationPendingChange: (pending: boolean) => void
+  legacyPending?: boolean
+  /** Refreshes whatever else shows recipes, such as the planner week. */
+  onRecipeMutation?: () => Promise<void>
+  onRecipeMutationPendingChange?: (pending: boolean) => void
 }
 
 export function useRecipeCatalog({
   userId,
-  legacyPending,
+  legacyPending = false,
   onRecipeMutation,
   onRecipeMutationPendingChange,
 }: UseRecipeCatalogOptions) {
@@ -54,7 +55,7 @@ export function useRecipeCatalog({
 
     addingRecipe.current = true
     setIsAddingRecipe(true)
-    onRecipeMutationPendingChange(true)
+    onRecipeMutationPendingChange?.(true)
 
     try {
       let recipe: Recipe
@@ -68,14 +69,14 @@ export function useRecipeCatalog({
       setRecipes((current) => [...(current ?? []), recipe])
       setActionFailed(false)
       try {
-        await onRecipeMutation()
+        await onRecipeMutation?.()
       } catch {
         setActionFailed(true)
       }
     } finally {
       addingRecipe.current = false
       setIsAddingRecipe(false)
-      onRecipeMutationPendingChange(false)
+      onRecipeMutationPendingChange?.(false)
     }
   }
 
@@ -83,7 +84,7 @@ export function useRecipeCatalog({
     if (deletingIds.current.has(recipeId)) return
 
     deletingIds.current.add(recipeId)
-    onRecipeMutationPendingChange(true)
+    onRecipeMutationPendingChange?.(true)
 
     try {
       await deleteRecipe({ data: { id: recipeId } })
@@ -93,7 +94,7 @@ export function useRecipeCatalog({
       )
       setActionFailed(false)
       try {
-        await onRecipeMutation()
+        await onRecipeMutation?.()
       } catch {
         setActionFailed(true)
       }
@@ -101,7 +102,7 @@ export function useRecipeCatalog({
       setActionFailed(true)
     } finally {
       deletingIds.current.delete(recipeId)
-      onRecipeMutationPendingChange(false)
+      onRecipeMutationPendingChange?.(false)
     }
   }
 
