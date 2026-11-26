@@ -1,0 +1,277 @@
+/* Welcome and done. Paper: Onboarding 1 and 3. Phone 36 / 38 and desktop
+   60 / 60 titles, -0.025em tracking, 520 and 440 text widths, 52 buttons, 14
+   step gap, 36 / 32 step circles, 22 / 24 chip dots, 5 / 6 chip padding and the
+   500 board have no token. Paper fills the first circle with #006CFF; all
+   three use --color-blue. */
+@layer components {
+  .onboarding.onboarding-intro {
+    background: var(--color-bg-page);
+  }
+
+  .intro-sheet {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: calc(var(--spacing-6) + var(--spacing-1));
+    padding: calc(var(--spacing-6) + var(--spacing-1)) var(--spacing-5);
+    border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
+    background: var(--color-bg-surface);
+    /* The sheet covers the foot of the note strip. */
+    position: relative;
+  }
+
+  .intro-sheet > * {
+    inline-size: 100%;
+    max-inline-size: 30rem;
+    margin-inline: auto;
+  }
+
+  .intro-head {
+    display: grid;
+    gap: var(--spacing-3);
+  }
+
+  .intro-eyebrow {
+    color: var(--color-text-brand);
+    font-size: var(--text-callout);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--leading-callout);
+    overflow-wrap: anywhere;
+  }
+
+  .intro-head h1 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 36px;
+    font-weight: var(--font-weight-extrabold);
+    letter-spacing: var(--tracking-display);
+    line-height: 38px;
+  }
+
+  /* Focus lands here to announce the screen, not to be operated. */
+  .intro-head h1:focus {
+    outline: none;
+  }
+
+  .intro-copy {
+    color: var(--color-text-secondary);
+  }
+
+  .intro-copy strong {
+    color: var(--color-text-primary);
+    font-weight: var(--font-weight-semibold);
+  }
+
+  .intro-how,
+  .intro-chips {
+    padding: 0;
+    list-style: none;
+  }
+
+  .intro-how {
+    display: grid;
+    gap: 14px;
+    margin-block: 0;
+    font-size: var(--text-callout);
+    line-height: var(--leading-callout);
+  }
+
+  .intro-how li {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .intro-how strong {
+    font-weight: var(--font-weight-semibold);
+  }
+
+  .intro-how-number {
+    display: grid;
+    flex: none;
+    place-items: center;
+    inline-size: var(--size-control-sm);
+    block-size: var(--size-control-sm);
+    border-radius: var(--radius-pill);
+    background: var(--color-bg-brand-soft);
+    color: var(--color-text-brand);
+    font-family: var(--font-display);
+    font-weight: var(--font-weight-extrabold);
+  }
+
+  .intro-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-2);
+    margin-block: 0;
+  }
+
+  .intro-chip {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-1-5);
+    min-block-size: var(--size-control-sm);
+    padding-inline: 5px var(--spacing-3);
+    border: 1px solid var(--color-gray-200);
+    border-radius: var(--radius-pill);
+    background: var(--color-bg-page);
+    font-size: var(--text-caption);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--leading-caption);
+    overflow-wrap: anywhere;
+  }
+
+  .intro-chip:not([class*='intro-chip-']) {
+    padding-inline-start: var(--spacing-3);
+  }
+
+  .intro-chip-lunch::before,
+  .intro-chip-dinner::before {
+    content: '';
+    flex: none;
+    inline-size: var(--size-check);
+    block-size: var(--size-check);
+    border-radius: var(--radius-pill);
+    background: var(--color-mint-300);
+  }
+
+  .intro-chip-dinner::before {
+    background: var(--color-lilac-300);
+  }
+
+  .intro > .intro-sheet > .intro-actions {
+    display: grid;
+    gap: var(--spacing-2);
+    margin-block-start: auto;
+  }
+
+  .intro-actions .button {
+    --button-size: 52px;
+    --button-text: var(--text-headline);
+  }
+
+  /* Paper fills Generate with tomato. Ink on it, never white (contrast). */
+  .intro-actions .intro-generate {
+    --button-bg: var(--color-pop);
+    --button-bg-hover: color-mix(
+      in srgb,
+      var(--color-pop),
+      var(--color-white) 12%
+    );
+    --button-bg-active: var(--color-pop);
+    --button-fg: var(--color-ink);
+  }
+
+  .intro-actions .intro-more {
+    --button-text: var(--text-body);
+
+    border-color: transparent;
+  }
+
+  .intro-note {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-1-5);
+    margin-block-start: var(--spacing-1);
+    color: var(--color-text-secondary);
+    font-size: var(--text-caption);
+    line-height: var(--leading-caption);
+    text-align: center;
+  }
+
+  @media (min-width: 64rem) {
+    .onboarding-card.intro {
+      /* Paper: the notes sit on the right. */
+      flex-direction: row-reverse;
+    }
+
+    .intro-sheet {
+      justify-content: center;
+      gap: var(--spacing-10);
+      min-inline-size: 0;
+      padding: var(--spacing-8) var(--spacing-6);
+      border-radius: 0;
+    }
+
+    .intro-sheet > * {
+      max-inline-size: 520px;
+      margin-inline: 0;
+    }
+
+    .intro-head {
+      gap: var(--spacing-4);
+    }
+
+    .intro-eyebrow {
+      font-size: var(--text-headline);
+      line-height: var(--leading-headline);
+    }
+
+    .intro-head h1 {
+      font-size: 60px;
+      letter-spacing: -0.025em;
+      line-height: 60px;
+    }
+
+    .intro-copy {
+      max-inline-size: 440px;
+      font-size: var(--text-headline);
+      line-height: var(--spacing-6);
+    }
+
+    .intro-how {
+      gap: var(--spacing-4);
+      font-size: var(--text-body);
+      line-height: var(--leading-body);
+    }
+
+    .intro-how li {
+      gap: var(--spacing-4);
+    }
+
+    .intro-how-number {
+      inline-size: 36px;
+      block-size: 36px;
+      background: var(--color-blue);
+      color: var(--color-white);
+    }
+
+    .intro-chip {
+      min-block-size: 36px;
+      gap: var(--spacing-2);
+      padding-inline: var(--spacing-1-5) 14px;
+      font-size: 14px;
+      line-height: var(--leading-callout);
+    }
+
+    .intro-chip-lunch::before,
+    .intro-chip-dinner::before {
+      inline-size: var(--spacing-6);
+      block-size: var(--spacing-6);
+    }
+
+    .intro > .intro-sheet > .intro-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: var(--spacing-5);
+      margin-block-start: 0;
+    }
+
+    .intro > .intro-sheet > .intro-actions-done {
+      column-gap: var(--spacing-3);
+      row-gap: var(--spacing-4);
+    }
+
+    .intro-actions .intro-more {
+      border-color: var(--color-gray-300);
+    }
+
+    .intro-actions-done .intro-note {
+      flex-basis: 100%;
+      justify-content: flex-start;
+      margin-block-start: 0;
+    }
+  }
+}

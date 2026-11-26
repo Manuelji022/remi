@@ -2,6 +2,12 @@
 
 ## What could go wrong
 
+- Welcome greets with the full name, or the site header and footer show.
+- A typed `?step=done` with nothing saved offers to finish, or jumps there
+  after the first save.
+- **Add more recipes** or Back does not return to the right step.
+- **Generate my first menu** does not open the planner's schedule dialog, or
+  opens it again after a reload.
 - Continue is enabled with no recipes, or stays disabled after the first one.
 - Enter does not save, saves an empty name, or loses focus from the name field.
 - The list does not count lunches and dinners, or the tip never leaves.

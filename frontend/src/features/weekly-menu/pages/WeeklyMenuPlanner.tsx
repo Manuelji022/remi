@@ -13,6 +13,7 @@ import {
 import { authClient } from '#/features/auth/auth-client'
 import { useAiMenuGeneration } from '#/features/weekly-menu/hooks/useAiMenuGeneration'
 import { useFirstRunTour } from '#/features/weekly-menu/hooks/useFirstRunTour'
+import { useGenerateOnArrival } from '#/features/weekly-menu/hooks/useGenerateOnArrival'
 import { useGuestPlannerState } from '#/features/weekly-menu/hooks/useGuestPlannerState'
 import {
   usePlannerWeekNavigation,
@@ -145,6 +146,11 @@ export function WeeklyMenuPlanner() {
     setPreferencesTab,
     setIsPreferencesOpen,
   })
+
+  useGenerateOnArrival(
+    Boolean(userId) && canWrite && !isWriting && !currentPreview,
+    generation.handleGenerateMenu,
+  )
 
   useEffect(() => {
     setIsPreferencesOpen(false)
