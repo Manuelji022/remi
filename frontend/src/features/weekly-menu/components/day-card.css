@@ -1,43 +1,120 @@
 @layer components {
   /* The article is the straight hit area; the paper inside carries the tilt
-     and never changes layout size. Paper: Design System / Day card. */
+     and never changes layout size. Paper: Pages / Week, stationery. */
   .day-card {
     min-inline-size: 0;
+
+    /* Each weekday leans and hangs its own way. Tilts are multiples of the
+       note angle, capped at 1x (Paper leans Sunday 2.25deg). */
+    --tilt: -0.67;
+    --drop: 0px;
+  }
+
+  .day-card[data-day='1'] {
+    --tilt: 0.67;
+  }
+
+  .day-card[data-day='2'] {
+    --drop: 10px;
+  }
+
+  .day-card[data-day='3'] {
+    --tilt: 1;
+    --drop: 4px;
+  }
+
+  .day-card[data-day='4'] {
+    --tilt: -1;
+  }
+
+  .day-card[data-day='5'] {
+    --tilt: -0.33;
+    --drop: 14px;
+  }
+
+  .day-card[data-day='6'] {
+    --tilt: -1;
+    --drop: 6px;
+  }
+
+  .day-card-past[data-day='1'] {
+    --drop: 10px;
+  }
+
+  .day-card-past[data-day='2'] {
+    --drop: 4px;
   }
 
   .day-card-paper {
     /* Paper pads the note 10, between --spacing-2 and --spacing-3. */
     --card-pad: 10px;
-    --card-gap: var(--spacing-1-5);
-    --card-edge: transparent;
+    --card-gap: var(--spacing-2);
 
-    --tilt: 0;
-    /* Only upcoming notes lean: -1x, +0.67x and -0.67x of the note angle. */
+    border: 0;
+
+    /* Meal slots: a card on the note, or text on the note itself. */
+    --slot-fill: var(--color-bg-surface);
+    --slot-edge: color-mix(in srgb, var(--color-ink) 25%, transparent);
+    --slot-dash: var(--color-ink);
+    --on-note-text: var(--color-text-secondary);
+  }
+
+  .day-card .badge {
+    --badge-bg: var(--color-bg-surface);
+  }
+
+  /* Upcoming: coloured paper, the only notes that lean. */
+  .day-card-upcoming .day-card-paper {
     rotate: calc(var(--rotate-note) * var(--tilt));
-    transform-origin: 50% 50%;
   }
 
-  .day-card-upcoming[data-tilt='0'] .day-card-paper {
-    --tilt: -1;
+  .day-card-upcoming[data-tone='butter'] .day-card-paper {
+    background: var(--color-butter-400);
   }
 
-  .day-card-upcoming[data-tilt='1'] .day-card-paper {
-    --tilt: 0.67;
+  .day-card-upcoming[data-tone='lilac'] .day-card-paper {
+    /* gray-700 on lilac is only 3.8:1, so text on this note goes darker. */
+    --on-note-text: var(--color-gray-800);
+
+    background: var(--color-lilac-300);
   }
 
-  .day-card-upcoming[data-tilt='2'] .day-card-paper {
-    --tilt: -0.67;
+  .day-card-upcoming[data-tone='mint'] .day-card-paper {
+    background: var(--color-mint-300);
   }
 
   .day-card-past .day-card-paper {
-    background: var(--color-bg-fill);
+    --slot-fill: color-mix(in srgb, var(--color-white) 60%, transparent);
+    --slot-dash: var(--slot-edge);
+
+    background: var(--color-bg-fill-hover);
   }
 
+  /* Today: the tomato note, taped to the board. Ink on tomato, never white. */
   .day-card-today .day-card-paper {
-    /* The 2px current ring plus a lifted shadow; no token for the lift yet. */
-    box-shadow:
-      0 0 0 2px var(--color-border-current),
-      0 16px 32px color-mix(in srgb, var(--color-ink) 12%, transparent);
+    --card-pad: var(--spacing-3);
+    --on-note-text: var(--color-ink);
+
+    position: relative;
+    background: var(--color-pop);
+    /* No token for the lift yet. */
+    box-shadow: 0 18px 36px -8px
+      color-mix(in srgb, var(--color-ink) 12%, transparent);
+  }
+
+  /* Washi tape. Paper: 84 by 26, 3px corners, butter at 85%. */
+  .day-card-today .day-card-paper::after {
+    content: '';
+    position: absolute;
+    inset-block-start: -14px;
+    inset-inline-start: 110px;
+    inline-size: 84px;
+    block-size: 26px;
+    border-radius: 3px;
+    background: color-mix(in srgb, var(--color-butter-400) 85%, transparent);
+    rotate: -4deg;
+    transform-origin: 0 0;
+    pointer-events: none;
   }
 
   .day-card-header {
@@ -47,7 +124,8 @@
     justify-content: space-between;
     column-gap: var(--spacing-2);
     row-gap: var(--spacing-0-5);
-    padding: var(--spacing-2) var(--spacing-2) var(--spacing-1);
+    /* Paper pads the heading 10 by 8. */
+    padding: 10px var(--spacing-2);
   }
 
   .day-name {
@@ -61,8 +139,15 @@
     text-transform: capitalize;
   }
 
+  .day-card-paper .day-name {
+    /* Paper sets the day at 36/38, between large title and display. */
+    font-size: 36px;
+    line-height: 38px;
+    white-space: nowrap;
+  }
+
   .day-card-past .day-name {
-    color: var(--color-text-dimmed);
+    color: var(--color-text-secondary);
   }
 
   .day-card-today .day-card-header {
@@ -70,14 +155,14 @@
   }
 
   .day-card-today .day-name {
-    font-size: var(--text-display);
-    line-height: var(--leading-display);
+    /* Paper sets today at 48/48. */
+    font-size: 48px;
+    line-height: 48px;
   }
 
   .day-today {
     order: 1;
     inline-size: 100%;
-    color: var(--color-text-brand);
     font-size: var(--text-caption);
     font-weight: var(--font-weight-medium);
     line-height: var(--leading-caption);
@@ -85,19 +170,19 @@
 
   .day-meals {
     display: grid;
-    gap: var(--spacing-1-5);
+    gap: var(--spacing-2);
   }
 
-  /* Meal slot: a sand fill on the inner radius, label over dish. The swap
-     button sits at the right and shows on hover or focus. */
+  /* Meal slot: a card on the inner radius, label over dish. The swap button
+     sits at the right and shows on hover or focus. */
   .meal-slot {
     position: relative;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: var(--spacing-2);
-    /* Paper pads the slot 10 by 12. */
-    padding: 10px var(--spacing-3);
+    /* Paper pads the slot 14 by 12. */
+    padding: 14px var(--spacing-3);
     border-radius: var(--radius-inner);
     background: var(--color-bg-fill);
     color: var(--color-text-secondary);
@@ -105,21 +190,29 @@
     line-height: var(--leading-caption);
   }
 
-  .day-card-past .meal-slot {
-    background: var(--color-bg-fill-hover);
+  .day-card-paper .meal-slot {
+    background: var(--slot-fill);
   }
 
-  /* Nothing planned at home: a hairline outline instead of a fill. */
-  .meal-slot.unplanned {
-    border: 1px solid var(--color-border-subtle);
-    background: none;
+  .day-card-today .meal-slot {
+    padding-inline: var(--spacing-4);
   }
 
-  /* A home slot with no meal yet: dashed, as Paper draws an empty slot. */
-  .meal-slot[data-empty] {
-    /* Paper uses gray-300 here; there is no semantic dashed-edge token. */
-    border: 2px dashed var(--color-gray-300);
+  /* Nothing to cook at home: outlined on the note's own colour. */
+  .day-card-paper .meal-slot.unplanned {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-0-5);
+    border: 1.5px solid var(--slot-edge);
     background: none;
+    color: var(--on-note-text);
+  }
+
+  /* A home slot with no meal yet: dashed. */
+  .day-card-paper .meal-slot[data-empty] {
+    border: 2px dashed var(--slot-dash);
+    background: none;
+    color: var(--on-note-text);
   }
 
   .meal-slot-text {
@@ -130,34 +223,47 @@
 
   .meal-name {
     color: var(--color-text-primary);
-    font-size: var(--text-callout);
+    font-size: var(--text-body);
     font-weight: var(--font-weight-semibold);
-    line-height: var(--leading-callout);
+    line-height: var(--leading-body);
+    overflow-wrap: anywhere;
   }
 
-  .meal-slot.unplanned .meal-name,
+  .day-card-today .meal-name {
+    font-size: var(--text-headline);
+  }
+
   .day-card-past .meal-name {
     color: var(--color-text-secondary);
-    font-weight: var(--font-weight-medium);
   }
 
-  /* Tonight: the brand-soft slot with the dish in the display face. */
+  .day-card-paper .meal-slot.unplanned .meal-name {
+    color: var(--on-note-text);
+    font-weight: var(--font-weight-regular);
+  }
+
+  /* Tonight: the dish in the display face. */
   .meal-slot[data-tonight] {
-    padding-block: var(--spacing-3) var(--spacing-4);
-    background: var(--color-bg-brand-soft);
+    /* Paper pads tonight 14 over, 20 under. */
+    padding-block: 14px var(--spacing-5);
   }
 
   .meal-slot[data-tonight] .meal-label {
-    color: var(--color-text-brand);
+    color: var(--color-text-primary);
     font-weight: var(--font-weight-medium);
   }
 
-  .meal-slot[data-tonight] .meal-name {
+  .meal-slot[data-tonight] .meal-slot-text {
+    gap: var(--spacing-1);
+  }
+
+  .meal-slot[data-tonight]:not([data-empty]) .meal-name {
     font-family: var(--font-display);
-    font-size: 28px;
+    /* Paper sets tonight at 26/30 on the seven-day board. */
+    font-size: 26px;
     font-weight: var(--font-weight-extrabold);
     letter-spacing: var(--tracking-title);
-    line-height: 32px;
+    line-height: 30px;
   }
 
   /* Swap: hidden at rest, shown on hover and focus, always on touch. */
@@ -184,27 +290,31 @@
   }
 
   /* Swapping: the slot turns ink while its menu is open. */
-  .meal-slot:has(.meal-swap[aria-expanded='true']) {
+  .day-card .meal-slot:has(.meal-swap[aria-expanded='true']) {
+    border-color: var(--color-text-primary);
     background: var(--color-text-primary);
   }
 
-  .meal-slot:has(.meal-swap[aria-expanded='true']) .meal-label {
+  .day-card .meal-slot:has(.meal-swap[aria-expanded='true']) .meal-label {
     color: var(--color-gray-300);
   }
 
-  .meal-slot:has(.meal-swap[aria-expanded='true']) .meal-name {
+  .day-card .meal-slot:has(.meal-swap[aria-expanded='true']) .meal-name {
     color: var(--color-text-on-brand);
   }
 
-  /* Phone: the note is a row (day, then meals) and tilts less. Today keeps a
-     single brand line, "Today · Thu 14", above its meals. */
-  @media (max-width: 39.999rem) {
-    .day-card-paper {
-      rotate: calc(var(--rotate-note-phone) * var(--tilt));
+  @media (min-width: 40rem) {
+    /* Notes hang at slightly different heights across the board. */
+    .day-card:not(.day-card-today) {
+      margin-block-start: var(--drop);
     }
+  }
 
-    .day-card-past .day-card-paper {
-      background: var(--color-bg-fill-hover);
+  /* Phone: the note is a row (day, then meals) and tilts less. Today keeps its
+     card slots, with lunch on one line. */
+  @media (max-width: 39.999rem) {
+    .day-card-upcoming .day-card-paper {
+      rotate: calc(var(--rotate-note-phone) * var(--tilt));
     }
 
     .day-card-upcoming .day-card-paper,
@@ -220,28 +330,33 @@
       padding: 0;
     }
 
-    /* Rows carry no slot fills: label and dish sit inline on the sand. */
+    /* Rows carry no slot cards: label and dish sit inline on the paper. */
     .day-card-upcoming .day-meals,
     .day-card-past .day-meals {
       gap: var(--spacing-1);
     }
 
     .day-card-upcoming .meal-slot,
-    .day-card-past .meal-slot {
+    .day-card-past .meal-slot,
+    .day-card-upcoming .day-card-paper .meal-slot,
+    .day-card-past .day-card-paper .meal-slot {
       padding: 0;
       border: 0;
       background: none;
+      color: var(--on-note-text);
     }
 
     .day-card-upcoming .meal-slot-text,
-    .day-card-past .meal-slot-text {
+    .day-card-past .meal-slot-text,
+    .day-card-today .meal-slot:not([data-tonight]) .meal-slot-text {
       display: flex;
       align-items: baseline;
       gap: var(--spacing-2);
     }
 
     .day-card-upcoming .meal-label,
-    .day-card-past .meal-label {
+    .day-card-past .meal-label,
+    .day-card-today .meal-slot:not([data-tonight]) .meal-label {
       flex-shrink: 0;
       inline-size: 2.75rem;
     }
@@ -252,37 +367,50 @@
       line-height: var(--leading-title);
     }
 
+    .day-card-today .day-card-paper {
+      --card-pad: 10px;
+      --card-gap: var(--spacing-1-5);
+
+      box-shadow: 0 14px 28px -8px
+        color-mix(in srgb, var(--color-ink) 12%, transparent);
+    }
+
+    .day-card-today .day-card-paper::after {
+      inset-block-start: -16px;
+      inset-inline-start: calc(50% - 42px);
+    }
+
     .day-card-today .day-card-header {
-      flex-wrap: nowrap;
-      justify-content: flex-start;
-      align-items: center;
-      column-gap: var(--spacing-1);
-      padding: var(--spacing-1-5) var(--spacing-2) var(--spacing-0-5);
+      padding: var(--spacing-1-5) var(--spacing-1-5) var(--spacing-1) 10px;
     }
 
     .day-card-today .day-name {
-      color: var(--color-text-brand);
-      font-family: var(--font-text);
-      font-size: var(--text-callout);
-      font-variation-settings: normal;
-      font-weight: var(--font-weight-semibold);
-      line-height: var(--leading-caption);
+      /* Paper sets today at 40/40 on phone. */
+      font-size: 40px;
+      line-height: 40px;
     }
 
-    .day-card-today .day-today {
-      order: -1;
-      inline-size: auto;
-      color: var(--color-text-brand);
-      font-size: var(--text-callout);
+    .day-today {
       font-weight: var(--font-weight-semibold);
     }
 
-    .day-card-today .day-today::after {
-      content: ' ·';
+    .day-card-today .meal-slot {
+      padding: var(--spacing-3) 14px;
     }
 
-    .day-card-today .badge {
-      margin-inline-start: auto;
+    .day-card-today .meal-slot[data-tonight] {
+      padding-block-end: var(--spacing-4);
+    }
+
+    .meal-slot[data-tonight] .meal-label {
+      color: var(--on-note-text);
+    }
+
+    .day-card-today .meal-slot[data-tonight]:not([data-empty]) .meal-name {
+      /* Paper sets tonight at 30/34 on phone. */
+      font-size: 30px;
+      letter-spacing: var(--tracking-display);
+      line-height: 34px;
     }
   }
 }

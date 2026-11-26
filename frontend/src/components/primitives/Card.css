@@ -18,11 +18,4 @@
   .card-compact {
     --card-pad: var(--spacing-card-pad-compact);
   }
-
-  /* The one card that is "now": a 2px ring instead of the hairline. */
-  .card-current {
-    --card-edge: transparent;
-
-    box-shadow: 0 0 0 2px var(--color-border-current);
-  }
 }
