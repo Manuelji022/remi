@@ -90,6 +90,12 @@
     color: var(--color-text-secondary);
   }
 
+  /* Result titles take focus from code, to be read out. They are not
+     controls, so no ring. */
+  .auth-title h1:focus {
+    outline: 0;
+  }
+
   .auth-title strong {
     color: var(--color-text-primary);
     font-weight: var(--font-weight-semibold);
