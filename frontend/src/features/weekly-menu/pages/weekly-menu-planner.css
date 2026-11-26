@@ -4,10 +4,12 @@
   }
 
   /* Paper: Planner controls · v2. Three zones: week + lock, the one hero
-     action, tools. Below lg they stack; from lg they share one row and the
-     tools sit at the end. */
+     action, tools. Below lg they stack; from lg they share a row, the tools
+     sit at the end and wrap under it when the labels do not fit. */
   .planner-controls {
     display: grid;
+    /* A long label wraps instead of widening the row past the screen. */
+    grid-template-columns: minmax(0, 1fr);
     gap: var(--spacing-3);
     margin-block-end: var(--spacing-8);
   }
@@ -83,6 +85,7 @@
 
   .planner-tools {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: var(--spacing-2);
   }
@@ -100,12 +103,14 @@
 
   @media (min-width: 64rem) {
     .planner-controls {
-      grid-template-columns: auto auto 1fr;
+      display: flex;
+      flex-wrap: wrap;
       align-items: center;
       gap: var(--spacing-6);
     }
 
     .planner-controls-start {
+      flex: none;
       flex-wrap: nowrap;
     }
 
@@ -118,7 +123,7 @@
     }
 
     .planner-tools {
-      justify-content: end;
+      margin-inline-start: auto;
     }
 
     .planner-tools .button {
@@ -126,23 +131,84 @@
     }
   }
 
-  .planner-section-heading:empty {
-    display: none;
-  }
-
   .planner-banner {
     margin-block-end: var(--spacing-6);
   }
 
+  /* The board. The space above the notes holds today's tape. */
   .planner-day-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
-    gap: var(--spacing-stack-md);
+    align-items: start;
+    gap: var(--spacing-3);
+    padding-block: var(--spacing-4) var(--spacing-3);
+  }
+
+  .planner-day-grid > :has(> .day-card-today) {
+    grid-column: span 2;
   }
 
   @media (max-width: 39.999rem) {
+    .planner-controls {
+      margin-block-end: var(--spacing-3);
+    }
+
+    /* Tighter, so both tools still share a row at 390. */
+    .planner-tools .button {
+      --button-pad: var(--spacing-3);
+      --button-pad-icon: var(--spacing-2);
+    }
+
     .planner-day-grid {
       grid-template-columns: minmax(0, 1fr);
+      gap: 10px; /* Paper's gap between phone notes. */
+    }
+
+    .planner-day-grid > :has(> .day-card-today) {
+      grid-column: auto;
+    }
+  }
+
+  /* From sm the week sits on a white surface. Paper: Week, stationery. */
+  @media (min-width: 40rem) {
+    .planner-shell {
+      padding: 22px var(--spacing-6) var(--spacing-12);
+      border-radius: var(--radius-surface);
+      background: var(--color-bg-surface);
+    }
+
+    .planner-day-grid {
+      padding-block: var(--spacing-12) var(--spacing-10);
+    }
+  }
+
+  @media (min-width: 64rem) {
+    /* The surface bleeds past the lane by its own padding less the gutter, so
+       from xl the board's edges line up with the header's. */
+    .planner-page {
+      max-inline-size: 80rem;
+    }
+
+    .planner-shell {
+      padding-inline: var(--spacing-10);
+    }
+  }
+
+  /* Wide enough for the whole week in one row: today keeps its width and the
+     other days share the rest. */
+  @media (min-width: 80rem) {
+    .planner-day-grid {
+      display: flex;
+      gap: var(--spacing-2);
+    }
+
+    .planner-day-grid > * {
+      flex: 1 1 0;
+      min-inline-size: 0;
+    }
+
+    .planner-day-grid > :has(> .day-card-today) {
+      flex: 0 0 16.5rem;
     }
   }
 

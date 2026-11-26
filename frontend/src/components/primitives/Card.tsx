@@ -1,7 +1,7 @@
 import './Card.css'
 import type { ComponentProps } from 'react'
 
-type CardVariant = 'default' | 'compact' | 'current'
+type CardVariant = 'default' | 'compact'
 
 function cardClass(variant: CardVariant, ...rest: Array<string | undefined>) {
   return ['card', variant !== 'default' && `card-${variant}`, ...rest]
@@ -10,8 +10,7 @@ function cardClass(variant: CardVariant, ...rest: Array<string | undefined>) {
 }
 
 interface CardProps extends ComponentProps<'div'> {
-  /** `default` pads 20. `compact` pads 16 for dense lists. `current` is the
-   *  one "now" card on a screen: a 2px ring instead of the hairline. */
+  /** `default` pads 20. `compact` pads 16 for dense lists. */
   variant?: CardVariant
   /** Pick the landmark that fits, e.g. `article` for a recipe. */
   as?: 'div' | 'section' | 'article' | 'aside'

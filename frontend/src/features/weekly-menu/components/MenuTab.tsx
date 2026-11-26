@@ -83,7 +83,6 @@ export function MenuTab({
 
   return (
     <div className="planner-menu-tab">
-      <div className="planner-section-heading"></div>
       <div className="planner-day-grid">
         {DAYS.map((day, index) => {
           const plan = menu.days[day]

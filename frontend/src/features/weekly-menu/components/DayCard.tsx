@@ -21,6 +21,9 @@ type EditableMeal = {
   onChange: (recipeId: string | null) => void
 }
 
+// By weekday, so a note keeps its colour as the week moves on.
+const NOTE_TONES = ['butter', 'lilac', 'mint'] as const
+
 interface DayCardProps {
   day: Day
   isWeekend: boolean
@@ -62,12 +65,10 @@ export function DayCard({
     <article
       aria-current={isToday ? 'date' : undefined}
       className={`day-card day-card-${timing} ${isWeekend ? 'weekend' : ''}`}
-      data-tilt={dayIndex % 3}
+      data-day={dayIndex}
+      data-tone={NOTE_TONES[dayIndex % NOTE_TONES.length]}
     >
-      <Card
-        className="day-card-paper"
-        variant={isToday ? 'current' : 'default'}
-      >
+      <Card className="day-card-paper">
         <div className="day-card-header">
           <h3
             aria-label={`${t(`days.${day}`)} ${dateNumber}`}
@@ -134,7 +135,9 @@ function MealSlotDisplay({
       data-tonight={tonight || undefined}
     >
       <div className="meal-slot-text">
-        <span className="meal-label">{t(`slots.${slot}`)}</span>
+        <span className="meal-label">
+          {t(tonight ? 'planner.tonight' : `slots.${slot}`)}
+        </span>
         <span className="meal-name">{name}</span>
         {meal.kind === 'outside' ? t('meal.outsideScope') : null}
       </div>
