@@ -72,9 +72,22 @@ export const messages = {
     'auth.forgotPasswordTitle': 'Reset password',
     'auth.forgotPasswordCopy':
       'Enter your email and we will send you a link to reset your password.',
+    'auth.signupPitchTitle': 'A week of dinners, planned in a minute.',
+    'auth.signupPitchCopy':
+      'Tell Remi what you like. It fills the week and writes the shopping list.',
+    'auth.passwordTooShort': 'Use at least 8 characters. {count} more to go.',
+    'auth.rememberedPassword': 'Remembered it?',
+    'auth.forgotPitchTitle': 'Happens to the best cooks.',
+    'auth.forgotPitchCopy':
+      "Your week is safe. We'll get you back to it in a minute.",
+    'auth.emailPlaceholder': 'name@example.com',
+    'auth.resetSentTitle': 'Check your email',
+    'auth.resendLink': 'Resend link',
+    'auth.resetLinkResent': 'Reset link sent again.',
     'auth.sendResetLink': 'Send reset link',
     'auth.sending': 'Sending...',
-    'auth.resetPasswordSent': 'Check your email for the reset link.',
+    'auth.resetPasswordSent':
+      "If there's an account for {email}, a reset link is on its way. It works for one hour.",
     'auth.resetPasswordError': 'Unable to send reset link.',
     'auth.resetPasswordTitle': 'New password',
     'auth.resetPasswordCopy': 'Enter a new password for your account.',
@@ -398,10 +411,22 @@ export const messages = {
     'auth.forgotPasswordTitle': 'Restablecer contraseña',
     'auth.forgotPasswordCopy':
       'Introduce tu email y te enviaremos un enlace para restablecer tu contraseña.',
+    'auth.signupPitchTitle': 'Una semana de cenas, planificada en un minuto.',
+    'auth.signupPitchCopy':
+      'Cuéntale a Remi qué te gusta. Completa la semana y escribe la lista de la compra.',
+    'auth.passwordTooShort': 'Usa al menos 8 caracteres. Faltan: {count}.',
+    'auth.rememberedPassword': '¿Ya te acuerdas?',
+    'auth.forgotPitchTitle': 'Les pasa a los mejores cocineros.',
+    'auth.forgotPitchCopy':
+      'Tu semana está a salvo. En un minuto vuelves a ella.',
+    'auth.emailPlaceholder': 'nombre@ejemplo.com',
+    'auth.resetSentTitle': 'Revisa tu email',
+    'auth.resendLink': 'Reenviar enlace',
+    'auth.resetLinkResent': 'Enlace enviado de nuevo.',
     'auth.sendResetLink': 'Enviar enlace',
     'auth.sending': 'Enviando...',
     'auth.resetPasswordSent':
-      'Revisa tu email para el enlace de restablecimiento.',
+      'Si hay una cuenta con {email}, te llegará un enlace para restablecer la contraseña. Funciona durante una hora.',
     'auth.resetPasswordError': 'No se pudo enviar el enlace.',
     'auth.resetPasswordTitle': 'Nueva contraseña',
     'auth.resetPasswordCopy': 'Introduce una nueva contraseña para tu cuenta.',

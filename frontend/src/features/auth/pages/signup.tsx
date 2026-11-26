@@ -1,22 +1,17 @@
 import { useNavigate } from '@tanstack/react-router'
-import '../auth.css'
 import type { ComponentProps } from 'react'
 import { useState } from 'react'
-import {
-  Banner,
-  Button,
-  Card,
-  Field,
-  Input,
-  TextLink,
-} from '#/components/primitives'
+import { Banner, Button, Field, Input } from '#/components/primitives'
 import { getLocalizedPath, useI18n } from '#/shared/i18n'
 import { authClient } from '#/features/auth/auth-client'
+import { AuthLayout } from '#/features/auth/components/AuthLayout'
+import { PasswordInput } from '#/features/auth/components/PasswordInput'
 
 type FormSubmitEvent = Parameters<
   NonNullable<ComponentProps<'form'>['onSubmit']>
 >[0]
 type SignInData = { twoFactorRedirect?: boolean } | null
+const MIN_PASSWORD_LENGTH = 8
 
 export function SignupPage() {
   const navigate = useNavigate()
@@ -24,8 +19,16 @@ export function SignupPage() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [isPasswordChecked, setIsPasswordChecked] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // The count of missing characters shows once the box is left or submitted.
+  const missing = MIN_PASSWORD_LENGTH - password.length
+  const passwordError =
+    isPasswordChecked && password && missing > 0
+      ? t('auth.passwordTooShort', { count: missing })
+      : undefined
 
   async function handleSubmit(event: FormSubmitEvent) {
     event.preventDefault()
@@ -77,12 +80,25 @@ export function SignupPage() {
   }
 
   return (
-    <main className="auth-page" id="main">
-      <Card as="section" className="auth-card" aria-labelledby="signup-title">
-        <h1 id="signup-title">{t('auth.signupTitle')}</h1>
-        <p className="auth-copy">{t('auth.signupCopy')}</p>
+    <AuthLayout
+      description={t('auth.signupCopy')}
+      headerSwitch={{
+        prompt: t('auth.alreadyHaveAccount'),
+        label: t('auth.login'),
+        to: '/login',
+      }}
+      pitchCopy={t('auth.signupPitchCopy')}
+      pitchTitle={t('auth.signupPitchTitle')}
+      title={t('auth.signupTitle')}
+    >
+      <form className="auth-panel-form" onSubmit={handleSubmit}>
+        {error ? (
+          <Banner announce className="auth-banner" tone="error">
+            {error}
+          </Banner>
+        ) : null}
 
-        <form className="auth-form" onSubmit={handleSubmit}>
+        <div className="auth-fields">
           <Field label={t('auth.name')}>
             <Input
               autoComplete="name"
@@ -106,36 +122,32 @@ export function SignupPage() {
             />
           </Field>
 
-          <Field label={t('auth.password')}>
-            <Input
+          <Field error={passwordError} label={t('auth.password')}>
+            <PasswordInput
               autoComplete="new-password"
-              minLength={8}
+              minLength={MIN_PASSWORD_LENGTH}
               name="password"
+              onBlur={() => setIsPasswordChecked(true)}
               onChange={(event) => setPassword(event.target.value)}
+              onInvalid={() => setIsPasswordChecked(true)}
               required
-              type="password"
               value={password}
             />
           </Field>
+        </div>
 
-          {error ? (
-            <Banner tone="error" announce>
-              {error}
-            </Banner>
-          ) : null}
-
-          <Button block variant="brand" disabled={isSubmitting} type="submit">
+        <div className="auth-actions">
+          <Button
+            block
+            disabled={isSubmitting}
+            size="lg"
+            type="submit"
+            variant="brand"
+          >
             {isSubmitting ? t('auth.creatingAccount') : t('auth.createAccount')}
           </Button>
-        </form>
-
-        <p className="auth-switch">
-          {t('auth.alreadyHaveAccount')}{' '}
-          <TextLink variant="inline" to="/login">
-            {t('auth.login')}
-          </TextLink>
-        </p>
-      </Card>
-    </main>
+        </div>
+      </form>
+    </AuthLayout>
   )
 }

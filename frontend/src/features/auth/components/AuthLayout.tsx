@@ -1,7 +1,9 @@
 import './auth-layout.css'
-import { Button } from '#/components/primitives'
+import { useEffect, useRef } from 'react'
+import { Button, Icon } from '#/components/primitives'
 import { LocalizedLink, useI18n } from '#/shared/i18n'
 import { AuthNotes } from './AuthNotes'
+import type { IconName } from '#/components/primitives'
 import type { ReactNode } from 'react'
 
 interface AuthLayoutProps {
@@ -10,6 +12,11 @@ interface AuthLayoutProps {
   /** The one way out of the page, at the end of the header. */
   headerSwitch: { prompt: string; label: string; to: string }
   title: string
+  /**
+   * The sticky note above a result title ("Check your email"). When it shows
+   * up the form is gone, so focus moves to the title.
+   */
+  badge?: IconName
   description: ReactNode
   children: ReactNode
 }
@@ -19,10 +26,16 @@ export function AuthLayout({
   pitchCopy,
   headerSwitch,
   title,
+  badge,
   description,
   children,
 }: AuthLayoutProps) {
   const { t } = useI18n()
+  const titleRef = useRef<HTMLHeadingElement>(null)
+
+  useEffect(() => {
+    if (badge) titleRef.current?.focus()
+  }, [badge])
 
   return (
     <>
@@ -57,9 +70,21 @@ export function AuthLayout({
           <AuthNotes />
         </div>
         <section className="auth-panel" aria-labelledby="auth-title">
+          {badge ? (
+            <div className="auth-badge">
+              <Icon name={badge} />
+            </div>
+          ) : null}
           <div className="auth-title">
-            <h1 id="auth-title">{title}</h1>
-            <p>{description}</p>
+            <h1
+              aria-describedby={badge ? 'auth-description' : undefined}
+              id="auth-title"
+              ref={titleRef}
+              tabIndex={-1}
+            >
+              {title}
+            </h1>
+            <p id="auth-description">{description}</p>
           </div>
           {children}
         </section>
