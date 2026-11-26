@@ -26,6 +26,7 @@ import {
   usePlannerWeekView,
 } from '#/features/weekly-menu/hooks/usePlannerViewState'
 import { usePlannerWeek } from '#/features/weekly-menu/hooks/usePlannerWeek'
+import { weekLockEnabled } from '#/features/weekly-menu/feature-flags'
 import { viewWeekStart } from '#/features/weekly-menu/week'
 
 export function WeeklyMenuPlanner() {
@@ -199,6 +200,7 @@ export function WeeklyMenuPlanner() {
           lock={{
             // Same cases where the menu itself is on screen.
             isVisible:
+              weekLockEnabled &&
               Boolean(visibleMenu) &&
               !currentPreview &&
               !generatingTargetWeek &&

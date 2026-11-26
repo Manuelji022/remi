@@ -9,6 +9,7 @@ import type { ReadyData } from '#/features/weekly-menu/planner-view'
 import { calendarWeekOffset } from '#/features/weekly-menu/hooks/usePlannerWeekNavigation'
 import type { PreferencesPanelTab } from '../components/preferences-panel/types'
 import type { Preferences } from '#/features/weekly-menu/types'
+import { weekLockEnabled } from '#/features/weekly-menu/feature-flags'
 import { isWeekLocked } from '#/features/weekly-menu/week'
 
 type AiGeneration = ReturnType<typeof useAiMenuGeneration>
@@ -99,6 +100,7 @@ export function usePlannerActions({
     if (!canWrite || isWriting || currentPreview) return
     const targetWeek = readyData?.week.menu.weekStart ?? viewedWeek
     if (
+      weekLockEnabled &&
       hasVisibleMenu &&
       isWeekLocked(targetWeek, new Date()) &&
       unlockedWeek !== targetWeek
